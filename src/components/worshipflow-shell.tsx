@@ -261,13 +261,15 @@ function Sidebar({
               </div>
             </div>
 
-            <button
-              type="button"
-              aria-label="Open account menu"
-              className="rounded-lg p-1.5 text-[var(--sidebar-muted)] transition hover:bg-white/8 hover:text-white"
-            >
-              <CircleUserRound className="size-4" />
-            </button>
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                aria-label="Sign out"
+                className="rounded-lg p-1.5 text-[var(--sidebar-muted)] transition hover:bg-white/8 hover:text-white"
+              >
+                <CircleUserRound className="size-4" />
+              </button>
+            </form>
           </div>
         </div>
       </div>
