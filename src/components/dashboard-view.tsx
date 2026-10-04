@@ -5,7 +5,6 @@ import {
   ChevronRight,
   FileText,
   House,
-  Library,
   ListMusic,
   LogOut,
   Menu,
