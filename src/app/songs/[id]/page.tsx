@@ -62,6 +62,21 @@ export default async function SongPage({
     notFound()
   }
 
+  const { data: versions, error: versionsError } = await supabase
+  .from("song_versions")
+  .select(
+    "id, version_number, title, artist, current_key, tempo, time_signature, capo, created_at"
+  )
+  .eq("song_id", song.id)
+  .eq("organization_id", membership.organization_id)
+  .order("version_number", { ascending: false })
+
+if (versionsError) {
+  throw new Error(
+    `Unable to load song versions: ${versionsError.message}`
+  )
+}
+
   const canEdit = new Set([
     "admin",
     "worship_leader",
@@ -161,7 +176,10 @@ export default async function SongPage({
         </header>
 
         <div className="mt-6">
-          <SongViewer source={song.chordpro_source} />
+          <SongViewer
+            source={song.chordpro_source}
+            title={song.title}
+/>
         </div>
 
         {song.notes ? (
@@ -175,6 +193,54 @@ export default async function SongPage({
             </p>
           </section>
         ) : null}
+        <section className="mt-6 rounded-2xl border border-[var(--border)] bg-white">
+  <div className="border-b border-[var(--border)] px-5 py-4 sm:px-6">
+    <h2 className="text-base font-semibold">
+      Version history
+    </h2>
+
+    <p className="mt-1 text-xs text-[var(--muted)]">
+      Previous saved versions of this song chart.
+    </p>
+  </div>
+
+  {versions.length === 0 ? (
+    <div className="px-5 py-10 text-center text-sm text-[var(--muted)]">
+      No previous versions are available.
+    </div>
+  ) : (
+    <div className="divide-y divide-[var(--border)]">
+      {versions.map((version) => (
+        <Link
+          key={version.id}
+          href={`/songs/${song.id}/versions/${version.id}`}
+          className="flex items-center gap-4 px-5 py-4 transition hover:bg-[var(--surface)] sm:px-6"
+        >
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface)] text-xs font-bold text-[var(--brand)]">
+            V{version.version_number}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold">
+              {version.title}
+            </div>
+
+            <div className="mt-1 text-xs text-[var(--muted)]">
+              {version.artist || "Unknown artist"} · Key{" "}
+              {version.current_key || "—"} · Capo{" "}
+              {version.capo} ·{" "}
+              {new Date(version.created_at).toLocaleString()}
+            </div>
+          </div>
+
+          <span className="text-xs font-semibold text-[var(--brand)]">
+            Open
+          </span>
+        </Link>
+      ))}
+    </div>
+  )}
+</section>
       </div>
     </main>
   )

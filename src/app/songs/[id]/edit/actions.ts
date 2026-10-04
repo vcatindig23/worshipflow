@@ -8,7 +8,8 @@ import {
   validateChordPro,
 } from "@/features/chordpro/parser"
 
-const songSchema = z.object({
+const editSongSchema = z.object({
+  id: z.string().uuid(),
   title: z.string().trim().min(1).max(200),
   artist: z.string().trim().max(200),
   tempo: z.coerce.number().int().min(20).max(300).or(z.literal("")),
@@ -21,8 +22,9 @@ const songSchema = z.object({
   notes: z.string().max(10000),
 })
 
-export async function createSong(formData: FormData) {
-  const result = songSchema.safeParse({
+export async function updateSong(formData: FormData) {
+  const result = editSongSchema.safeParse({
+    id: formData.get("id"),
     title: formData.get("title"),
     artist: formData.get("artist") ?? "",
     tempo: formData.get("tempo") ?? "",
@@ -33,15 +35,16 @@ export async function createSong(formData: FormData) {
   })
 
   if (!result.success) {
-    redirect("/songs/new?error=invalid_details")
+    const id = String(formData.get("id") ?? "")
+    redirect(`/songs/${id}/edit?error=invalid_details`)
   }
 
-  const chordProValidation = validateChordPro(
+  const validation = validateChordPro(
     result.data.chordProSource
   )
 
-  if (!chordProValidation.valid) {
-    redirect("/songs/new?error=invalid_chordpro")
+  if (!validation.valid) {
+    redirect(`/songs/${result.data.id}/edit?error=invalid_chordpro`)
   }
 
   const supabase = await createClient()
@@ -62,7 +65,7 @@ export async function createSong(formData: FormData) {
       .maybeSingle()
 
   if (membershipError) {
-    redirect("/songs/new?error=membership_failed")
+    redirect(`/songs/${result.data.id}/edit?error=membership_failed`)
   }
 
   if (!membership) {
@@ -76,7 +79,7 @@ export async function createSong(formData: FormData) {
   ])
 
   if (!allowedRoles.has(membership.role)) {
-    redirect("/songs/new?error=not_authorized")
+    redirect(`/songs/${result.data.id}?error=not_authorized`)
   }
 
   const currentKey =
@@ -90,9 +93,10 @@ export async function createSong(formData: FormData) {
       ? null
       : result.data.tempo
 
-  const { data: songId, error: songError } =
-    await supabase.rpc("create_song_with_initial_version", {
-      p_organization_id: membership.organization_id,
+  const { error } = await supabase.rpc(
+    "update_song_with_version",
+    {
+      p_song_id: result.data.id,
       p_title: result.data.title,
       p_artist: result.data.artist || null,
       p_tempo: tempo,
@@ -101,11 +105,12 @@ export async function createSong(formData: FormData) {
       p_chordpro_source: result.data.chordProSource,
       p_notes: result.data.notes || null,
       p_current_key: currentKey,
-    })
+    }
+  )
 
-  if (songError || !songId) {
-    redirect("/songs/new?error=create_failed")
+  if (error) {
+    redirect(`/songs/${result.data.id}/edit?error=update_failed`)
   }
 
-  redirect(`/songs/${songId}`)
+  redirect(`/songs/${result.data.id}?saved=true`)
 }
