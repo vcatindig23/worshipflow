@@ -1,379 +1,472 @@
 import Link from "next/link"
 import {
-  Building2,
-  CalendarClock,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Church,
+  Clock3,
   Globe2,
+  Mail,
   MapPin,
-  Music2,
   Phone,
+  Users,
 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { createOrganization } from "./actions"
+import { createChurch } from "./actions"
 
 type OnboardingPageProps = {
-  searchParams: Promise<{
-    error?: string
-  }>
+  searchParams: Promise<
+    Record<string, string | string[] | undefined>
+  >
 }
 
-const errorMessages: Record<string, string> = {
-  invalid_details:
-    "Please review the fields and correct the highlighted information.",
-  membership_check_failed:
-    "We could not verify your church membership.",
+function getParam(
+  value: string | string[] | undefined
+) {
+  return Array.isArray(value)
+    ? value[0]
+    : value
+}
+
+const errorMessages: Record<
+  string,
+  string
+> = {
+  invalid_form:
+    "Please review the highlighted information and try again.",
   create_failed:
-    "We could not create your church workspace.",
-  setup_failed:
-    "The workspace was created, but the setup information could not be saved.",
+    "The church could not be created. Please try again.",
+  details_failed:
+    "The church was created, but its details could not be saved.",
 }
-
-const days = [
-  { value: "0", label: "Sunday" },
-  { value: "1", label: "Monday" },
-  { value: "2", label: "Tuesday" },
-  { value: "3", label: "Wednesday" },
-  { value: "4", label: "Thursday" },
-  { value: "5", label: "Friday" },
-  { value: "6", label: "Saturday" },
-]
-
-const timezones = [
-  "Asia/Manila",
-  "Asia/Singapore",
-  "Asia/Tokyo",
-  "Australia/Sydney",
-  "UTC",
-]
 
 export default async function OnboardingPage({
   searchParams,
 }: OnboardingPageProps) {
   const params = await searchParams
+  const mode =
+    getParam(params.mode) ?? "choice"
+  const error =
+    getParam(params.error) ?? ""
+
   const supabase = await createClient()
 
-  const { data: claimsData } = await supabase.auth.getClaims()
-  const userId = claimsData?.claims?.sub
+  const { data: claimsData } =
+    await supabase.auth.getClaims()
+
+  const userId =
+    claimsData?.claims?.sub
 
   if (!userId) {
     redirect("/login")
   }
 
-  const { data: membership, error } = await supabase
+  const {
+    data: membership,
+  } = await supabase
     .from("organization_members")
     .select("organization_id")
     .eq("user_id", userId)
+    .order("created_at", {
+      ascending: true,
+    })
     .limit(1)
     .maybeSingle()
-
-  if (error) {
-    throw new Error("Unable to determine church membership.")
-  }
 
   if (membership) {
     redirect("/")
   }
 
-  const errorMessage = params.error
-    ? errorMessages[params.error] ?? "Something went wrong."
-    : null
+  if (mode === "choice") {
+    return (
+      <main className="min-h-screen bg-[var(--background)] px-6 py-10">
+        <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-4xl items-center justify-center">
+          <div className="w-full">
+            <div className="mx-auto max-w-2xl text-center">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[var(--brand)] text-white shadow-sm">
+                <Church className="size-6" />
+              </div>
 
-  return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-8 sm:px-6">
-      <div className="mx-auto max-w-4xl">
-        <header className="mb-8 text-center">
-          <Link
-            href="/"
-            className="mx-auto mb-7 flex w-fit items-center gap-3"
-          >
-            <div className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-              <Music2 className="size-5" />
+              <p className="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand)]">
+                Welcome to WorshipFlow
+              </p>
+
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
+                Where should we start?
+              </h1>
+
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)] md:text-base">
+                Create a workspace for your church or join a church
+                that has already invited you.
+              </p>
             </div>
 
-            <span className="text-lg font-semibold tracking-[-0.025em]">
-              WorshipFlow
-            </span>
-          </Link>
+            <div className="mt-9 grid gap-5 md:grid-cols-2">
+              <Link
+                href="/onboarding?mode=create"
+                className="group rounded-3xl border border-[var(--border)] bg-white p-7 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+              >
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                  <Church className="size-6" />
+                </div>
 
-          <div className="text-sm font-medium text-[var(--brand)]">
-            Step 1 of 1
+                <h2 className="mt-5 text-xl font-bold text-[var(--foreground)]">
+                  Create a New Church
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                  Set up your church&apos;s WorshipFlow workspace.
+                  You will automatically become its administrator.
+                </p>
+
+                <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-[var(--brand)]">
+                  Create Workspace
+                  <ArrowRight className="size-4 transition group-hover:translate-x-1" />
+                </div>
+              </Link>
+
+              <Link
+                href="/onboarding/join"
+                className="group rounded-3xl border border-[var(--border)] bg-white p-7 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+              >
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--brand)]">
+                  <Users className="size-6" />
+                </div>
+
+                <h2 className="mt-5 text-xl font-bold text-[var(--foreground)]">
+                  Join an Existing Church
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                  Already invited by your worship leader or church
+                  administrator? Enter your invitation code.
+                </p>
+
+                <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-[var(--brand)]">
+                  Join Workspace
+                  <ArrowRight className="size-4 transition group-hover:translate-x-1" />
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen bg-[var(--background)] px-6 py-10">
+      <div className="mx-auto max-w-3xl">
+        <Link
+          href="/onboarding"
+          className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
+        >
+          <ArrowLeft className="size-4" />
+          Back to choices
+        </Link>
+
+        <div className="mt-7">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
+            <Church className="size-3.5" />
+            Create New Church
           </div>
 
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)]">
             Set up your church
           </h1>
 
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Tell WorshipFlow about your church and your regular worship
-            service. You can change these settings later.
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            Complete the basics now. You can change these settings
+            later from Church Settings.
           </p>
-        </header>
+        </div>
 
-        {errorMessage ? (
-          <div
-            role="alert"
-            className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
-          >
-            {errorMessage}
+        {errorMessages[error] ? (
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+            {errorMessages[error]}
           </div>
         ) : null}
 
-        <form action={createOrganization} className="space-y-6">
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7">
-            <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                <Building2 className="size-5" />
+        <form
+          action={createChurch}
+          className="mt-7 rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
+        >
+          <div className="space-y-6">
+            <section>
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
+                Church Information
+              </h2>
+
+              <div className="mt-4 space-y-5">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Church name
+                  </label>
+
+                  <input
+                    id="name"
+                    name="name"
+                    required
+                    maxLength={200}
+                    placeholder="Grace Community Church"
+                    className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="description"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Description
+                  </label>
+
+                  <textarea
+                    id="description"
+                    name="description"
+                    maxLength={2000}
+                    rows={4}
+                    placeholder="A short description of your church."
+                    className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                  />
+                </div>
               </div>
+            </section>
 
-              <div>
-                <h2 className="font-semibold">Church information</h2>
-                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                  Basic information about your church workspace.
-                </p>
+            <section className="border-t border-[var(--border)] pt-6">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
+                Contact Information
+              </h2>
+
+              <div className="mt-4 grid gap-5 md:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="contactEmail"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Contact email
+                  </label>
+
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+
+                    <input
+                      id="contactEmail"
+                      name="contactEmail"
+                      type="email"
+                      maxLength={320}
+                      placeholder="church@example.com"
+                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="contactPhone"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Contact phone
+                  </label>
+
+                  <div className="relative">
+                    <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+
+                    <input
+                      id="contactPhone"
+                      name="contactPhone"
+                      maxLength={50}
+                      placeholder="+63 900 000 0000"
+                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    />
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="address"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Address
+                  </label>
+
+                  <div className="relative">
+                    <MapPin className="pointer-events-none absolute left-3.5 top-3.5 size-4 text-[var(--muted)]" />
+
+                    <textarea
+                      id="address"
+                      name="address"
+                      maxLength={500}
+                      rows={3}
+                      placeholder="Church address"
+                      className="w-full resize-y rounded-xl border border-[var(--border)] bg-white py-3 pl-10 pr-4 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    />
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="website"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Website
+                  </label>
+
+                  <div className="relative">
+                    <Globe2 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+
+                    <input
+                      id="website"
+                      name="website"
+                      type="url"
+                      maxLength={500}
+                      placeholder="https://example.com"
+                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            </section>
 
-            <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label
-                  htmlFor="name"
-                  className="mb-2 block text-sm font-medium"
-                >
-                  Church name
-                </label>
+            <section className="border-t border-[var(--border)] pt-6">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
+                Default Service
+              </h2>
 
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  minLength={2}
-                  maxLength={120}
-                  placeholder="New Life Christian Church"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                />
-              </div>
+              <div className="mt-4 grid gap-5 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="defaultServiceName"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Service name
+                  </label>
 
-              <div className="sm:col-span-2">
-                <label
-                  htmlFor="description"
-                  className="mb-2 block text-sm font-medium"
-                >
-                  Church description
-                </label>
+                  <input
+                    id="defaultServiceName"
+                    name="defaultServiceName"
+                    required
+                    maxLength={200}
+                    defaultValue="Sunday Worship"
+                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                  />
+                </div>
 
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={3}
-                  maxLength={1000}
-                  placeholder="Tell your team a little about your church or worship ministry."
-                  className="w-full rounded-xl border border-[var(--border)] px-3.5 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                />
-              </div>
+                <div>
+                  <label
+                    htmlFor="defaultServiceDay"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Service day
+                  </label>
 
-              <div>
-                <label
-                  htmlFor="contactEmail"
-                  className="mb-2 block text-sm font-medium"
-                >
-                  Church email
-                </label>
-
-                <input
-                  id="contactEmail"
-                  name="contactEmail"
-                  type="email"
-                  placeholder="church@example.com"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="contactPhone"
-                  className="mb-2 flex items-center gap-2 text-sm font-medium"
-                >
-                  <Phone className="size-4 text-[var(--muted)]" />
-                  Church phone
-                </label>
-
-                <input
-                  id="contactPhone"
-                  name="contactPhone"
-                  type="tel"
-                  maxLength={50}
-                  placeholder="+63 900 000 0000"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label
-                  htmlFor="address"
-                  className="mb-2 flex items-center gap-2 text-sm font-medium"
-                >
-                  <MapPin className="size-4 text-[var(--muted)]" />
-                  Church address
-                </label>
-
-                <textarea
-                  id="address"
-                  name="address"
-                  rows={2}
-                  maxLength={500}
-                  placeholder="Church address"
-                  className="w-full rounded-xl border border-[var(--border)] px-3.5 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label
-                  htmlFor="website"
-                  className="mb-2 flex items-center gap-2 text-sm font-medium"
-                >
-                  <Globe2 className="size-4 text-[var(--muted)]" />
-                  Church website
-                </label>
-
-                <input
-                  id="website"
-                  name="website"
-                  type="url"
-                  placeholder="https://example.com"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                />
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7">
-            <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                <CalendarClock className="size-5" />
-              </div>
-
-              <div>
-                <h2 className="font-semibold">Service defaults</h2>
-                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                  These values will be used when you create new services.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-5 sm:grid-cols-3">
-              <div>
-                <label
-                  htmlFor="defaultServiceName"
-                  className="mb-2 block text-sm font-medium"
-                >
-                  Service name
-                </label>
-
-                <input
-                  id="defaultServiceName"
-                  name="defaultServiceName"
-                  type="text"
-                  required
-                  maxLength={120}
-                  defaultValue="Sunday Worship"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="defaultServiceDay"
-                  className="mb-2 block text-sm font-medium"
-                >
-                  Service day
-                </label>
-
-                <select
-                  id="defaultServiceDay"
-                  name="defaultServiceDay"
-                  defaultValue="0"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                >
-                  {days.map((day) => (
-                    <option key={day.value} value={day.value}>
-                      {day.label}
+                  <select
+                    id="defaultServiceDay"
+                    name="defaultServiceDay"
+                    defaultValue="0"
+                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none focus:border-[var(--brand)]"
+                  >
+                    <option value="0">
+                      Sunday
                     </option>
-                  ))}
-                </select>
+                    <option value="1">
+                      Monday
+                    </option>
+                    <option value="2">
+                      Tuesday
+                    </option>
+                    <option value="3">
+                      Wednesday
+                    </option>
+                    <option value="4">
+                      Thursday
+                    </option>
+                    <option value="5">
+                      Friday
+                    </option>
+                    <option value="6">
+                      Saturday
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="defaultServiceTime"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Service time
+                  </label>
+
+                  <div className="relative">
+                    <Clock3 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+
+                    <input
+                      id="defaultServiceTime"
+                      name="defaultServiceTime"
+                      type="time"
+                      required
+                      defaultValue="09:00"
+                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none focus:border-[var(--brand)]"
+                    />
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="timezone"
+                    className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  >
+                    Timezone
+                  </label>
+
+                  <select
+                    id="timezone"
+                    name="timezone"
+                    defaultValue="Asia/Manila"
+                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none focus:border-[var(--brand)]"
+                  >
+                    <option value="Asia/Manila">
+                      Asia/Manila
+                    </option>
+                    <option value="Asia/Singapore">
+                      Asia/Singapore
+                    </option>
+                    <option value="Asia/Tokyo">
+                      Asia/Tokyo
+                    </option>
+                    <option value="Australia/Sydney">
+                      Australia/Sydney
+                    </option>
+                    <option value="UTC">
+                      UTC
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            <div className="flex flex-col gap-3 border-t border-[var(--border)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-2 text-xs leading-5 text-[var(--muted)]">
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" />
+                <span>
+                  You will become the administrator of this church
+                  workspace.
+                </span>
               </div>
 
-              <div>
-                <label
-                  htmlFor="defaultServiceTime"
-                  className="mb-2 block text-sm font-medium"
-                >
-                  Service time
-                </label>
-
-                <input
-                  id="defaultServiceTime"
-                  name="defaultServiceTime"
-                  type="time"
-                  required
-                  defaultValue="09:00"
-                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                />
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <label
-                htmlFor="timezone"
-                className="mb-2 block text-sm font-medium"
+              <button
+                type="submit"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
               >
-                Time zone
-              </label>
-
-              <select
-                id="timezone"
-                name="timezone"
-                defaultValue="Asia/Manila"
-                className="h-11 w-full rounded-xl border border-[var(--border)] bg-white text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-              >
-                {timezones.map((timezone) => (
-                  <option key={timezone} value={timezone}>
-                    {timezone}
-                  </option>
-                ))}
-              </select>
-
-              <p className="mt-2 text-xs text-[var(--muted)]">
-                This will be used when displaying service dates and times.
-              </p>
+                Create Church
+                <ArrowRight className="size-4" />
+              </button>
             </div>
-          </section>
-
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--brand-soft)] p-5 sm:p-7">
-            <h2 className="font-semibold">You&apos;re almost ready</h2>
-
-            <p className="mt-2 text-sm leading-6 text-[var(--brand-dark)]">
-              Your account will become the administrator of this church
-              workspace. After setup, you&apos;ll be able to build your song
-              library, prepare setlists, schedule services, and invite your
-              worship team.
-            </p>
-          </section>
-
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Link
-              href="/login"
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-white px-5 text-sm font-semibold transition hover:bg-[var(--surface)]"
-            >
-              Cancel
-            </Link>
-
-            <button
-              type="submit"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)]"
-            >
-              Complete setup
-            </button>
           </div>
         </form>
       </div>

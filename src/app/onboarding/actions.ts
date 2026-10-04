@@ -4,50 +4,51 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 
-const organizationSchema = z.object({
+const createChurchSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2)
-    .max(120),
+    .min(1)
+    .max(200),
   description: z
     .string()
     .trim()
-    .max(1000),
+    .max(2000)
+    .optional(),
   contactEmail: z
     .string()
     .trim()
-    .toLowerCase()
     .email()
-    .max(254)
+    .max(320)
     .or(z.literal("")),
   contactPhone: z
     .string()
     .trim()
-    .max(50),
+    .max(50)
+    .optional(),
   address: z
     .string()
     .trim()
-    .max(500),
+    .max(500)
+    .optional(),
   website: z
     .string()
     .trim()
-    .url()
     .max(500)
-    .or(z.literal("")),
+    .optional(),
   defaultServiceName: z
     .string()
     .trim()
     .min(1)
-    .max(120),
-  defaultServiceDay: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .max(6),
+    .max(200),
+  defaultServiceDay: z
+    .string()
+    .regex(/^[0-6]$/),
   defaultServiceTime: z
     .string()
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+    .regex(
+      /^(?:[01]\d|2[0-3]):[0-5]\d$/
+    ),
   timezone: z
     .string()
     .trim()
@@ -55,76 +56,131 @@ const organizationSchema = z.object({
     .max(100),
 })
 
-export async function createOrganization(formData: FormData) {
-  const result = organizationSchema.safeParse({
+export async function createChurch(
+  formData: FormData
+) {
+  const parsed = createChurchSchema.safeParse({
     name: formData.get("name"),
-    description: formData.get("description") ?? "",
-    contactEmail: formData.get("contactEmail") ?? "",
-    contactPhone: formData.get("contactPhone") ?? "",
-    address: formData.get("address") ?? "",
-    website: formData.get("website") ?? "",
-    defaultServiceName: formData.get("defaultServiceName"),
-    defaultServiceDay: formData.get("defaultServiceDay"),
-    defaultServiceTime: formData.get("defaultServiceTime"),
-    timezone: formData.get("timezone"),
+    description:
+      formData.get("description") ?? "",
+    contactEmail:
+      formData.get("contactEmail") ?? "",
+    contactPhone:
+      formData.get("contactPhone") ?? "",
+    address:
+      formData.get("address") ?? "",
+    website:
+      formData.get("website") ?? "",
+    defaultServiceName:
+      formData.get("defaultServiceName"),
+    defaultServiceDay:
+      formData.get("defaultServiceDay"),
+    defaultServiceTime:
+      formData.get("defaultServiceTime"),
+    timezone:
+      formData.get("timezone"),
   })
 
-  if (!result.success) {
-    redirect("/onboarding?error=invalid_details")
+  if (!parsed.success) {
+    redirect(
+      "/onboarding?mode=create&error=invalid_form"
+    )
   }
 
   const supabase = await createClient()
 
-  const { data: claimsData } = await supabase.auth.getClaims()
-  const userId = claimsData?.claims?.sub
+  const { data: claimsData } =
+    await supabase.auth.getClaims()
+
+  const userId =
+    claimsData?.claims?.sub
 
   if (!userId) {
     redirect("/login")
   }
 
-  const { data: existingMembership, error: membershipError } =
-    await supabase
-      .from("organization_members")
-      .select("organization_id")
-      .eq("user_id", userId)
-      .limit(1)
-      .maybeSingle()
-
-  if (membershipError) {
-    redirect("/onboarding?error=membership_check_failed")
-  }
+  const {
+    data: existingMembership,
+  } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", userId)
+    .order("created_at", {
+      ascending: true,
+    })
+    .limit(1)
+    .maybeSingle()
 
   if (existingMembership) {
     redirect("/")
   }
 
-  const { data: organizationId, error: createError } =
-    await supabase.rpc("create_organization", {
-      p_name: result.data.name,
-    })
+  const { data: organizationData, error } =
+    await supabase.rpc(
+      "create_organization",
+      {
+        p_name: parsed.data.name,
+      }
+    )
 
-  if (createError || !organizationId) {
-    redirect("/onboarding?error=create_failed")
+  if (error) {
+    if (
+      error.message.includes(
+        "AUTHENTICATION_REQUIRED"
+      )
+    ) {
+      redirect("/login")
+    }
+
+    redirect(
+      "/onboarding?mode=create&error=create_failed"
+    )
   }
 
-  const { error: updateError } = await supabase
-    .from("organizations")
-    .update({
-      description: result.data.description || null,
-      contact_email: result.data.contactEmail || null,
-      contact_phone: result.data.contactPhone || null,
-      address: result.data.address || null,
-      website: result.data.website || null,
-      timezone: result.data.timezone,
-      default_service_name: result.data.defaultServiceName,
-      default_service_day: result.data.defaultServiceDay,
-      default_service_time: result.data.defaultServiceTime,
-      onboarding_completed_at: new Date().toISOString(),
-    })
-    .eq("id", organizationId)
+  const organizationId =
+    typeof organizationData === "string"
+      ? organizationData
+      : null
+
+  if (!organizationId) {
+    redirect(
+      "/onboarding?mode=create&error=create_failed"
+    )
+  }
+
+  const { error: updateError } =
+    await supabase
+      .from("organizations")
+      .update({
+        description:
+          parsed.data.description || null,
+        contact_email:
+          parsed.data.contactEmail || null,
+        contact_phone:
+          parsed.data.contactPhone || null,
+        address:
+          parsed.data.address || null,
+        website:
+          parsed.data.website || null,
+        timezone:
+          parsed.data.timezone,
+        default_service_name:
+          parsed.data.defaultServiceName,
+        default_service_day:
+          Number(
+            parsed.data.defaultServiceDay
+          ),
+        default_service_time:
+          parsed.data.defaultServiceTime,
+        onboarding_completed_at:
+          new Date().toISOString(),
+      })
+      .eq("id", organizationId)
 
   if (updateError) {
-    redirect("/onboarding?error=setup_failed")
+    redirect(
+      "/onboarding?mode=create&error=details_failed"
+    )
   }
 
   redirect("/")

@@ -1,139 +1,158 @@
+"use client"
+
 import Link from "next/link"
-import { Music2 } from "lucide-react"
-import { login } from "./actions"
+import { useActionState } from "react"
+import {
+  ArrowRight,
+  Church,
+  KeyRound,
+  Loader2,
+  Mail,
+  Music2,
+} from "lucide-react"
+import {
+  login,
+  type LoginState,
+} from "./actions"
 
-type LoginPageProps = {
-  searchParams: Promise<{
-    error?: string
-  }>
+const initialState: LoginState = {
+  error: "",
 }
 
-const errorMessages: Record<string, string> = {
-  invalid_credentials: "Enter a valid email address and password.",
-  sign_in_failed: "We could not sign you in. Check your email and password.",
-}
-
-export default async function LoginPage({
-  searchParams,
-}: LoginPageProps) {
-  const params = await searchParams
-  const errorMessage = params.error
-    ? errorMessages[params.error] ?? "Something went wrong. Please try again."
-    : null
+export default function LoginPage() {
+  const [state, formAction, pending] =
+    useActionState(
+      login,
+      initialState
+    )
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-8 sm:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center">
+    <main className="min-h-screen bg-[var(--background)] px-6 py-10">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-center justify-center">
         <div className="w-full">
-          <div className="mb-8 flex justify-center">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-                <Music2 className="size-5" />
-              </div>
-
-              <span className="text-lg font-semibold tracking-[-0.025em]">
-                WorshipFlow
-              </span>
-            </Link>
-          </div>
-
-          <div className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
-            <div className="mb-7">
-              <p className="text-sm font-medium text-[var(--brand)]">
-                Welcome back
-              </p>
-
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.035em]">
-                Sign in to WorshipFlow
-              </h1>
-
-              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Manage songs, chords, setlists, services, and your worship
-                team.
-              </p>
+          <div className="mb-8 text-center">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[var(--brand)] text-white shadow-sm">
+              <Music2 className="size-6" />
             </div>
 
-            {errorMessage ? (
+            <h1 className="mt-5 text-3xl font-bold tracking-tight text-[var(--foreground)]">
+              Welcome to WorshipFlow
+            </h1>
+
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+              Sign in to manage your church&apos;s worship
+              workspace.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7">
+            {state.error ? (
               <div
                 role="alert"
-                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
               >
-                {errorMessage}
+                {state.error}
               </div>
             ) : null}
 
-            <form action={login} className="space-y-5">
+            <form
+              action={formAction}
+              className="space-y-5"
+            >
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-medium"
+                  className="mb-2 block text-sm font-medium text-[var(--foreground)]"
                 >
                   Email address
                 </label>
 
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                  placeholder="you@example.com"
-                />
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    maxLength={320}
+                    placeholder="you@example.com"
+                    className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                  />
+                </div>
               </div>
 
               <div>
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium"
+                    className="block text-sm font-medium text-[var(--foreground)]"
                   >
                     Password
                   </label>
 
                   <Link
                     href="/forgot-password"
-                    className="text-xs font-semibold text-[var(--brand)] hover:underline"
+                    className="text-xs font-semibold text-[var(--brand)] transition hover:text-[var(--brand-dark)]"
                   >
                     Forgot password?
                   </Link>
                 </div>
 
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-                  placeholder="Enter your password"
-                />
+                <div className="relative">
+                  <KeyRound className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    maxLength={200}
+                    placeholder="Enter your password"
+                    className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                  />
+                </div>
               </div>
 
               <button
                 type="submit"
-                className="h-11 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] focus:outline-none focus:ring-4 focus:ring-[var(--brand-soft)]"
+                disabled={pending}
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Sign in
+                {pending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <ArrowRight className="size-4" />
+                )}
+
+                {pending
+                  ? "Signing in..."
+                  : "Sign In"}
               </button>
             </form>
 
-            <div className="mt-6 border-t border-[var(--border)] pt-6 text-center">
-              <p className="text-sm text-[var(--muted)]">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/signup"
-                  className="font-semibold text-[var(--brand)] hover:underline"
-                >
-                  Create one
-                </Link>
-              </p>
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px flex-1 bg-[var(--border)]" />
+              <span className="text-xs text-[var(--muted)]">
+                New to WorshipFlow?
+              </span>
+              <div className="h-px flex-1 bg-[var(--border)]" />
             </div>
+
+            <Link
+              href="/signup"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            >
+              <Church className="size-4" />
+              Create an Account
+            </Link>
           </div>
 
-          <p className="mt-6 text-center text-xs leading-5 text-[var(--muted)]">
-            WorshipFlow is designed for church worship teams and ministry
-            collaboration.
+          <p className="mt-5 text-center text-xs leading-5 text-[var(--muted)]">
+            After signing in, WorshipFlow will automatically send
+            you to your church workspace or onboarding.
           </p>
         </div>
       </div>

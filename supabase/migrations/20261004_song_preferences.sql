@@ -243,4 +243,111 @@ using (
       array['admin']::text[]
     )
   )
+
+create or replace function public.set_song_tags(
+  p_song_id uuid,
+  p_tag_names text[]
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid;
+  v_organization_id uuid;
+  v_tag_name text;
+  v_tag_id uuid;
+begin
+  v_user_id := (select auth.uid());
+
+  if v_user_id is null then
+    raise exception 'Authentication required';
+  end if;
+
+  select organization_id
+  into v_organization_id
+  from public.songs
+  where id = p_song_id;
+
+  if v_organization_id is null then
+    raise exception 'Song not found';
+  end if;
+
+  if not exists (
+    select 1
+    from public.organization_members
+    where organization_id = v_organization_id
+      and user_id = v_user_id
+      and role in ('admin', 'worship_leader', 'song_editor')
+  ) then
+    raise exception 'Not authorized';
+  end if;
+
+  if coalesce(array_length(p_tag_names, 1), 0) > 20 then
+    raise exception 'A song cannot have more than 20 tags';
+  end if;
+
+  delete from public.song_tags
+  where song_id = p_song_id;
+
+  foreach v_tag_name in array p_tag_names
+  loop
+    v_tag_name := trim(v_tag_name);
+
+    if char_length(v_tag_name) = 0 then
+      continue;
+    end if;
+
+    if char_length(v_tag_name) > 50 then
+      raise exception 'Tag name must be 50 characters or fewer';
+    end if;
+
+    insert into public.tags (
+      organization_id,
+      name,
+      created_by,
+      updated_at
+    )
+    values (
+      v_organization_id,
+      v_tag_name,
+      v_user_id,
+      now()
+    )
+    on conflict do nothing;
+
+    select id
+    into v_tag_id
+    from public.tags
+    where organization_id = v_organization_id
+      and lower(trim(name)) = lower(v_tag_name)
+    limit 1;
+
+    if v_tag_id is null then
+      raise exception 'Unable to create tag';
+    end if;
+
+    insert into public.song_tags (
+      song_id,
+      tag_id
+    )
+    values (
+      p_song_id,
+      v_tag_id
+    )
+    on conflict do nothing;
+  end loop;
+end;
+$$;
+
+revoke execute on function public.set_song_tags(uuid, text[])
+from public;
+
+revoke execute on function public.set_song_tags(uuid, text[])
+from anon;
+
+grant execute on function public.set_song_tags(uuid, text[])
+to authenticated;
+
 );
