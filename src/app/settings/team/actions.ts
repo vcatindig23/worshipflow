@@ -65,7 +65,23 @@ async function getCurrentMembership() {
     .limit(1)
     .maybeSingle()
 
-  if (error || !membership) {
+  if (error) {
+    console.error(
+      "Failed to load current membership:",
+      {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      }
+    )
+
+    redirect(
+      "/settings/team?error=membership_load_failed"
+    )
+  }
+
+  if (!membership) {
     redirect("/onboarding")
   }
 
@@ -134,6 +150,17 @@ export async function createInvitation(
     )
 
   if (error) {
+    console.error(
+      "create_organization_invitation failed:",
+      {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        organizationId,
+      }
+    )
+
     if (
       error.message.includes(
         "USER_ALREADY_MEMBER"
@@ -162,9 +189,60 @@ export async function createInvitation(
 
     if (
       error.message.includes(
-        "organization_invitations_pending_email_idx"
-      ) ||
-      error.message.includes("duplicate")
+        "AUTHENTICATION_REQUIRED"
+      )
+    ) {
+      return {
+        success: false,
+        code: "",
+        error:
+          "Your session could not be verified. Please sign in again.",
+      }
+    }
+
+    if (
+      error.message.includes(
+        "EMAIL_REQUIRED"
+      )
+    ) {
+      return {
+        success: false,
+        code: "",
+        error:
+          "An email address is required.",
+      }
+    }
+
+    if (
+      error.message.includes(
+        "CODE_HASH_REQUIRED"
+      )
+    ) {
+      return {
+        success: false,
+        code: "",
+        error:
+          "The invitation could not be secured. Please try again.",
+      }
+    }
+
+    if (
+      error.message.includes(
+        "INVALID_ROLE"
+      )
+    ) {
+      return {
+        success: false,
+        code: "",
+        error:
+          "The selected invitation role is invalid.",
+      }
+    }
+
+    if (
+      error.message.includes(
+        "PENDING_INVITATION_EXISTS"
+      )
     ) {
       return {
         success: false,
@@ -178,7 +256,7 @@ export async function createInvitation(
       success: false,
       code: "",
       error:
-        "The invitation could not be created.",
+        "The invitation could not be created. Please try again.",
     }
   }
 
@@ -226,6 +304,16 @@ export async function revokeInvitation(
     )
 
   if (error) {
+    console.error(
+      "revoke_organization_invitation failed:",
+      {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      }
+    )
+
     redirect(
       "/settings/team?error=invite_revoke_failed"
     )
@@ -292,6 +380,16 @@ export async function updateMemberRole(
     )
 
   if (error) {
+    console.error(
+      "update_organization_member_role failed:",
+      {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      }
+    )
+
     redirect(
       "/settings/team?error=member_role_failed"
     )
@@ -356,6 +454,16 @@ export async function removeMember(
     )
 
   if (error) {
+    console.error(
+      "remove_organization_member failed:",
+      {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      }
+    )
+
     redirect(
       "/settings/team?error=member_remove_failed"
     )

@@ -23,18 +23,15 @@ type TeamPageProps = {
 }
 
 type MemberProfile = {
-  email: string | null
-  full_name: string | null
+  id: string
+  display_name: string | null
+  avatar_url: string | null
 }
 
 type MemberRow = {
   user_id: string
   role: string
   created_at: string
-  profiles:
-    | MemberProfile
-    | MemberProfile[]
-    | null
 }
 
 type InvitationRow = {
@@ -46,10 +43,7 @@ type InvitationRow = {
   expires_at: string
 }
 
-const roleLabels: Record<
-  string,
-  string
-> = {
+const roleLabels: Record<string, string> = {
   admin: "Administrator",
   worship_leader: "Worship Leader",
   song_editor: "Song Editor",
@@ -57,10 +51,7 @@ const roleLabels: Record<
   viewer: "Viewer",
 }
 
-const errorMessages: Record<
-  string,
-  string
-> = {
+const errorMessages: Record<string, string> = {
   invalid_invitation:
     "The invitation information is invalid.",
   invite_revoke_failed:
@@ -71,10 +62,10 @@ const errorMessages: Record<
     "The member role could not be updated.",
   invalid_member:
     "The member information is invalid.",
-  member_remove_failed:
-    "The member could not be removed.",
   membership_not_found:
     "Your church membership could not be found.",
+  membership_load_failed:
+    "Your church membership could not be loaded.",
   administrator_required:
     "Only administrators can perform that action.",
   cannot_remove_self:
@@ -85,8 +76,7 @@ export default async function TeamSettingsPage({
   searchParams,
 }: TeamPageProps) {
   const params = await searchParams
-  const workspace =
-    await getWorkspace()
+  const workspace = await getWorkspace()
 
   if (!workspace) {
     redirect("/onboarding")
@@ -96,8 +86,7 @@ export default async function TeamSettingsPage({
     redirect("/settings/church")
   }
 
-  const supabase =
-    await createClient()
+  const supabase = await createClient()
 
   const [
     organizationResult,
@@ -117,15 +106,7 @@ export default async function TeamSettingsPage({
     supabase
       .from("organization_members")
       .select(
-        `
-          user_id,
-          role,
-          created_at,
-          profiles (
-            email,
-            full_name
-          )
-        `
+        "user_id, role, created_at"
       )
       .eq(
         "organization_id",
@@ -152,6 +133,53 @@ export default async function TeamSettingsPage({
     supabase.auth.getClaims(),
   ])
 
+  if (organizationResult.error) {
+    console.error(
+      "Failed to load organization:",
+      {
+        code:
+          organizationResult.error.code,
+        message:
+          organizationResult.error.message,
+        details:
+          organizationResult.error.details,
+        hint:
+          organizationResult.error.hint,
+      }
+    )
+  }
+
+  if (membersResult.error) {
+    console.error(
+      "Failed to load organization members:",
+      {
+        code: membersResult.error.code,
+        message:
+          membersResult.error.message,
+        details:
+          membersResult.error.details,
+        hint:
+          membersResult.error.hint,
+      }
+    )
+  }
+
+  if (invitationsResult.error) {
+    console.error(
+      "Failed to load organization invitations:",
+      {
+        code:
+          invitationsResult.error.code,
+        message:
+          invitationsResult.error.message,
+        details:
+          invitationsResult.error.details,
+        hint:
+          invitationsResult.error.hint,
+      }
+    )
+  }
+
   const organization =
     organizationResult.data
 
@@ -169,6 +197,55 @@ export default async function TeamSettingsPage({
   const invitations =
     (invitationsResult.data ??
       []) as InvitationRow[]
+
+  const memberUserIds =
+    members.map(
+      (member) => member.user_id
+    )
+
+  let profiles: MemberProfile[] = []
+
+  if (memberUserIds.length > 0) {
+    const {
+      data: profilesData,
+      error: profilesError,
+    } = await supabase
+      .from("profiles")
+      .select(
+        "id, display_name, avatar_url"
+      )
+      .in(
+        "id",
+        memberUserIds
+      )
+
+    if (profilesError) {
+      console.error(
+        "Failed to load member profiles:",
+        {
+          code: profilesError.code,
+          message:
+            profilesError.message,
+          details:
+            profilesError.details,
+          hint:
+            profilesError.hint,
+        }
+      )
+    }
+
+    profiles =
+      (profilesData ??
+        []) as MemberProfile[]
+  }
+
+  const profileMap =
+    new Map(
+      profiles.map((profile) => [
+        profile.id,
+        profile,
+      ])
+    )
 
   const errorKey =
     typeof params.error === "string"
@@ -203,8 +280,7 @@ export default async function TeamSettingsPage({
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Invite your worship team, assign roles, and manage access
-            to your church workspace.
+            Invite your worship team, assign roles, and manage access to your church workspace.
           </p>
         </div>
 
@@ -225,6 +301,15 @@ export default async function TeamSettingsPage({
           className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           {errorMessage}
+        </div>
+      ) : null}
+
+      {membersResult.error ? (
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          The church members could not be loaded. Please refresh the page and try again.
         </div>
       ) : null}
 
@@ -334,15 +419,12 @@ export default async function TeamSettingsPage({
           {members.map(
             (member) => {
               const profile =
-                Array.isArray(
-                  member.profiles
+                profileMap.get(
+                  member.user_id
                 )
-                  ? member.profiles[0]
-                  : member.profiles
 
               const displayName =
-                profile?.full_name?.trim() ||
-                profile?.email ||
+                profile?.display_name?.trim() ||
                 "Unnamed member"
 
               const isCurrentUser =
@@ -378,9 +460,11 @@ export default async function TeamSettingsPage({
                         ) : null}
                       </div>
 
-                      <p className="truncate text-sm text-[var(--muted)]">
-                        {profile?.email ??
-                          "No email available"}
+                      <p className="mt-1 text-sm text-[var(--muted)]">
+                        {roleLabels[
+                          member.role
+                        ] ??
+                          member.role}
                       </p>
                     </div>
                   </div>
