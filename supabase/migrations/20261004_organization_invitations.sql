@@ -29,29 +29,34 @@ create table if not exists public.organization_invitations (
 );
 
 create index if not exists organization_invitations_organization_id_idx
-  on public.organization_invitations(organization_id);
+on public.organization_invitations(organization_id);
 
 create index if not exists organization_invitations_email_idx
-  on public.organization_invitations(lower(email));
+on public.organization_invitations(lower(email));
 
 create index if not exists organization_invitations_status_idx
-  on public.organization_invitations(status);
+on public.organization_invitations(status);
 
 create unique index if not exists organization_invitations_pending_email_idx
-  on public.organization_invitations(
-    organization_id,
-    lower(email)
-  )
-  where status = 'pending';
+on public.organization_invitations(
+  organization_id,
+  lower(email)
+)
+where status = 'pending';
 
-alter table public.organization_invitations enable row level security;
+alter table public.organization_invitations
+enable row level security;
 
-revoke all on table public.organization_invitations from anon, authenticated;
+revoke all
+on table public.organization_invitations
+from anon, authenticated;
 
-grant select on table public.organization_invitations to authenticated;
+grant select
+on table public.organization_invitations
+to authenticated;
 
 drop policy if exists "Administrators can view organization invitations"
-  on public.organization_invitations;
+on public.organization_invitations;
 
 create policy "Administrators can view organization invitations"
 on public.organization_invitations
@@ -61,7 +66,8 @@ using (
   exists (
     select 1
     from public.organization_members om
-    where om.organization_id = organization_invitations.organization_id
+    where om.organization_id =
+      organization_invitations.organization_id
       and om.user_id = (select auth.uid())
       and om.role = 'admin'
   )
@@ -86,11 +92,11 @@ declare
   v_invitation_id uuid;
   v_expires_at timestamptz;
 begin
-  if (auth.uid() is null) then
+  if auth.uid() is null then
     raise exception 'AUTHENTICATION_REQUIRED';
   end if;
 
-  v_email := lower(trim(p_email));
+  v_email := lower(trim(coalesce(p_email, '')));
 
   if v_email = '' then
     raise exception 'EMAIL_REQUIRED';
@@ -146,11 +152,17 @@ begin
     p_code_hash,
     (select auth.uid())
   )
-  returning id, organization_invitations.expires_at
-  into v_invitation_id, v_expires_at;
+  returning
+    id,
+    organization_invitations.expires_at
+  into
+    v_invitation_id,
+    v_expires_at;
 
   return query
-  select v_invitation_id, v_expires_at;
+  select
+    v_invitation_id,
+    v_expires_at;
 end;
 $$;
 
@@ -205,7 +217,8 @@ begin
     raise exception 'INVITATION_EXPIRED';
   end if;
 
-  if v_email = '' or lower(v_invitation.email) <> v_email then
+  if v_email = ''
+     or lower(v_invitation.email) <> v_email then
     raise exception 'INVITATION_EMAIL_MISMATCH';
   end if;
 
@@ -349,7 +362,9 @@ begin
     raise exception 'MEMBER_NOT_FOUND';
   end if;
 
-  if p_user_id = (select auth.uid()) and p_role <> 'admin' then
+  if p_user_id = (select auth.uid())
+     and p_role <> 'admin' then
+
     if not exists (
       select 1
       from public.organization_members
@@ -359,6 +374,7 @@ begin
     ) then
       raise exception 'LAST_ADMIN_CANNOT_BE_DEMOTED';
     end if;
+
   end if;
 
   update public.organization_members
@@ -409,6 +425,7 @@ begin
   end if;
 
   if v_target_role = 'admin' then
+
     if not exists (
       select 1
       from public.organization_members
@@ -418,6 +435,7 @@ begin
     ) then
       raise exception 'LAST_ADMIN_CANNOT_BE_REMOVED';
     end if;
+
   end if;
 
   delete from public.organization_members
@@ -426,54 +444,74 @@ begin
 end;
 $$;
 
-revoke execute on function public.create_organization_invitation(
+revoke execute
+on function public.create_organization_invitation(
   uuid,
   text,
   text,
   text
-) from public, anon, authenticated;
+)
+from public, anon, authenticated;
 
-revoke execute on function public.accept_organization_invitation(
+revoke execute
+on function public.accept_organization_invitation(
   text
-) from public, anon, authenticated;
+)
+from public, anon, authenticated;
 
-revoke execute on function public.revoke_organization_invitation(
+revoke execute
+on function public.revoke_organization_invitation(
   uuid
-) from public, anon, authenticated;
+)
+from public, anon, authenticated;
 
-revoke execute on function public.update_organization_member_role(
+revoke execute
+on function public.update_organization_member_role(
   uuid,
   uuid,
   text
-) from public, anon, authenticated;
+)
+from public, anon, authenticated;
 
-revoke execute on function public.remove_organization_member(
+revoke execute
+on function public.remove_organization_member(
   uuid,
   uuid
-) from public, anon, authenticated;
+)
+from public, anon, authenticated;
 
-grant execute on function public.create_organization_invitation(
+grant execute
+on function public.create_organization_invitation(
   uuid,
   text,
   text,
   text
-) to authenticated;
+)
+to authenticated;
 
-grant execute on function public.accept_organization_invitation(
+grant execute
+on function public.accept_organization_invitation(
   text
-) to authenticated;
+)
+to authenticated;
 
-grant execute on function public.revoke_organization_invitation(
+grant execute
+on function public.revoke_organization_invitation(
   uuid
-) to authenticated;
+)
+to authenticated;
 
-grant execute on function public.update_organization_member_role(
+grant execute
+on function public.update_organization_member_role(
   uuid,
   uuid,
   text
-) to authenticated;
+)
+to authenticated;
 
-grant execute on function public.remove_organization_member(
+grant execute
+on function public.remove_organization_member(
   uuid,
   uuid
-) to authenticated;
+)
+to authenticated;
