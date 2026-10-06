@@ -44,7 +44,7 @@ const navigation = [
   },
   {
     label: "Team",
-    href: "/team",
+    href: "/settings/team",
     icon: Users,
   },
   {
@@ -497,7 +497,7 @@ export default function DashboardView({
                   </p>
 
                   <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--brand)]">
-                    Coming next
+                    Open setlists
                     <ChevronRight className="size-3.5" />
                   </div>
                 </Link>
