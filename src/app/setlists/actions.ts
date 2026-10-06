@@ -24,6 +24,26 @@ const setlistStatusSchema = z.enum([
   "archived",
 ])
 
+const teamPositionSchema = z.enum([
+  "worship_leader",
+  "singer",
+  "lead_guitarist",
+  "rhythm_guitarist",
+  "acoustic_guitarist",
+  "electric_guitarist",
+  "bassist",
+  "keyboardist",
+  "pianist",
+  "drummer",
+  "percussionist",
+  "violinist",
+  "cellist",
+  "sound_engineer",
+  "audio_visual",
+  "choir_member",
+  "other",
+])
+
 function parseOptionalInteger(
   value: FormDataEntryValue | null
 ) {
@@ -640,4 +660,105 @@ export async function deleteSetlist(
 
   revalidatePath("/setlists")
   redirect("/setlists")
+}
+
+export async function addSetlistTeamAssignment(
+  formData: FormData
+) {
+  const setlistId = String(
+    formData.get("setlistId") ?? ""
+  ).trim()
+  const assignmentKey = String(
+    formData.get("assignmentKey") ?? ""
+  ).trim()
+  const [userId, teamPosition] = assignmentKey.split("|")
+
+  if (
+    !uuidSchema.safeParse(setlistId).success ||
+    !uuidSchema.safeParse(userId).success ||
+    !teamPosition ||
+    !teamPositionSchema.safeParse(teamPosition).success
+  ) {
+    redirect(`/setlists/${setlistId}?error=invalid_team_assignment`)
+  }
+
+  const { supabase, role } = await getMembership()
+  requireRole(role, editorRoles)
+
+  const { error } = await supabase.rpc(
+    "add_setlist_team_assignment",
+    {
+      p_setlist_id: setlistId,
+      p_user_id: userId,
+      p_team_position: teamPosition,
+    }
+  )
+
+  if (error) {
+    console.error("add_setlist_team_assignment failed:", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    })
+
+    if (error.message.includes("TEAM_MEMBER_POSITION_REQUIRED")) {
+      redirect(
+        `/setlists/${setlistId}?error=team_position_not_assigned`
+      )
+    }
+
+    if (error.code === "23505") {
+      redirect(
+        `/setlists/${setlistId}?error=team_assignment_exists`
+      )
+    }
+
+    redirect(`/setlists/${setlistId}?error=team_assignment_failed`)
+  }
+
+  revalidatePath(`/setlists/${setlistId}`)
+  revalidatePath("/services")
+  redirect(`/setlists/${setlistId}`)
+}
+
+export async function removeSetlistTeamAssignment(
+  formData: FormData
+) {
+  const setlistId = String(
+    formData.get("setlistId") ?? ""
+  ).trim()
+  const assignmentId = String(
+    formData.get("assignmentId") ?? ""
+  ).trim()
+
+  if (
+    !uuidSchema.safeParse(setlistId).success ||
+    !uuidSchema.safeParse(assignmentId).success
+  ) {
+    redirect("/setlists")
+  }
+
+  const { supabase, role } = await getMembership()
+  requireRole(role, editorRoles)
+
+  const { error } = await supabase.rpc(
+    "remove_setlist_team_assignment",
+    {
+      p_assignment_id: assignmentId,
+      p_setlist_id: setlistId,
+    }
+  )
+
+  if (error) {
+    console.error("remove_setlist_team_assignment failed:", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    })
+    redirect(`/setlists/${setlistId}?error=team_assignment_failed`)
+  }
+
+  revalidatePath(`/setlists/${setlistId}`)
+  revalidatePath("/services")
+  redirect(`/setlists/${setlistId}`)
 }

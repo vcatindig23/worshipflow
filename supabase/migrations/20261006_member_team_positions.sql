@@ -82,7 +82,7 @@ begin
   update public.organization_members
   set team_positions = array(
     select distinct position
-    from unnest(p_team_positions) as position
+    from unnest(p_team_positions) as positions(position)
     order by position
   )
   where organization_id = p_organization_id

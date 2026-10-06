@@ -10,15 +10,18 @@ import {
   Edit,
   Music2,
   Trash2,
+  Users,
 } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import {
   addSongToSetlist,
+  addSetlistTeamAssignment,
   deleteSetlist,
   moveSetlistSong,
   removeSongFromSetlist,
+  removeSetlistTeamAssignment,
   setSetlistStatus,
   updateSetlistSong,
 } from "../actions"
@@ -67,6 +70,42 @@ type Song = {
   status: "active" | "archived"
 }
 
+type TeamMember = {
+  user_id: string
+  team_positions: string[]
+}
+
+type TeamAssignment = {
+  id: string
+  user_id: string
+  team_position: string
+}
+
+type MemberProfile = {
+  id: string
+  display_name: string | null
+}
+
+const teamPositionLabels: Record<string, string> = {
+  worship_leader: "Worship Leader",
+  singer: "Singer",
+  lead_guitarist: "Lead Guitarist",
+  rhythm_guitarist: "Rhythm Guitarist",
+  acoustic_guitarist: "Acoustic Guitarist",
+  electric_guitarist: "Electric Guitarist",
+  bassist: "Bassist",
+  keyboardist: "Keyboardist",
+  pianist: "Pianist",
+  drummer: "Drummer",
+  percussionist: "Percussionist",
+  violinist: "Violinist",
+  cellist: "Cellist",
+  sound_engineer: "Sound Engineer",
+  audio_visual: "Audio / Visual",
+  choir_member: "Choir Member",
+  other: "Other",
+}
+
 const editorRoles = [
   "admin",
   "worship_leader",
@@ -108,6 +147,14 @@ const errorMessages: Record<
     "The setlist status could not be updated.",
   delete_failed:
     "The setlist could not be deleted.",
+  invalid_team_assignment:
+    "Select a valid worship-team member and position.",
+  team_position_not_assigned:
+    "Assign that worship-team position to the member in Team Settings first.",
+  team_assignment_exists:
+    "That member is already assigned to this setlist for that position.",
+  team_assignment_failed:
+    "The team assignment could not be changed.",
 }
 
 function formatDate(value: string | null) {
@@ -269,6 +316,74 @@ export default async function SetlistPage({
   const canManageStatus =
     leaderRoles.includes(workspace.role)
 
+  const [
+    teamMembersResult,
+    teamAssignmentsResult,
+  ] = await Promise.all([
+    supabase
+      .from("organization_members")
+      .select("user_id, team_positions")
+      .eq("organization_id", workspace.organizationId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("setlist_team_assignments")
+      .select("id, user_id, team_position")
+      .eq("setlist_id", id)
+      .order("created_at", { ascending: true }),
+  ])
+
+  const teamDataAvailable =
+    !teamMembersResult.error &&
+    !teamAssignmentsResult.error
+  const teamMembers = (
+    teamMembersResult.data ?? []
+  ) as TeamMember[]
+  const teamAssignments = (
+    teamAssignmentsResult.data ?? []
+  ) as TeamAssignment[]
+
+  const profileIds = Array.from(
+    new Set([
+      ...teamMembers.map((member) => member.user_id),
+      ...teamAssignments.map((assignment) => assignment.user_id),
+    ])
+  )
+  let teamProfiles: MemberProfile[] = []
+
+  if (profileIds.length > 0) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", profileIds)
+
+    if (error) {
+      redirect(`/setlists/${id}?error=setlist_load_failed`)
+    }
+
+    teamProfiles = (data ?? []) as MemberProfile[]
+  }
+
+  const teamProfileNames = new Map(
+    teamProfiles.map((profile) => [
+      profile.id,
+      profile.display_name?.trim() || "Unnamed member",
+    ])
+  )
+  const existingAssignmentKeys = new Set(
+    teamAssignments.map(
+      (assignment) =>
+        `${assignment.user_id}|${assignment.team_position}`
+    )
+  )
+  const assignableOptions = teamMembers.flatMap((member) =>
+    (member.team_positions ?? []).map((position) => ({
+      key: `${member.user_id}|${position}`,
+      label: `${teamProfileNames.get(member.user_id) ?? "Unnamed member"} — ${
+        teamPositionLabels[position] ?? position
+      }`,
+    }))
+  ).filter((option) => !existingAssignmentKeys.has(option.key))
+
   const errorKey =
     typeof queryParams.error === "string"
       ? queryParams.error
@@ -293,6 +408,17 @@ export default async function SetlistPage({
       {errorMessage ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {errorMessage}
+        </div>
+      ) : null}
+
+      {!teamDataAvailable ? (
+        <div
+          role="status"
+          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800"
+        >
+          Worship-team assignments are unavailable until the member-position
+          and setlist-assignment database migrations have been applied. Your
+          setlist and songs remain available.
         </div>
       ) : null}
 
@@ -836,6 +962,115 @@ export default async function SetlistPage({
         </section>
 
         <aside className="space-y-5">
+          <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Users className="size-4 text-[var(--brand)]" />
+              <h2 className="font-semibold text-[var(--foreground)]">
+                Worship Team
+              </h2>
+            </div>
+
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+              Assign members and their service positions.
+            </p>
+
+            {teamAssignments.length > 0 ? (
+              <ul className="mt-4 divide-y divide-[var(--border)]">
+                {teamAssignments.map((assignment) => (
+                  <li
+                    key={assignment.id}
+                    className="flex items-center justify-between gap-3 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-[var(--foreground)]">
+                        {teamProfileNames.get(assignment.user_id) ??
+                          "Unnamed member"}
+                      </p>
+                      <p className="mt-0.5 text-xs text-[var(--muted)]">
+                        {teamPositionLabels[assignment.team_position] ??
+                          assignment.team_position}
+                      </p>
+                    </div>
+
+                    {canEdit ? (
+                      <form action={removeSetlistTeamAssignment}>
+                        <input
+                          type="hidden"
+                          name="setlistId"
+                          value={id}
+                        />
+                        <input
+                          type="hidden"
+                          name="assignmentId"
+                          value={assignment.id}
+                        />
+                        <button
+                          type="submit"
+                          aria-label={`Remove ${teamProfileNames.get(assignment.user_id) ?? "member"} from setlist`}
+                          className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </form>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 rounded-xl bg-[var(--surface)] p-3 text-sm text-[var(--muted)]">
+                No worship team members are assigned yet.
+              </p>
+            )}
+
+            {canEdit && teamDataAvailable ? (
+              assignableOptions.length > 0 ? (
+                <form
+                  action={addSetlistTeamAssignment}
+                  className="mt-4 space-y-3 border-t border-[var(--border)] pt-4"
+                >
+                  <input
+                    type="hidden"
+                    name="setlistId"
+                    value={id}
+                  />
+                  <label
+                    htmlFor="assignmentKey"
+                    className="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+                  >
+                    Member and position
+                  </label>
+                  <select
+                    id="assignmentKey"
+                    name="assignmentKey"
+                    required
+                    defaultValue=""
+                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                  >
+                    <option value="" disabled>
+                      Select a team member
+                    </option>
+                    {assignableOptions.map((option) => (
+                      <option key={option.key} value={option.key}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="submit"
+                    className="h-10 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                  >
+                    Assign to Service
+                  </button>
+                </form>
+              ) : (
+                <p className="mt-4 text-xs leading-5 text-[var(--muted)]">
+                  Assign worship-team positions to members in Team Settings
+                  before adding them to this service.
+                </p>
+              )
+            ) : null}
+          </section>
+
           {canEdit ? (
             <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
               <div>

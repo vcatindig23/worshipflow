@@ -136,7 +136,7 @@ export default async function TeamSettingsPage({
     supabase
       .from("organization_members")
       .select(
-        "user_id, role, team_positions, created_at"
+        "user_id, role, created_at"
       )
       .eq(
         "organization_id",
@@ -220,9 +220,42 @@ export default async function TeamSettingsPage({
   const currentUserId =
     claimsResult.data?.claims?.sub
 
-  const members =
+  let members =
     (membersResult.data ??
       []) as MemberRow[]
+
+  let teamPositionsUnavailable = false
+  if (!membersResult.error && members.length > 0) {
+    const { data: positionRows, error: positionsError } =
+      await supabase
+        .from("organization_members")
+        .select("user_id, team_positions")
+        .eq("organization_id", workspace.organizationId)
+        .in(
+          "user_id",
+          members.map((member) => member.user_id)
+        )
+
+    if (positionsError) {
+      teamPositionsUnavailable = true
+      console.error("Failed to load worship-team positions:", {
+        code: positionsError.code,
+        message: positionsError.message,
+      })
+    }
+
+    const positionsByUser = new Map(
+      (positionRows ?? []).map((row) => [
+        row.user_id,
+        row.team_positions as string[],
+      ])
+    )
+
+    members = members.map((member) => ({
+      ...member,
+      team_positions: positionsByUser.get(member.user_id) ?? [],
+    }))
+  }
 
   const invitations =
     (invitationsResult.data ??
@@ -340,6 +373,16 @@ export default async function TeamSettingsPage({
           className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           The church members could not be loaded. Please refresh the page and try again.
+        </div>
+      ) : null}
+
+      {teamPositionsUnavailable ? (
+        <div
+          role="status"
+          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+        >
+          Members are loaded, but worship-team positions are unavailable until
+          the team-position database migration is applied.
         </div>
       ) : null}
 
@@ -563,54 +606,56 @@ export default async function TeamSettingsPage({
                       </button>
                     </form>
 
-                    <details className="w-full md:max-w-sm">
-                      <summary className="cursor-pointer text-sm font-medium text-[var(--brand)] hover:underline">
-                        Edit worship positions
-                      </summary>
+                    {!teamPositionsUnavailable ? (
+                      <details className="w-full md:max-w-sm">
+                        <summary className="cursor-pointer text-sm font-medium text-[var(--brand)] hover:underline">
+                          Edit worship positions
+                        </summary>
 
-                      <form
-                        action={updateMemberTeamPositions}
-                        className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3"
-                      >
-                        <input
-                          type="hidden"
-                          name="userId"
-                          value={member.user_id}
-                        />
-                        <fieldset>
-                          <legend className="mb-2 text-xs font-semibold text-[var(--foreground)]">
-                            Select all that apply
-                          </legend>
-                          <div className="grid grid-cols-2 gap-x-3 gap-y-2">
-                            {teamPositionOptions.map(
-                              ([value, label]) => (
-                                <label
-                                  key={value}
-                                  className="flex items-center gap-2 text-xs text-[var(--foreground)]"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    name="teamPositions"
-                                    value={value}
-                                    defaultChecked={member.team_positions?.includes(
-                                      value
-                                    )}
-                                    className="size-4 rounded border-[var(--border)] text-[var(--brand)] focus:ring-[var(--brand)]"
-                                  />
-                                  {label}
-                                </label>
-                              )
-                            )}
-                          </div>
-                        </fieldset>
-                        <button
-                          type="submit"
-                          className="mt-3 h-9 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                        <form
+                          action={updateMemberTeamPositions}
+                          className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3"
                         >
-                          Save positions
-                        </button>
-                      </form>
-                    </details>
+                          <input
+                            type="hidden"
+                            name="userId"
+                            value={member.user_id}
+                          />
+                          <fieldset>
+                            <legend className="mb-2 text-xs font-semibold text-[var(--foreground)]">
+                              Select all that apply
+                            </legend>
+                            <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                              {teamPositionOptions.map(
+                                ([value, label]) => (
+                                  <label
+                                    key={value}
+                                    className="flex items-center gap-2 text-xs text-[var(--foreground)]"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      name="teamPositions"
+                                      value={value}
+                                      defaultChecked={member.team_positions?.includes(
+                                        value
+                                      )}
+                                      className="size-4 rounded border-[var(--border)] text-[var(--brand)] focus:ring-[var(--brand)]"
+                                    />
+                                    {label}
+                                  </label>
+                                )
+                              )}
+                            </div>
+                          </fieldset>
+                          <button
+                            type="submit"
+                            className="mt-3 h-9 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                          >
+                            Save positions
+                          </button>
+                        </form>
+                      </details>
+                    ) : null}
 
                     {!isCurrentUser ? (
                       <form
@@ -641,8 +686,8 @@ export default async function TeamSettingsPage({
             }
           )}
 
-          {members.length ===
-          0 ? (
+          {members.length === 0 &&
+          !membersResult.error ? (
             <div className="py-12 text-center">
               <Users className="mx-auto size-8 text-[var(--muted)]" />
 
