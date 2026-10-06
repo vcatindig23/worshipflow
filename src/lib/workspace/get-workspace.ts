@@ -1,6 +1,17 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 
+type TeamAssignmentRow = {
+  setlist_id: string
+  user_id: string
+  team_position: string
+}
+
+type MemberProfile = {
+  id: string
+  display_name: string | null
+}
+
 export type WorkspaceData = {
   userId: string
   userName: string
@@ -32,6 +43,11 @@ export type WorkspaceData = {
     name: string
     service_date: string
     status: "draft" | "published" | "archived"
+    teamAssignments: {
+      userId: string
+      displayName: string
+      position: string
+    }[]
   }[]
 }
 
@@ -162,6 +178,62 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     throw new Error("Unable to load upcoming services.")
   }
 
+  const upcomingSetlists = (upcomingSetlistsResult.data ??
+    []) as Omit<
+    WorkspaceData["upcomingSetlists"][number],
+    "teamAssignments"
+  >[]
+  const assignmentsBySetlist = new Map<string, TeamAssignmentRow[]>()
+
+  if (upcomingSetlists.length > 0) {
+    const { data: assignmentRows, error: assignmentsError } = await supabase
+      .from("setlist_team_assignments")
+      .select("setlist_id, user_id, team_position")
+      .in(
+        "setlist_id",
+        upcomingSetlists.map((setlist) => setlist.id)
+      )
+      .order("created_at", { ascending: true })
+
+    if (assignmentsError) {
+      throw new Error("Unable to load upcoming service team assignments.")
+    }
+
+    for (const assignment of (assignmentRows ?? []) as TeamAssignmentRow[]) {
+      const setlistAssignments =
+        assignmentsBySetlist.get(assignment.setlist_id) ?? []
+      setlistAssignments.push(assignment)
+      assignmentsBySetlist.set(assignment.setlist_id, setlistAssignments)
+    }
+  }
+
+  const assignedUserIds = Array.from(
+    new Set(
+      Array.from(assignmentsBySetlist.values()).flatMap((assignments) =>
+        assignments.map((assignment) => assignment.user_id)
+      )
+    )
+  )
+  const profileNames = new Map<string, string>()
+
+  if (assignedUserIds.length > 0) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", assignedUserIds)
+
+    if (profilesError) {
+      throw new Error("Unable to load names for upcoming service teams.")
+    }
+
+    for (const profile of (profiles ?? []) as MemberProfile[]) {
+      profileNames.set(
+        profile.id,
+        profile.display_name?.trim() || "Name not set"
+      )
+    }
+  }
+
   return {
     userId,
     userName: profileResult.data?.display_name ?? "Worship Member",
@@ -183,7 +255,15 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     songCount: songCountResult.count ?? 0,
     memberCount: memberCountResult.count ?? 0,
     recentSongs: recentSongsResult.data ?? [],
-    upcomingSetlists:
-      (upcomingSetlistsResult.data ?? []) as WorkspaceData["upcomingSetlists"],
+    upcomingSetlists: upcomingSetlists.map((setlist) => ({
+      ...setlist,
+      teamAssignments: (assignmentsBySetlist.get(setlist.id) ?? []).map(
+        (assignment) => ({
+          userId: assignment.user_id,
+          displayName: profileNames.get(assignment.user_id) ?? "Name not set",
+          position: assignment.team_position,
+        })
+      ),
+    })),
   }
 }

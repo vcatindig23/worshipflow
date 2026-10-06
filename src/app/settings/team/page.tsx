@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { createClient } from "@/lib/supabase/server"
+import { teamPositionLabels } from "@/lib/team-positions"
 import InviteMemberForm from "./invite-member-form"
 import {
   removeMember,
@@ -51,26 +52,6 @@ const roleLabels: Record<string, string> = {
   song_editor: "Song Editor",
   team_member: "Team Member",
   viewer: "Viewer",
-}
-
-const teamPositionLabels: Record<string, string> = {
-  worship_leader: "Worship Leader",
-  singer: "Singer",
-  lead_guitarist: "Lead Guitarist",
-  rhythm_guitarist: "Rhythm Guitarist",
-  acoustic_guitarist: "Acoustic Guitarist",
-  electric_guitarist: "Electric Guitarist",
-  bassist: "Bassist",
-  keyboardist: "Keyboardist",
-  pianist: "Pianist",
-  drummer: "Drummer",
-  percussionist: "Percussionist",
-  violinist: "Violinist",
-  cellist: "Cellist",
-  sound_engineer: "Sound Engineer",
-  audio_visual: "Audio / Visual",
-  choir_member: "Choir Member",
-  other: "Other",
 }
 
 const teamPositionOptions = Object.entries(

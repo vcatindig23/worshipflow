@@ -15,6 +15,7 @@ import {
 import { notFound, redirect } from "next/navigation"
 import PrintSetlistButton from "@/components/setlists/print-setlist-button"
 import { createClient } from "@/lib/supabase/server"
+import { teamPositionLabels } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import {
   addSongToSetlist,
@@ -85,26 +86,6 @@ type TeamAssignment = {
 type MemberProfile = {
   id: string
   display_name: string | null
-}
-
-const teamPositionLabels: Record<string, string> = {
-  worship_leader: "Worship Leader",
-  singer: "Singer",
-  lead_guitarist: "Lead Guitarist",
-  rhythm_guitarist: "Rhythm Guitarist",
-  acoustic_guitarist: "Acoustic Guitarist",
-  electric_guitarist: "Electric Guitarist",
-  bassist: "Bassist",
-  keyboardist: "Keyboardist",
-  pianist: "Pianist",
-  drummer: "Drummer",
-  percussionist: "Percussionist",
-  violinist: "Violinist",
-  cellist: "Cellist",
-  sound_engineer: "Sound Engineer",
-  audio_visual: "Audio / Visual",
-  choir_member: "Choir Member",
-  other: "Other",
 }
 
 const editorRoles = [

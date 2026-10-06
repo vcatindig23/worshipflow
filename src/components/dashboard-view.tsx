@@ -14,6 +14,7 @@ import {
   Settings,
   Users,
 } from "lucide-react"
+import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
 
 type DashboardViewProps = {
@@ -372,6 +373,24 @@ export default function DashboardView({
                               new Date(`${setlist.service_date}T00:00:00Z`)
                             )}
                           </p>
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {setlist.teamAssignments.length > 0 ? (
+                              setlist.teamAssignments.map((assignment) => (
+                                <span
+                                  key={`${assignment.userId}-${assignment.position}`}
+                                  className="rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] text-[var(--foreground)]"
+                                >
+                                  {assignment.displayName}
+                                  {" · "}
+                                  {getTeamPositionLabel(assignment.position)}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-[10px] text-[var(--muted)]">
+                                Team not assigned
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </Link>
                     ))}

@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 
 type ServicesPageProps = {
@@ -39,26 +40,6 @@ type MemberProfile = {
 }
 
 type Period = "upcoming" | "past" | "all"
-
-const teamPositionLabels: Record<string, string> = {
-  worship_leader: "Worship Leader",
-  singer: "Singer",
-  lead_guitarist: "Lead Guitarist",
-  rhythm_guitarist: "Rhythm Guitarist",
-  acoustic_guitarist: "Acoustic Guitarist",
-  electric_guitarist: "Electric Guitarist",
-  bassist: "Bassist",
-  keyboardist: "Keyboardist",
-  pianist: "Pianist",
-  drummer: "Drummer",
-  percussionist: "Percussionist",
-  violinist: "Violinist",
-  cellist: "Cellist",
-  sound_engineer: "Sound Engineer",
-  audio_visual: "Audio / Visual",
-  choir_member: "Choir Member",
-  other: "Other",
-}
 
 function getParam(
   value: string | string[] | undefined
@@ -380,8 +361,7 @@ export default async function ServicesPage({
                               >
                                 {profileNames.get(assignment.user_id) ?? "Name not set"}
                                 {" · "}
-                                {teamPositionLabels[assignment.team_position] ??
-                                  assignment.team_position}
+                                {getTeamPositionLabel(assignment.team_position)}
                               </span>
                             )
                           )
