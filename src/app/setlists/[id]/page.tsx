@@ -371,7 +371,7 @@ export default async function SetlistPage({
   const teamProfileNames = new Map(
     teamProfiles.map((profile) => [
       profile.id,
-      profile.display_name?.trim() || "Unnamed member",
+      profile.display_name?.trim() || "Name not set",
     ])
   )
   const existingAssignmentKeys = new Set(
@@ -381,6 +381,11 @@ export default async function SetlistPage({
     )
   )
   const teamPositions = Object.keys(teamPositionLabels)
+  const hasConfiguredTeamPosition = teamMemberIdentities.some((member) =>
+    (member.team_positions ?? []).some((position) =>
+      teamPositions.includes(position)
+    )
+  )
   const assignableOptions = teamMemberIdentities.flatMap((member) =>
     (member.team_positions ?? [])
       .filter((position) => teamPositions.includes(position))
@@ -1105,9 +1110,7 @@ export default async function SetlistPage({
                     Assign to Service
                   </button>
                 </form>
-              ) : teamMemberIdentities.every(
-                (member) => member.team_positions.length === 0
-              ) ? (
+              ) : !hasConfiguredTeamPosition ? (
                 <p className="mt-4 border-t border-[var(--border)] pt-4 text-xs leading-5 text-[var(--muted)]">
                   Assign worship-team positions to members on the Team page before scheduling them here.
                 </p>
