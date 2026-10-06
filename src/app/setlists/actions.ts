@@ -701,6 +701,16 @@ export async function addSetlistTeamAssignment(
       details: error.details,
     })
 
+    if (
+      error.code === "PGRST202" ||
+      error.code === "42883" ||
+      error.code === "42P01"
+    ) {
+      redirect(
+        `/setlists/${setlistId}?error=team_assignment_migration_missing`
+      )
+    }
+
     if (error.message.includes("TEAM_MEMBER_NOT_IN_ORGANIZATION")) {
       redirect(
         `/setlists/${setlistId}?error=team_member_not_found`
@@ -755,6 +765,15 @@ export async function removeSetlistTeamAssignment(
       message: error.message,
       details: error.details,
     })
+    if (
+      error.code === "PGRST202" ||
+      error.code === "42883" ||
+      error.code === "42P01"
+    ) {
+      redirect(
+        `/setlists/${setlistId}?error=team_assignment_migration_missing`
+      )
+    }
     redirect(`/setlists/${setlistId}?error=team_assignment_failed`)
   }
 

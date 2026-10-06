@@ -66,3 +66,59 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: #aeb8b0;
 }
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    min-height: 0;
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .app-sidebar,
+  .app-header,
+  .home-button,
+  .setlist-print-hide,
+  .setlist-print-actions,
+  .setlist-print-sidebar,
+  .setlist-print-layout form,
+  .setlist-print-layout button {
+    display: none !important;
+  }
+
+  .setlist-print-layout {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .setlist-print-content {
+    display: block !important;
+  }
+
+  .setlist-print-header,
+  .setlist-song-card {
+    break-inside: avoid;
+    border-color: #d1d5d2 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .setlist-song-card {
+    margin-bottom: 12px;
+  }
+
+  .setlist-print-notes,
+  .setlist-print-team {
+    display: block !important;
+  }
+
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}

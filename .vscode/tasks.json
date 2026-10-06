@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Link Supabase project",
+			"type": "shell",
+			"command": "npx --yes supabase@latest --output-format text link --project-ref kivvypsdudvijlrtpind",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

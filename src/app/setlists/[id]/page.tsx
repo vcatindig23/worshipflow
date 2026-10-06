@@ -13,6 +13,7 @@ import {
   Users,
 } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
+import PrintSetlistButton from "@/components/setlists/print-setlist-button"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import {
@@ -152,6 +153,8 @@ const errorMessages: Record<
     "That person is not a member of this church workspace.",
   team_assignment_exists:
     "That member is already assigned to this setlist for that position.",
+  team_assignment_migration_missing:
+    "The setlist assignment database migration is missing or not yet visible to Supabase. Apply the setlist-team-assignment migration and refresh the API schema cache.",
   team_assignment_failed:
     "The team assignment could not be changed.",
 }
@@ -396,10 +399,10 @@ export default async function SetlistPage({
       : ""
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
+    <main className="setlist-print-layout mx-auto max-w-7xl space-y-7 px-6 py-8">
       <Link
         href="/setlists"
-        className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
+        className="setlist-print-hide inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
       >
         <ArrowLeft className="size-4" />
         Setlists
@@ -422,7 +425,7 @@ export default async function SetlistPage({
         </div>
       ) : null}
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm md:p-7">
+      <section className="setlist-print-header rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm md:p-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -475,7 +478,9 @@ export default async function SetlistPage({
             ) : null}
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="setlist-print-actions flex flex-wrap gap-2">
+            <PrintSetlistButton />
+
             {canEdit ? (
               <Link
                 href={`/setlists/${id}/edit`}
@@ -570,7 +575,7 @@ export default async function SetlistPage({
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="setlist-print-content grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
@@ -625,7 +630,7 @@ export default async function SetlistPage({
                 return (
                   <article
                     key={setlistSong.id}
-                    className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm"
+                    className="setlist-song-card rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm"
                   >
                     <div className="flex flex-col gap-5">
                       <div className="flex items-start gap-4">
@@ -943,12 +948,23 @@ export default async function SetlistPage({
 
                       {!canEdit &&
                       setlistSong.notes ? (
-                        <div className="rounded-2xl bg-[var(--surface)] p-4">
+                        <div className="setlist-print-hide rounded-2xl bg-[var(--surface)] p-4">
                           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
                             Arrangement Notes
                           </p>
 
                           <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">
+                            {setlistSong.notes}
+                          </p>
+                        </div>
+                      ) : null}
+
+                      {setlistSong.notes ? (
+                        <div className="setlist-print-notes hidden">
+                          <p className="text-xs font-semibold uppercase tracking-wide">
+                            Arrangement Notes
+                          </p>
+                          <p className="mt-1 whitespace-pre-wrap text-sm leading-6">
                             {setlistSong.notes}
                           </p>
                         </div>
@@ -961,7 +977,29 @@ export default async function SetlistPage({
           )}
         </section>
 
-        <aside className="space-y-5">
+        <section className="setlist-print-team hidden">
+          <h2 className="text-lg font-semibold">Worship Team</h2>
+          {teamAssignments.length > 0 ? (
+            <ul className="mt-3 grid grid-cols-2 gap-x-8 gap-y-2">
+              {teamAssignments.map((assignment) => (
+                <li
+                  key={assignment.id}
+                  className="flex justify-between gap-4 border-b border-gray-200 py-2"
+                >
+                  <span>{teamProfileNames.get(assignment.user_id) ?? "Unnamed member"}</span>
+                  <span className="text-right">
+                    {teamPositionLabels[assignment.team_position] ??
+                      assignment.team_position}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-sm">No worship team members are assigned yet.</p>
+          )}
+        </section>
+
+        <aside className="setlist-print-sidebar space-y-5">
           <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <Users className="size-4 text-[var(--brand)]" />

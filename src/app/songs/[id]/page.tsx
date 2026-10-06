@@ -9,6 +9,7 @@ import {
   Tag,
 } from "lucide-react"
 import RecordSongOpen from "@/components/songs/record-song-open"
+import SongViewer from "@/components/songs/song-viewer"
 import { setSongStatus, setSongTags } from "@/app/songs/actions"
 import { createClient } from "@/lib/supabase/server"
 
@@ -275,8 +276,8 @@ export default async function SongPage({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="overflow-hidden rounded-3xl border border-[var(--border)] bg-white shadow-sm">
-          <div className="border-b border-[var(--border)] px-6 py-5">
+        <section className="space-y-4 overflow-hidden rounded-3xl">
+          <div className="rounded-3xl border border-[var(--border)] bg-white px-6 py-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">
@@ -297,11 +298,10 @@ export default async function SongPage({
             </div>
           </div>
 
-          <div className="overflow-x-auto p-6">
-            <pre className="whitespace-pre-wrap font-mono text-sm leading-7 text-[var(--foreground)]">
-              {typedSong.chordpro_source}
-            </pre>
-          </div>
+          <SongViewer
+            source={typedSong.chordpro_source}
+            title={typedSong.title}
+          />
         </section>
 
         <aside className="space-y-6">

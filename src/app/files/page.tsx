@@ -121,8 +121,13 @@ export default async function FilesPage({
       message: error.message,
       name: error.name,
     })
-    throw new Error("Unable to load workspace files.")
   }
+
+  const storageErrorMessage = error
+    ? error.message.toLowerCase().includes("bucket not found")
+      ? "The workspace file bucket is missing. Apply the workspace-files database migration to enable uploads and downloads."
+      : "The shared file library could not be loaded. Check the Supabase Storage configuration and try again."
+    : ""
 
   const files = (data ?? []).filter(
     (item) => item.id !== null
@@ -204,6 +209,15 @@ export default async function FilesPage({
         </div>
       ) : null}
 
+      {storageErrorMessage ? (
+        <div
+          role="alert"
+          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+        >
+          {storageErrorMessage}
+        </div>
+      ) : null}
+
       {canManageFiles ? (
         <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-4 flex items-center gap-3">
@@ -281,7 +295,7 @@ export default async function FilesPage({
           </button>
         </form>
 
-        {files.length === 0 ? (
+        {storageErrorMessage ? null : files.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
             <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <FileText className="size-5" />

@@ -5,6 +5,20 @@ import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 
 const maxFileSize = 25 * 1024 * 1024
+const contentTypesByExtension: Record<string, string> = {
+  pdf: "application/pdf",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  mp3: "audio/mpeg",
+  m4a: "audio/mp4",
+  wav: "audio/wav",
+}
 
 type UploadFileFormProps = {
   organizationId: string
@@ -18,6 +32,48 @@ function safeFileName(fileName: string) {
     .slice(-120)
 
   return name || "file"
+}
+
+function getUploadErrorMessage(error: unknown) {
+  const message =
+    error instanceof Error ? error.message : ""
+  const normalizedMessage = message.toLowerCase()
+
+  if (normalizedMessage.includes("bucket not found")) {
+    return "The workspace file bucket is missing. Apply the workspace-files database migration, then try again."
+  }
+
+  if (
+    normalizedMessage.includes("row-level security") ||
+    normalizedMessage.includes("permission denied")
+  ) {
+    return "Your account is not allowed to upload files. Check that you have an editor role and that the workspace-files policies are applied."
+  }
+
+  if (
+    normalizedMessage.includes("mime") ||
+    normalizedMessage.includes("content type")
+  ) {
+    return "This file type is not allowed. Choose a PDF, Office document, image, or supported audio file."
+  }
+
+  if (
+    normalizedMessage.includes("payload too large") ||
+    normalizedMessage.includes("file size")
+  ) {
+    return "The file exceeds the storage limit. Choose a file no larger than 25 MB."
+  }
+
+  if (
+    normalizedMessage.includes("secret api key required") ||
+    normalizedMessage.includes("invalid api key")
+  ) {
+    return "Supabase rejected the configured publishable API key. Check the project's Data API settings; do not use a secret key in browser code."
+  }
+
+  return message
+    ? `Upload failed: ${message}`
+    : "The file could not be uploaded because storage returned an unknown error."
 }
 
 export default function UploadFileForm({
@@ -40,6 +96,14 @@ export default function UploadFileForm({
       return
     }
 
+    const extension = file.name.split(".").pop()?.toLowerCase() ?? ""
+    const contentType = contentTypesByExtension[extension]
+
+    if (!contentType) {
+      setError("Choose a PDF, Office document, image, or supported audio file.")
+      return
+    }
+
     setUploading(true)
     setError("")
 
@@ -53,7 +117,7 @@ export default function UploadFileForm({
       const { error: uploadError } = await supabase.storage
         .from("workspace-files")
         .upload(objectPath, file, {
-          contentType: file.type,
+          contentType,
           upsert: false,
         })
 
@@ -61,11 +125,10 @@ export default function UploadFileForm({
         throw uploadError
       }
 
-      formData.set("file", "")
       router.refresh()
     } catch (uploadError) {
       console.error("Workspace file upload failed:", uploadError)
-      setError("The file could not be uploaded. Please try again.")
+      setError(getUploadErrorMessage(uploadError))
     } finally {
       setUploading(false)
     }

@@ -117,7 +117,7 @@ export default function WorshipFlowShell({
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-white/10 bg-[var(--sidebar)] lg:block">
+      <aside className="app-sidebar fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-white/10 bg-[var(--sidebar)] lg:block">
         <div className="flex h-full flex-col">
           <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
             <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
@@ -212,7 +212,7 @@ export default function WorshipFlowShell({
       ) : null}
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/95 px-5 backdrop-blur md:px-8">
+        <header className="app-header sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/95 px-5 backdrop-blur md:px-8">
           <button
             type="button"
             aria-label="Open navigation"
