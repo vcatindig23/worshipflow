@@ -197,6 +197,15 @@ export default async function SetlistPage({
     )
   }
 
+  if (
+    setlistSongsResult.error ||
+    songsResult.error
+  ) {
+    redirect(
+      `/setlists/${id}?error=setlist_load_failed`
+    )
+  }
+
   if (!setlistResult.data) {
     notFound()
   }
@@ -218,7 +227,7 @@ export default async function SetlistPage({
   let songDetails: Song[] = []
 
   if (songIds.length > 0) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("songs")
       .select(
         "id, title, artist, current_key, tempo, capo, status"
@@ -228,6 +237,12 @@ export default async function SetlistPage({
         "organization_id",
         workspace.organizationId
       )
+
+    if (error) {
+      redirect(
+        `/setlists/${id}?error=setlist_load_failed`
+      )
+    }
 
     songDetails = (data ?? []) as Song[]
   }

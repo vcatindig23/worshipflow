@@ -131,13 +131,17 @@ export default async function SetlistsPage({
   let songRows: SetlistSongRow[] = []
 
   if (setlists.length > 0) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("setlist_songs")
       .select("id, setlist_id")
       .in(
         "setlist_id",
         setlists.map((setlist) => setlist.id)
       )
+
+    if (error) {
+      redirect("/error?code=setlists_load_failed")
+    }
 
     songRows = (data ?? []) as SetlistSongRow[]
   }
