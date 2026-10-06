@@ -73,6 +73,7 @@ type Song = {
 
 type TeamMemberIdentity = {
   user_id: string
+  team_positions: string[]
 }
 
 type TeamAssignment = {
@@ -151,6 +152,8 @@ const errorMessages: Record<
     "Select a valid worship-team member and position.",
   team_member_not_found:
     "That person is not a member of this church workspace.",
+  team_position_not_assigned:
+    "That member does not have this worship-team position assigned on the Team page.",
   team_assignment_exists:
     "That member is already assigned to this setlist for that position.",
   team_assignment_migration_missing:
@@ -324,7 +327,7 @@ export default async function SetlistPage({
   ] = await Promise.all([
     supabase
       .from("organization_members")
-      .select("user_id")
+      .select("user_id, team_positions")
       .eq("organization_id", workspace.organizationId)
       .order("created_at", { ascending: true }),
     supabase
@@ -379,12 +382,14 @@ export default async function SetlistPage({
   )
   const teamPositions = Object.keys(teamPositionLabels)
   const assignableOptions = teamMemberIdentities.flatMap((member) =>
-    teamPositions.map((position) => ({
-      key: `${member.user_id}|${position}`,
-      label: `${teamProfileNames.get(member.user_id) ?? "Unnamed member"} — ${
-        teamPositionLabels[position] ?? position
-      }`,
-    }))
+    (member.team_positions ?? [])
+      .filter((position) => teamPositions.includes(position))
+      .map((position) => ({
+        key: `${member.user_id}|${position}`,
+        label: `${teamProfileNames.get(member.user_id) ?? "Name not set"} — ${
+          teamPositionLabels[position] ?? position
+        }`,
+      }))
   ).filter((option) => !existingAssignmentKeys.has(option.key))
 
   const errorKey =
@@ -986,7 +991,7 @@ export default async function SetlistPage({
                   key={assignment.id}
                   className="flex justify-between gap-4 border-b border-gray-200 py-2"
                 >
-                  <span>{teamProfileNames.get(assignment.user_id) ?? "Unnamed member"}</span>
+                  <span>{teamProfileNames.get(assignment.user_id) ?? "Name not set"}</span>
                   <span className="text-right">
                     {teamPositionLabels[assignment.team_position] ??
                       assignment.team_position}
@@ -1009,7 +1014,7 @@ export default async function SetlistPage({
             </div>
 
             <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-              Assign any church member to a role for this service.
+              Assign members to the positions set for them on the Team page.
             </p>
 
             {teamAssignments.length > 0 ? (
@@ -1022,7 +1027,7 @@ export default async function SetlistPage({
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-[var(--foreground)]">
                         {teamProfileNames.get(assignment.user_id) ??
-                          "Unnamed member"}
+                          "Name not set"}
                       </p>
                       <p className="mt-0.5 text-xs text-[var(--muted)]">
                         {teamPositionLabels[assignment.team_position] ??
@@ -1100,9 +1105,15 @@ export default async function SetlistPage({
                     Assign to Service
                   </button>
                 </form>
+              ) : teamMemberIdentities.every(
+                (member) => member.team_positions.length === 0
+              ) ? (
+                <p className="mt-4 border-t border-[var(--border)] pt-4 text-xs leading-5 text-[var(--muted)]">
+                  Assign worship-team positions to members on the Team page before scheduling them here.
+                </p>
               ) : (
                 <p className="mt-4 text-xs leading-5 text-[var(--muted)]">
-                  All church members are already assigned to this service.
+                  All assigned member positions are already on this service.
                 </p>
               )
             ) : null}

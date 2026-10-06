@@ -4,6 +4,7 @@ import {
   Building2,
   Church,
   ShieldCheck,
+  UserRound,
   Users,
 } from "lucide-react"
 import { redirect } from "next/navigation"
@@ -53,7 +54,29 @@ export default async function SettingsPage() {
         </p>
       </section>
 
-      <section className="grid gap-5 md:grid-cols-2">
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <Link
+          href="/settings/profile"
+          className="group rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+        >
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
+            <UserRound className="size-6" />
+          </div>
+
+          <div className="mt-5 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
+                Your Profile
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                Set the name your teammates see in the workspace and on service assignments.
+              </p>
+            </div>
+
+            <ArrowRight className="mt-1 size-5 shrink-0 text-[var(--muted)] transition group-hover:translate-x-1 group-hover:text-[var(--brand)]" />
+          </div>
+        </Link>
+
         <Link
           href="/settings/church"
           className="group rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"

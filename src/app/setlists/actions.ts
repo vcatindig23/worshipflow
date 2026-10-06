@@ -717,6 +717,12 @@ export async function addSetlistTeamAssignment(
       )
     }
 
+    if (error.message.includes("TEAM_POSITION_NOT_ASSIGNED_TO_MEMBER")) {
+      redirect(
+        `/setlists/${setlistId}?error=team_position_not_assigned`
+      )
+    }
+
     if (error.code === "23505") {
       redirect(
         `/setlists/${setlistId}?error=team_assignment_exists`

@@ -500,7 +500,7 @@ export default async function TeamSettingsPage({
 
               const displayName =
                 profile?.display_name?.trim() ||
-                "Unnamed member"
+                "Name not set"
 
               const isCurrentUser =
                 member.user_id ===
