@@ -27,7 +27,38 @@ type SetlistSong = {
   setlist_id: string
 }
 
+type TeamAssignment = {
+  setlist_id: string
+  user_id: string
+  team_position: string
+}
+
+type MemberProfile = {
+  id: string
+  display_name: string | null
+}
+
 type Period = "upcoming" | "past" | "all"
+
+const teamPositionLabels: Record<string, string> = {
+  worship_leader: "Worship Leader",
+  singer: "Singer",
+  lead_guitarist: "Lead Guitarist",
+  rhythm_guitarist: "Rhythm Guitarist",
+  acoustic_guitarist: "Acoustic Guitarist",
+  electric_guitarist: "Electric Guitarist",
+  bassist: "Bassist",
+  keyboardist: "Keyboardist",
+  pianist: "Pianist",
+  drummer: "Drummer",
+  percussionist: "Percussionist",
+  violinist: "Violinist",
+  cellist: "Cellist",
+  sound_engineer: "Sound Engineer",
+  audio_visual: "Audio / Visual",
+  choir_member: "Choir Member",
+  other: "Other",
+}
 
 function getParam(
   value: string | string[] | undefined
@@ -120,26 +151,65 @@ export default async function ServicesPage({
 
   const setlists = (data ?? []) as Setlist[]
   const songCounts = new Map<string, number>()
+  const assignmentsBySetlist = new Map<string, TeamAssignment[]>()
 
   if (setlists.length > 0) {
-    const { data: songRows, error: songsError } = await supabase
-      .from("setlist_songs")
-      .select("setlist_id")
-      .in(
-        "setlist_id",
-        setlists.map((setlist) => setlist.id)
-      )
+    const setlistIds = setlists.map((setlist) => setlist.id)
+    const [songsResult, assignmentsResult] = await Promise.all([
+      supabase
+        .from("setlist_songs")
+        .select("setlist_id")
+        .in("setlist_id", setlistIds),
+      supabase
+        .from("setlist_team_assignments")
+        .select("setlist_id, user_id, team_position")
+        .in("setlist_id", setlistIds)
+        .order("created_at", { ascending: true }),
+    ])
 
-    if (songsError) {
+    if (songsResult.error || assignmentsResult.error) {
       redirect("/error?code=setlists_load_failed")
     }
 
-    for (const row of (songRows ?? []) as SetlistSong[]) {
+    for (const row of (songsResult.data ?? []) as SetlistSong[]) {
       songCounts.set(
         row.setlist_id,
         (songCounts.get(row.setlist_id) ?? 0) + 1
       )
     }
+
+    for (const assignment of (assignmentsResult.data ?? []) as TeamAssignment[]) {
+      const assignments = assignmentsBySetlist.get(assignment.setlist_id) ?? []
+      assignments.push(assignment)
+      assignmentsBySetlist.set(assignment.setlist_id, assignments)
+    }
+  }
+
+  const assignedUserIds = Array.from(
+    new Set(
+      Array.from(assignmentsBySetlist.values()).flatMap((assignments) =>
+        assignments.map((assignment) => assignment.user_id)
+      )
+    )
+  )
+  let profileNames = new Map<string, string>()
+
+  if (assignedUserIds.length > 0) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", assignedUserIds)
+
+    if (profilesError) {
+      redirect("/error?code=setlists_load_failed")
+    }
+
+    profileNames = new Map(
+      ((profiles ?? []) as MemberProfile[]).map((profile) => [
+        profile.id,
+        profile.display_name?.trim() || "Name not set",
+      ])
+    )
   }
 
   return (
@@ -298,6 +368,28 @@ export default async function ServicesPage({
                             ? "song"
                             : "songs"}
                         </span>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {(assignmentsBySetlist.get(setlist.id) ?? []).length > 0 ? (
+                          (assignmentsBySetlist.get(setlist.id) ?? []).map(
+                            (assignment) => (
+                              <span
+                                key={`${assignment.user_id}-${assignment.team_position}`}
+                                className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs text-[var(--foreground)]"
+                              >
+                                {profileNames.get(assignment.user_id) ?? "Name not set"}
+                                {" · "}
+                                {teamPositionLabels[assignment.team_position] ??
+                                  assignment.team_position}
+                              </span>
+                            )
+                          )
+                        ) : (
+                          <span className="text-xs text-[var(--muted)]">
+                            Team not assigned
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
