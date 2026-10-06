@@ -3,6 +3,7 @@ import {
   ArrowDownToLine,
   FileText,
   FolderOpen,
+  Search,
   Trash2,
   Upload,
 } from "lucide-react"
@@ -25,6 +26,12 @@ type StoredFile = {
     mimetype?: string
   } | null
 }
+
+type FileCategory =
+  | "all"
+  | "documents"
+  | "images"
+  | "audio"
 
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
@@ -54,6 +61,39 @@ function formatDate(value: string | null) {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "medium",
   }).format(new Date(value))
+}
+
+function getFileCategory(file: StoredFile): Exclude<FileCategory, "all"> | "other" {
+  const mimeType = file.metadata?.mimetype?.toLowerCase() ?? ""
+  const extension = readableName(file.name)
+    .split(".")
+    .pop()
+    ?.toLowerCase()
+
+  if (
+    mimeType.startsWith("audio/") ||
+    ["mp3", "m4a", "wav"].includes(extension ?? "")
+  ) {
+    return "audio"
+  }
+
+  if (
+    mimeType.startsWith("image/") ||
+    ["jpg", "jpeg", "png", "webp"].includes(extension ?? "")
+  ) {
+    return "images"
+  }
+
+  if (
+    mimeType === "application/pdf" ||
+    mimeType.includes("word") ||
+    mimeType.includes("presentation") ||
+    ["pdf", "doc", "docx", "ppt", "pptx"].includes(extension ?? "")
+  ) {
+    return "documents"
+  }
+
+  return "other"
 }
 
 const errors: Record<string, string> = {
@@ -88,8 +128,29 @@ export default async function FilesPage({
     (item) => item.id !== null
   ) as StoredFile[]
 
+  const query = getParam(params.q)?.trim() ?? ""
+  const requestedCategory = getParam(params.type)
+  const category: FileCategory =
+    requestedCategory === "documents" ||
+    requestedCategory === "images" ||
+    requestedCategory === "audio"
+      ? requestedCategory
+      : "all"
+  const filteredFiles = files.filter((file) => {
+    const matchesQuery =
+      !query ||
+      readableName(file.name)
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    const matchesCategory =
+      category === "all" ||
+      getFileCategory(file) === category
+
+    return matchesQuery && matchesCategory
+  })
+
   const filesWithLinks = await Promise.all(
-    files.map(async (file) => {
+    filteredFiles.map(async (file) => {
       const path = `${workspace.organizationId}/${file.name}`
       const { data: signedUrl, error: urlError } =
         await supabase.storage
@@ -177,11 +238,48 @@ export default async function FilesPage({
               Shared files
             </h2>
             <p className="mt-1 text-xs text-[var(--muted)]">
-              {files.length}{" "}
-              {files.length === 1 ? "file" : "files"} in your workspace
+              Showing {filteredFiles.length} of {files.length}{" "}
+              {files.length === 1 ? "file" : "files"}
             </p>
           </div>
         </div>
+
+        <form
+          action="/files"
+          method="get"
+          className="mb-4 flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 sm:flex-row"
+        >
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+            <input
+              name="q"
+              type="search"
+              defaultValue={query}
+              placeholder="Search files..."
+              aria-label="Search files"
+              className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+            />
+          </div>
+
+          <select
+            name="type"
+            defaultValue={category}
+            aria-label="Filter files by type"
+            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
+          >
+            <option value="all">All file types</option>
+            <option value="documents">Documents</option>
+            <option value="images">Images</option>
+            <option value="audio">Audio</option>
+          </select>
+
+          <button
+            type="submit"
+            className="h-11 rounded-xl bg-[var(--surface)] px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+          >
+            Apply
+          </button>
+        </form>
 
         {files.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
@@ -194,6 +292,15 @@ export default async function FilesPage({
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
               Upload sheet music, service documents, images, or rehearsal
               audio to make them available to your team.
+            </p>
+          </div>
+        ) : filteredFiles.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-12 text-center shadow-sm">
+            <h3 className="text-base font-semibold text-[var(--foreground)]">
+              No matching files
+            </h3>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              Try another search term or file type.
             </p>
           </div>
         ) : (

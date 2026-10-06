@@ -27,6 +27,26 @@ export type WorkspaceData = {
     tempo: number | null
     updated_at: string
   }[]
+  upcomingSetlists: {
+    id: string
+    name: string
+    service_date: string
+    status: "draft" | "published" | "archived"
+  }[]
+}
+
+function getToday(timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date())
+
+  const part = (type: string) =>
+    parts.find((item) => item.type === type)?.value ?? ""
+
+  return `${part("year")}-${part("month")}-${part("day")}`
 }
 
 export async function getWorkspace(): Promise<WorkspaceData> {
@@ -93,7 +113,7 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     throw new Error("Unable to load your church workspace.")
   }
 
-  const [songCountResult, memberCountResult, recentSongsResult] =
+  const [songCountResult, memberCountResult, recentSongsResult, upcomingSetlistsResult] =
     await Promise.all([
       supabase
         .from("songs")
@@ -115,6 +135,15 @@ export async function getWorkspace(): Promise<WorkspaceData> {
         .eq("status", "active")
         .order("updated_at", { ascending: false })
         .limit(5),
+
+      supabase
+        .from("setlists")
+        .select("id, name, service_date, status")
+        .eq("organization_id", membership.organization_id)
+        .gte("service_date", getToday(organization.timezone))
+        .neq("status", "archived")
+        .order("service_date", { ascending: true })
+        .limit(3),
     ])
 
   if (songCountResult.error) {
@@ -127,6 +156,10 @@ export async function getWorkspace(): Promise<WorkspaceData> {
 
   if (recentSongsResult.error) {
     throw new Error("Unable to load recent songs.")
+  }
+
+  if (upcomingSetlistsResult.error) {
+    throw new Error("Unable to load upcoming services.")
   }
 
   return {
@@ -150,5 +183,7 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     songCount: songCountResult.count ?? 0,
     memberCount: memberCountResult.count ?? 0,
     recentSongs: recentSongsResult.data ?? [],
+    upcomingSetlists:
+      (upcomingSetlistsResult.data ?? []) as WorkspaceData["upcomingSetlists"],
   }
 }

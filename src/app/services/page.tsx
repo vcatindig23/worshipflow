@@ -103,7 +103,9 @@ export default async function ServicesPage({
     })
 
   if (period === "upcoming") {
-    setlistQuery = setlistQuery.gte("service_date", today)
+    setlistQuery = setlistQuery
+      .gte("service_date", today)
+      .neq("status", "archived")
   } else if (period === "past") {
     setlistQuery = setlistQuery
       .not("service_date", "is", null)

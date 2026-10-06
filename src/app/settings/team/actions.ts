@@ -31,6 +31,26 @@ const memberRoleSchema = z.enum([
   "viewer",
 ])
 
+const teamPositionSchema = z.enum([
+  "worship_leader",
+  "singer",
+  "lead_guitarist",
+  "rhythm_guitarist",
+  "acoustic_guitarist",
+  "electric_guitarist",
+  "bassist",
+  "keyboardist",
+  "pianist",
+  "drummer",
+  "percussionist",
+  "violinist",
+  "cellist",
+  "sound_engineer",
+  "audio_visual",
+  "choir_member",
+  "other",
+])
+
 const uuidSchema = z.string().uuid()
 
 export type InvitationState = {
@@ -402,6 +422,58 @@ export async function updateMemberRole(
   revalidatePath("/songs")
   revalidatePath("/setlists")
 
+  redirect("/settings/team")
+}
+
+export async function updateMemberTeamPositions(
+  formData: FormData
+) {
+  const parsedUserId = uuidSchema.safeParse(
+    String(formData.get("userId") ?? "").trim()
+  )
+  const parsedPositions = z
+    .array(teamPositionSchema)
+    .max(10)
+    .safeParse(formData.getAll("teamPositions"))
+
+  if (!parsedUserId.success || !parsedPositions.success) {
+    redirect("/settings/team?error=invalid_team_positions")
+  }
+
+  const {
+    supabase,
+    organizationId,
+    role: currentRole,
+  } = await getCurrentMembership()
+
+  if (currentRole !== "admin") {
+    redirect("/settings/team?error=administrator_required")
+  }
+
+  const { error } = await supabase.rpc(
+    "update_organization_member_team_positions",
+    {
+      p_organization_id: organizationId,
+      p_user_id: parsedUserId.data,
+      p_team_positions: parsedPositions.data,
+    }
+  )
+
+  if (error) {
+    console.error(
+      "update_organization_member_team_positions failed:",
+      {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      }
+    )
+
+    redirect("/settings/team?error=team_positions_failed")
+  }
+
+  revalidatePath("/settings/team")
   redirect("/settings/team")
 }
 

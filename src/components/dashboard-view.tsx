@@ -311,6 +311,74 @@ export default function DashboardView({
                 </div>
               </section>
 
+              <section className="mt-6 rounded-2xl border border-[var(--border)] bg-white">
+                <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4 sm:px-6">
+                  <div>
+                    <h3 className="text-base font-semibold">
+                      Upcoming services
+                    </h3>
+                    <p className="mt-1 text-xs text-[var(--muted)]">
+                      Your next dated worship plans
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/services"
+                    className="text-xs font-semibold text-[var(--brand)] hover:underline"
+                  >
+                    View schedule
+                  </Link>
+                </div>
+
+                {workspace.upcomingSetlists.length === 0 ? (
+                  <div className="flex flex-col items-start gap-4 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div>
+                      <p className="text-sm font-medium">
+                        No upcoming services scheduled
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                        Create a dated setlist to add a service to your schedule.
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/setlists/new"
+                      className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                    >
+                      <Plus className="size-3.5" />
+                      Plan a service
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid gap-px bg-[var(--border)] sm:grid-cols-2 xl:grid-cols-3">
+                    {workspace.upcomingSetlists.map((setlist) => (
+                      <Link
+                        key={setlist.id}
+                        href={`/setlists/${setlist.id}`}
+                        className="flex items-start gap-3 bg-white px-5 py-4 transition hover:bg-[var(--surface)] sm:px-6"
+                      >
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                          <CalendarDays className="size-[18px]" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold">
+                            {setlist.name}
+                          </p>
+                          <p className="mt-1 text-xs text-[var(--muted)]">
+                            {new Intl.DateTimeFormat("en-PH", {
+                              dateStyle: "medium",
+                              timeZone: "UTC",
+                            }).format(
+                              new Date(`${setlist.service_date}T00:00:00Z`)
+                            )}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </section>
+
               <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.8fr)]">
                 <div className="rounded-2xl border border-[var(--border)] bg-white">
                   <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4 sm:px-6">

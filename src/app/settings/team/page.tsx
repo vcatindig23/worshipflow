@@ -14,6 +14,7 @@ import {
   removeMember,
   revokeInvitation,
   updateMemberRole,
+  updateMemberTeamPositions,
 } from "./actions"
 
 type TeamPageProps = {
@@ -31,6 +32,7 @@ type MemberProfile = {
 type MemberRow = {
   user_id: string
   role: string
+  team_positions: string[]
   created_at: string
 }
 
@@ -51,6 +53,30 @@ const roleLabels: Record<string, string> = {
   viewer: "Viewer",
 }
 
+const teamPositionLabels: Record<string, string> = {
+  worship_leader: "Worship Leader",
+  singer: "Singer",
+  lead_guitarist: "Lead Guitarist",
+  rhythm_guitarist: "Rhythm Guitarist",
+  acoustic_guitarist: "Acoustic Guitarist",
+  electric_guitarist: "Electric Guitarist",
+  bassist: "Bassist",
+  keyboardist: "Keyboardist",
+  pianist: "Pianist",
+  drummer: "Drummer",
+  percussionist: "Percussionist",
+  violinist: "Violinist",
+  cellist: "Cellist",
+  sound_engineer: "Sound Engineer",
+  audio_visual: "Audio / Visual",
+  choir_member: "Choir Member",
+  other: "Other",
+}
+
+const teamPositionOptions = Object.entries(
+  teamPositionLabels
+)
+
 const errorMessages: Record<string, string> = {
   invalid_invitation:
     "The invitation information is invalid.",
@@ -60,6 +86,10 @@ const errorMessages: Record<string, string> = {
     "The member role information is invalid.",
   member_role_failed:
     "The member role could not be updated.",
+  invalid_team_positions:
+    "Select valid worship-team positions (up to 10).",
+  team_positions_failed:
+    "The member's worship-team positions could not be updated.",
   invalid_member:
     "The member information is invalid.",
   membership_not_found:
@@ -106,7 +136,7 @@ export default async function TeamSettingsPage({
     supabase
       .from("organization_members")
       .select(
-        "user_id, role, created_at"
+        "user_id, role, team_positions, created_at"
       )
       .eq(
         "organization_id",
@@ -466,10 +496,27 @@ export default async function TeamSettingsPage({
                         ] ??
                           member.role}
                       </p>
+
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {member.team_positions?.length ? (
+                          member.team_positions.map((position) => (
+                            <span
+                              key={position}
+                              className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-[10px] font-semibold text-[var(--brand)]"
+                            >
+                              {teamPositionLabels[position] ?? position}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-[var(--muted)]">
+                            No worship-team positions assigned
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-3 md:items-end">
                     <form
                       action={
                         updateMemberRole
@@ -515,6 +562,55 @@ export default async function TeamSettingsPage({
                         Save
                       </button>
                     </form>
+
+                    <details className="w-full md:max-w-sm">
+                      <summary className="cursor-pointer text-sm font-medium text-[var(--brand)] hover:underline">
+                        Edit worship positions
+                      </summary>
+
+                      <form
+                        action={updateMemberTeamPositions}
+                        className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3"
+                      >
+                        <input
+                          type="hidden"
+                          name="userId"
+                          value={member.user_id}
+                        />
+                        <fieldset>
+                          <legend className="mb-2 text-xs font-semibold text-[var(--foreground)]">
+                            Select all that apply
+                          </legend>
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                            {teamPositionOptions.map(
+                              ([value, label]) => (
+                                <label
+                                  key={value}
+                                  className="flex items-center gap-2 text-xs text-[var(--foreground)]"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    name="teamPositions"
+                                    value={value}
+                                    defaultChecked={member.team_positions?.includes(
+                                      value
+                                    )}
+                                    className="size-4 rounded border-[var(--border)] text-[var(--brand)] focus:ring-[var(--brand)]"
+                                  />
+                                  {label}
+                                </label>
+                              )
+                            )}
+                          </div>
+                        </fieldset>
+                        <button
+                          type="submit"
+                          className="mt-3 h-9 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                        >
+                          Save positions
+                        </button>
+                      </form>
+                    </details>
 
                     {!isCurrentUser ? (
                       <form
