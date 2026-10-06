@@ -101,9 +101,8 @@ begin
     from public.organization_members
     where organization_id = v_organization_id
       and user_id = p_user_id
-      and p_team_position = any(team_positions)
   ) then
-    raise exception 'TEAM_MEMBER_POSITION_REQUIRED';
+    raise exception 'TEAM_MEMBER_NOT_IN_ORGANIZATION';
   end if;
 
   insert into public.setlist_team_assignments (

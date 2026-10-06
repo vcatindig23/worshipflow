@@ -112,9 +112,7 @@ export default async function TeamSettingsPage({
     redirect("/onboarding")
   }
 
-  if (workspace.role !== "admin") {
-    redirect("/settings/church")
-  }
+  const canManageTeam = workspace.role === "admin"
 
   const supabase = await createClient()
 
@@ -386,21 +384,23 @@ export default async function TeamSettingsPage({
         </div>
       ) : null}
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">
-            Invite a Team Member
-          </h2>
+      {canManageTeam ? (
+        <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">
+              Invite a Team Member
+            </h2>
 
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-            Choose the member&apos;s initial role when creating the invitation.
-          </p>
-        </div>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+              Choose the member&apos;s initial role when creating the invitation.
+            </p>
+          </div>
 
-        <InviteMemberForm />
-      </section>
+          <InviteMemberForm />
+        </section>
+      ) : null}
 
-      {invitations.length > 0 ? (
+      {canManageTeam && invitations.length > 0 ? (
         <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
@@ -484,7 +484,9 @@ export default async function TeamSettingsPage({
           </h2>
 
           <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-            Administrators can change member roles at any time.
+            {canManageTeam
+              ? "Administrators can change app access and worship-team positions."
+              : "Application access and worship-team positions for your church members."}
           </p>
         </div>
 
@@ -559,13 +561,14 @@ export default async function TeamSettingsPage({
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3 md:items-end">
-                    <form
-                      action={
-                        updateMemberRole
-                      }
-                      className="flex items-center gap-2"
-                    >
+                  {canManageTeam ? (
+                    <div className="flex flex-col gap-3 md:items-end">
+                      <form
+                        action={
+                          updateMemberRole
+                        }
+                        className="flex items-center gap-2"
+                      >
                       <input
                         type="hidden"
                         name="userId"
@@ -604,9 +607,9 @@ export default async function TeamSettingsPage({
                       >
                         Save
                       </button>
-                    </form>
+                      </form>
 
-                    {!teamPositionsUnavailable ? (
+                      {!teamPositionsUnavailable ? (
                       <details className="w-full md:max-w-sm">
                         <summary className="cursor-pointer text-sm font-medium text-[var(--brand)] hover:underline">
                           Edit worship positions
@@ -655,14 +658,14 @@ export default async function TeamSettingsPage({
                           </button>
                         </form>
                       </details>
-                    ) : null}
+                      ) : null}
 
-                    {!isCurrentUser ? (
-                      <form
-                        action={
-                          removeMember
-                        }
-                      >
+                      {!isCurrentUser ? (
+                        <form
+                          action={
+                            removeMember
+                          }
+                        >
                         <input
                           type="hidden"
                           name="userId"
@@ -678,9 +681,10 @@ export default async function TeamSettingsPage({
                           <UserMinus className="size-3.5" />
                           Remove
                         </button>
-                      </form>
-                    ) : null}
-                  </div>
+                        </form>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               )
             }

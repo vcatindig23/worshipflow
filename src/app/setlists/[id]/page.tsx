@@ -70,9 +70,8 @@ type Song = {
   status: "active" | "archived"
 }
 
-type TeamMember = {
+type TeamMemberIdentity = {
   user_id: string
-  team_positions: string[]
 }
 
 type TeamAssignment = {
@@ -149,8 +148,8 @@ const errorMessages: Record<
     "The setlist could not be deleted.",
   invalid_team_assignment:
     "Select a valid worship-team member and position.",
-  team_position_not_assigned:
-    "Assign that worship-team position to the member in Team Settings first.",
+  team_member_not_found:
+    "That person is not a member of this church workspace.",
   team_assignment_exists:
     "That member is already assigned to this setlist for that position.",
   team_assignment_failed:
@@ -322,7 +321,7 @@ export default async function SetlistPage({
   ] = await Promise.all([
     supabase
       .from("organization_members")
-      .select("user_id, team_positions")
+      .select("user_id")
       .eq("organization_id", workspace.organizationId)
       .order("created_at", { ascending: true }),
     supabase
@@ -335,16 +334,16 @@ export default async function SetlistPage({
   const teamDataAvailable =
     !teamMembersResult.error &&
     !teamAssignmentsResult.error
-  const teamMembers = (
+  const teamMemberIdentities = (
     teamMembersResult.data ?? []
-  ) as TeamMember[]
+  ) as TeamMemberIdentity[]
   const teamAssignments = (
     teamAssignmentsResult.data ?? []
   ) as TeamAssignment[]
 
   const profileIds = Array.from(
     new Set([
-      ...teamMembers.map((member) => member.user_id),
+      ...teamMemberIdentities.map((member) => member.user_id),
       ...teamAssignments.map((assignment) => assignment.user_id),
     ])
   )
@@ -375,8 +374,9 @@ export default async function SetlistPage({
         `${assignment.user_id}|${assignment.team_position}`
     )
   )
-  const assignableOptions = teamMembers.flatMap((member) =>
-    (member.team_positions ?? []).map((position) => ({
+  const teamPositions = Object.keys(teamPositionLabels)
+  const assignableOptions = teamMemberIdentities.flatMap((member) =>
+    teamPositions.map((position) => ({
       key: `${member.user_id}|${position}`,
       label: `${teamProfileNames.get(member.user_id) ?? "Unnamed member"} — ${
         teamPositionLabels[position] ?? position
@@ -971,7 +971,7 @@ export default async function SetlistPage({
             </div>
 
             <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-              Assign members and their service positions.
+              Assign any church member to a role for this service.
             </p>
 
             {teamAssignments.length > 0 ? (
@@ -1064,8 +1064,7 @@ export default async function SetlistPage({
                 </form>
               ) : (
                 <p className="mt-4 text-xs leading-5 text-[var(--muted)]">
-                  Assign worship-team positions to members in Team Settings
-                  before adding them to this service.
+                  All church members are already assigned to this service.
                 </p>
               )
             ) : null}

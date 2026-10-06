@@ -701,9 +701,9 @@ export async function addSetlistTeamAssignment(
       details: error.details,
     })
 
-    if (error.message.includes("TEAM_MEMBER_POSITION_REQUIRED")) {
+    if (error.message.includes("TEAM_MEMBER_NOT_IN_ORGANIZATION")) {
       redirect(
-        `/setlists/${setlistId}?error=team_position_not_assigned`
+        `/setlists/${setlistId}?error=team_member_not_found`
       )
     }
 
