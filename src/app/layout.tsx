@@ -14,8 +14,8 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
   },
   icons: {
-    icon: "/worshipflow-brand.png",
-    apple: "/worshipflow-brand.png",
+    icon: "/worshipflow-app-icon.png",
+    apple: "/worshipflow-app-icon.png",
   },
 }
 

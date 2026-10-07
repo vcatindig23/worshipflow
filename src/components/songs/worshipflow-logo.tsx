@@ -9,12 +9,12 @@ export default function WorshipFlowLogo({
 }: WorshipFlowLogoProps) {
   return (
     <Image
-      src="/worshipflow-mark.svg"
+      src="/worshipflow-mark.png"
       alt=""
       aria-hidden="true"
-      width={64}
-      height={64}
-      className={className}
+      width={340}
+      height={320}
+      className={`object-contain ${className}`}
     />
   )
 }

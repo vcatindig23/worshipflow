@@ -14,8 +14,8 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#365c45",
     icons: [
       {
-        src: "/worshipflow-brand.png",
-        sizes: "768x768",
+        src: "/worshipflow-app-icon.png",
+        sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },

@@ -32,12 +32,12 @@ export default function LoginPage() {
         <div className="w-full">
           <div className="mb-8 text-center">
             <Image
-              src="/worshipflow-wordmark.svg"
+              src="/worshipflow-wordmark.png"
               alt="WorshipFlow"
               width={545}
-              height={420}
+              height={100}
               priority
-              className="mx-auto h-auto w-40"
+              className="mx-auto h-auto w-64"
             />
 
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)]">
