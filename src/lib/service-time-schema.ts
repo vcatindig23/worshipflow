@@ -28,9 +28,6 @@ export async function hasServiceTimeColumn(
           error?.code === "42703" ||
           error?.code === "PGRST204"
         ) {
-          console.error(
-            "The service-time migration is not applied. Apply supabase/migrations/20261007100419_add_setlist_service_time.sql."
-          )
           serviceTimeColumnAvailable = false
           serviceTimeColumnCheckedAt = Date.now()
           return false

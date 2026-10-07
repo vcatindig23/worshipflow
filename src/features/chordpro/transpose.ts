@@ -59,6 +59,29 @@ function getNoteIndex(root: string) {
   return NOTE_INDEX[normalized]
 }
 
+export function getTranspositionBetweenKeys(
+  fromKey: string | null | undefined,
+  toKey: string | null | undefined
+) {
+  const fromMatch = fromKey?.match(/^([A-Ga-g])([#b]?)/)
+  const toMatch = toKey?.match(/^([A-Ga-g])([#b]?)/)
+
+  if (!fromMatch || !toMatch) {
+    return null
+  }
+
+  const fromIndex = getNoteIndex(`${fromMatch[1]}${fromMatch[2]}`)
+  const toIndex = getNoteIndex(`${toMatch[1]}${toMatch[2]}`)
+
+  if (fromIndex === undefined || toIndex === undefined) {
+    return null
+  }
+
+  const semitones = ((toIndex - fromIndex + 12) % 12)
+
+  return semitones > 6 ? semitones - 12 : semitones
+}
+
 function formatNote(index: number, preferFlats: boolean) {
   const normalizedIndex = ((index % 12) + 12) % 12
 

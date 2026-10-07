@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Edit,
   Music2,
+  MonitorPlay,
   Trash2,
   Users,
 } from "lucide-react"
@@ -479,6 +480,16 @@ export default async function SetlistPage({
           </div>
 
           <div className="setlist-print-actions flex flex-wrap gap-2">
+            {setlistSongs.length > 0 ? (
+              <Link
+                href={`/setlists/${id}/live`}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+              >
+                <MonitorPlay className="size-4" />
+                Live Stage
+              </Link>
+            ) : null}
+
             <PrintSetlistButton />
 
             {canEdit ? (
