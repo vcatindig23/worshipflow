@@ -19,7 +19,10 @@ type ProfileSettingsPageProps = {
 
 const errorMessages: Record<string, string> = {
   invalid_name: "Enter a name between 2 and 120 characters.",
-  invalid_avatar: "Enter a valid HTTPS image URL up to 500 characters long.",
+  invalid_avatar:
+    "Choose a valid PNG, JPEG, or WebP image that is no larger than 5 MB.",
+  avatar_upload_failed:
+    "Your photo could not be uploaded. Please try again.",
   save_failed: "Your profile could not be saved. Please try again.",
 }
 
@@ -43,22 +46,6 @@ function getInitials(name: string) {
     .map((part) => part[0])
     .join("")
     .toLocaleUpperCase()
-}
-
-function isHttpsUrl(value: string | null) {
-  if (!value) {
-    return false
-  }
-
-  try {
-    return new URL(value).protocol === "https:"
-  } catch (error) {
-    if (error instanceof TypeError) {
-      return false
-    }
-
-    throw error
-  }
 }
 
 export default async function ProfileSettingsPage({
@@ -122,11 +109,27 @@ export default async function ProfileSettingsPage({
     ? membership.organizations[0]
     : membership?.organizations
   const displayName = profile.display_name
-  const avatarUrl = isHttpsUrl(profile.avatar_url)
-    ? profile.avatar_url
-    : null
+  let avatarUrl: string | null = null
+  if (profile.avatar_url?.startsWith(`${user.id}/`)) {
+    const { data: signedAvatar, error: avatarError } = await supabase.storage
+      .from("profile-avatars")
+      .createSignedUrl(profile.avatar_url, 60 * 60)
+
+    if (avatarError) {
+      console.error("Failed to create profile avatar URL:", {
+        message: avatarError.message,
+      })
+      throw new Error("Unable to load your profile photo.")
+    }
+
+    avatarUrl = signedAvatar.signedUrl
+  }
   const errorMessage = errorMessages[getParam(params.error) ?? ""]
   const emailConfirmed = Boolean(user.email_confirmed_at)
+  const warningMessage =
+    getParam(params.warning) === "avatar_cleanup_failed"
+      ? "Your new photo was saved, but an old copy could not be removed."
+      : null
 
   return (
     <main className="mx-auto max-w-5xl space-y-7 px-6 py-8">
@@ -166,6 +169,15 @@ export default async function ProfileSettingsPage({
           className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           {errorMessage}
+        </div>
+      ) : null}
+
+      {warningMessage ? (
+        <div
+          role="status"
+          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+        >
+          {warningMessage}
         </div>
       ) : null}
 
@@ -225,31 +237,36 @@ export default async function ProfileSettingsPage({
 
             <div>
               <label
-                htmlFor="avatarUrl"
+                htmlFor="avatar"
                 className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--foreground)]"
               >
                 <Camera className="size-4 text-[var(--muted)]" />
-                Profile photo URL
+                Upload profile photo
               </label>
               <input
-                id="avatarUrl"
-                name="avatarUrl"
-                type="url"
-                maxLength={500}
-                inputMode="url"
-                autoComplete="url"
-                defaultValue={profile.avatar_url ?? ""}
-                placeholder="https://example.com/your-photo.jpg"
+                id="avatar"
+                name="avatar"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
                 aria-describedby="avatarHelp"
-                className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                className="block w-full cursor-pointer rounded-xl border border-[var(--border)] bg-white text-sm text-[var(--muted)] file:mr-4 file:cursor-pointer file:border-0 file:bg-[var(--surface)] file:px-4 file:py-3 file:text-sm file:font-medium file:text-[var(--foreground)] hover:file:bg-[var(--brand-soft)]"
               />
               <p
                 id="avatarHelp"
                 className="mt-2 text-xs leading-5 text-[var(--muted)]"
               >
-                Optional. Use a publicly accessible HTTPS image link. Clear the
-                field to use your initials instead.
+                PNG, JPEG, or WebP only. Maximum file size: 5 MB.
               </p>
+              {profile.avatar_url ? (
+                <label className="mt-3 inline-flex items-center gap-2 text-sm text-[var(--muted)]">
+                  <input
+                    type="checkbox"
+                    name="removeAvatar"
+                    className="size-4 rounded border-[var(--border)] accent-[var(--brand)]"
+                  />
+                  Remove current photo and use initials
+                </label>
+              ) : null}
             </div>
           </div>
 

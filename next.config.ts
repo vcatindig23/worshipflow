@@ -3,6 +3,7 @@ import type { NextConfig } from "next"
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
+      bodySizeLimit: "6mb",
       allowedOrigins: [
         "localhost:3000",
         "localhost:3001",
