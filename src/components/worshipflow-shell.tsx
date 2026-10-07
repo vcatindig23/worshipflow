@@ -9,6 +9,7 @@ import {
   Church,
   LayoutDashboard,
   Menu,
+  Music2,
   UserRound,
   Search,
   Settings,

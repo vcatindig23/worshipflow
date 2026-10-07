@@ -18,7 +18,7 @@ type TooltipPosition = {
 }
 
 const DIAGRAM_WIDTH = 176
-const DIAGRAM_HEIGHT = 208
+const DIAGRAM_HEIGHT = 240
 
 function getTooltipPosition(element: HTMLElement): TooltipPosition {
   const bounds = element.getBoundingClientRect()
@@ -37,7 +37,15 @@ function getTooltipPosition(element: HTMLElement): TooltipPosition {
   return { left, top }
 }
 
-function Diagram({ chord, shape }: { chord: string; shape: ChordDiagram }) {
+function Diagram({
+  chord,
+  shape,
+  stageMode,
+}: {
+  chord: string
+  shape: ChordDiagram
+  stageMode: boolean
+}) {
   const baseFret = shape.baseFret ?? 1
   const visibleFrets = 5
   const top = 34
@@ -82,7 +90,7 @@ function Diagram({ chord, shape }: { chord: string; shape: ChordDiagram }) {
           x="5"
           y={top + fretHeight * 0.7}
           fontSize="11"
-          fill="#365c45"
+          fill={stageMode ? "#9fe7ff" : "#365c45"}
         >
           {baseFret}fr
         </text>
@@ -125,7 +133,7 @@ function Diagram({ chord, shape }: { chord: string; shape: ChordDiagram }) {
               cx={x}
               cy={top + (fret - baseFret + 0.5) * fretHeight}
               r="7"
-              fill="currentColor"
+              fill={stageMode ? "#9fe7ff" : "#365c45"}
             />
             {shape.fingers[index] ? (
               <text
@@ -134,7 +142,7 @@ function Diagram({ chord, shape }: { chord: string; shape: ChordDiagram }) {
                 textAnchor="middle"
                 fontSize="8"
                 fontWeight="700"
-                fill="#ffffff"
+                fill={stageMode ? "#0d120f" : "#ffffff"}
               >
                 {shape.fingers[index]}
               </text>
@@ -245,7 +253,7 @@ export default function ChordDiagramTooltip({
           <p className="text-sm font-bold">{chord}</p>
           {shape ? (
             <>
-              <Diagram chord={chord} shape={shape} />
+              <Diagram chord={chord} shape={shape} stageMode={stageMode} />
               {root !== chord ? (
                 <p className="text-[10px] text-[var(--muted)]">
                   {root} shape · bass note shown in chord name
