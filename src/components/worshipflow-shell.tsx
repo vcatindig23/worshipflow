@@ -10,12 +10,12 @@ import {
   LayoutDashboard,
   Menu,
   UserRound,
-  Music2,
   Search,
   Settings,
   Users,
   X,
 } from "lucide-react"
+import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 
 type WorshipFlowShellProps = {
   children: React.ReactNode
@@ -133,7 +133,7 @@ export default function WorshipFlowShell({
         <div className="flex h-full flex-col">
           <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
             <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-              <Music2 className="size-5" />
+              <WorshipFlowLogo className="size-7" />
             </div>
 
             <div className="min-w-0">
@@ -189,7 +189,7 @@ export default function WorshipFlowShell({
               <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
                 <div className="flex items-center gap-3">
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-                    <Music2 className="size-5" />
+                    <WorshipFlowLogo className="size-7" />
                   </div>
 
                   <div>

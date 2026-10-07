@@ -23,8 +23,9 @@ describe("ChordPro line rendering", () => {
 
     expect(markup).toContain("absolute left-0")
     expect(markup).toContain("h-0 w-0")
-    expect(markup).toContain(">G</span>")
-    expect(markup).toContain(">C</span>")
+    expect(markup).toContain(">G</button>")
+    expect(markup).toContain(">C</button>")
+    expect(markup).toContain('aria-label="Show G chord diagram"')
     expect(markup.indexOf(">Amazing </span>")).toBeLessThan(
       markup.indexOf(">grace</span>")
     )
@@ -40,8 +41,8 @@ describe("ChordPro line rendering", () => {
     )
 
     expect(markup).not.toContain("h-0 w-0")
-    expect(markup).not.toContain(">G</span>")
-    expect(markup).not.toContain(">C</span>")
+    expect(markup).not.toContain(">G</button>")
+    expect(markup).not.toContain(">C</button>")
     expect(markup).toContain(">Amazing </span><span>grace</span>")
     expect(markup).not.toContain("padding-top")
   })
@@ -65,9 +66,9 @@ describe("ChordPro line rendering", () => {
     )
 
     expect(markup).toContain("gap-x-6")
-    expect(markup).toContain(">D/F#</span>")
-    expect(markup).toContain(">Bm</span>")
-    expect(markup).toContain(">A</span>")
+    expect(markup).toContain(">D/F#</button>")
+    expect(markup).toContain(">Bm</button>")
+    expect(markup).toContain(">A</button>")
   })
 
   it("omits chord-only progressions when chords are hidden", () => {

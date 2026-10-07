@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Music2 } from "lucide-react"
+import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import { signup } from "./actions"
 
 type SignupPageProps = {
@@ -33,7 +33,7 @@ export default async function SignupPage({
           <div className="mb-8 flex justify-center">
             <Link href="/" className="flex items-center gap-3">
               <div className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-                <Music2 className="size-5" />
+                <WorshipFlowLogo className="size-7" />
               </div>
 
               <span className="text-lg font-semibold tracking-[-0.025em]">

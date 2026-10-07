@@ -8,8 +8,8 @@ import {
   KeyRound,
   Loader2,
   Mail,
-  Music2,
 } from "lucide-react"
+import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import {
   login,
   type LoginState,
@@ -32,7 +32,7 @@ export default function LoginPage() {
         <div className="w-full">
           <div className="mb-8 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[var(--brand)] text-white shadow-sm">
-              <Music2 className="size-6" />
+              <WorshipFlowLogo className="size-9" />
             </div>
 
             <h1 className="mt-5 text-3xl font-bold tracking-tight text-[var(--foreground)]">

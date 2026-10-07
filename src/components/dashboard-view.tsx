@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
+import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 
 type DashboardViewProps = {
   workspace: WorkspaceData
@@ -123,7 +124,7 @@ export default function DashboardView({
         <aside className="hidden w-[264px] shrink-0 flex-col bg-[var(--sidebar)] text-white lg:flex">
           <div className="flex h-[78px] items-center gap-3 border-b border-white/8 px-5">
             <div className="flex size-10 items-center justify-center rounded-xl bg-white text-[var(--sidebar)]">
-              <Music2 className="size-5" />
+              <WorshipFlowLogo className="size-7" />
             </div>
 
             <div className="min-w-0">

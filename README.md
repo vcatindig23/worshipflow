@@ -20,6 +20,14 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Install WorshipFlow
+
+WorshipFlow includes a web app manifest and device icons for installation on supported browsers. Visit the deployed app over HTTPS and use the browser's **Install app** or **Add to Home Screen** option. Authentication and application data still require a network connection; offline access is not enabled.
+
+## Chord diagrams
+
+In a song chart or live-stage view, hover over a chord or focus it with the keyboard to see its guitar fingering diagram. On touch devices, tap a chord. Common open and barre chord shapes are supported; unsupported chord qualities are identified instead of being shown with a guessed fingering.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

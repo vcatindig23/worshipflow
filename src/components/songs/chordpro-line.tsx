@@ -1,4 +1,5 @@
 import type { ContentLine } from "@/features/chordpro/types"
+import ChordDiagramTooltip from "./chord-diagram-tooltip"
 
 type ChordProLineProps = {
   line: ContentLine
@@ -34,7 +35,11 @@ export default function ChordProLine({
       >
         {line.tokens.map((token, tokenIndex) =>
           token.type === "chord" ? (
-            <span key={`chord-${tokenIndex}`}>{token.value}</span>
+            <ChordDiagramTooltip
+              key={`chord-${tokenIndex}`}
+              chord={token.value}
+              stageMode={stageMode}
+            />
           ) : null
         )}
       </div>
@@ -74,7 +79,10 @@ export default function ChordProLine({
                 fontSize: `${chordFontSize}px`,
               }}
             >
-              {token.value}
+              <ChordDiagramTooltip
+                chord={token.value}
+                stageMode={stageMode}
+              />
             </span>
           </span>
         )

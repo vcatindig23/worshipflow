@@ -10,6 +10,7 @@ const publicPaths = [
   "/error",
   "/auth/confirm",
   "/auth/callback",
+  "/manifest.webmanifest",
 ]
 
 function isPublicPath(pathname: string) {
