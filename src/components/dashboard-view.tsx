@@ -57,6 +57,11 @@ const navigation = [
     icon: UserRound,
   },
   {
+    label: "Notifications",
+    href: "/notifications",
+    icon: Bell,
+  },
+  {
     label: "Team",
     href: "/settings/team",
     icon: Users,
@@ -153,6 +158,14 @@ export default function DashboardView({
                   >
                     <Icon className="size-[18px]" strokeWidth={1.8} />
                     <span>{item.label}</span>
+                    {item.href === "/notifications" &&
+                    workspace.unreadNotificationCount > 0 ? (
+                      <span className="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold">
+                        {workspace.unreadNotificationCount > 99
+                          ? "99+"
+                          : workspace.unreadNotificationCount}
+                      </span>
+                    ) : null}
                   </Link>
                 )
               })}
@@ -239,13 +252,20 @@ export default function DashboardView({
                 <Search className="size-[18px]" />
               </Link>
 
-              <button
-                type="button"
+              <Link
+                href="/notifications"
                 aria-label="Notifications"
                 className="relative rounded-xl border border-[var(--border)] p-2.5 text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
               >
                 <Bell className="size-[18px]" />
-              </button>
+                {workspace.unreadNotificationCount > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-[var(--brand)] text-[9px] font-bold text-white">
+                    {workspace.unreadNotificationCount > 9
+                      ? "9+"
+                      : workspace.unreadNotificationCount}
+                  </span>
+                ) : null}
+              </Link>
 
               <Link
                 href="/songs/new"

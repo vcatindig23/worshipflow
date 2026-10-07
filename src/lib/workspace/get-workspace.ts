@@ -40,6 +40,7 @@ export type WorkspaceData = {
   role: string
   songCount: number
   memberCount: number
+  unreadNotificationCount: number
   recentSongs: {
     id: string
     title: string
@@ -160,6 +161,7 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     recentSongsResult,
     upcomingSetlistsResult,
     memberAssignmentsResult,
+    unreadNotificationsResult,
   ] =
     await Promise.all([
       supabase
@@ -196,6 +198,12 @@ export async function getWorkspace(): Promise<WorkspaceData> {
         .from("setlist_team_assignments")
         .select("setlist_id, team_position")
         .eq("user_id", userId),
+
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .is("read_at", null),
     ])
 
   if (songCountResult.error) {
@@ -216,6 +224,10 @@ export async function getWorkspace(): Promise<WorkspaceData> {
 
   if (memberAssignmentsResult.error) {
     throw new Error("Unable to load your service assignments.")
+  }
+
+  if (unreadNotificationsResult.error) {
+    throw new Error("Unable to count your unread notifications.")
   }
 
   const memberAssignments = (memberAssignmentsResult.data ??
@@ -345,6 +357,7 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     role: membership.role,
     songCount: songCountResult.count ?? 0,
     memberCount: memberCountResult.count ?? 0,
+    unreadNotificationCount: unreadNotificationsResult.count ?? 0,
     recentSongs: recentSongsResult.data ?? [],
     upcomingSetlists: upcomingSetlists.map((setlist) => ({
       ...setlist,

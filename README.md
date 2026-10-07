@@ -32,6 +32,10 @@ Use **Forgot password?** on the sign-in page to request a reset link by email. T
 
 In a song chart or live-stage view, hover over a chord or focus it with the keyboard to see its guitar fingering diagram. On touch devices, tap a chord. Common open and barre chord shapes are supported; unsupported chord qualities are identified instead of being shown with a guessed fingering.
 
+## Notifications
+
+The in-app notification inbox records when you are added to or removed from a service team. Notifications are private to the assigned member, can be marked read individually or all at once, and link back to the service.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
