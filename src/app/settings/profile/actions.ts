@@ -5,15 +5,40 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 
-const displayNameSchema = z.string().trim().min(2).max(120)
+const profileSchema = z.object({
+  displayName: z.string().trim().min(2).max(120),
+  avatarUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((value) => value === "" || isHttpsUrl(value)),
+})
 
-export async function updateProfileDisplayName(formData: FormData) {
-  const parsedName = displayNameSchema.safeParse(
-    formData.get("displayName")
-  )
+function isHttpsUrl(value: string) {
+  try {
+    return new URL(value).protocol === "https:"
+  } catch (error) {
+    if (error instanceof TypeError) {
+      return false
+    }
 
-  if (!parsedName.success) {
-    redirect("/settings/profile?error=invalid_name")
+    throw error
+  }
+}
+
+export async function updateProfile(formData: FormData) {
+  const parsedProfile = profileSchema.safeParse({
+    displayName: formData.get("displayName"),
+    avatarUrl: formData.get("avatarUrl"),
+  })
+
+  if (!parsedProfile.success) {
+    const avatarIsInvalid = parsedProfile.error.issues.some(
+      (issue) => issue.path[0] === "avatarUrl"
+    )
+    redirect(
+      `/settings/profile?error=${avatarIsInvalid ? "invalid_avatar" : "invalid_name"}`
+    )
   }
 
   const supabase = await createClient()
@@ -26,13 +51,16 @@ export async function updateProfileDisplayName(formData: FormData) {
 
   const { data, error } = await supabase
     .from("profiles")
-    .update({ display_name: parsedName.data })
+    .update({
+      display_name: parsedProfile.data.displayName,
+      avatar_url: parsedProfile.data.avatarUrl || null,
+    })
     .eq("id", userId)
     .select("id")
     .maybeSingle()
 
   if (error || !data) {
-    console.error("Failed to update profile display name:", {
+    console.error("Failed to update profile:", {
       code: error?.code,
       message: error?.message,
       details: error?.details,

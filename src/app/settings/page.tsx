@@ -69,7 +69,7 @@ export default async function SettingsPage() {
                 Your Profile
               </h2>
               <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Set the name your teammates see in the workspace and on service assignments.
+                Update your name and photo, and review your sign-in email and church role.
               </p>
             </div>
 
