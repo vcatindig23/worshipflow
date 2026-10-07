@@ -24,6 +24,10 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 WorshipFlow includes a web app manifest and device icons for installation on supported browsers. Visit the deployed app over HTTPS and use the browser's **Install app** or **Add to Home Screen** option. Authentication and application data still require a network connection; offline access is not enabled.
 
+## Account recovery
+
+Use **Forgot password?** on the sign-in page to request a reset link by email. The link returns to WorshipFlow, where you can set a new password of at least 8 characters.
+
 ## Chord diagrams
 
 In a song chart or live-stage view, hover over a chord or focus it with the keyboard to see its guitar fingering diagram. On touch devices, tap a chord. Common open and barre chord shapes are supported; unsupported chord qualities are identified instead of being shown with a guessed fingering.

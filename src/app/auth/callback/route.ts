@@ -41,6 +41,10 @@ export async function GET(request: NextRequest) {
     )
   }
 
+  if (next === "/reset-password") {
+    return NextResponse.redirect(new URL(next, origin))
+  }
+
   const { data: membership, error: membershipError } = await supabase
     .from("organization_members")
     .select("organization_id")

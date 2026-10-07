@@ -6,6 +6,7 @@ const publicPaths = [
   "/login",
   "/signup",
   "/forgot-password",
+  "/reset-password",
   "/check-email",
   "/error",
   "/auth/confirm",
