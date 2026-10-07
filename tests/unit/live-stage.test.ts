@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  buildLiveStageSongs,
   getBoundedStageIndex,
   parseStageSongIndex,
 } from "../../src/lib/live-stage"
@@ -24,6 +25,105 @@ describe("live stage navigation", () => {
     expect(parseStageSongIndex("1000")).toBeNull()
     expect(parseStageSongIndex("9007199254740992")).toBeNull()
     expect(parseStageSongIndex("song")).toBeNull()
+  })
+})
+
+describe("prepared live-stage charts", () => {
+  it("prepares every song in setlist order and applies arrangement overrides", () => {
+    const songs = buildLiveStageSongs(
+      [
+        {
+          song_id: "song-b",
+          position: 2,
+          section: "Closing",
+          key_override: "D",
+          capo_override: 2,
+          tempo_override: 96,
+          notes: "Start softly",
+        },
+        {
+          song_id: "song-a",
+          position: 1,
+          section: "Opening",
+          key_override: null,
+          capo_override: null,
+          tempo_override: null,
+          notes: null,
+        },
+      ],
+      [
+        {
+          id: "song-a",
+          title: "First Song",
+          artist: "Band",
+          current_key: "G",
+          tempo: 100,
+          capo: 0,
+          chordpro_source: "{title: First Song}",
+        },
+        {
+          id: "song-b",
+          title: "Second Song",
+          artist: null,
+          current_key: "C",
+          tempo: 80,
+          capo: 1,
+          chordpro_source: "{title: Second Song}",
+        },
+      ]
+    )
+
+    expect(songs.map((song) => song.title)).toEqual([
+      "Second Song",
+      "First Song",
+    ])
+    expect(songs[0]).toMatchObject({
+      source: "{title: Second Song}",
+      section: "Closing",
+      key: "D",
+      capo: 2,
+      tempo: 96,
+      notes: "Start softly",
+      position: 2,
+    })
+    expect(songs[1]).toMatchObject({
+      section: "Opening",
+      key: "G",
+      capo: 0,
+      tempo: 100,
+    })
+  })
+
+  it("keeps setlist entries when a referenced chart is unavailable", () => {
+    expect(
+      buildLiveStageSongs(
+        [
+          {
+            song_id: "missing-song",
+            position: 0,
+            section: "Worship",
+            key_override: null,
+            capo_override: null,
+            tempo_override: null,
+            notes: null,
+          },
+        ],
+        []
+      )
+    ).toEqual([
+      {
+        id: "missing-song",
+        title: "Song unavailable",
+        artist: null,
+        source: "",
+        section: "Worship",
+        key: null,
+        capo: null,
+        tempo: null,
+        notes: null,
+        position: 0,
+      },
+    ])
   })
 })
 

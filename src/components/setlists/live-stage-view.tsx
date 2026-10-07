@@ -9,6 +9,8 @@ import {
   Minimize2,
   Minus,
   Plus,
+  Wifi,
+  WifiOff,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
@@ -17,29 +19,16 @@ import {
   getTranspositionBetweenKeys,
   transposeChordProSource,
 } from "@/features/chordpro/transpose"
-import { getBoundedStageIndex } from "@/lib/live-stage"
+import {
+  getBoundedStageIndex,
+  type LiveStageSong,
+} from "@/lib/live-stage"
 import ChordProLine from "@/components/songs/chordpro-line"
-
-type StageSongSummary = {
-  id: string
-  title: string
-  artist: string | null
-}
-
-type LiveSong = StageSongSummary & {
-  source: string
-  section: string
-  key: string | null
-  capo: number | null
-  tempo: number | null
-  notes: string | null
-  position: number
-}
 
 type LiveStageViewProps = {
   setlistId: string
   setlistName: string
-  songs: StageSongSummary[]
+  songs: LiveStageSong[]
 }
 
 export default function LiveStageView({
@@ -48,55 +37,20 @@ export default function LiveStageView({
   songs,
 }: LiveStageViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [currentSong, setCurrentSong] = useState<LiveSong | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [reloadCount, setReloadCount] = useState(0)
-  const [loadError, setLoadError] = useState<string | null>(null)
   const [fontSize, setFontSize] = useState(36)
   const [showChords, setShowChords] = useState(true)
   const [transposeOffset, setTransposeOffset] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [fullscreenError, setFullscreenError] = useState<string | null>(null)
+  const [isOnline, setIsOnline] = useState(true)
+  const currentSong = songs[currentIndex] ?? null
 
   useEffect(() => {
-    const controller = new AbortController()
-    fetch(
-      `/api/setlists/${encodeURIComponent(setlistId)}/songs/${currentIndex}`,
-      { signal: controller.signal, cache: "no-store" }
-    )
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("This song could not be loaded.")
-        }
+    const updateOnlineStatus = () => setIsOnline(navigator.onLine)
+    updateOnlineStatus()
+    window.addEventListener("online", updateOnlineStatus)
+    window.addEventListener("offline", updateOnlineStatus)
 
-        return (await response.json()) as LiveSong
-      })
-      .then((song) => {
-        if (!controller.signal.aborted) {
-          setCurrentSong(song)
-          setTransposeOffset(0)
-        }
-      })
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted) {
-          setCurrentSong(null)
-          setLoadError(
-            error instanceof Error
-              ? error.message
-              : "This song could not be loaded."
-          )
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) {
-          setLoading(false)
-        }
-      })
-
-    return () => controller.abort()
-  }, [currentIndex, reloadCount, setlistId])
-
-  useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(Boolean(document.fullscreenElement))
     }
@@ -105,6 +59,8 @@ export default function LiveStageView({
     document.body.style.overflow = "hidden"
 
     return () => {
+      window.removeEventListener("online", updateOnlineStatus)
+      window.removeEventListener("offline", updateOnlineStatus)
       document.removeEventListener("fullscreenchange", handleFullscreenChange)
       document.body.style.overflow = ""
     }
@@ -144,10 +100,8 @@ export default function LiveStageView({
     )
 
     if (nextIndex !== null) {
-      setCurrentSong(null)
-      setLoading(true)
-      setLoadError(null)
       setCurrentIndex(nextIndex)
+      setTransposeOffset(0)
     }
   }, [currentIndex, songs.length])
 
@@ -207,6 +161,29 @@ export default function LiveStageView({
         <div className="flex shrink-0 items-center gap-2">
           <span className="hidden text-xs text-white/50 sm:inline">
             {songs.length ? currentIndex + 1 : 0} / {songs.length}
+          </span>
+          <span
+            role="status"
+            aria-live="polite"
+            className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-[10px] font-semibold sm:text-xs ${
+              isOnline
+                ? "border-emerald-300/20 bg-emerald-300/10 text-emerald-200"
+                : "border-amber-300/25 bg-amber-300/10 text-amber-100"
+            }`}
+            title={
+              isOnline
+                ? "All song charts are loaded for this open stage session."
+                : "Offline. Loaded song charts are still available in this stage session."
+            }
+          >
+            {isOnline ? (
+              <Wifi className="size-3.5" />
+            ) : (
+              <WifiOff className="size-3.5" />
+            )}
+            <span className="hidden sm:inline">
+              {isOnline ? "Charts ready offline" : "Offline · charts ready"}
+            </span>
           </span>
           <button
             type="button"
@@ -331,28 +308,8 @@ export default function LiveStageView({
                     </div>
                   ) : null}
 
-                  {loading ? (
-                    <p role="status" className="py-12 text-center text-sm text-white/55">
-                      Loading song chart…
-                    </p>
-                  ) : loadError ? (
-                    <div role="alert" className="mx-auto my-12 text-center">
-                      <p className="text-sm text-red-200">{loadError}</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLoading(true)
-                          setLoadError(null)
-                          setReloadCount((count) => count + 1)
-                        }}
-                        className="mt-4 rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white/75 hover:bg-white/10"
-                      >
-                        Retry
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="pb-12">
-                      {displayLines.map((line, lineIndex) => {
+                  <div className="pb-12">
+                    {displayLines.map((line, lineIndex) => {
                         if (line.type === "blank") {
                           return <div key={`blank-${lineIndex}`} className="h-8" aria-hidden="true" />
                         }
@@ -381,29 +338,13 @@ export default function LiveStageView({
                             stageMode
                           />
                         )
-                      })}
-                    </div>
-                  )}
+                    })}
+                  </div>
                 </>
-              ) : loading ? (
-                <p role="status" className="m-auto text-sm text-white/55">
-                  Loading song chart…
-                </p>
               ) : (
-                <div role="alert" className="m-auto text-center">
-                  <p className="text-sm text-red-200">{loadError}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLoading(true)
-                      setLoadError(null)
-                      setReloadCount((count) => count + 1)
-                    }}
-                    className="mt-4 rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white/75 hover:bg-white/10"
-                  >
-                    Retry
-                  </button>
-                </div>
+                <p className="m-auto text-center text-sm text-white/55">
+                  This song is not available in the loaded service plan.
+                </p>
               )}
             </div>
           </section>

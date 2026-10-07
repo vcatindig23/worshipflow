@@ -22,7 +22,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Install WorshipFlow
 
-WorshipFlow includes a web app manifest and device icons for installation on supported browsers. Visit the deployed app over HTTPS and use the browser's **Install app** or **Add to Home Screen** option. Authentication and application data still require a network connection; offline access is not enabled.
+WorshipFlow includes a web app manifest and device icons for installation on supported browsers. Visit the deployed app over HTTPS and use the browser's **Install app** or **Add to Home Screen** option. When Live Stage opens, it loads all song charts in the service plan so you can keep navigating and presenting if the connection drops while that stage session remains open. Opening or refreshing the app still requires a connection.
 
 ## Account recovery
 
