@@ -11,6 +11,7 @@ import {
   Menu,
   UserRound,
   Music2,
+  Search,
   Settings,
   Users,
   X,
@@ -40,6 +41,11 @@ const navigation = [
     href: "/services",
     label: "Services",
     icon: CalendarDays,
+  },
+  {
+    href: "/search",
+    label: "Search",
+    icon: Search,
   },
   {
     href: "/my-schedule",

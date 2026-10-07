@@ -45,6 +45,11 @@ const navigation = [
     icon: CalendarDays,
   },
   {
+    label: "Search",
+    href: "/search",
+    icon: Search,
+  },
+  {
     label: "My Schedule",
     href: "/my-schedule",
     icon: UserRound,
@@ -228,13 +233,13 @@ export default function DashboardView({
             </div>
 
             <div className="hidden items-center gap-2 sm:flex">
-              <button
-                type="button"
+              <Link
+                href="/search"
                 aria-label="Search"
                 className="rounded-xl border border-[var(--border)] p-2.5 text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
               >
                 <Search className="size-[18px]" />
-              </button>
+              </Link>
 
               <button
                 type="button"

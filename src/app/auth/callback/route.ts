@@ -14,12 +14,6 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code")
   const next = getSafeNextPath(searchParams.get("next"))
 
-  if (searchParams.has("error")) {
-    return NextResponse.redirect(
-      new URL("/error?code=google_sign_in_failed", origin)
-    )
-  }
-
   if (!code) {
     return NextResponse.redirect(
       new URL("/error?code=confirmation_failed", origin)

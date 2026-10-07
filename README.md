@@ -20,15 +20,6 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Google Sign-In
-
-To enable Google sign-in:
-
-1. Create a Google OAuth client ID for a web application in Google Cloud.
-2. In Supabase Authentication > Providers, enable Google and enter the client ID and client secret.
-3. In the Google OAuth client's authorized redirect URIs, add the callback URL shown in your Supabase project's Auth provider settings (it uses the form `https://<project-ref>.supabase.co/auth/v1/callback`).
-4. In Supabase Authentication > URL Configuration, add your app's callback URL to the redirect URL allow list, such as `http://localhost:3001/auth/callback` for local development and `https://your-domain.example/auth/callback` for production.
-
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
