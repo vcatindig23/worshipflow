@@ -9,6 +9,7 @@ import {
   Church,
   LayoutDashboard,
   Menu,
+  UserRound,
   Music2,
   Settings,
   Users,
@@ -39,6 +40,11 @@ const navigation = [
     href: "/services",
     label: "Services",
     icon: CalendarDays,
+  },
+  {
+    href: "/my-schedule",
+    label: "My Schedule",
+    icon: UserRound,
   },
   {
     href: "/settings/team",

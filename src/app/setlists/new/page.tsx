@@ -43,6 +43,10 @@ export default async function NewSetlistPage({
       "Enter a setlist name between 1 and 200 characters.",
     invalid_date:
       "Enter a valid service date.",
+    invalid_time:
+      "Enter a valid service start time.",
+    service_time_migration_missing:
+      "Service start times require the pending Supabase migration. Apply it before setting a service time.",
     description_too_long:
       "The description is too long.",
     create_failed:
@@ -78,6 +82,13 @@ export default async function NewSetlistPage({
       {error && errorMessages[error] ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {errorMessages[error]}
+        </div>
+      ) : null}
+
+      {!workspace.serviceTimeAvailable ? (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          Service start times will be available after the Supabase migration
+          is applied.
         </div>
       ) : null}
 
@@ -119,6 +130,28 @@ export default async function NewSetlistPage({
               className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
             />
           </div>
+
+          {workspace.serviceTimeAvailable ? (
+            <div>
+              <label
+                htmlFor="serviceTime"
+                className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+              >
+                Service start time
+              </label>
+
+              <input
+                id="serviceTime"
+                name="serviceTime"
+                type="time"
+                defaultValue={workspace.defaultServiceTime.slice(0, 5)}
+                className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              />
+              <p className="mt-2 text-xs text-[var(--muted)]">
+                Prefilled from your church&apos;s default service time. Google Calendar uses a one-hour duration.
+              </p>
+            </div>
+          ) : null}
 
           <div>
             <label

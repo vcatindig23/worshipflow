@@ -7,6 +7,8 @@ import {
 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { formatServiceTime } from "@/lib/service-scheduling"
+import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 
@@ -21,6 +23,7 @@ type Setlist = {
   name: string
   description: string | null
   service_date: string | null
+  service_time: string | null
   status: "draft" | "published" | "archived"
 }
 
@@ -104,10 +107,11 @@ export default async function ServicesPage({
       : "upcoming"
   const today = getToday(workspace.organizationTimezone)
   const supabase = await createClient()
+  const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
 
   let setlistQuery = supabase
     .from("setlists")
-    .select("id, name, description, service_date, status")
+    .select("*")
     .eq("organization_id", workspace.organizationId)
     .order("service_date", {
       ascending: period !== "past",
@@ -130,7 +134,12 @@ export default async function ServicesPage({
     redirect("/error?code=setlists_load_failed")
   }
 
-  const setlists = (data ?? []) as Setlist[]
+  const setlists = (data ?? []).map((setlist) => ({
+    ...setlist,
+    service_time: serviceTimeAvailable
+      ? setlist.service_time
+      : null,
+  })) as Setlist[]
   const songCounts = new Map<string, number>()
   const assignmentsBySetlist = new Map<string, TeamAssignment[]>()
 
@@ -342,6 +351,9 @@ export default async function ServicesPage({
                         <span className="inline-flex items-center gap-1.5">
                           <CalendarDays className="size-3.5" />
                           {formatDate(setlist.service_date)}
+                          {formatServiceTime(setlist.service_time)
+                            ? ` · ${formatServiceTime(setlist.service_time)}`
+                            : ""}
                         </span>
                         <span>
                           {songCounts.get(setlist.id) ?? 0}{" "}

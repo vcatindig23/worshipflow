@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { hasServiceTimeColumn } from "@/lib/service-time-schema"
+import {
+  isValidServiceDate,
+  isValidServiceTime,
+} from "@/lib/service-scheduling"
 
 const uuidSchema = z.string().uuid()
 
@@ -110,6 +115,9 @@ export async function createSetlist(
   const serviceDateValue = String(
     formData.get("serviceDate") ?? ""
   ).trim()
+  const serviceTimeValue = String(
+    formData.get("serviceTime") ?? ""
+  ).trim()
 
   const parsedName = z
     .string()
@@ -124,12 +132,13 @@ export async function createSetlist(
 
   if (
     serviceDateValue &&
-    !z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .safeParse(serviceDateValue).success
+    !isValidServiceDate(serviceDateValue)
   ) {
     redirect("/setlists/new?error=invalid_date")
+  }
+
+  if (serviceTimeValue && !isValidServiceTime(serviceTimeValue)) {
+    redirect("/setlists/new?error=invalid_time")
   }
 
   if (description.length > 2000) {
@@ -144,6 +153,11 @@ export async function createSetlist(
   } = await getMembership()
 
   requireRole(role, editorRoles)
+  const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
+
+  if (serviceTimeValue && !serviceTimeAvailable) {
+    redirect("/setlists/new?error=service_time_migration_missing")
+  }
 
   const { data, error } = await supabase
     .from("setlists")
@@ -153,6 +167,13 @@ export async function createSetlist(
       description: description || null,
       service_date:
         serviceDateValue || null,
+      ...(serviceTimeAvailable
+        ? {
+            service_time: serviceTimeValue
+              ? `${serviceTimeValue}:00`
+              : null,
+          }
+        : {}),
       status: "draft",
       created_by: userId,
       updated_by: userId,
@@ -186,6 +207,9 @@ export async function updateSetlist(
   const serviceDateValue = String(
     formData.get("serviceDate") ?? ""
   ).trim()
+  const serviceTimeValue = String(
+    formData.get("serviceTime") ?? ""
+  ).trim()
 
   if (!uuidSchema.safeParse(setlistId).success) {
     redirect("/setlists")
@@ -206,13 +230,16 @@ export async function updateSetlist(
 
   if (
     serviceDateValue &&
-    !z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .safeParse(serviceDateValue).success
+    !isValidServiceDate(serviceDateValue)
   ) {
     redirect(
       `/setlists/${setlistId}/edit?error=invalid_date`
+    )
+  }
+
+  if (serviceTimeValue && !isValidServiceTime(serviceTimeValue)) {
+    redirect(
+      `/setlists/${setlistId}/edit?error=invalid_time`
     )
   }
 
@@ -230,6 +257,13 @@ export async function updateSetlist(
   } = await getMembership()
 
   requireRole(role, editorRoles)
+  const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
+
+  if (serviceTimeValue && !serviceTimeAvailable) {
+    redirect(
+      `/setlists/${setlistId}/edit?error=service_time_migration_missing`
+    )
+  }
 
   const { error } = await supabase
     .from("setlists")
@@ -238,6 +272,13 @@ export async function updateSetlist(
       description: description || null,
       service_date:
         serviceDateValue || null,
+      ...(serviceTimeAvailable
+        ? {
+            service_time: serviceTimeValue
+              ? `${serviceTimeValue}:00`
+              : null,
+          }
+        : {}),
       updated_by: userId,
     })
     .eq("id", setlistId)

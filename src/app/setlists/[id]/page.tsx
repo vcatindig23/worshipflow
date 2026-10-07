@@ -15,6 +15,8 @@ import {
 import { notFound, redirect } from "next/navigation"
 import PrintSetlistButton from "@/components/setlists/print-setlist-button"
 import { createClient } from "@/lib/supabase/server"
+import { formatServiceTime } from "@/lib/service-scheduling"
+import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { teamPositionLabels } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import {
@@ -43,6 +45,7 @@ type Setlist = {
   name: string
   description: string | null
   service_date: string | null
+  service_time: string | null
   status:
     | "draft"
     | "published"
@@ -181,6 +184,7 @@ export default async function SetlistPage({
   }
 
   const supabase = await createClient()
+  const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
 
   const [
     setlistResult,
@@ -189,9 +193,7 @@ export default async function SetlistPage({
   ] = await Promise.all([
     supabase
       .from("setlists")
-      .select(
-        "id, organization_id, name, description, service_date, status, created_at, updated_at"
-      )
+      .select("*")
       .eq("id", id)
       .eq(
         "organization_id",
@@ -243,8 +245,12 @@ export default async function SetlistPage({
     notFound()
   }
 
-  const setlist =
-    setlistResult.data as Setlist
+  const setlist = {
+    ...setlistResult.data,
+    service_time: serviceTimeAvailable
+      ? setlistResult.data.service_time
+      : null,
+  } as Setlist
 
   const setlistSongs =
     (setlistSongsResult.data ??
@@ -452,6 +458,9 @@ export default async function SetlistPage({
                 {formatDate(
                   setlist.service_date
                 )}
+                {formatServiceTime(setlist.service_time)
+                  ? ` · ${formatServiceTime(setlist.service_time)}`
+                  : ""}
               </span>
 
               <span>
@@ -1302,12 +1311,12 @@ export default async function SetlistPage({
 
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-[var(--muted)]">
-                  Service date
+                  Service time
                 </dt>
 
                 <dd className="text-right font-medium text-[var(--foreground)]">
-                  {setlist.service_date ??
-                    "Not scheduled"}
+                  {formatServiceTime(setlist.service_time) ??
+                    "Not set"}
                 </dd>
               </div>
             </dl>

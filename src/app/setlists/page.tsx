@@ -9,6 +9,8 @@ import {
 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { formatServiceTime } from "@/lib/service-scheduling"
+import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 
 type SetlistsPageProps = {
@@ -22,6 +24,7 @@ type Setlist = {
   name: string
   description: string | null
   service_date: string | null
+  service_time: string | null
   status: "draft" | "published" | "archived"
   created_at: string
   updated_at: string
@@ -75,6 +78,7 @@ export default async function SetlistsPage({
   }
 
   const supabase = await createClient()
+  const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
 
   const query =
     getParam(params.q)?.trim() ?? ""
@@ -91,9 +95,7 @@ export default async function SetlistsPage({
 
   let setlistQuery = supabase
     .from("setlists")
-    .select(
-      "id, name, description, service_date, status, created_at, updated_at"
-    )
+    .select("*")
     .eq(
       "organization_id",
       workspace.organizationId
@@ -124,9 +126,12 @@ export default async function SetlistsPage({
     )
   }
 
-  const setlists = (
-    setlistRows ?? []
-  ) as Setlist[]
+  const setlists = (setlistRows ?? []).map((setlist) => ({
+    ...setlist,
+    service_time: serviceTimeAvailable
+      ? setlist.service_time
+      : null,
+  })) as Setlist[]
 
   let songRows: SetlistSongRow[] = []
 
@@ -352,6 +357,9 @@ export default async function SetlistsPage({
                               {formatDate(
                                 setlist.service_date
                               )}
+                              {formatServiceTime(setlist.service_time)
+                                ? ` · ${formatServiceTime(setlist.service_time)}`
+                                : ""}
                             </span>
 
                             <span>

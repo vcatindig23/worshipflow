@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 
 type TeamAssignmentRow = {
   setlist_id: string
@@ -10,6 +11,11 @@ type TeamAssignmentRow = {
 type MemberProfile = {
   id: string
   display_name: string | null
+}
+
+type MemberAssignmentRow = {
+  setlist_id: string
+  team_position: string
 }
 
 export type WorkspaceData = {
@@ -27,6 +33,7 @@ export type WorkspaceData = {
   defaultServiceName: string
   defaultServiceDay: number
   defaultServiceTime: string
+  serviceTimeAvailable: boolean
   role: string
   songCount: number
   memberCount: number
@@ -42,12 +49,20 @@ export type WorkspaceData = {
     id: string
     name: string
     service_date: string
+    service_time: string | null
     status: "draft" | "published" | "archived"
     teamAssignments: {
       userId: string
       displayName: string
       position: string
     }[]
+  }[]
+  myUpcomingAssignments: {
+    id: string
+    name: string
+    service_date: string
+    service_time: string | null
+    positions: string[]
   }[]
 }
 
@@ -129,7 +144,15 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     throw new Error("Unable to load your church workspace.")
   }
 
-  const [songCountResult, memberCountResult, recentSongsResult, upcomingSetlistsResult] =
+  const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
+
+  const [
+    songCountResult,
+    memberCountResult,
+    recentSongsResult,
+    upcomingSetlistsResult,
+    memberAssignmentsResult,
+  ] =
     await Promise.all([
       supabase
         .from("songs")
@@ -154,12 +177,17 @@ export async function getWorkspace(): Promise<WorkspaceData> {
 
       supabase
         .from("setlists")
-        .select("id, name, service_date, status")
+        .select("*")
         .eq("organization_id", membership.organization_id)
         .gte("service_date", getToday(organization.timezone))
         .neq("status", "archived")
         .order("service_date", { ascending: true })
         .limit(3),
+
+      supabase
+        .from("setlist_team_assignments")
+        .select("setlist_id, team_position")
+        .eq("user_id", userId),
     ])
 
   if (songCountResult.error) {
@@ -176,6 +204,49 @@ export async function getWorkspace(): Promise<WorkspaceData> {
 
   if (upcomingSetlistsResult.error) {
     throw new Error("Unable to load upcoming services.")
+  }
+
+  if (memberAssignmentsResult.error) {
+    throw new Error("Unable to load your service assignments.")
+  }
+
+  const memberAssignments = (memberAssignmentsResult.data ??
+    []) as MemberAssignmentRow[]
+  const memberSetlistIds = Array.from(
+    new Set(memberAssignments.map((assignment) => assignment.setlist_id))
+  )
+  let myUpcomingAssignments: WorkspaceData["myUpcomingAssignments"] = []
+
+  if (memberSetlistIds.length > 0) {
+    const { data: assignedSetlists, error: assignedSetlistsError } =
+      await supabase
+        .from("setlists")
+        .select("*")
+        .eq("organization_id", membership.organization_id)
+        .in("id", memberSetlistIds)
+        .gte("service_date", getToday(organization.timezone))
+        .neq("status", "archived")
+        .order("service_date", { ascending: true })
+        .limit(3)
+
+    if (assignedSetlistsError) {
+      throw new Error("Unable to load your upcoming assigned services.")
+    }
+
+    const positionsBySetlist = new Map<string, string[]>()
+    for (const assignment of memberAssignments) {
+      const positions = positionsBySetlist.get(assignment.setlist_id) ?? []
+      positions.push(assignment.team_position)
+      positionsBySetlist.set(assignment.setlist_id, positions)
+    }
+
+    myUpcomingAssignments = (assignedSetlists ?? []).map((setlist) => ({
+      ...setlist,
+      service_time: serviceTimeAvailable
+        ? setlist.service_time
+        : null,
+      positions: positionsBySetlist.get(setlist.id) ?? [],
+    }))
   }
 
   const upcomingSetlists = (upcomingSetlistsResult.data ??
@@ -251,12 +322,16 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     defaultServiceName: organization.default_service_name,
     defaultServiceDay: organization.default_service_day,
     defaultServiceTime: organization.default_service_time,
+    serviceTimeAvailable,
     role: membership.role,
     songCount: songCountResult.count ?? 0,
     memberCount: memberCountResult.count ?? 0,
     recentSongs: recentSongsResult.data ?? [],
     upcomingSetlists: upcomingSetlists.map((setlist) => ({
       ...setlist,
+      service_time: serviceTimeAvailable
+        ? setlist.service_time
+        : null,
       teamAssignments: (assignmentsBySetlist.get(setlist.id) ?? []).map(
         (assignment) => ({
           userId: assignment.user_id,
@@ -265,5 +340,6 @@ export async function getWorkspace(): Promise<WorkspaceData> {
         })
       ),
     })),
+    myUpcomingAssignments,
   }
 }

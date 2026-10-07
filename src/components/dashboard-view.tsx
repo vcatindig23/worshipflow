@@ -13,6 +13,7 @@ import {
   Search,
   Settings,
   Users,
+  UserRound,
 } from "lucide-react"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
@@ -44,6 +45,11 @@ const navigation = [
     icon: CalendarDays,
   },
   {
+    label: "My Schedule",
+    href: "/my-schedule",
+    icon: UserRound,
+  },
+  {
     label: "Team",
     href: "/settings/team",
     icon: Users,
@@ -62,7 +68,11 @@ function roleLabel(role: string) {
     .join(" ")
 }
 
-function formatServiceTime(time: string) {
+function formatServiceTime(time: string | null) {
+  if (!time) {
+    return null
+  }
+
   const [hoursString, minutesString] = time.split(":")
   const hours = Number(hoursString)
   const minutes = minutesString ?? "00"
@@ -261,6 +271,18 @@ export default function DashboardView({
                 </p>
               </section>
 
+              {!workspace.serviceTimeAvailable ? (
+                <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                  Service start times are temporarily unavailable. Apply
+                  {" "}
+                  <code className="font-semibold">
+                    20261007100419_add_setlist_service_time.sql
+                  </code>
+                  {" "}
+                  to the Supabase database to enable them.
+                </div>
+              ) : null}
+
               <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
                   <div className="text-xs font-medium text-[var(--muted)]">
@@ -372,6 +394,9 @@ export default function DashboardView({
                             }).format(
                               new Date(`${setlist.service_date}T00:00:00Z`)
                             )}
+                            {formatServiceTime(setlist.service_time)
+                              ? ` · ${formatServiceTime(setlist.service_time)}`
+                              : ""}
                           </p>
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {setlist.teamAssignments.length > 0 ? (
@@ -391,6 +416,68 @@ export default function DashboardView({
                               </span>
                             )}
                           </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="mt-6 rounded-2xl border border-[var(--border)] bg-white">
+                <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4 sm:px-6">
+                  <div>
+                    <h3 className="text-base font-semibold">
+                      Your upcoming assignments
+                    </h3>
+                    <p className="mt-1 text-xs text-[var(--muted)]">
+                      Services where you are scheduled to serve
+                    </p>
+                  </div>
+                  <Link
+                    href="/my-schedule"
+                    className="text-xs font-semibold text-[var(--brand)] hover:underline"
+                  >
+                    My schedule
+                  </Link>
+                </div>
+
+                {workspace.myUpcomingAssignments.length === 0 ? (
+                  <p className="px-5 py-5 text-sm text-[var(--muted)] sm:px-6">
+                    You don&apos;t have any upcoming service assignments.
+                  </p>
+                ) : (
+                  <div className="divide-y divide-[var(--border)]">
+                    {workspace.myUpcomingAssignments.map((assignment) => (
+                      <Link
+                        key={assignment.id}
+                        href={`/setlists/${assignment.id}`}
+                        className="flex flex-col gap-2 px-5 py-4 transition hover:bg-[var(--surface)] sm:flex-row sm:items-center sm:justify-between sm:px-6"
+                      >
+                        <div>
+                          <p className="text-sm font-semibold">
+                            {assignment.name}
+                          </p>
+                          <p className="mt-1 text-xs text-[var(--muted)]">
+                            {new Intl.DateTimeFormat("en-PH", {
+                              dateStyle: "medium",
+                              timeZone: "UTC",
+                            }).format(
+                              new Date(`${assignment.service_date}T00:00:00Z`)
+                            )}
+                            {formatServiceTime(assignment.service_time)
+                              ? ` · ${formatServiceTime(assignment.service_time)}`
+                              : ""}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {assignment.positions.map((position) => (
+                            <span
+                              key={position}
+                              className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-[10px] font-medium text-[var(--brand)]"
+                            >
+                              {getTeamPositionLabel(position)}
+                            </span>
+                          ))}
                         </div>
                       </Link>
                     ))}
