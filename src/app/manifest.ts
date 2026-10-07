@@ -14,28 +14,10 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#365c45",
     icons: [
       {
-        src: "/worshipflow-192.png",
-        sizes: "192x192",
+        src: "/worshipflow-brand.png",
+        sizes: "768x768",
         type: "image/png",
         purpose: "any",
-      },
-      {
-        src: "/worshipflow-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
-        src: "/worshipflow-192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "maskable",
-      },
-      {
-        src: "/worshipflow-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable",
       },
     ],
   }

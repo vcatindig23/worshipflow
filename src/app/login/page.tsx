@@ -9,7 +9,7 @@ import {
   Loader2,
   Mail,
 } from "lucide-react"
-import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+import Image from "next/image"
 import {
   login,
   type LoginState,
@@ -31,11 +31,16 @@ export default function LoginPage() {
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-center justify-center">
         <div className="w-full">
           <div className="mb-8 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[var(--brand)] text-white shadow-sm">
-              <WorshipFlowLogo className="size-9" />
-            </div>
+            <Image
+              src="/worshipflow-wordmark.svg"
+              alt="WorshipFlow"
+              width={545}
+              height={420}
+              priority
+              className="mx-auto h-auto w-40"
+            />
 
-            <h1 className="mt-5 text-3xl font-bold tracking-tight text-[var(--foreground)]">
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)]">
               Welcome to WorshipFlow
             </h1>
 
