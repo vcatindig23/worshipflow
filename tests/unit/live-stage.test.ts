@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
-import { getBoundedStageIndex } from "../../src/lib/live-stage"
+import {
+  getBoundedStageIndex,
+  parseStageSongIndex,
+} from "../../src/lib/live-stage"
 import { getTranspositionBetweenKeys } from "../../src/features/chordpro/transpose"
 
 describe("live stage navigation", () => {
@@ -11,6 +14,16 @@ describe("live stage navigation", () => {
 
   it("returns null for an empty setlist", () => {
     expect(getBoundedStageIndex(0, 1, 0)).toBeNull()
+  })
+
+  it("accepts only bounded non-negative integer song indices", () => {
+    expect(parseStageSongIndex("0")).toBe(0)
+    expect(parseStageSongIndex("999")).toBe(999)
+    expect(parseStageSongIndex("-1")).toBeNull()
+    expect(parseStageSongIndex("1.5")).toBeNull()
+    expect(parseStageSongIndex("1000")).toBeNull()
+    expect(parseStageSongIndex("9007199254740992")).toBeNull()
+    expect(parseStageSongIndex("song")).toBeNull()
   })
 })
 

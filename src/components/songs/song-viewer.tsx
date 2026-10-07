@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
 import { getChordProMetadata, parseChordPro } from "@/features/chordpro/parser"
 import { transposeChordProSource } from "@/features/chordpro/transpose"
+import ChordProLine from "./chordpro-line"
 
 type SongViewerProps = {
   source: string
@@ -158,57 +159,13 @@ export default function SongViewer({
           }
 
           return (
-            <div
+            <ChordProLine
               key={`line-${index}`}
-              className={`min-h-[1.8em] whitespace-pre-wrap font-medium leading-[1.9] ${
-                stageMode ? "text-white" : ""
-              }`}
-              style={{
-                fontSize: `${fontSize}px`,
-              }}
-            >
-              {item.line.tokens.map((token, tokenIndex) => {
-                if (token.type === "text") {
-                  return (
-                    <span key={`text-${tokenIndex}`}>
-                      {token.value || " "}
-                    </span>
-                  )
-                }
-
-                return (
-                  <span
-                    key={`chord-${tokenIndex}`}
-                    className="inline-block align-top"
-                  >
-                    {showChords ? (
-                      <span
-                        className={`block min-h-[1em] font-semibold leading-none ${
-                          stageMode
-                            ? "text-white/55"
-                            : "text-[var(--brand)]"
-                        }`}
-                        style={{
-                          fontSize: `${Math.max(
-                            12,
-                            Math.round(fontSize * 0.65)
-                          )}px`,
-                        }}
-                      >
-                        {token.value}
-                      </span>
-                    ) : (
-                      <span
-                        className="block min-h-[1em] opacity-0"
-                        aria-hidden="true"
-                      >
-                        {token.value}
-                      </span>
-                    )}
-                  </span>
-                )
-              })}
-            </div>
+              line={item.line}
+              fontSize={fontSize}
+              showChords={showChords}
+              stageMode={stageMode}
+            />
           )
         })}
       </div>
@@ -246,13 +203,14 @@ export default function SongViewer({
           <button
             type="button"
             onClick={() => setShowChords((value) => !value)}
+            aria-pressed={showChords}
             className={`h-9 rounded-lg border px-3 text-xs font-semibold transition ${
               showChords
                 ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]"
                 : "border-[var(--border)] bg-white text-[var(--muted)]"
             }`}
           >
-            Chords
+            {showChords ? "Hide chords" : "Show chords"}
           </button>
 
           <button

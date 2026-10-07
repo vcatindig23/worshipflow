@@ -14,6 +14,12 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code")
   const next = getSafeNextPath(searchParams.get("next"))
 
+  if (searchParams.has("error")) {
+    return NextResponse.redirect(
+      new URL("/error?code=google_sign_in_failed", origin)
+    )
+  }
+
   if (!code) {
     return NextResponse.redirect(
       new URL("/error?code=confirmation_failed", origin)
@@ -22,13 +28,40 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
+  const { error: exchangeError } =
+    await supabase.auth.exchangeCodeForSession(code)
 
-  if (error) {
+  if (exchangeError) {
     return NextResponse.redirect(
       new URL("/error?code=confirmation_failed", origin)
     )
   }
 
-  return NextResponse.redirect(new URL(next, origin))
+  const { data: claimsData, error: claimsError } =
+    await supabase.auth.getClaims()
+  const userId = claimsData?.claims?.sub
+
+  if (claimsError || !userId) {
+    return NextResponse.redirect(
+      new URL("/error?code=confirmation_failed", origin)
+    )
+  }
+
+  const { data: membership, error: membershipError } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (membershipError) {
+    return NextResponse.redirect(
+      new URL("/error?code=membership_load_failed", origin)
+    )
+  }
+
+  return NextResponse.redirect(
+    new URL(membership ? next : "/onboarding", origin)
+  )
 }

@@ -10,6 +10,10 @@ type ErrorPageProps = {
 const messages: Record<string, string> = {
   confirmation_failed:
     "The confirmation link is invalid, expired, or has already been used.",
+  google_sign_in_failed:
+    "Google sign-in was cancelled or could not be completed. Please try again.",
+  membership_load_failed:
+    "Your church membership could not be loaded. Please try signing in again.",
 }
 
 export default async function ErrorPage({

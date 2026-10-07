@@ -1,13 +1,8 @@
-import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { parseStageSongIndex } from "@/lib/live-stage"
 
-const uuidSchema = z.string().uuid()
-const indexSchema = z
-  .string()
-  .regex(/^\d+$/)
-  .transform(Number)
-  .refine(Number.isSafeInteger)
-  .refine((index) => index >= 0)
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 type LiveSongRouteProps = {
   params: Promise<{
@@ -21,11 +16,11 @@ export async function GET(
   { params }: LiveSongRouteProps
 ) {
   const { id, index: indexValue } = await params
-  const indexResult = indexSchema.safeParse(indexValue)
+  const songIndex = parseStageSongIndex(indexValue)
 
   if (
-    !uuidSchema.safeParse(id).success ||
-    !indexResult.success
+    !uuidPattern.test(id) ||
+    songIndex === null
   ) {
     return Response.json(
       { error: "Invalid service or song index." },
@@ -90,7 +85,7 @@ export async function GET(
     .select("song_id, position, section, key_override, capo_override, tempo_override, notes")
     .eq("setlist_id", id)
     .order("position", { ascending: true })
-    .range(indexResult.data, indexResult.data)
+    .range(songIndex, songIndex)
     .maybeSingle()
 
   if (setlistSongError) {

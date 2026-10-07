@@ -28,6 +28,31 @@ const endDirectives = new Set([
   "end_of_interlude",
 ])
 
+function getSectionTitle(name: string) {
+  const match = name.match(
+    /^start_of_(verse|chorus|bridge|pre_chorus|intro|outro|tag|interlude)(?:_(\d+))?$/
+  )
+
+  if (!match) {
+    return null
+  }
+
+  const title = sectionNames[`start_of_${match[1]}`]
+
+  return title
+    ? `${title}${match[2] ? ` ${match[2]}` : ""}`
+    : null
+}
+
+function isEndDirective(name: string) {
+  return (
+    endDirectives.has(name) ||
+    /^end_of_(verse|chorus|bridge|pre_chorus|intro|outro|tag|interlude)(?:_\d+)?$/.test(
+      name
+    )
+  )
+}
+
 export function buildSongDisplayLines(
   lines: SongLine[]
 ): RenderedSongSection[] {
@@ -42,7 +67,7 @@ export function buildSongDisplayLines(
     }
 
     if (line.type === "directive") {
-      const sectionTitle = sectionNames[line.name]
+      const sectionTitle = getSectionTitle(line.name)
 
       if (sectionTitle) {
         result.push({
@@ -53,7 +78,7 @@ export function buildSongDisplayLines(
         continue
       }
 
-      if (endDirectives.has(line.name)) {
+      if (isEndDirective(line.name)) {
         continue
       }
 

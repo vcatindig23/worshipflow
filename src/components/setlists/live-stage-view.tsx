@@ -18,6 +18,7 @@ import {
   transposeChordProSource,
 } from "@/features/chordpro/transpose"
 import { getBoundedStageIndex } from "@/lib/live-stage"
+import ChordProLine from "@/components/songs/chordpro-line"
 
 type StageSongSummary = {
   id: string
@@ -372,34 +373,13 @@ export default function LiveStageView({
                         }
 
                         return (
-                          <div
+                          <ChordProLine
                             key={`line-${lineIndex}`}
-                            className="min-h-[1.8em] whitespace-pre-wrap font-medium leading-[1.8]"
-                            style={{ fontSize: `${fontSize}px` }}
-                          >
-                            {line.line.tokens.map((token, tokenIndex) => (
-                              token.type === "text" ? (
-                                <span key={`text-${tokenIndex}`}>{token.value || " "}</span>
-                              ) : (
-                                <span
-                                  key={`chord-${tokenIndex}`}
-                                  className="inline-block align-top"
-                                >
-                                  <span
-                                    className={`block min-h-[1em] font-semibold leading-none ${
-                                      showChords
-                                        ? "text-sky-300"
-                                        : "opacity-0"
-                                    }`}
-                                    aria-hidden={!showChords}
-                                    style={{ fontSize: `${Math.max(14, Math.round(fontSize * 0.55))}px` }}
-                                  >
-                                    {token.value}
-                                  </span>
-                                </span>
-                              )
-                            ))}
-                          </div>
+                            line={line.line}
+                            fontSize={fontSize}
+                            showChords={showChords}
+                            stageMode
+                          />
                         )
                       })}
                     </div>

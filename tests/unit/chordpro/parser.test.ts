@@ -66,6 +66,39 @@ describe("ChordPro parser", () => {
     })
   })
 
+  it("accepts square-bracket notation for section directives", () => {
+    const result = parseChordPro(
+      `[start_of_intro]\n[D] [D/F#] [G] [Bm] [A] [G]\n{end_of_intro}`
+    )
+
+    expect(result.lines[0]).toEqual({
+      type: "directive",
+      name: "start_of_intro",
+      value: null,
+    })
+    expect(result.lines[1]).toEqual({
+      type: "content",
+      tokens: [
+        { type: "chord", value: "D" },
+        { type: "text", value: " " },
+        { type: "chord", value: "D/F#" },
+        { type: "text", value: " " },
+        { type: "chord", value: "G" },
+        { type: "text", value: " " },
+        { type: "chord", value: "Bm" },
+        { type: "text", value: " " },
+        { type: "chord", value: "A" },
+        { type: "text", value: " " },
+        { type: "chord", value: "G" },
+      ],
+    })
+    expect(result.lines[2]).toEqual({
+      type: "directive",
+      name: "end_of_intro",
+      value: null,
+    })
+  })
+
   it("preserves blank lines", () => {
     const result = parseChordPro("Verse\n\nChorus")
 

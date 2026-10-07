@@ -6,6 +6,8 @@ import type {
 } from "./types"
 
 const directivePattern = /^\{\s*([a-zA-Z0-9_]+)(?:\s*:\s*(.*?))?\s*\}$/
+const sectionDirectivePattern =
+  /^\[(start_of|end_of)_(verse|chorus|bridge|pre_chorus|intro|outro|tag|interlude)\]$/i
 const chordPattern = /\[([^\]]+)\]/g
 
 const metadataDirectives = new Set([
@@ -30,17 +32,27 @@ function normalizeDirectiveName(name: string) {
 function parseDirective(line: string): DirectiveLine | null {
   const match = line.match(directivePattern)
 
-  if (!match) {
+  if (match) {
+    const name = normalizeDirectiveName(match[1] ?? "")
+    const value = match[2] === undefined ? null : match[2].trim()
+
+    return {
+      type: "directive",
+      name,
+      value: value === "" ? null : value,
+    }
+  }
+
+  const sectionMatch = line.match(sectionDirectivePattern)
+
+  if (!sectionMatch) {
     return null
   }
 
-  const name = normalizeDirectiveName(match[1] ?? "")
-  const value = match[2] === undefined ? null : match[2].trim()
-
   return {
     type: "directive",
-    name,
-    value: value === "" ? null : value,
+    name: `${sectionMatch[1]}_${sectionMatch[2]}`.toLowerCase(),
+    value: null,
   }
 }
 
