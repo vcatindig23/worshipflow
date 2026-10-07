@@ -3,10 +3,11 @@ import { redirect } from "next/navigation"
 import {
   ArrowLeft,
   CheckCircle2,
-  ShieldCheck,
   UserMinus,
   Users,
 } from "lucide-react"
+import ProfileAvatar from "@/components/profile-avatar"
+import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { createClient } from "@/lib/supabase/server"
 import { teamPositionLabels } from "@/lib/team-positions"
@@ -288,6 +289,10 @@ export default async function TeamSettingsPage({
         profile,
       ])
     )
+  const avatarUrls = await getProfileAvatarUrlMap(
+    supabase,
+    profiles.map((profile) => profile.avatar_url)
+  )
 
   const errorKey =
     typeof params.error === "string"
@@ -493,14 +498,15 @@ export default async function TeamSettingsPage({
                   className="flex flex-col gap-4 py-5 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[var(--brand)]">
-                      {member.role ===
-                      "admin" ? (
-                        <ShieldCheck className="size-5" />
-                      ) : (
-                        <Users className="size-5" />
-                      )}
-                    </div>
+                    <ProfileAvatar
+                      name={displayName}
+                      imageUrl={
+                        profile?.avatar_url
+                          ? avatarUrls.get(profile.avatar_url)
+                          : null
+                      }
+                      sizeClassName="size-10"
+                    />
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
+import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 
 type TeamAssignmentRow = {
   setlist_id: string
@@ -11,6 +12,7 @@ type TeamAssignmentRow = {
 type MemberProfile = {
   id: string
   display_name: string | null
+  avatar_url: string | null
 }
 
 type MemberAssignmentRow = {
@@ -21,6 +23,7 @@ type MemberAssignmentRow = {
 export type WorkspaceData = {
   userId: string
   userName: string
+  userAvatarUrl: string | null
   userEmail: string
   organizationId: string
   organizationName: string
@@ -54,6 +57,7 @@ export type WorkspaceData = {
     teamAssignments: {
       userId: string
       displayName: string
+      avatarUrl: string | null
       position: string
     }[]
   }[]
@@ -93,7 +97,7 @@ export async function getWorkspace(): Promise<WorkspaceData> {
   const [profileResult, membershipResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("display_name")
+      .select("display_name, avatar_url")
       .eq("id", userId)
       .maybeSingle(),
 
@@ -125,6 +129,10 @@ export async function getWorkspace(): Promise<WorkspaceData> {
   if (profileResult.error) {
     throw new Error("Unable to load your profile.")
   }
+
+  const userAvatarUrls = await getProfileAvatarUrlMap(supabase, [
+    profileResult.data?.avatar_url ?? null,
+  ])
 
   if (membershipResult.error) {
     throw new Error("Unable to load your church membership.")
@@ -285,29 +293,40 @@ export async function getWorkspace(): Promise<WorkspaceData> {
       )
     )
   )
+  const profilesById = new Map<string, MemberProfile>()
   const profileNames = new Map<string, string>()
+  let assignmentAvatarUrls = new Map<string, string>()
 
   if (assignedUserIds.length > 0) {
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, display_name")
+      .select("id, display_name, avatar_url")
       .in("id", assignedUserIds)
 
     if (profilesError) {
       throw new Error("Unable to load names for upcoming service teams.")
     }
 
-    for (const profile of (profiles ?? []) as MemberProfile[]) {
+    const memberProfiles = (profiles ?? []) as MemberProfile[]
+    for (const profile of memberProfiles) {
+      profilesById.set(profile.id, profile)
       profileNames.set(
         profile.id,
         profile.display_name?.trim() || "Name not set"
       )
     }
+
+    assignmentAvatarUrls = await getProfileAvatarUrlMap(
+      supabase,
+      memberProfiles.map((profile) => profile.avatar_url)
+    )
   }
 
   return {
     userId,
     userName: profileResult.data?.display_name ?? "Worship Member",
+    userAvatarUrl:
+      userAvatarUrls.get(profileResult.data?.avatar_url ?? "") ?? null,
     userEmail:
       claimsData.claims.email ??
       "",
@@ -336,6 +355,10 @@ export async function getWorkspace(): Promise<WorkspaceData> {
         (assignment) => ({
           userId: assignment.user_id,
           displayName: profileNames.get(assignment.user_id) ?? "Name not set",
+          avatarUrl:
+            assignmentAvatarUrls.get(
+              profilesById.get(assignment.user_id)?.avatar_url ?? ""
+            ) ?? null,
           position: assignment.team_position,
         })
       ),

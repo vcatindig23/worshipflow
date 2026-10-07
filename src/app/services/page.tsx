@@ -6,9 +6,11 @@ import {
   Plus,
 } from "lucide-react"
 import { redirect } from "next/navigation"
+import ProfileAvatar from "@/components/profile-avatar"
 import { createClient } from "@/lib/supabase/server"
 import { formatServiceTime } from "@/lib/service-scheduling"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
+import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 
@@ -40,6 +42,7 @@ type TeamAssignment = {
 type MemberProfile = {
   id: string
   display_name: string | null
+  avatar_url: string | null
 }
 
 type Period = "upcoming" | "past" | "all"
@@ -183,22 +186,32 @@ export default async function ServicesPage({
     )
   )
   let profileNames = new Map<string, string>()
+  let profilesById = new Map<string, MemberProfile>()
+  let avatarUrls = new Map<string, string>()
 
   if (assignedUserIds.length > 0) {
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, display_name")
+      .select("id, display_name, avatar_url")
       .in("id", assignedUserIds)
 
     if (profilesError) {
       redirect("/error?code=setlists_load_failed")
     }
 
+    const memberProfiles = (profiles ?? []) as MemberProfile[]
+    profilesById = new Map(
+      memberProfiles.map((profile) => [profile.id, profile])
+    )
     profileNames = new Map(
-      ((profiles ?? []) as MemberProfile[]).map((profile) => [
+      memberProfiles.map((profile) => [
         profile.id,
         profile.display_name?.trim() || "Name not set",
       ])
+    )
+    avatarUrls = await getProfileAvatarUrlMap(
+      supabase,
+      memberProfiles.map((profile) => profile.avatar_url)
     )
   }
 
@@ -369,8 +382,22 @@ export default async function ServicesPage({
                             (assignment) => (
                               <span
                                 key={`${assignment.user_id}-${assignment.team_position}`}
-                                className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs text-[var(--foreground)]"
+                                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface)] py-1 pl-1 pr-2.5 text-xs text-[var(--foreground)]"
                               >
+                                <ProfileAvatar
+                                  name={
+                                    profileNames.get(assignment.user_id) ??
+                                    "Name not set"
+                                  }
+                                  imageUrl={
+                                    avatarUrls.get(
+                                      profilesById.get(assignment.user_id)
+                                        ?.avatar_url ?? ""
+                                    ) ?? null
+                                  }
+                                  sizeClassName="size-5"
+                                  className="text-[8px]"
+                                />
                                 {profileNames.get(assignment.user_id) ?? "Name not set"}
                                 {" · "}
                                 {getTeamPositionLabel(assignment.team_position)}

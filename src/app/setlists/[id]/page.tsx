@@ -14,11 +14,13 @@ import {
   Users,
 } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
+import ProfileAvatar from "@/components/profile-avatar"
 import PrintSetlistButton from "@/components/setlists/print-setlist-button"
 import { createClient } from "@/lib/supabase/server"
 import { formatServiceTime } from "@/lib/service-scheduling"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { teamPositionLabels } from "@/lib/team-positions"
+import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import {
   addSongToSetlist,
@@ -90,6 +92,7 @@ type TeamAssignment = {
 type MemberProfile = {
   id: string
   display_name: string | null
+  avatar_url: string | null
 }
 
 const editorRoles = [
@@ -346,7 +349,7 @@ export default async function SetlistPage({
   if (profileIds.length > 0) {
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, display_name")
+      .select("id, display_name, avatar_url")
       .in("id", profileIds)
 
     if (error) {
@@ -356,6 +359,13 @@ export default async function SetlistPage({
     teamProfiles = (data ?? []) as MemberProfile[]
   }
 
+  const teamAvatarUrls = await getProfileAvatarUrlMap(
+    supabase,
+    teamProfiles.map((profile) => profile.avatar_url)
+  )
+  const teamProfilesById = new Map(
+    teamProfiles.map((profile) => [profile.id, profile])
+  )
   const teamProfileNames = new Map(
     teamProfiles.map((profile) => [
       profile.id,
@@ -1030,15 +1040,30 @@ export default async function SetlistPage({
                     key={assignment.id}
                     className="flex items-center justify-between gap-3 py-3"
                   >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-[var(--foreground)]">
-                        {teamProfileNames.get(assignment.user_id) ??
-                          "Name not set"}
-                      </p>
-                      <p className="mt-0.5 text-xs text-[var(--muted)]">
-                        {teamPositionLabels[assignment.team_position] ??
-                          assignment.team_position}
-                      </p>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <ProfileAvatar
+                        name={
+                          teamProfileNames.get(assignment.user_id) ??
+                          "Name not set"
+                        }
+                        imageUrl={
+                          teamAvatarUrls.get(
+                            teamProfilesById.get(assignment.user_id)
+                              ?.avatar_url ?? ""
+                          ) ?? null
+                        }
+                        sizeClassName="size-9"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-[var(--foreground)]">
+                          {teamProfileNames.get(assignment.user_id) ??
+                            "Name not set"}
+                        </p>
+                        <p className="mt-0.5 text-xs text-[var(--muted)]">
+                          {teamPositionLabels[assignment.team_position] ??
+                            assignment.team_position}
+                        </p>
+                      </div>
                     </div>
 
                     {canEdit ? (

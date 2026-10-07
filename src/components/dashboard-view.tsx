@@ -18,6 +18,7 @@ import {
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+import ProfileAvatar from "@/components/profile-avatar"
 
 type DashboardViewProps = {
   workspace: WorkspaceData
@@ -111,13 +112,6 @@ export default function DashboardView({
   workspace,
   onMenuOpen,
 }: DashboardViewProps) {
-  const userInitials = workspace.userName
-    .split(" ")
-    .map((part) => part.charAt(0))
-    .join("")
-    .slice(0, 2)
-    .toUpperCase()
-
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="flex min-h-screen">
@@ -182,9 +176,12 @@ export default function DashboardView({
           <div className="border-t border-white/8 p-3">
             <div className="rounded-xl bg-white/5 p-3">
               <div className="flex items-center gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-xs font-bold text-[var(--brand)]">
-                  {userInitials}
-                </div>
+                <ProfileAvatar
+                  name={workspace.userName}
+                  imageUrl={workspace.userAvatarUrl}
+                  sizeClassName="size-9"
+                  className="text-xs"
+                />
 
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">
@@ -409,8 +406,14 @@ export default function DashboardView({
                               setlist.teamAssignments.map((assignment) => (
                                 <span
                                   key={`${assignment.userId}-${assignment.position}`}
-                                  className="rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] text-[var(--foreground)]"
+                                  className="inline-flex items-center gap-1 rounded-full bg-[var(--surface)] py-1 pl-1 pr-2 text-[10px] text-[var(--foreground)]"
                                 >
+                                  <ProfileAvatar
+                                    name={assignment.displayName}
+                                    imageUrl={assignment.avatarUrl}
+                                    sizeClassName="size-4"
+                                    className="text-[7px]"
+                                  />
                                   {assignment.displayName}
                                   {" · "}
                                   {getTeamPositionLabel(assignment.position)}
