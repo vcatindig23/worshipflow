@@ -204,9 +204,7 @@ export default function AssignmentConfirmation({
 
             {currentRespondedAt ? (
               <p className="mt-0.5 text-[11px] text-rose-700">
-                {formatResponseDate(
-                  currentRespondedAt
-                )}
+                {responseDate}
               </p>
             ) : null}
           </div>
