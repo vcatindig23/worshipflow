@@ -112,7 +112,7 @@ export async function moveTimelineItem(formData: FormData) {
   }
   const current = (items ?? [])[index]
   const neighbor = (items ?? [])[target]
-  const first = await supabase.from("setlist_timeline_items").update({ position: -1 }).eq("id", current.id).eq("setlist_id", setlistId)
+  const first = await supabase.from("setlist_timeline_items").update({ position: 1000000 }).eq("id", current.id).eq("setlist_id", setlistId)
   if (first.error) redirectError(setlistId, "timeline_move_failed")
   const second = await supabase.from("setlist_timeline_items").update({ position: current.position }).eq("id", neighbor.id).eq("setlist_id", setlistId)
   if (second.error) redirectError(setlistId, "timeline_move_failed")
