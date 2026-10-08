@@ -23,6 +23,7 @@ import { teamPositionLabels } from "@/lib/team-positions"
 import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import ServiceResources from "./service-resources"
+import ServiceTimeline from "./service-timeline"
 import {
   addSongToSetlist,
   addSetlistTeamAssignment,
@@ -169,6 +170,22 @@ const errorMessages: Record<
     "The service resource could not be added.",
   resource_remove_failed:
     "The service resource could not be removed.",
+  timeline_invalid_title:
+    "Timeline item title is required and must be 160 characters or fewer.",
+  timeline_invalid_type:
+    "The timeline item type is invalid.",
+  timeline_invalid_duration:
+    "Timeline duration must be between 1 and 240 minutes.",
+  timeline_notes_too_long:
+    "Timeline notes are too long.",
+  timeline_add_failed:
+    "The timeline item could not be added.",
+  timeline_remove_failed:
+    "The timeline item could not be removed.",
+  timeline_invalid_direction:
+    "The timeline item movement is invalid.",
+  timeline_move_failed:
+    "The timeline item could not be moved.",
 }
 
 function formatDate(value: string | null) {
@@ -656,6 +673,8 @@ export default async function SetlistPage({
           ) : null}
         </section>
       ) : null}
+
+      <ServiceTimeline setlistId={id} canEdit={canEdit} />
 
       <div className="setlist-print-content grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="space-y-4">
