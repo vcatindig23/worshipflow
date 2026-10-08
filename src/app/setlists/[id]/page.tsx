@@ -47,6 +47,8 @@ type Setlist = {
   organization_id: string
   name: string
   description: string | null
+  service_notes: string | null
+  announcements: string | null
   service_date: string | null
   service_time: string | null
   status:
@@ -615,6 +617,32 @@ export default async function SetlistPage({
           </div>
         </div>
       </section>
+
+      {(setlist.announcements || setlist.service_notes) ? (
+        <section className="grid gap-4 md:grid-cols-2">
+          {setlist.announcements ? (
+            <article className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">
+                Service Announcements
+              </h2>
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">
+                {setlist.announcements}
+              </p>
+            </article>
+          ) : null}
+
+          {setlist.service_notes ? (
+            <article className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">
+                Service Notes
+              </h2>
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">
+                {setlist.service_notes}
+              </p>
+            </article>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className="setlist-print-content grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="space-y-4">
