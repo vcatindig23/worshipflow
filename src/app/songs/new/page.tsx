@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowLeft, Music2 } from "lucide-react"
 import { createSong } from "./actions"
+import ChordProImportEditor from "@/components/songs/chordpro-import-editor"
 
 type NewSongPageProps = {
   searchParams: Promise<{
@@ -206,12 +207,8 @@ export default async function NewSongPage({
                 </p>
               </div>
 
-              <textarea
-                id="chordProSource"
-                name="chordProSource"
-                required
-                defaultValue={starterSong}
-                spellCheck={false}
+              <ChordProImportEditor
+                source={starterSong}
                 className="min-h-[380px] w-full rounded-2xl border border-[var(--border)] bg-[#151d18] px-4 py-4 font-mono text-sm leading-7 text-white outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
               />
             </section>

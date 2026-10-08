@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import RecordSongOpen from "@/components/songs/record-song-open"
 import SongViewer from "@/components/songs/song-viewer"
+import DownloadChordProButton from "@/components/songs/download-chordpro-button"
 import { setSongStatus, setSongTags } from "@/app/songs/actions"
 import { createClient } from "@/lib/supabase/server"
 
@@ -226,6 +227,12 @@ export default async function SongPage({
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <DownloadChordProButton
+              source={typedSong.chordpro_source}
+              title={typedSong.title}
+              artist={typedSong.artist}
+            />
+
             {canEdit ? (
               <Link
                 href={`/songs/${typedSong.id}/edit`}

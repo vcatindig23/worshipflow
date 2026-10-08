@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowLeft, Save } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
+import ChordProImportEditor from "@/components/songs/chordpro-import-editor"
 import { createClient } from "@/lib/supabase/server"
 import { updateSong } from "./actions"
 
@@ -250,12 +251,8 @@ export default async function EditSongPage({
               Use ChordPro notation with chords inside square brackets.
             </p>
 
-            <textarea
-              id="chordProSource"
-              name="chordProSource"
-              required
-              spellCheck={false}
-              defaultValue={song.chordpro_source}
+            <ChordProImportEditor
+              source={song.chordpro_source}
               className="mt-5 min-h-[430px] w-full rounded-2xl border border-[var(--border)] bg-[#151d18] px-4 py-4 font-mono text-sm leading-7 text-white outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
             />
           </section>
