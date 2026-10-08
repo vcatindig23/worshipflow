@@ -1,14 +1,10 @@
-"use server"
-
 import Link from "next/link"
 import { FileText, Link2, Trash2 } from "lucide-react"
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
-import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 
-const editorRoles = ["admin", "worship_leader", "song_editor"]
+import { addServiceResource, removeServiceResource } from "./service-resources-actions"
+
 const pathSchema = z.string().min(3).max(500)
 const nameSchema = z.string().trim().min(1).max(120)
 
