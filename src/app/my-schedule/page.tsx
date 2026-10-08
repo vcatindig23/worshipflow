@@ -590,6 +590,9 @@ export default async function MySchedulePage({
                             ?.responded_at ??
                           null
                         }
+                        timeZone={
+                          workspace.organizationTimezone
+                        }
                       />
                     </div>
 
