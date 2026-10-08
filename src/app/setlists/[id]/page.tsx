@@ -22,6 +22,7 @@ import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { teamPositionLabels } from "@/lib/team-positions"
 import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
+import ServiceResources from "./service-resources"
 import {
   addSongToSetlist,
   addSetlistTeamAssignment,
@@ -156,6 +157,18 @@ const errorMessages: Record<
     "The setlist assignment database migration is missing or not yet visible to Supabase. Apply the setlist-team-assignment migration and refresh the API schema cache.",
   team_assignment_failed:
     "The team assignment could not be changed.",
+  invalid_resource:
+    "Select a valid workspace file and display name.",
+  resource_permission_denied:
+    "You do not have permission to manage service resources.",
+  resource_file_not_found:
+    "That workspace file could not be found.",
+  resource_already_added:
+    "That file is already linked to this service.",
+  resource_add_failed:
+    "The service resource could not be added.",
+  resource_remove_failed:
+    "The service resource could not be removed.",
 }
 
 function formatDate(value: string | null) {
@@ -1069,6 +1082,8 @@ export default async function SetlistPage({
         </section>
 
         <aside className="setlist-print-sidebar space-y-5">
+          <ServiceResources setlistId={id} canEdit={canEdit} />
+
           <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <Users className="size-4 text-[var(--brand)]" />
