@@ -19,6 +19,8 @@ type Setlist = {
   id: string
   name: string
   description: string | null
+  service_notes: string | null
+  announcements: string | null
   service_date: string | null
   service_time: string | null
   status: "draft" | "published" | "archived"
@@ -96,6 +98,10 @@ export default async function EditSetlistPage({
       "Service start times require the pending Supabase migration. Apply it before setting a service time.",
     description_too_long:
       "The description is too long.",
+    service_notes_too_long:
+      "Service notes are too long.",
+    announcements_too_long:
+      "Announcements are too long.",
     update_failed:
       "The setlist could not be updated.",
   }
@@ -231,6 +237,58 @@ export default async function EditSetlistPage({
               }
               className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="serviceNotes"
+              className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+            >
+              Service Notes
+            </label>
+
+            <textarea
+              id="serviceNotes"
+              name="serviceNotes"
+              maxLength={3000}
+              rows={5}
+              defaultValue={
+                typedSetlist.service_notes ??
+                ""
+              }
+              placeholder="Add preparation notes, transitions, reminders, or details for the worship team."
+              className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+            />
+
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              Notes for the worship team to review before the service.
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="announcements"
+              className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+            >
+              Service Announcements
+            </label>
+
+            <textarea
+              id="announcements"
+              name="announcements"
+              maxLength={3000}
+              rows={5}
+              defaultValue={
+                typedSetlist.announcements ??
+                ""
+              }
+              placeholder="Share important announcements, schedule changes, or reminders for this service."
+              className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+            />
+
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              Announcements will be visible to members viewing this service plan.
+            </p>
           </div>
 
           <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end">
