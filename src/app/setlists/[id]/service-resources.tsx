@@ -172,8 +172,13 @@ export default async function ServiceResources({
   setlistId: string
   canEdit: boolean
 }) {
-  const { supabase, workspace } =
-    await getServiceResourceAccess(setlistId)
+  const workspace = await getWorkspace()
+
+  if (!workspace) {
+    return null
+  }
+
+  const supabase = await createClient()
 
   const [{ data: resources }, { data: files }] =
     await Promise.all([
