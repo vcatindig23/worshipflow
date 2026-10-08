@@ -2,6 +2,7 @@ import Link from "next/link"
 import {
   AlertCircle,
   ArrowRight,
+  BarChart3,
   CalendarDays,
   CheckCircle2,
   Clock3,
