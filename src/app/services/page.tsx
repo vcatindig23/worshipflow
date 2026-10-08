@@ -552,6 +552,14 @@ export default async function ServicesPage({
             <History className="size-4" />
             Service History
           </Link>
+
+          <Link
+            href="/services/insights"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+          >
+            <BarChart3 className="size-4" />
+            Insights
+          </Link>
           <Link
             href="/setlists/new"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
