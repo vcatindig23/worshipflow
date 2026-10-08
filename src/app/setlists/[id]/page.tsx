@@ -176,6 +176,8 @@ const errorMessages: Record<
     "The timeline item type is invalid.",
   timeline_invalid_duration:
     "Timeline duration must be between 1 and 240 minutes.",
+  timeline_invalid_song:
+    "The selected timeline song must already be part of this service.",
   timeline_notes_too_long:
     "Timeline notes are too long.",
   timeline_add_failed:
