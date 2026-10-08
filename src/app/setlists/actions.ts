@@ -153,6 +153,14 @@ export async function createSetlist(
     redirect("/setlists/new?error=description_too_long")
   }
 
+  if (serviceNotes.length > 3000) {
+    redirect("/setlists/new?error=service_notes_too_long")
+  }
+
+  if (announcements.length > 3000) {
+    redirect("/setlists/new?error=announcements_too_long")
+  }
+
   const {
     supabase,
     userId,
@@ -212,6 +220,14 @@ export async function updateSetlist(
 
   const description = String(
     formData.get("description") ?? ""
+  ).trim()
+
+  const serviceNotes = String(
+    formData.get("serviceNotes") ?? ""
+  ).trim()
+
+  const announcements = String(
+    formData.get("announcements") ?? ""
   ).trim()
 
   const serviceDateValue = String(
@@ -292,6 +308,8 @@ export async function updateSetlist(
     .update({
       name: parsedName.data,
       description: description || null,
+      service_notes: serviceNotes || null,
+      announcements: announcements || null,
       service_date:
         serviceDateValue || null,
       ...(serviceTimeAvailable
