@@ -105,7 +105,9 @@ export default async function ServiceInsightsPage() {
 
   const [
     completedResult,
-    pastResult,
+    completedCountResult,
+    pastTotalResult,
+    pastCompletedResult,
   ] = await Promise.all([
     supabase
       .from("setlists")
@@ -119,28 +121,49 @@ export default async function ServiceInsightsPage() {
 
     supabase
       .from("setlists")
-      .select("id, completed_at")
+      .select("id", { count: "exact", head: true })
+      .eq("organization_id", workspace.organizationId)
+      .not("completed_at", "is", null),
+
+    supabase
+      .from("setlists")
+      .select("id", { count: "exact", head: true })
       .eq("organization_id", workspace.organizationId)
       .not("service_date", "is", null)
       .lt("service_date", today),
+
+    supabase
+      .from("setlists")
+      .select("id", { count: "exact", head: true })
+      .eq("organization_id", workspace.organizationId)
+      .not("service_date", "is", null)
+      .lt("service_date", today)
+      .not("completed_at", "is", null),
   ])
 
-  if (completedResult.error || pastResult.error) {
+  if (
+    completedResult.error ||
+    completedCountResult.error ||
+    pastTotalResult.error ||
+    pastCompletedResult.error
+  ) {
     redirect("/error?code=setlists_load_failed")
   }
 
   const completedServices =
     (completedResult.data ?? []) as CompletedService[]
 
-  const pastServices = pastResult.data ?? []
-  const completedPastCount = pastServices.filter(
-    (service) => Boolean(service.completed_at)
-  ).length
+  const totalCompletedServices =
+    completedCountResult.count ?? 0
+  const pastServiceCount =
+    pastTotalResult.count ?? 0
+  const completedPastCount =
+    pastCompletedResult.count ?? 0
 
   const completionRate =
-    pastServices.length > 0
+    pastServiceCount > 0
       ? Math.round(
-          (completedPastCount / pastServices.length) * 100
+          (completedPastCount / pastServiceCount) * 100
         )
       : null
 
@@ -419,10 +442,10 @@ export default async function ServiceInsightsPage() {
                 </p>
               </div>
               <p className="mt-3 text-2xl font-bold text-[var(--foreground)]">
-                {completedServices.length}
+                {totalCompletedServices}
               </p>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                Based on recorded service history
+                Recorded completed services
               </p>
             </div>
 
@@ -478,11 +501,17 @@ export default async function ServiceInsightsPage() {
                   : `${completionRate}%`}
               </p>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                {completedPastCount} of {pastServices.length} past services
+                {completedPastCount} of {pastServiceCount} past services
                 completed
               </p>
             </div>
           </section>
+
+          <p className="text-xs leading-5 text-[var(--muted)]">
+            Trend, average, and song-usage details below are calculated from the
+            200 most recently completed services, while the completion totals
+            above use the full recorded history.
+          </p>
 
           <section className="grid gap-5 lg:grid-cols-[1.3fr_0.7fr]">
             <div className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
