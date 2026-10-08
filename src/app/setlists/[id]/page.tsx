@@ -87,6 +87,12 @@ type TeamAssignment = {
   id: string
   user_id: string
   team_position: string
+  confirmation_status:
+    | "pending"
+    | "confirmed"
+    | "declined"
+  responded_at: string | null
+  response_note: string | null
 }
 
 type MemberProfile = {
@@ -323,7 +329,9 @@ export default async function SetlistPage({
       .order("created_at", { ascending: true }),
     supabase
       .from("setlist_team_assignments")
-      .select("id, user_id, team_position")
+      .select(
+        "id, user_id, team_position, confirmation_status, responded_at, response_note"
+      )
       .eq("setlist_id", id)
       .order("created_at", { ascending: true }),
   ])
@@ -394,6 +402,18 @@ export default async function SetlistPage({
         }`,
       }))
   ).filter((option) => !existingAssignmentKeys.has(option.key))
+
+  const confirmedAssignments = teamAssignments.filter(
+    (assignment) => assignment.confirmation_status === "confirmed"
+  ).length
+
+  const pendingAssignments = teamAssignments.filter(
+    (assignment) => assignment.confirmation_status === "pending"
+  ).length
+
+  const declinedAssignments = teamAssignments.filter(
+    (assignment) => assignment.confirmation_status === "declined"
+  ).length
 
   const errorKey =
     typeof queryParams.error === "string"
@@ -1034,68 +1054,101 @@ export default async function SetlistPage({
             </p>
 
             {teamAssignments.length > 0 ? (
-              <ul className="mt-4 divide-y divide-[var(--border)]">
-                {teamAssignments.map((assignment) => (
-                  <li
-                    key={assignment.id}
-                    className="flex items-center justify-between gap-3 py-3"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <ProfileAvatar
-                        name={
-                          teamProfileNames.get(assignment.user_id) ??
-                          "Name not set"
-                        }
-                        imageUrl={
-                          teamAvatarUrls.get(
-                            teamProfilesById.get(assignment.user_id)
-                              ?.avatar_url ?? ""
-                          ) ?? null
-                        }
-                        sizeClassName="size-9"
-                      />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-[var(--foreground)]">
-                          {teamProfileNames.get(assignment.user_id) ??
-                            "Name not set"}
-                        </p>
-                        <p className="mt-0.5 text-xs text-[var(--muted)]">
-                          {teamPositionLabels[assignment.team_position] ??
-                            assignment.team_position}
-                        </p>
+              <>
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <div className="rounded-xl bg-emerald-50 px-3 py-2.5">
+                    <p className="text-lg font-bold text-emerald-700">
+                      {confirmedAssignments}
+                    </p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                      Confirmed
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-amber-50 px-3 py-2.5">
+                    <p className="text-lg font-bold text-amber-700">
+                      {pendingAssignments}
+                    </p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                      Pending
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-rose-50 px-3 py-2.5">
+                    <p className="text-lg font-bold text-rose-700">
+                      {declinedAssignments}
+                    </p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-rose-700">
+                      Declined
+                    </p>
+                  </div>
+                </div>
+                <ul className="mt-4 divide-y divide-[var(--border)]">
+                  {teamAssignments.map((assignment) => (
+                    <li key={assignment.id} className="py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <ProfileAvatar
+                            name={teamProfileNames.get(assignment.user_id) ?? "Name not set"}
+                            imageUrl={
+                              teamAvatarUrls.get(
+                                teamProfilesById.get(assignment.user_id)?.avatar_url ?? ""
+                              ) ?? null
+                            }
+                            sizeClassName="size-9"
+                          />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-[var(--foreground)]">
+                              {teamProfileNames.get(assignment.user_id) ?? "Name not set"}
+                            </p>
+                            <p className="mt-0.5 text-xs text-[var(--muted)]">
+                              {teamPositionLabels[assignment.team_position] ?? assignment.team_position}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                              assignment.confirmation_status === "confirmed"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : assignment.confirmation_status === "declined"
+                                  ? "bg-rose-50 text-rose-700"
+                                  : "bg-amber-50 text-amber-700"
+                            }`}
+                          >
+                            {assignment.confirmation_status === "confirmed"
+                              ? "Confirmed"
+                              : assignment.confirmation_status === "declined"
+                                ? "Declined"
+                                : "Pending"}
+                          </span>
+                          {canEdit ? (
+                            <form action={removeSetlistTeamAssignment}>
+                              <input type="hidden" name="setlistId" value={id} />
+                              <input type="hidden" name="assignmentId" value={assignment.id} />
+                              <button
+                                type="submit"
+                                aria-label={`Remove ${teamProfileNames.get(assignment.user_id) ?? "member"} from setlist`}
+                                className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </form>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
-
-                    {canEdit ? (
-                      <form action={removeSetlistTeamAssignment}>
-                        <input
-                          type="hidden"
-                          name="setlistId"
-                          value={id}
-                        />
-                        <input
-                          type="hidden"
-                          name="assignmentId"
-                          value={assignment.id}
-                        />
-                        <button
-                          type="submit"
-                          aria-label={`Remove ${teamProfileNames.get(assignment.user_id) ?? "member"} from setlist`}
-                          className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
-                      </form>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
+                      {assignment.response_note ? (
+                        <p className="mt-2 rounded-lg bg-[var(--surface)] px-3 py-2 text-xs leading-5 text-[var(--muted)]">
+                          {assignment.response_note}
+                        </p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </>
             ) : (
               <p className="mt-4 rounded-xl bg-[var(--surface)] p-3 text-sm text-[var(--muted)]">
                 No worship team members are assigned yet.
               </p>
             )}
-
             {canEdit && teamDataAvailable ? (
               assignableOptions.length > 0 ? (
                 <form
