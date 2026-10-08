@@ -1,7 +1,17 @@
 "use client"
 
+<<<<<<< HEAD
 import { useEffect, useState } from "react"
 import { CheckCircle2, Clock3, XCircle } from "lucide-react"
+=======
+import { useEffect, useState, useTransition } from "react"
+import {
+  Check,
+  Clock3,
+  MessageSquareText,
+  X,
+} from "lucide-react"
+>>>>>>> 34d386bdc707839fa8c39070bf6e6eaaa7d2b856
 import { respondToSetlistAssignment } from "./actions"
 
 type AssignmentConfirmationProps = {
@@ -12,7 +22,11 @@ type AssignmentConfirmationProps = {
 }
 
 function formatResponseDate(
+<<<<<<< HEAD
   value: string,
+=======
+  value: string | null,
+>>>>>>> 34d386bdc707839fa8c39070bf6e6eaaa7d2b856
   timeZone?: string
 ) {
   const date = new Date(value)
@@ -21,12 +35,23 @@ function formatResponseDate(
     return value
   }
 
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
   return new Intl.DateTimeFormat("en-PH", {
+<<<<<<< HEAD
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+=======
+    dateStyle: "medium",
+    timeStyle: "short",
+>>>>>>> 34d386bdc707839fa8c39070bf6e6eaaa7d2b856
     ...(timeZone
       ? {
           timeZone,
@@ -62,8 +87,35 @@ export default function AssignmentConfirmation({
   const [showDeclineForm, setShowDeclineForm] =
     useState(false)
 
+<<<<<<< HEAD
   const [declineNote, setDeclineNote] =
     useState("")
+=======
+  const [
+    responseDate,
+    setResponseDate,
+  ] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!currentRespondedAt) {
+      setResponseDate(null)
+      return
+    }
+
+    const browserTimeZone =
+      Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    setResponseDate(
+      formatResponseDate(
+        currentRespondedAt,
+        browserTimeZone
+      )
+    )
+  }, [currentRespondedAt])
+
+  function handleConfirm() {
+    setError("")
+>>>>>>> 34d386bdc707839fa8c39070bf6e6eaaa7d2b856
 
   useEffect(() => {
     if (!currentRespondedAt) {
@@ -139,12 +191,15 @@ export default function AssignmentConfirmation({
             {responseDate ? (
               <p className="mt-0.5 text-[11px] text-emerald-700">
                 {responseDate}
+<<<<<<< HEAD
               </p>
             ) : null}
 
             {currentResponseNote ? (
               <p className="mt-2 text-xs leading-5 text-emerald-800">
                 {currentResponseNote}
+=======
+>>>>>>> 34d386bdc707839fa8c39070bf6e6eaaa7d2b856
               </p>
             ) : null}
           </div>
