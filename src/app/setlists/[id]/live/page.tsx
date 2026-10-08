@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import { formatServiceTime } from "@/lib/service-scheduling"
+import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import LiveStageView from "@/components/setlists/live-stage-view"
 import { buildLiveStageSongs } from "@/lib/live-stage"
 import { createClient } from "@/lib/supabase/server"
@@ -83,9 +84,11 @@ export default async function LiveStagePage({
   }
 
   const supabase = await createClient()
-  const { data: setlist, error: setlistError } = await supabase
+  const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
+
+  const { data: rawSetlist, error: setlistError } = await supabase
     .from("setlists")
-    .select("id, name, description, service_notes, announcements, service_date, service_time, status")
+    .select("*")
     .eq("id", id)
     .eq("organization_id", workspace.organizationId)
     .maybeSingle()
@@ -94,8 +97,19 @@ export default async function LiveStagePage({
     redirect(`/error?code=setlists_load_failed`)
   }
 
-  if (!setlist) {
+  if (!rawSetlist) {
     notFound()
+  }
+
+  const setlist = {
+    ...rawSetlist,
+    description: rawSetlist.description ?? null,
+    service_notes: rawSetlist.service_notes ?? null,
+    announcements: rawSetlist.announcements ?? null,
+    service_date: rawSetlist.service_date ?? null,
+    service_time: serviceTimeAvailable
+      ? rawSetlist.service_time ?? null
+      : null,
   }
 
   const { data: setlistSongs, error: setlistSongsError } = await supabase
