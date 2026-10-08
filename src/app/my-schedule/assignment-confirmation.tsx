@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import {
   Check,
   Clock3,
@@ -22,16 +22,28 @@ type AssignmentConfirmationProps = {
 }
 
 function formatResponseDate(
-  value: string | null
+  value: string | null,
+  timeZone?: string
 ) {
   if (!value) {
     return null
   }
 
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value))
+    ...(timeZone
+      ? {
+          timeZone,
+        }
+      : {}),
+  }).format(date)
 }
 
 export default function AssignmentConfirmation({
@@ -74,6 +86,28 @@ export default function AssignmentConfirmation({
     isPending,
     startTransition,
   ] = useTransition()
+
+  const [
+    responseDate,
+    setResponseDate,
+  ] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!currentRespondedAt) {
+      setResponseDate(null)
+      return
+    }
+
+    const browserTimeZone =
+      Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    setResponseDate(
+      formatResponseDate(
+        currentRespondedAt,
+        browserTimeZone
+      )
+    )
+  }, [currentRespondedAt])
 
   function handleConfirm() {
     setError("")
@@ -144,9 +178,7 @@ export default function AssignmentConfirmation({
 
             {currentRespondedAt ? (
               <p className="mt-0.5 text-[11px] text-emerald-700">
-                {formatResponseDate(
-                  currentRespondedAt
-                )}
+                {responseDate}
               </p>
             ) : null}
           </div>
