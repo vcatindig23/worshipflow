@@ -112,6 +112,14 @@ export async function createSetlist(
     formData.get("description") ?? ""
   ).trim()
 
+  const serviceNotes = String(
+    formData.get("serviceNotes") ?? ""
+  ).trim()
+
+  const announcements = String(
+    formData.get("announcements") ?? ""
+  ).trim()
+
   const serviceDateValue = String(
     formData.get("serviceDate") ?? ""
   ).trim()
@@ -165,6 +173,8 @@ export async function createSetlist(
       organization_id: organizationId,
       name: parsedName.data,
       description: description || null,
+      service_notes: serviceNotes || null,
+      announcements: announcements || null,
       service_date:
         serviceDateValue || null,
       ...(serviceTimeAvailable
@@ -246,6 +256,18 @@ export async function updateSetlist(
   if (description.length > 2000) {
     redirect(
       `/setlists/${setlistId}/edit?error=description_too_long`
+    )
+  }
+
+  if (serviceNotes.length > 3000) {
+    redirect(
+      `/setlists/${setlistId}/edit?error=service_notes_too_long`
+    )
+  }
+
+  if (announcements.length > 3000) {
+    redirect(
+      `/setlists/${setlistId}/edit?error=announcements_too_long`
     )
   }
 
