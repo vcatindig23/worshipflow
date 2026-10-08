@@ -36,6 +36,10 @@ In a song chart or live-stage view, hover over a chord or focus it with the keyb
 
 The in-app notification inbox records when you are added to or removed from a service team. Notifications are private to the assigned member, can be marked read individually or all at once, and link back to the service.
 
+## Activity history
+
+Workspace members can review a recent activity feed covering song edits, service and setlist changes, team assignments, and membership updates. Each entry links to its related workspace area when that item still exists.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

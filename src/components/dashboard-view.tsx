@@ -1,5 +1,6 @@
 import Link from "next/link"
 import {
+  Activity,
   Bell,
   CalendarDays,
   ChevronRight,
@@ -60,6 +61,11 @@ const navigation = [
     label: "Notifications",
     href: "/notifications",
     icon: Bell,
+  },
+  {
+    label: "Activity",
+    href: "/activity",
+    icon: Activity,
   },
   {
     label: "Team",

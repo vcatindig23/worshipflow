@@ -11,32 +11,15 @@ describe("PWA manifest", () => {
     expect(appManifest.display).toBe("standalone")
   })
 
-  it("provides standard and maskable icons at install sizes", () => {
+  it("provides the branded 512px app icon", () => {
     const appManifest = manifest()
 
-    expect(appManifest.icons).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          src: "/worshipflow-192.png",
-          sizes: "192x192",
-          purpose: "any",
-        }),
-        expect.objectContaining({
-          src: "/worshipflow-512.png",
-          sizes: "512x512",
-          purpose: "any",
-        }),
-        expect.objectContaining({
-          src: "/worshipflow-192.png",
-          sizes: "192x192",
-          purpose: "maskable",
-        }),
-        expect.objectContaining({
-          src: "/worshipflow-512.png",
-          sizes: "512x512",
-          purpose: "maskable",
-        }),
-      ])
-    )
+    expect(appManifest.icons).toEqual([
+      expect.objectContaining({
+        src: "/worshipflow-app-icon.png",
+        sizes: "512x512",
+        purpose: "any",
+      }),
+    ])
   })
 })
