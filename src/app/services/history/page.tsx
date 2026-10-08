@@ -118,12 +118,20 @@ export default async function ServicesHistoryPage() {
             </p>
           </div>
 
-          <Link
-            href="/services"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
-          >
-            Back to Services
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/services/insights"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            >
+              Service Insights
+            </Link>
+            <Link
+              href="/services"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            >
+              Back to Services
+            </Link>
+          </div>
         </div>
       </section>
 
