@@ -6,8 +6,10 @@ import {
   ArrowUp,
   BookOpen,
   CalendarDays,
+  CheckCircle2,
   ChevronRight,
   Edit,
+  History,
   Music2,
   MonitorPlay,
   Trash2,
@@ -59,6 +61,10 @@ type Setlist = {
     | "archived"
   created_at: string
   updated_at: string
+  completed_at: string | null
+  attendance_count: number | null
+  actual_duration_minutes: number | null
+  after_service_notes: string | null
 }
 
 type SetlistSong = {
@@ -188,6 +194,8 @@ const errorMessages: Record<
     "The timeline item movement is invalid.",
   timeline_move_failed:
     "The timeline item could not be moved.",
+  completion_failed:
+    "The service completion update could not be saved.",
 }
 
 function formatDate(value: string | null) {
@@ -511,6 +519,13 @@ export default async function SetlistPage({
                   setlist.status
                 )}
               </span>
+
+              {setlist.completed_at ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+                  <CheckCircle2 className="size-3.5" />
+                  Completed
+                </span>
+              ) : null}
             </div>
 
             <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
@@ -544,6 +559,26 @@ export default async function SetlistPage({
           </div>
 
           <div className="setlist-print-actions flex flex-wrap gap-2">
+            {canManageStatus ? (
+              <Link
+                href={`/setlists/${id}/complete`}
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition ${
+                  setlist.completed_at
+                    ? "border border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-[var(--surface)]"
+                    : "bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]"
+                }`}
+              >
+                {setlist.completed_at ? (
+                  <History className="size-4" />
+                ) : (
+                  <CheckCircle2 className="size-4" />
+                )}
+                {setlist.completed_at
+                  ? "Service History"
+                  : "Complete Service"}
+              </Link>
+            ) : null}
+
             {setlistSongs.length > 0 ? (
               <Link
                 href={`/setlists/${id}/live`}
@@ -1472,6 +1507,18 @@ export default async function SetlistPage({
                     "Not set"}
                 </dd>
               </div>
+              {setlist.completed_at ? (
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-[var(--muted)]">
+                    Attendance
+                  </dt>
+                  <dd className="font-medium text-[var(--foreground)]">
+                    {setlist.attendance_count === null
+                      ? "Not recorded"
+                      : setlist.attendance_count.toLocaleString("en-PH")}
+                  </dd>
+                </div>
+              ) : null}
             </dl>
           </section>
 
