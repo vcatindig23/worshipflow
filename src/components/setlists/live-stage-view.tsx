@@ -8,6 +8,7 @@ import {
   Maximize2,
   Minimize2,
   Minus,
+  PanelRight,
   Plus,
   Wifi,
   WifiOff,
@@ -27,12 +28,46 @@ import {
 import { saveOfflineStageSnapshot } from "@/lib/offline-stage"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import ChordProLine from "@/components/songs/chordpro-line"
+import LiveStageServicePanel from "./live-stage-service-panel"
+
+type LiveStageTimelineItem = {
+  id: string
+  position: number
+  item_type: string
+  title: string
+  duration_minutes: number | null
+  notes: string | null
+  song_id: string | null
+}
+
+type LiveStageTeamMember = {
+  id: string
+  display_name: string
+  team_position: string
+  confirmation_status: "pending" | "confirmed" | "declined"
+  response_note: string | null
+}
+
+type LiveStageResource = {
+  id: string
+  display_name: string
+  signed_url: string
+}
 
 type LiveStageViewProps = {
   setlistId: string
   setlistName: string
   userId: string
   songs: LiveStageSong[]
+  serviceDate: string
+  serviceTime: string
+  status: string
+  description: string | null
+  serviceNotes: string | null
+  announcements: string | null
+  timeline: LiveStageTimelineItem[]
+  team: LiveStageTeamMember[]
+  resources: LiveStageResource[]
 }
 
 export default function LiveStageView({
@@ -40,6 +75,15 @@ export default function LiveStageView({
   setlistName,
   userId,
   songs,
+  serviceDate,
+  serviceTime,
+  status,
+  description,
+  serviceNotes,
+  announcements,
+  timeline,
+  team,
+  resources,
 }: LiveStageViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [fontSize, setFontSize] = useState(36)
@@ -50,6 +94,7 @@ export default function LiveStageView({
   const [isOnline, setIsOnline] = useState(true)
   const [offlineSaved, setOfflineSaved] = useState(false)
   const [offlineSaveError, setOfflineSaveError] = useState<string | null>(null)
+  const [showServicePanel, setShowServicePanel] = useState(false)
   const currentSong = songs[currentIndex] ?? null
 
   useEffect(() => {
@@ -212,6 +257,29 @@ export default function LiveStageView({
   }
 
   const activeSongSummary = songs[currentIndex]
+  const songIndexById = useMemo(
+    () =>
+      songs.reduce<Record<string, number>>((result, song, index) => {
+        if (result[song.id] === undefined) {
+          result[song.id] = index
+        }
+        return result
+      }, {}),
+    [songs]
+  )
+
+  const selectTimelineSong = useCallback(
+    (songId: string) => {
+      const index = songIndexById[songId]
+      if (index === undefined) {
+        return
+      }
+      setCurrentIndex(index)
+      setTransposeOffset(0)
+      setShowServicePanel(false)
+    },
+    [songIndexById]
+  )
 
   return (
     <main className="fixed inset-0 z-50 flex min-h-dvh flex-col overflow-hidden bg-[#0d120f] text-white">
@@ -261,6 +329,14 @@ export default function LiveStageView({
                     : "Saving offline copy"}
             </span>
           </span>
+          <button
+            type="button"
+            onClick={() => setShowServicePanel(true)}
+            aria-label="Open service panel"
+            className="inline-flex size-10 items-center justify-center rounded-xl border border-white/15 text-white/70 transition hover:bg-white/10 hover:text-white"
+          >
+            <PanelRight className="size-4" />
+          </button>
           <button
             type="button"
             onClick={toggleFullscreen}
@@ -464,6 +540,23 @@ export default function LiveStageView({
           </footer>
         </>
       )}
+      {showServicePanel ? (
+        <LiveStageServicePanel
+          serviceDate={serviceDate}
+          serviceTime={serviceTime}
+          status={status}
+          description={description}
+          serviceNotes={serviceNotes}
+          announcements={announcements}
+          timeline={timeline}
+          team={team}
+          resources={resources}
+          currentSongId={currentSong?.id ?? null}
+          songIndexById={songIndexById}
+          onSelectSong={selectTimelineSong}
+          onClose={() => setShowServicePanel(false)}
+        />
+      ) : null}
     </main>
   )
 }
