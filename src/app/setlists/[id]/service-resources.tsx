@@ -2,7 +2,6 @@ import Link from "next/link"
 import { FileText, Link2, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
-
 import { addServiceResource, removeServiceResource } from "./service-resources-actions"
 
 type ServiceResource = {
@@ -41,128 +40,6 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "medium",
   }).format(new Date(value))
-}
-
-async function getServiceResourceAccess(setlistId: string) {
-  const workspace = await getWorkspace()
-
-  if (!workspace) {
-    redirect("/onboarding")
-  }
-
-  const supabase = await createClient()
-
-  const { data: setlist, error: setlistError } = await supabase
-    .from("setlists")
-    .select("id, organization_id")
-    .eq("id", setlistId)
-    .eq("organization_id", workspace.organizationId)
-    .maybeSingle()
-
-  if (setlistError || !setlist) {
-    redirect(`/setlists/${setlistId}?error=setlist_load_failed`)
-  }
-
-  return {
-    supabase,
-    workspace,
-    setlist,
-  }
-}
-
-export async function addServiceResource(formData: FormData) {
-  const setlistId = String(formData.get("setlistId") ?? "").trim()
-  const parsedPath = pathSchema.safeParse(formData.get("storagePath"))
-  const parsedName = nameSchema.safeParse(formData.get("displayName"))
-
-  if (!z.string().uuid().safeParse(setlistId).success) {
-    redirect("/setlists")
-  }
-
-  if (!parsedPath.success || !parsedName.success) {
-    redirect(`/setlists/${setlistId}?error=invalid_resource`)
-  }
-
-  const { supabase, workspace } =
-    await getServiceResourceAccess(setlistId)
-
-  if (!editorRoles.includes(workspace.role)) {
-    redirect(`/setlists/${setlistId}?error=resource_permission_denied`)
-  }
-
-  const storagePath = parsedPath.data
-  const expectedPrefix = `${workspace.organizationId}/`
-
-  if (
-    !storagePath.startsWith(expectedPrefix) ||
-    storagePath.split("/").length !== 2
-  ) {
-    redirect(`/setlists/${setlistId}?error=invalid_resource`)
-  }
-
-  const fileName = storagePath.slice(expectedPrefix.length)
-  const { data: files, error: listError } = await supabase.storage
-    .from("workspace-files")
-    .list(workspace.organizationId, { limit: 1000 })
-
-  if (listError || !(files ?? []).some((file) => file.name === fileName)) {
-    redirect(`/setlists/${setlistId}?error=resource_file_not_found`)
-  }
-
-  const { error } = await supabase.from("setlist_resources").insert({
-    organization_id: workspace.organizationId,
-    setlist_id: setlistId,
-    storage_path: storagePath,
-    display_name: parsedName.data,
-    created_by: workspace.userId,
-  })
-
-  if (error) {
-    const message = error.message.toLowerCase()
-    redirect(
-      `/setlists/${setlistId}?error=${
-        message.includes("duplicate") || message.includes("unique")
-          ? "resource_already_added"
-          : "resource_add_failed"
-      }`
-    )
-  }
-
-  revalidatePath(`/setlists/${setlistId}`)
-  redirect(`/setlists/${setlistId}`)
-}
-
-export async function removeServiceResource(formData: FormData) {
-  const setlistId = String(formData.get("setlistId") ?? "").trim()
-  const resourceId = String(formData.get("resourceId") ?? "").trim()
-
-  if (
-    !z.string().uuid().safeParse(setlistId).success ||
-    !z.string().uuid().safeParse(resourceId).success
-  ) {
-    redirect("/setlists")
-  }
-
-  const { supabase, workspace } =
-    await getServiceResourceAccess(setlistId)
-
-  if (!editorRoles.includes(workspace.role)) {
-    redirect(`/setlists/${setlistId}?error=resource_permission_denied`)
-  }
-
-  const { error } = await supabase
-    .from("setlist_resources")
-    .delete()
-    .eq("id", resourceId)
-    .eq("setlist_id", setlistId)
-    .eq("organization_id", workspace.organizationId)
-
-  if (error) {
-    redirect(`/setlists/${setlistId}?error=resource_remove_failed`)
-  }
-
-  revalidatePath(`/setlists/${setlistId}`)
-  redirect(`/setlists/${setlistId}`)
 }
 
 export default async function ServiceResources({
@@ -234,6 +111,13 @@ export default async function ServiceResources({
         resource !== null
     )
 
+  const availableFiles = storedFiles.filter(
+    (file) =>
+      !linkedPaths.has(
+        `${workspace.organizationId}/${file.name}`
+      )
+  )
+
   return (
     <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
@@ -283,7 +167,11 @@ export default async function ServiceResources({
 
                 {canEdit ? (
                   <form action={removeServiceResource}>
-                    <input type="hidden" name="setlistId" value={setlistId} />
+                    <input
+                      type="hidden"
+                      name="setlistId"
+                      value={setlistId}
+                    />
                     <input
                       type="hidden"
                       name="resourceId"
@@ -313,7 +201,11 @@ export default async function ServiceResources({
           action={addServiceResource}
           className="mt-4 space-y-3 border-t border-[var(--border)] pt-4"
         >
-          <input type="hidden" name="setlistId" value={setlistId} />
+          <input
+            type="hidden"
+            name="setlistId"
+            value={setlistId}
+          />
 
           <div>
             <label
@@ -332,16 +224,14 @@ export default async function ServiceResources({
               <option value="" disabled>
                 Select a file
               </option>
-              {storedFiles
-                .filter((file) => !linkedPaths.has(`${workspace.organizationId}/${file.name}`))
-                .map((file) => (
-                  <option
-                    key={file.name}
-                    value={`${workspace.organizationId}/${file.name}`}
-                  >
-                    {readableName(file.name)}
-                  </option>
-                ))}
+              {availableFiles.map((file) => (
+                <option
+                  key={file.name}
+                  value={`${workspace.organizationId}/${file.name}`}
+                >
+                  {readableName(file.name)}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -357,14 +247,14 @@ export default async function ServiceResources({
               name="displayName"
               maxLength={120}
               required
-              placeholder="e.g. Rehearsal audio, service guide, or reference PDF"
+              placeholder="e.g. Rehearsal audio or service guide"
               className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
             />
           </div>
 
           <button
             type="submit"
-            disabled={storedFiles.filter((file) => !linkedPaths.has(`${workspace.organizationId}/${file.name}`)).length === 0}
+            disabled={availableFiles.length === 0}
             className="h-10 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Link to Service
@@ -374,6 +264,10 @@ export default async function ServiceResources({
             <p className="text-xs leading-5 text-[var(--muted)]">
               Upload files in the Workspace Library first, then return here to
               link them to this service.
+            </p>
+          ) : availableFiles.length === 0 ? (
+            <p className="text-xs leading-5 text-[var(--muted)]">
+              All workspace files are already linked to this service.
             </p>
           ) : null}
         </form>
