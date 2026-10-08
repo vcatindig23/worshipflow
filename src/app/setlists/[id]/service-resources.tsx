@@ -5,9 +5,6 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 
 import { addServiceResource, removeServiceResource } from "./service-resources-actions"
 
-const pathSchema = z.string().min(3).max(500)
-const nameSchema = z.string().trim().min(1).max(120)
-
 type ServiceResource = {
   id: string
   storage_path: string
