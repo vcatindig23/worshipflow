@@ -5,6 +5,7 @@ import {
   CalendarDays,
   CheckCircle2,
   Clock3,
+  History,
   ListMusic,
   Plus,
   Users,
@@ -31,6 +32,7 @@ type Setlist = {
   service_date: string | null
   service_time: string | null
   status: "draft" | "published" | "archived"
+  completed_at: string | null
 }
 
 type SetlistSong = {
@@ -542,13 +544,22 @@ export default async function ServicesPage({
           </p>
         </div>
 
-        <Link
-          href="/setlists/new"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-        >
-          <Plus className="size-4" />
-          Plan a Service
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/services/history"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+          >
+            <History className="size-4" />
+            Service History
+          </Link>
+          <Link
+            href="/setlists/new"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+          >
+            <Plus className="size-4" />
+            Plan a Service
+          </Link>
+        </div>
       </section>
 
       <nav
@@ -697,6 +708,13 @@ export default async function ServicesPage({
                                   setlist.status
                                 )}
                               </span>
+
+                              {setlist.completed_at ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-800">
+                                  <CheckCircle2 className="size-3" />
+                                  Completed
+                                </span>
+                              ) : null}
                             </div>
 
                             {setlist.description ? (
