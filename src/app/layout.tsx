@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import HomeButton from "@/components/home-button"
+import OfflineSupport from "@/components/offline-support"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body>
         {children}
         <HomeButton />
+        <OfflineSupport />
       </body>
     </html>
   )

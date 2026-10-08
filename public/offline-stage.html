@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d120f">
+    <title>Offline Live Stage | WorshipFlow</title>
+    <style>
+      :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #0d120f; color: #fff; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+      header, footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 1rem; border-color: #ffffff20; }
+      header { border-bottom: 1px solid #ffffff20; }
+      footer { border-top: 1px solid #ffffff20; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 1rem; }
+      h2 { font-size: clamp(1.7rem, 6vw, 3rem); margin: .3rem 0 .7rem; }
+      button { min-height: 2.75rem; padding: 0 .9rem; border: 1px solid #ffffff35; border-radius: .7rem; color: inherit; background: #ffffff0d; font-weight: 650; cursor: pointer; }
+      button:disabled { opacity: .35; cursor: not-allowed; }
+      button:focus-visible { outline: 2px solid #eac65b; outline-offset: 2px; }
+      main { flex: 1; width: 100%; max-width: 76rem; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
+      #section, #status, #artist, #meta, #saved { color: #ffffff85; }
+      #section { font-size: .75rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+      #status { text-align: center; font-size: .8rem; }
+      #meta { display: flex; gap: .5rem; font-size: .8rem; }
+      #chart { margin-top: 2rem; font: 1.9rem/1.8 ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+      #note { margin-top: 1.5rem; padding: .8rem 1rem; border: 1px solid #eac65b40; border-radius: .7rem; color: #ffe8a0; line-height: 1.5; }
+      .row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+      #controls { justify-content: center; flex: 1; }
+      .section-heading { margin: 2rem 0 .5rem; color: #ffffff70; font-size: .8rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+      #error { max-width: 40rem; margin: 5rem auto; padding: 2rem; text-align: center; line-height: 1.6; }
+      #error h1 { font-size: 1.5rem; margin-bottom: .7rem; }
+      @media (max-width: 640px) {
+        header { flex-wrap: wrap; }
+        #chart { font-size: 1.35rem; }
+        #controls { order: 3; flex-basis: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <p id="setlist" style="font-size:.75rem;color:#ffffff80"></p>
+        <h1>Live stage · Offline</h1>
+      </div>
+      <div class="row">
+        <span id="counter" style="font-size:.8rem;color:#ffffff80"></span>
+        <button id="fullscreen" type="button">Fullscreen</button>
+      </div>
+    </header>
+    <div id="error" hidden>
+      <h1>Offline service not prepared</h1>
+      <p>While connected, open this service’s Live Stage once and wait for “Saved for offline” before going offline.</p>
+    </div>
+    <main id="stage" hidden>
+      <p id="section"></p>
+      <h2 id="title"></h2>
+      <p id="artist"></p>
+      <div id="meta" class="row" style="margin-top:1rem"></div>
+      <aside id="note" hidden></aside>
+      <div id="chart"></div>
+    </main>
+    <footer id="footer" hidden>
+      <button id="previous" type="button">Previous</button>
+      <div id="controls" class="row">
+        <button id="toggle-chords" type="button" aria-pressed="true">Hide chords</button>
+        <button id="transpose-down" type="button" aria-label="Transpose down">−</button>
+        <span id="transpose-label" style="min-width:2rem;text-align:center;color:#ffffff85">0</span>
+        <button id="transpose-up" type="button" aria-label="Transpose up">+</button>
+        <button id="smaller" type="button" aria-label="Decrease lyrics size">A−</button>
+        <button id="larger" type="button" aria-label="Increase lyrics size">A+</button>
+      </div>
+      <button id="next" type="button">Next</button>
+    </footer>
+    <p id="saved" style="padding:0 1rem 1rem;text-align:center;font-size:.7rem"></p>
+    <script src="/offline-stage.js" defer></script>
+  </body>
+</html>

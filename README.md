@@ -22,7 +22,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Install WorshipFlow
 
-WorshipFlow includes the app logo in its sign-in screen, workspace navigation, browser icon, and installable app manifest. Visit the deployed app over HTTPS and use the browser's **Install app** or **Add to Home Screen** option. When Live Stage opens, it loads all song charts in the service plan so you can keep navigating and presenting if the connection drops while that stage session remains open. Opening or refreshing the app still requires a connection.
+WorshipFlow includes the app logo in its sign-in screen, workspace navigation, browser icon, and installable app manifest. Visit the deployed app over HTTPS and use the browser's **Install app** or **Add to Home Screen** option. While connected, open each service's Live Stage and wait for **Saved for offline** before relying on it without internet. WorshipFlow saves that service's charts on the device and can reopen the Live Stage after a reload; the rest of the workspace still needs a connection. Offline chart snapshots are scoped to the signed-in account and cleared when you sign out.
 
 ## Account recovery
 

@@ -13,6 +13,7 @@ import {
   WifiOff,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import type { Session } from "@supabase/supabase-js"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
 import { getChordProMetadata, parseChordPro } from "@/features/chordpro/parser"
 import {
@@ -23,17 +24,21 @@ import {
   getBoundedStageIndex,
   type LiveStageSong,
 } from "@/lib/live-stage"
+import { saveOfflineStageSnapshot } from "@/lib/offline-stage"
+import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import ChordProLine from "@/components/songs/chordpro-line"
 
 type LiveStageViewProps = {
   setlistId: string
   setlistName: string
+  userId: string
   songs: LiveStageSong[]
 }
 
 export default function LiveStageView({
   setlistId,
   setlistName,
+  userId,
   songs,
 }: LiveStageViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -43,6 +48,8 @@ export default function LiveStageView({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [fullscreenError, setFullscreenError] = useState<string | null>(null)
   const [isOnline, setIsOnline] = useState(true)
+  const [offlineSaved, setOfflineSaved] = useState(false)
+  const [offlineSaveError, setOfflineSaveError] = useState<string | null>(null)
   const currentSong = songs[currentIndex] ?? null
 
   useEffect(() => {
@@ -65,6 +72,68 @@ export default function LiveStageView({
       document.body.style.overflow = ""
     }
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const supabase = createBrowserClient()
+    supabase.auth.getSession().then(
+      ({
+        data,
+        error,
+      }: {
+        data: { session: Session | null }
+        error: Error | null
+      }) => {
+        if (error) {
+          throw error
+        }
+
+        if (data.session?.user.id !== userId) {
+          throw new Error(
+            "Your session changed; sign in again to save offline charts."
+          )
+        }
+
+        try {
+          localStorage.setItem("worshipflow-offline-user", userId)
+        } catch {
+          throw new Error("Browser storage is unavailable for offline use.")
+        }
+
+        return saveOfflineStageSnapshot({
+          setlistId,
+          setlistName,
+          userId,
+          storageKey: `${userId}:${setlistId}`,
+          songs,
+          savedAt: new Date().toISOString(),
+        })
+      }
+    ).then(
+      () => {
+        if (!cancelled) {
+          setOfflineSaved(true)
+          setOfflineSaveError(null)
+        }
+      },
+      (error: unknown) => {
+        console.error("Saving offline live-stage charts failed:", error)
+        if (!cancelled) {
+          setOfflineSaved(false)
+          setOfflineSaveError(
+            error instanceof Error
+              ? error.message
+              : "Unable to save this service for offline use."
+          )
+        }
+      }
+    )
+
+    return () => {
+      cancelled = true
+    }
+  }, [setlistId, setlistName, userId, songs])
 
   const sourceKey = useMemo(
     () => getChordProMetadata(currentSong?.source ?? "", "key") ?? null,
@@ -171,18 +240,25 @@ export default function LiveStageView({
                 : "border-amber-300/25 bg-amber-300/10 text-amber-100"
             }`}
             title={
-              isOnline
-                ? "All song charts are loaded for this open stage session."
-                : "Offline. Loaded song charts are still available in this stage session."
+              offlineSaveError ??
+              (offlineSaved
+                ? "This service and its song charts are saved on this device for offline use."
+                : "Saving this service and its song charts for offline use.")
             }
           >
-            {isOnline ? (
-              <Wifi className="size-3.5" />
-            ) : (
+            {!isOnline ? (
               <WifiOff className="size-3.5" />
+            ) : (
+              <Wifi className="size-3.5" />
             )}
             <span className="hidden sm:inline">
-              {isOnline ? "Charts ready offline" : "Offline · charts ready"}
+              {offlineSaveError
+                ? "Offline save failed"
+                : !isOnline
+                  ? "Offline · charts saved"
+                  : offlineSaved
+                    ? "Saved for offline"
+                    : "Saving offline copy"}
             </span>
           </span>
           <button

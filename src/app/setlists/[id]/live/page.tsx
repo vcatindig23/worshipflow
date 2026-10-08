@@ -90,6 +90,7 @@ export default async function LiveStagePage({
     <LiveStageView
       setlistId={id}
       setlistName={setlist.name}
+      userId={workspace.userId}
       songs={stageSongs}
     />
   )
