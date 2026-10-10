@@ -9,6 +9,7 @@ import {
   Church,
   LayoutDashboard,
   Menu,
+  MessagesSquare,
   Music2,
   UserRound,
   Search,
@@ -52,6 +53,11 @@ const navigation = [
     href: "/my-schedule",
     label: "My Schedule",
     icon: UserRound,
+  },
+  {
+    href: "/chat",
+    label: "Team Chat",
+    icon: MessagesSquare,
   },
   {
     href: "/settings/team",
