@@ -259,6 +259,8 @@ export default async function LiveStagePage({
     <LiveStageView
       setlistId={id}
       setlistName={setlist.name}
+      canManageCompletion={["admin", "worship_leader"].includes(workspace.role)}
+      isServiceCompleted={Boolean(setlist.completed_at)}
       userId={workspace.userId}
       songs={stageSongs}
       serviceDate={formatServiceDate(setlist.service_date)}
