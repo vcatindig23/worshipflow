@@ -9,6 +9,7 @@ import {
   ListMusic,
   LogOut,
   Menu,
+  MessagesSquare,
   Music2,
   Plus,
   Search,
@@ -56,6 +57,11 @@ const navigation = [
     label: "My Schedule",
     href: "/my-schedule",
     icon: UserRound,
+  },
+  {
+    label: "Team Chat",
+    href: "/chat",
+    icon: MessagesSquare,
   },
   {
     label: "Notifications",
