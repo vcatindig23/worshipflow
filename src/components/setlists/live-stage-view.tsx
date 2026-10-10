@@ -57,6 +57,8 @@ type LiveStageResource = {
 type LiveStageViewProps = {
   setlistId: string
   setlistName: string
+  canManageCompletion: boolean
+  isServiceCompleted: boolean
   userId: string
   songs: LiveStageSong[]
   serviceDate: string
@@ -73,6 +75,8 @@ type LiveStageViewProps = {
 export default function LiveStageView({
   setlistId,
   setlistName,
+  canManageCompletion,
+  isServiceCompleted,
   userId,
   songs,
   serviceDate,
@@ -542,6 +546,9 @@ export default function LiveStageView({
       )}
       {showServicePanel ? (
         <LiveStageServicePanel
+          setlistId={setlistId}
+          canManageCompletion={canManageCompletion}
+          isServiceCompleted={isServiceCompleted}
           serviceDate={serviceDate}
           serviceTime={serviceTime}
           status={status}
