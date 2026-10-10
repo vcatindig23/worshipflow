@@ -26,6 +26,7 @@ import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import ServiceResources from "./service-resources"
 import ServiceTimeline from "./service-timeline"
+import ServicePreparationChecklist from "./service-preparation-checklist"
 import {
   addSongToSetlist,
   addSetlistTeamAssignment,
@@ -363,6 +364,8 @@ export default async function SetlistPage({
   const [
     teamMembersResult,
     teamAssignmentsResult,
+    timelineCountResult,
+    resourcesCountResult,
   ] = await Promise.all([
     supabase
       .from("organization_members")
@@ -376,6 +379,16 @@ export default async function SetlistPage({
       )
       .eq("setlist_id", id)
       .order("created_at", { ascending: true }),
+    supabase
+      .from("setlist_timeline_items")
+      .select("id", { count: "exact", head: true })
+      .eq("setlist_id", id)
+      .eq("organization_id", workspace.organizationId),
+    supabase
+      .from("setlist_resources")
+      .select("id", { count: "exact", head: true })
+      .eq("setlist_id", id)
+      .eq("organization_id", workspace.organizationId),
   ])
 
   const teamDataAvailable =
@@ -387,6 +400,12 @@ export default async function SetlistPage({
   const teamAssignments = (
     teamAssignmentsResult.data ?? []
   ) as TeamAssignment[]
+  const timelineCount = timelineCountResult.error
+    ? null
+    : timelineCountResult.count ?? 0
+  const resourceCount = resourcesCountResult.error
+    ? null
+    : resourcesCountResult.count ?? 0
 
   const profileIds = Array.from(
     new Set([
@@ -685,8 +704,25 @@ export default async function SetlistPage({
         </div>
       </section>
 
+      <ServicePreparationChecklist
+        setlistId={id}
+        serviceDate={setlist.service_date}
+        serviceTime={setlist.service_time}
+        songCount={setlistSongs.length}
+        teamAssignments={teamAssignments}
+        timelineCount={timelineCount}
+        resourceCount={resourceCount}
+        hasServiceNotes={Boolean(setlist.service_notes)}
+        hasAnnouncements={Boolean(setlist.announcements)}
+        canEdit={canEdit}
+        isCompleted={Boolean(setlist.completed_at)}
+      />
+
       {(setlist.announcements || setlist.service_notes) ? (
-        <section className="grid gap-4 md:grid-cols-2">
+        <section
+          id="service-notes"
+          className="scroll-mt-6 grid gap-4 md:grid-cols-2"
+        >
           {setlist.announcements ? (
             <article className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">
@@ -714,7 +750,7 @@ export default async function SetlistPage({
       <ServiceTimeline setlistId={id} canEdit={canEdit} />
 
       <div className="setlist-print-content grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="space-y-4">
+        <section id="worship-order" className="scroll-mt-6 space-y-4">
           <div>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
               Worship Order
@@ -1140,7 +1176,7 @@ export default async function SetlistPage({
         <aside className="setlist-print-sidebar space-y-5">
           <ServiceResources setlistId={id} canEdit={canEdit} />
 
-          <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <section id="worship-team" className="scroll-mt-6 rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
               <Users className="size-4 text-[var(--brand)]" />
               <h2 className="font-semibold text-[var(--foreground)]">
