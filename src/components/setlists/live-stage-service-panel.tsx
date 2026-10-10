@@ -1,7 +1,10 @@
 "use client"
 
+import Link from "next/link"
 import {
+  ArrowRight,
   CheckCircle2,
+  ClipboardCheck,
   Clock3,
   FileText,
   ListOrdered,
@@ -36,6 +39,9 @@ type ServiceResource = {
 }
 
 type LiveStageServicePanelProps = {
+  setlistId: string
+  canManageCompletion: boolean
+  isServiceCompleted: boolean
   serviceDate: string
   serviceTime: string
   status: string
@@ -86,6 +92,9 @@ const positionLabels: Record<string, string> = {
 }
 
 export default function LiveStageServicePanel({
+  setlistId,
+  canManageCompletion,
+  isServiceCompleted,
   serviceDate,
   serviceTime,
   status,
@@ -421,6 +430,29 @@ export default function LiveStageServicePanel({
             )}
           </section>
         </div>
+        {canManageCompletion ? (
+          <footer className="shrink-0 border-t border-white/10 bg-black/20 px-5 py-4 sm:px-6">
+            <Link
+              href={"/setlists/" + setlistId + "/complete"}
+              className="flex items-center justify-between gap-3 rounded-xl bg-[var(--brand)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+            >
+              <span className="flex min-w-0 items-center gap-2.5">
+                <ClipboardCheck className="size-4 shrink-0" />
+                <span>
+                  {isServiceCompleted
+                    ? "Review service history"
+                    : "Finish service & record notes"}
+                </span>
+              </span>
+              <ArrowRight className="size-4 shrink-0" />
+            </Link>
+            <p className="mt-2 text-xs leading-5 text-white/40">
+              {isServiceCompleted
+                ? "Completion is saved. Review attendance, duration, or after-service notes."
+                : "After the service, record attendance, actual duration, and team notes."}
+            </p>
+          </footer>
+        ) : null}
       </aside>
     </div>
   )
