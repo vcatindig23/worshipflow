@@ -1,13 +1,13 @@
 "use client"
 
 import {
-  FormEvent,
   useEffect,
   useMemo,
   useRef,
   useState,
   useTransition,
 } from "react"
+import type { FormEvent } from "react"
 import {
   AlertCircle,
   MessageCircle,
