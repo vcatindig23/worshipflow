@@ -119,7 +119,10 @@ export default async function ServiceResources({
   )
 
   return (
-    <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+    <section
+      id="service-resources"
+      className="scroll-mt-6 rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm"
+    >
       <div className="flex items-center gap-2">
         <Link2 className="size-4 text-[var(--brand)]" />
         <h2 className="font-semibold text-[var(--foreground)]">
