@@ -1,16 +1,11 @@
-"use client"
-
 import Link from "next/link"
 import {
   AlertCircle,
   ArrowRight,
-  CalendarClock,
   CheckCircle2,
   Circle,
   ClipboardCheck,
   FileText,
-  ListMusic,
-  Users,
 } from "lucide-react"
 
 type AssignmentStatus = "pending" | "confirmed" | "declined"
