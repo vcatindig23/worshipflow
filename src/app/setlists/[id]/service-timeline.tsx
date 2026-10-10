@@ -112,7 +112,10 @@ export default async function ServiceTimeline({
   )
 
   return (
-    <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+    <section
+      id="service-timeline"
+      className="scroll-mt-6 rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm"
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
