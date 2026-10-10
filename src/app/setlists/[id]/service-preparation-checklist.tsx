@@ -270,7 +270,12 @@ export default function ServicePreparationChecklist({
         />
       </div>
 
-      {!isReady ? (
+      {isCompleted ? (
+        <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-[var(--muted)]">
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-700" />
+          This service is marked complete. The checklist reflects the preparation details currently saved in the plan.
+        </p>
+      ) : !isReady ? (
         <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-[var(--muted)]">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-600" />
           Resolve the remaining essentials before service time. The additional preparation items below are recommended, but optional.
