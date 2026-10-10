@@ -48,6 +48,7 @@ export default function AssignmentConfirmation({
   status,
   responseNote,
   respondedAt,
+  timeZone,
 }: AssignmentConfirmationProps) {
   const [
     currentStatus,
