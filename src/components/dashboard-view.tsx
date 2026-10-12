@@ -1,6 +1,7 @@
 import Link from "next/link"
 import {
   CalendarDays,
+  ContactRound,
   ChevronRight,
   FileText,
   House,
@@ -49,6 +50,11 @@ const navigation = [
     label: "My Schedule",
     href: "/my-schedule",
     icon: UserRound,
+  },
+  {
+    label: "Profile",
+    href: "/profile",
+    icon: ContactRound,
   },
   {
     label: "Team",
@@ -169,23 +175,30 @@ export default function DashboardView({
 
           <div className="border-t border-white/8 p-3">
             <div className="rounded-xl bg-white/5 p-3">
-              <div className="flex items-center gap-3">
-                <ProfileAvatar
-                  name={workspace.userName}
-                  imageUrl={workspace.userAvatarUrl}
-                  sizeClassName="size-9"
-                  className="text-xs"
-                />
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/profile"
+                  aria-label={`View profile for ${workspace.userName}`}
+                  title="View profile"
+                  className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 transition hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
+                >
+                  <ProfileAvatar
+                    name={workspace.userName}
+                    imageUrl={workspace.userAvatarUrl}
+                    sizeClassName="size-9"
+                    className="text-xs"
+                  />
 
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">
-                    {workspace.userName}
-                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium transition group-hover:text-white">
+                      {workspace.userName}
+                    </div>
 
-                  <div className="truncate text-xs text-[var(--sidebar-muted)]">
-                    {roleLabel(workspace.role)}
+                    <div className="truncate text-xs text-[var(--sidebar-muted)]">
+                      {roleLabel(workspace.role)}
+                    </div>
                   </div>
-                </div>
+                </Link>
 
                 <form action="/auth/signout" method="post">
                   <button
