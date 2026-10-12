@@ -17,7 +17,7 @@ import {
   WifiOff,
 } from "lucide-react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
-import { sendTeamChatMessage } from "./actions"
+import { markTeamChatNotificationsRead, sendTeamChatMessage } from "./actions"
 
 export type TeamChatMessage = {
   id: string
@@ -90,6 +90,10 @@ export default function TeamChatClient({
   )
 
   useEffect(() => {
+    void markTeamChatNotificationsRead()
+  }, [organizationId])
+
+  useEffect(() => {
     const channel = supabase
       .channel(`team-chat-${organizationId}`)
       .on(
@@ -114,6 +118,10 @@ export default function TeamChatClient({
           const incomingMessage: TeamChatMessage = {
             ...row,
             authorName: memberNames.get(row.user_id) ?? "Team member",
+          }
+
+          if (row.user_id !== currentUserId) {
+            void markTeamChatNotificationsRead()
           }
 
           setMessages((current) => {
@@ -148,7 +156,7 @@ export default function TeamChatClient({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [memberNames, organizationId, supabase])
+  }, [currentUserId, memberNames, organizationId, supabase])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({

@@ -157,6 +157,12 @@ export default function DashboardView({
             <nav className="space-y-1">
               {navigation.map((item) => {
                 const Icon = item.icon
+                const badgeCount =
+                  item.href === "/notifications"
+                    ? workspace.unreadNotificationCount
+                    : item.href === "/chat"
+                      ? workspace.unreadChatNotificationCount
+                      : 0
 
                 return (
                   <Link
@@ -170,12 +176,9 @@ export default function DashboardView({
                   >
                     <Icon className="size-[18px]" strokeWidth={1.8} />
                     <span>{item.label}</span>
-                    {item.href === "/notifications" &&
-                    workspace.unreadNotificationCount > 0 ? (
+                    {badgeCount > 0 ? (
                       <span className="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold">
-                        {workspace.unreadNotificationCount > 99
-                          ? "99+"
-                          : workspace.unreadNotificationCount}
+                        {badgeCount > 99 ? "99+" : badgeCount}
                       </span>
                     ) : null}
                   </Link>

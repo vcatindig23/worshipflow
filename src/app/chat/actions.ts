@@ -53,3 +53,28 @@ export async function sendTeamChatMessage(rawBody: string) {
     message: data,
   }
 }
+
+
+export async function markTeamChatNotificationsRead() {
+  const workspace = await getWorkspace()
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", workspace.userId)
+    .eq("organization_id", workspace.organizationId)
+    .eq("type", "team_chat_message")
+    .is("read_at", null)
+
+  if (error) {
+    console.error("mark_team_chat_notifications_read failed:", {
+      code: error.code,
+      message: error.message,
+    })
+
+    return { success: false as const }
+  }
+
+  return { success: true as const }
+}

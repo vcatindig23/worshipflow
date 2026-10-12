@@ -41,6 +41,7 @@ export type WorkspaceData = {
   songCount: number
   memberCount: number
   unreadNotificationCount: number
+  unreadChatNotificationCount: number
   recentSongs: {
     id: string
     title: string
@@ -162,6 +163,7 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     upcomingSetlistsResult,
     memberAssignmentsResult,
     unreadNotificationsResult,
+    unreadChatNotificationsResult,
   ] =
     await Promise.all([
       supabase
@@ -204,6 +206,14 @@ export async function getWorkspace(): Promise<WorkspaceData> {
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
         .is("read_at", null),
+
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("organization_id", membership.organization_id)
+        .eq("type", "team_chat_message")
+        .is("read_at", null),
     ])
 
   if (songCountResult.error) {
@@ -228,6 +238,10 @@ export async function getWorkspace(): Promise<WorkspaceData> {
 
   if (unreadNotificationsResult.error) {
     throw new Error("Unable to count your unread notifications.")
+  }
+
+  if (unreadChatNotificationsResult.error) {
+    throw new Error("Unable to count unread team chat notifications.")
   }
 
   const memberAssignments = (memberAssignmentsResult.data ??
@@ -358,6 +372,7 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     songCount: songCountResult.count ?? 0,
     memberCount: memberCountResult.count ?? 0,
     unreadNotificationCount: unreadNotificationsResult.count ?? 0,
+    unreadChatNotificationCount: unreadChatNotificationsResult.count ?? 0,
     recentSongs: recentSongsResult.data ?? [],
     upcomingSetlists: upcomingSetlists.map((setlist) => ({
       ...setlist,
