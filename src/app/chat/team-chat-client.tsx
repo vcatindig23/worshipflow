@@ -7,7 +7,8 @@ import {
   useState,
   useTransition,
 } from "react"
-import type { FormEvent } from "react"
+import type { FormEvent, ReactNode } from "react"
+import { Fragment } from "react"
 import {
   AlertCircle,
   ChevronUp,
@@ -77,6 +78,56 @@ function formatMessageTime(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date)
+}
+
+function getMessageDayKey(value: string) {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return "unknown-date"
+  }
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+
+  return `${year}-${month}-${day}`
+}
+
+function formatMessageDate(value: string) {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable"
+  }
+
+  return new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "full",
+  }).format(date)
+}
+
+function highlightSearchTerm(body: string, query: string): ReactNode {
+  const normalizedQuery = query.trim()
+
+  if (!normalizedQuery) {
+    return body
+  }
+
+  const escapedQuery = normalizedQuery.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")
+  const matches = body.split(new RegExp(`(${escapedQuery})`, "gi"))
+
+  return matches.map((part, index) =>
+    part.toLocaleLowerCase() === normalizedQuery.toLocaleLowerCase() ? (
+      <mark
+        key={index}
+        className="rounded bg-amber-200 px-0.5 text-inherit dark:bg-amber-500/40"
+      >
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  )
 }
 
 export default function TeamChatClient({
@@ -227,12 +278,12 @@ export default function TeamChatClient({
         return
       }
 
-      const matchingMessages: TeamChatMessage[] = result.messages.map(
-        (message) => ({
+      const matchingMessages: TeamChatMessage[] = result.messages
+        .map((message) => ({
           ...message,
           authorName: memberNames.get(message.user_id) ?? "Team member",
-        })
-      )
+        }))
+        .reverse()
 
       setSearchResults(matchingMessages)
     })
@@ -322,6 +373,8 @@ export default function TeamChatClient({
       setDraft("")
     })
   }
+
+  const visibleMessages = activeSearch ? searchResults ?? [] : messages
 
   const connectionLabel =
     connectionState === "live"
@@ -501,41 +554,59 @@ export default function TeamChatClient({
         ((!activeSearch && messages.length > 0) ||
           (activeSearch && (searchResults?.length ?? 0) > 0)) ? (
           <ol className="space-y-5">
-            {(activeSearch ? searchResults ?? [] : messages).map((message) => {
+            {visibleMessages.map((message, index) => {
+              const previousMessage = visibleMessages[index - 1]
+              const showDateSeparator =
+                !previousMessage ||
+                getMessageDayKey(previousMessage.created_at) !==
+                  getMessageDayKey(message.created_at)
               const isOwnMessage = message.user_id === currentUserId
               const displayName = isOwnMessage ? "You" : message.authorName
 
               return (
-                <li
-                  key={message.id}
-                  className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`flex max-w-[94%] gap-3 sm:max-w-[82%] ${isOwnMessage ? "flex-row-reverse" : "flex-row"}`}
+                <Fragment key={message.id}>
+                  {showDateSeparator ? (
+                    <li
+                      aria-label={formatMessageDate(message.created_at)}
+                      className="flex justify-center py-1"
+                    >
+                      <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-[10px] font-semibold text-[var(--muted)] shadow-sm">
+                        {formatMessageDate(message.created_at)}
+                      </span>
+                    </li>
+                  ) : null}
+                  <li
+                    className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
                   >
-                    <div className="mt-5 flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[10px] font-bold text-[var(--brand)]">
-                      {isOwnMessage ? initials(members.find((member) => member.id === currentUserId)?.displayName ?? "You") : initials(message.authorName)}
-                    </div>
-                    <div className={`flex min-w-0 flex-col ${isOwnMessage ? "items-end" : "items-start"}`}>
-                      <div className={`mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] ${isOwnMessage ? "justify-end" : ""}`}>
-                        <span className="font-semibold text-[var(--foreground)]">
-                          {displayName}
-                        </span>
-                        <time
-                          dateTime={message.created_at}
-                          className="text-[var(--muted)]"
-                        >
-                          {formatMessageTime(message.created_at)}
-                        </time>
+                    <div
+                      className={`flex max-w-[94%] gap-3 sm:max-w-[82%] ${isOwnMessage ? "flex-row-reverse" : "flex-row"}`}
+                    >
+                      <div className="mt-5 flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[10px] font-bold text-[var(--brand)]">
+                        {isOwnMessage ? initials(members.find((member) => member.id === currentUserId)?.displayName ?? "You") : initials(message.authorName)}
                       </div>
-                      <p
-                        className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-left text-sm leading-6 shadow-sm ${isOwnMessage ? "rounded-tr-md bg-[var(--brand)] text-white" : "rounded-tl-md border border-[var(--border)] bg-white text-[var(--foreground)]"}`}
-                      >
-                        {message.body}
-                      </p>
+                      <div className={`flex min-w-0 flex-col ${isOwnMessage ? "items-end" : "items-start"}`}>
+                        <div className={`mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] ${isOwnMessage ? "justify-end" : ""}`}>
+                          <span className="font-semibold text-[var(--foreground)]">
+                            {displayName}
+                          </span>
+                          <time
+                            dateTime={message.created_at}
+                            className="text-[var(--muted)]"
+                          >
+                            {formatMessageTime(message.created_at)}
+                          </time>
+                        </div>
+                        <p
+                          className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-left text-sm leading-6 shadow-sm ${isOwnMessage ? "rounded-tr-md bg-[var(--brand)] text-white" : "rounded-tl-md border border-[var(--border)] bg-white text-[var(--foreground)]"}`}
+                        >
+                          {activeSearch
+                            ? highlightSearchTerm(message.body, activeSearch)
+                            : message.body}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </li>
+                  </li>
+                </Fragment>
               )
             })}
           </ol>
