@@ -22,6 +22,13 @@ import {
 } from "react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 
+import { searchWorkspaceLive } from "@/app/search/actions"
+import {
+  loadNotificationPreview,
+  markHeaderNotificationRead,
+  markHeaderNotificationsRead,
+} from "@/app/notifications/dropdown-actions"
+
 type HeaderNotification = {
   id: string
   type: string
@@ -31,17 +38,11 @@ type HeaderNotification = {
   read_at: string | null
   created_at: string
 }
-import { searchWorkspaceLive } from "@/app/search/actions"
-import {
-  loadNotificationPreview,
-  markHeaderNotificationRead,
-  markHeaderNotificationsRead,
-} from "@/app/notifications/dropdown-actions"
 
 type WorkspaceHeaderActionsProps = {
-  searchOpen: boolean
-  onOpenSearch: () => void
-  onCloseSearch: () => void
+  searchOpen?: boolean
+  onOpenSearch?: () => void
+  onCloseSearch?: () => void
 }
 
 type SearchSong = {
@@ -115,12 +116,28 @@ function NotificationIcon({ type }: { type: string }) {
 }
 
 export default function WorkspaceHeaderActions({
-  searchOpen,
-  onOpenSearch,
-  onCloseSearch,
-}: WorkspaceHeaderActionsProps) {
+  searchOpen: controlledSearchOpen,
+  onOpenSearch: onOpenSearchProp,
+  onCloseSearch: onCloseSearchProp,
+}: WorkspaceHeaderActionsProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
+  const [internalSearchOpen, setInternalSearchOpen] = useState(false)
+  const searchOpen = controlledSearchOpen ?? internalSearchOpen
+  const onOpenSearch = useCallback(() => {
+    if (onOpenSearchProp) {
+      onOpenSearchProp()
+    } else {
+      setInternalSearchOpen(true)
+    }
+  }, [onOpenSearchProp])
+  const onCloseSearch = useCallback(() => {
+    if (onCloseSearchProp) {
+      onCloseSearchProp()
+    } else {
+      setInternalSearchOpen(false)
+    }
+  }, [onCloseSearchProp])
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null)

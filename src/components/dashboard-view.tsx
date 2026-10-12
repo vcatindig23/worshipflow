@@ -21,6 +21,7 @@ import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ProfileAvatar from "@/components/profile-avatar"
+import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 
 type DashboardViewProps = {
   workspace: WorkspaceData
@@ -258,33 +259,12 @@ export default function DashboardView({
               </div>
             </div>
 
-            <div className="hidden items-center gap-2 sm:flex">
-              <Link
-                href="/search"
-                aria-label="Search"
-                className="rounded-xl border border-[var(--border)] p-2.5 text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-              >
-                <Search className="size-[18px]" />
-              </Link>
-
-              <Link
-                href="/notifications"
-                aria-label="Notifications"
-                className="relative rounded-xl border border-[var(--border)] p-2.5 text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-              >
-                <Bell className="size-[18px]" />
-                {workspace.unreadNotificationCount > 0 ? (
-                  <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-[var(--brand)] text-[9px] font-bold text-white">
-                    {workspace.unreadNotificationCount > 9
-                      ? "9+"
-                      : workspace.unreadNotificationCount}
-                  </span>
-                ) : null}
-              </Link>
+            <div className="flex items-center gap-2">
+              <WorkspaceHeaderActions />
 
               <Link
                 href="/songs/new"
-                className="ml-2 inline-flex items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)]"
+                className="ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] sm:inline-flex"
               >
                 <Plus className="size-4" />
                 New Song
