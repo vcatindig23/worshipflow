@@ -262,7 +262,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         </div>
 
         <div className="px-5 pb-6 sm:px-8">
-          <div className="flex flex-col gap-4 sm:-mt-14 sm:flex-row sm:items-end sm:gap-5">
+          <div className="-mt-12 flex flex-col gap-4 sm:-mt-14 sm:flex-row sm:items-end sm:gap-5">
             <ProfileAvatar
               name={displayName}
               imageUrl={workspace.userAvatarUrl}
