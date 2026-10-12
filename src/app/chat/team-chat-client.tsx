@@ -413,6 +413,21 @@ export default function TeamChatClient({
               id="team-chat-message"
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (
+                  event.key !== "Enter" ||
+                  event.shiftKey ||
+                  event.nativeEvent.isComposing
+                ) {
+                  return
+                }
+
+                event.preventDefault()
+
+                if (draft.trim() && !isPending) {
+                  event.currentTarget.form?.requestSubmit()
+                }
+              }}
               maxLength={2000}
               rows={2}
               placeholder="Message your worship team…"
@@ -432,7 +447,7 @@ export default function TeamChatClient({
           </button>
         </form>
         <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-[var(--muted)]">
-          <span>Keep messages focused on worship and service coordination.</span>
+          <span>Press Enter to send · Shift+Enter for a new line.</span>
           <span className="shrink-0 tabular-nums">{draft.length}/2000</span>
         </div>
       </div>
