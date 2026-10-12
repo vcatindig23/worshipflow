@@ -420,6 +420,7 @@ export default function TeamChatClient({
             forceScrollToBottomRef.current = true
             setNewMessageCount(0)
           } else if (isNearBottom) {
+            forceScrollToBottomRef.current = true
             setNewMessageCount(0)
             void markTeamChatNotificationsRead()
           } else {
@@ -1034,16 +1035,20 @@ export default function TeamChatClient({
         authorName: memberNames.get(result.message.user_id) ?? "You",
       }
 
+      const messageAlreadyReceived = knownMessageIdsRef.current.has(sentMessage.id)
       knownMessageIdsRef.current.add(sentMessage.id)
-    forceScrollToBottomRef.current = true
-    setNewMessageCount(0)
-    setMessages((current) => {
-        if (current.some((message) => message.id === sentMessage.id)) {
-          return current
-        }
 
-        return [...current, sentMessage].slice(-100)
-      })
+      if (!messageAlreadyReceived) {
+        forceScrollToBottomRef.current = true
+        setNewMessageCount(0)
+        setMessages((current) => {
+          if (current.some((message) => message.id === sentMessage.id)) {
+            return current
+          }
+
+          return [...current, sentMessage].slice(-100)
+        })
+      }
       stopTypingIndicator()
       setDraft("")
       setMentionedUserIds([])
