@@ -12,6 +12,7 @@ import { Fragment } from "react"
 import {
   AlertCircle,
   Check,
+  ChevronDown,
   ChevronUp,
   Copy,
   LoaderCircle,
@@ -279,6 +280,7 @@ export default function TeamChatClient({
   const [pinnedMessages, setPinnedMessages] = useState(initialPinnedMessages)
   const [isPinningMessage, startPinningMessage] = useTransition()
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
+  const [newMessageCount, setNewMessageCount] = useState(0)
   const [hasMoreMessages, setHasMoreMessages] = useState(
     initialMessages.length === 100
   )
@@ -306,6 +308,8 @@ export default function TeamChatClient({
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const forceScrollToBottomRef = useRef(false)
+  const knownMessageIdsRef = useRef(new Set(initialMessages.map((message) => message.id)))
   const previousScrollPositionRef = useRef<{
     scrollHeight: number
     scrollTop: number
@@ -401,7 +405,25 @@ export default function TeamChatClient({
             authorName: memberNames.get(row.user_id) ?? "Team member",
           }
 
-          if (row.user_id !== currentUserId) {
+          if (knownMessageIdsRef.current.has(incomingMessage.id)) {
+            return
+          }
+          knownMessageIdsRef.current.add(incomingMessage.id)
+
+          const container = messagesContainerRef.current
+          const distanceFromBottom = container
+            ? container.scrollHeight - container.scrollTop - container.clientHeight
+            : 0
+          const isNearBottom = !container || distanceFromBottom <= 96
+
+          if (row.user_id === currentUserId) {
+            forceScrollToBottomRef.current = true
+            setNewMessageCount(0)
+          } else if (isNearBottom) {
+            setNewMessageCount(0)
+            void markTeamChatNotificationsRead()
+          } else {
+            setNewMessageCount((count) => count + 1)
             void markTeamChatNotificationsRead()
           }
 
@@ -581,13 +603,25 @@ export default function TeamChatClient({
         previousPosition.scrollTop +
         (container.scrollHeight - previousPosition.scrollHeight)
       previousScrollPositionRef.current = null
+      forceScrollToBottomRef.current = false
       return
     }
 
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    })
+    const distanceFromBottom = container
+      ? container.scrollHeight - container.scrollTop - container.clientHeight
+      : 0
+    const shouldFollowLatest =
+      forceScrollToBottomRef.current || !container || distanceFromBottom <= 96
+
+    if (shouldFollowLatest) {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      })
+      setNewMessageCount(0)
+    }
+
+    forceScrollToBottomRef.current = false
   }, [messages, activeSearch])
 
   function sendTypingStatus(isTyping: boolean) {
@@ -765,6 +799,9 @@ export default function TeamChatClient({
           authorName: memberNames.get(message.user_id) ?? "Team member",
         })
       )
+      for (const message of olderMessages) {
+        knownMessageIdsRef.current.add(message.id)
+      }
 
       const container = messagesContainerRef.current
       if (container) {
@@ -934,6 +971,7 @@ export default function TeamChatClient({
         return
       }
 
+      knownMessageIdsRef.current.delete(result.messageId)
       setMessages((current) =>
         current.filter((message) => message.id !== result.messageId)
       )
@@ -948,6 +986,25 @@ export default function TeamChatClient({
         setEditDraft("")
       }
     })
+  }
+
+  function handleMessagesScroll() {
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight
+
+    if (distanceFromBottom <= 96) {
+      setNewMessageCount(0)
+    }
+  }
+
+  function handleJumpToLatest() {
+    setNewMessageCount(0)
+    forceScrollToBottomRef.current = true
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
+    forceScrollToBottomRef.current = false
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -977,7 +1034,10 @@ export default function TeamChatClient({
         authorName: memberNames.get(result.message.user_id) ?? "You",
       }
 
-      setMessages((current) => {
+      knownMessageIdsRef.current.add(sentMessage.id)
+    forceScrollToBottomRef.current = true
+    setNewMessageCount(0)
+    setMessages((current) => {
         if (current.some((message) => message.id === sentMessage.id)) {
           return current
         }
@@ -1163,7 +1223,8 @@ export default function TeamChatClient({
 
       <div
         ref={messagesContainerRef}
-        className="min-h-[360px] max-h-[62vh] overflow-y-auto bg-[var(--background)]/55 px-4 py-5 sm:min-h-[440px] sm:px-6"
+        className="relative min-h-[360px] max-h-[62vh] overflow-y-auto bg-[var(--background)]/55 px-4 py-5 sm:min-h-[440px] sm:px-6"
+        onScroll={handleMessagesScroll}
         aria-label="Team chat messages"
         aria-live="polite"
       >
@@ -1426,6 +1487,19 @@ export default function TeamChatClient({
               )
             })}
           </ol>
+        ) : null}
+        {newMessageCount > 0 && !activeSearch ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-3">
+            <button
+              type="button"
+              onClick={handleJumpToLatest}
+              className="pointer-events-auto inline-flex h-9 items-center gap-2 rounded-full border border-[var(--brand)]/20 bg-[var(--brand)] px-4 text-xs font-semibold text-white shadow-lg transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2"
+            >
+              <ChevronDown className="size-4" />
+              {newMessageCount} new {newMessageCount === 1 ? "message" : "messages"}
+              <span className="ml-1 border-l border-white/30 pl-2">Jump to latest</span>
+            </button>
+          </div>
         ) : null}
         <div ref={messagesEndRef} />
       </div>
