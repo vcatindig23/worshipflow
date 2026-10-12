@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react"
+import { teamPositionLabels } from "@/lib/team-positions"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { updateProfile } from "./actions"
@@ -24,6 +25,11 @@ const errorMessages: Record<string, string> = {
   avatar_upload_failed:
     "Your photo could not be uploaded. Please try again.",
   save_failed: "Your profile could not be saved. Please try again.",
+  invalid_bio: "Your bio must be 500 characters or fewer.",
+  invalid_location: "Your location must be 120 characters or fewer.",
+  invalid_website: "Enter a valid website address using HTTP or HTTPS.",
+  invalid_team_positions: "Select up to 10 valid worship-team positions.",
+  team_positions_failed: "Your profile was saved, but worship-team positions could not be updated. Please retry.",
 }
 
 const roleLabels: Record<string, string> = {
@@ -71,12 +77,12 @@ export default async function ProfileSettingsPage({
   const [profileResult, membershipResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("display_name, avatar_url")
+      .select("display_name, avatar_url, bio, location, website, created_at")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
       .from("organization_members")
-      .select("role, organizations (name)")
+      .select("organization_id, role, team_positions, created_at, organizations (name)")
       .eq("user_id", user.id)
       .limit(1)
       .maybeSingle(),
@@ -109,6 +115,11 @@ export default async function ProfileSettingsPage({
     ? membership.organizations[0]
     : membership?.organizations
   const displayName = profile.display_name
+  const profileBio = profile.bio ?? ""
+  const profileLocation = profile.location ?? ""
+  const profileWebsite = profile.website ?? ""
+  const organizationId = membership?.organization_id ?? ""
+  const selectedTeamPositions = (membership?.team_positions ?? []) as string[]
   let avatarUrl: string | null = null
   if (profile.avatar_url?.startsWith(`${user.id}/`)) {
     const { data: signedAvatar, error: avatarError } = await supabase.storage
@@ -141,7 +152,8 @@ export default async function ProfileSettingsPage({
         Settings
       </Link>
 
-      <section>
+      <section className="flex flex-wrap items-start justify-between gap-4">
+        <div>
         <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
           <UserRound className="size-3.5" />
           Personal Settings
@@ -152,6 +164,14 @@ export default async function ProfileSettingsPage({
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
           Manage how your church team sees you and review your account details.
         </p>
+        </div>
+        <Link
+          href="/profile"
+          className="inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+        >
+          <UserRound className="size-4" />
+          View profile
+        </Link>
       </section>
 
       {getParam(params.saved) === "true" ? (
@@ -186,6 +206,9 @@ export default async function ProfileSettingsPage({
           action={updateProfile}
           className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
         >
+          {organizationId ? (
+            <input type="hidden" name="organizationId" value={organizationId} />
+          ) : null}
           <div className="flex items-center gap-4 border-b border-[var(--border)] pb-6">
             <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[var(--brand-soft)] text-lg font-bold text-[var(--brand)]">
               {avatarUrl ? (
@@ -237,6 +260,64 @@ export default async function ProfileSettingsPage({
 
             <div>
               <label
+                htmlFor="bio"
+                className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+              >
+                About you
+              </label>
+              <textarea
+                id="bio"
+                name="bio"
+                rows={4}
+                maxLength={500}
+                defaultValue={profileBio}
+                placeholder="Share a little about yourself and your heart for worship."
+                className="w-full rounded-xl border border-[var(--border)] bg-white px-3.5 py-3 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              />
+              <p className="mt-2 text-xs text-[var(--muted)]">Up to 500 characters.</p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="location"
+                className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+              >
+                Location
+              </label>
+              <input
+                id="location"
+                name="location"
+                type="text"
+                maxLength={120}
+                defaultValue={profileLocation}
+                placeholder="City or region"
+                className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="website"
+                className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+              >
+                Website or social link
+              </label>
+              <input
+                id="website"
+                name="website"
+                type="text"
+                maxLength={250}
+                inputMode="url"
+                autoComplete="url"
+                defaultValue={profileWebsite}
+                placeholder="yourwebsite.com"
+                className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              />
+              <p className="mt-2 text-xs text-[var(--muted)]">Only HTTP and HTTPS links are allowed.</p>
+            </div>
+
+            <div>
+              <label
                 htmlFor="avatar"
                 className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--foreground)]"
               >
@@ -269,6 +350,44 @@ export default async function ProfileSettingsPage({
               ) : null}
             </div>
           </div>
+
+          {membership ? (
+            <section className="mt-7 border-t border-[var(--border)] pt-6">
+              <div>
+                <h3 className="font-semibold text-[var(--foreground)]">
+                  Worship-team positions
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                  Choose the roles you serve in, such as drummer, vocalist, guitarist, or sound engineer. Your church administrator can also help manage team assignments.
+                </p>
+              </div>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {Object.entries(teamPositionLabels).map(([value, label]) => (
+                  <label
+                    key={value}
+                    className="flex items-center gap-3 rounded-xl border border-[var(--border)] px-3 py-2.5 text-sm text-[var(--foreground)] transition hover:border-[var(--brand)] hover:bg-[var(--surface)]"
+                  >
+                    <input
+                      type="checkbox"
+                      name="teamPositions"
+                      value={value}
+                      defaultChecked={selectedTeamPositions.includes(value)}
+                      className="size-4 rounded border-[var(--border)] accent-[var(--brand)]"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-[var(--muted)]">
+                Select up to 10 positions. These appear on your profile and help teammates identify your ministry roles.
+              </p>
+            </section>
+          ) : (
+            <section className="mt-7 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+              <p className="text-sm font-medium text-[var(--foreground)]">Worship-team positions</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">Join a church workspace to add your worship roles to your profile.</p>
+            </section>
+          )}
 
           <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-5">
             <p className="text-xs text-[var(--muted)]">
