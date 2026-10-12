@@ -21,6 +21,7 @@ import {
   useState,
 } from "react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
+import { createPortal } from "react-dom"
 
 import { searchWorkspaceLive } from "@/app/search/actions"
 import {
@@ -139,6 +140,7 @@ export default function WorkspaceHeaderActions({
     }
   }, [onCloseSearchProp])
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [isBrowserMounted, setIsBrowserMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null)
   const [isSearching, setIsSearching] = useState(false)
@@ -180,6 +182,10 @@ export default function WorkspaceHeaderActions({
   useEffect(() => {
     void refreshNotifications()
   }, [refreshNotifications])
+
+  useEffect(() => {
+    setIsBrowserMounted(true)
+  }, [])
 
   useEffect(() => {
     function handleSearchShortcut(event: KeyboardEvent) {
@@ -313,6 +319,27 @@ export default function WorkspaceHeaderActions({
       void supabase.removeChannel(channel)
     }
   }, [notificationUserId, refreshNotifications, supabase])
+
+  useEffect(() => {
+    function handleOpenSearchRequest() {
+      setNotificationsOpen(false)
+      onOpenSearch()
+    }
+
+    function handleOpenNotificationsRequest() {
+      onCloseSearch()
+      setNotificationsOpen(true)
+      void refreshNotifications()
+    }
+
+    window.addEventListener("worshipflow:open-global-search", handleOpenSearchRequest)
+    window.addEventListener("worshipflow:open-notifications", handleOpenNotificationsRequest)
+
+    return () => {
+      window.removeEventListener("worshipflow:open-global-search", handleOpenSearchRequest)
+      window.removeEventListener("worshipflow:open-notifications", handleOpenNotificationsRequest)
+    }
+  }, [onCloseSearch, onOpenSearch, refreshNotifications])
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -550,150 +577,155 @@ export default function WorkspaceHeaderActions({
         ) : null}
       </div>
 
-      {searchOpen ? (
-        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/35 px-3 py-8 backdrop-blur-[2px] sm:px-6">
-          <button
-            type="button"
-            aria-label="Close global search"
-            onClick={onCloseSearch}
-            className="absolute inset-0 h-full w-full cursor-default"
-          />
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-label="Global search"
-            className="relative mx-auto mt-[4vh] flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-2xl sm:mt-[8vh]"
-          >
-            <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-4 sm:px-5">
-              <Search className="size-5 shrink-0 text-[var(--brand)]" />
-              <label className="min-w-0 flex-1">
-                <span className="sr-only">Search songs and setlists</span>
-                <input
-                  ref={searchInputRef}
-                  autoComplete="off"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  type="search"
-                  value={searchQuery}
-                  maxLength={100}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search songs, artists, setlists, services…"
-                  className="h-9 w-full border-0 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:ring-0"
-                />
-              </label>
-              <button
-                type="button"
-                aria-label="Close search"
-                onClick={onCloseSearch}
-                className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            <div className="min-h-[220px] flex-1 overflow-y-auto px-3 py-3 sm:px-4">
-              {searchQuery.trim().length < 2 ? (
-                <div className="flex min-h-[190px] flex-col items-center justify-center text-center">
-                  <span className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                    <Search className="size-5" />
-                  </span>
-                  <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">
-                    Search your workspace
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    Type at least 2 characters to find songs and setlists.
-                  </p>
-                </div>
-              ) : isSearching ? (
-                <div role="status" className="flex min-h-[190px] items-center justify-center gap-2 text-sm text-[var(--muted)]">
-                  <LoaderCircle className="size-4 animate-spin" />
-                  Searching your workspace…
-                </div>
-              ) : searchError ? (
-                <div role="alert" className="flex min-h-[190px] flex-col items-center justify-center px-5 text-center">
-                  <p className="text-sm font-semibold text-[var(--foreground)]">Search unavailable</p>
-                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{searchError}</p>
-                </div>
-              ) : !searchResults || (searchResults.songs.length === 0 && searchResults.setlists.length === 0) ? (
-                <div className="flex min-h-[190px] flex-col items-center justify-center px-5 text-center">
-                  <Search className="size-6 text-[var(--muted)]" />
-                  <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">No matches found</p>
-                  <p className="mt-1 text-xs text-[var(--muted)]">Try a different song, artist, or setlist name.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {searchResults.songs.length > 0 ? (
-                    <section aria-labelledby="live-search-songs">
-                      <h3 id="live-search-songs" className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
-                        Songs
-                      </h3>
-                      <ul className="space-y-1">
-                        {searchResults.songs.map((song) => (
-                          <li key={song.id}>
-                            <Link
-                              href={`/songs/${song.id}`}
-                              onClick={onCloseSearch}
-                              className="flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
-                            >
-                              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
-                                <Music2 className="size-4" />
+      {searchOpen && isBrowserMounted
+        ? createPortal(
+                    <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/35 px-3 py-8 backdrop-blur-[2px] sm:px-6">
+                      <button
+                        type="button"
+                        aria-label="Close global search"
+                        onClick={onCloseSearch}
+                        className="absolute inset-0 h-full w-full cursor-default"
+                      />
+                      <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Global search"
+                        className="relative mx-auto mt-[4vh] flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-2xl sm:mt-[8vh]"
+                      >
+                        <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-4 sm:px-5">
+                          <Search className="size-5 shrink-0 text-[var(--brand)]" />
+                          <label className="min-w-0 flex-1">
+                            <span className="sr-only">Search songs and setlists</span>
+                            <input
+                              ref={searchInputRef}
+                              autoComplete="off"
+                              autoCorrect="off"
+                              spellCheck={false}
+                              type="search"
+                              value={searchQuery}
+                              maxLength={100}
+                              onChange={(event) => setSearchQuery(event.target.value)}
+                              placeholder="Search songs, artists, setlists, services…"
+                              className="h-9 w-full border-0 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:ring-0"
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            aria-label="Close search"
+                            onClick={onCloseSearch}
+                            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                          >
+                            <X className="size-4" />
+                          </button>
+                        </div>
+            
+                        <div className="min-h-[220px] flex-1 overflow-y-auto px-3 py-3 sm:px-4">
+                          {searchQuery.trim().length < 2 ? (
+                            <div className="flex min-h-[190px] flex-col items-center justify-center text-center">
+                              <span className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                                <Search className="size-5" />
                               </span>
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{song.title}</span>
-                                <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">{song.artist || song.album || "Artist not set"}</span>
-                              </span>
-                              {song.status === "archived" ? (
-                                <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-800">Archived</span>
+                              <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">
+                                Search your workspace
+                              </p>
+                              <p className="mt-1 text-xs text-[var(--muted)]">
+                                Type at least 2 characters to find songs and setlists.
+                              </p>
+                            </div>
+                          ) : isSearching ? (
+                            <div role="status" className="flex min-h-[190px] items-center justify-center gap-2 text-sm text-[var(--muted)]">
+                              <LoaderCircle className="size-4 animate-spin" />
+                              Searching your workspace…
+                            </div>
+                          ) : searchError ? (
+                            <div role="alert" className="flex min-h-[190px] flex-col items-center justify-center px-5 text-center">
+                              <p className="text-sm font-semibold text-[var(--foreground)]">Search unavailable</p>
+                              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{searchError}</p>
+                            </div>
+                          ) : !searchResults || (searchResults.songs.length === 0 && searchResults.setlists.length === 0) ? (
+                            <div className="flex min-h-[190px] flex-col items-center justify-center px-5 text-center">
+                              <Search className="size-6 text-[var(--muted)]" />
+                              <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">No matches found</p>
+                              <p className="mt-1 text-xs text-[var(--muted)]">Try a different song, artist, or setlist name.</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {searchResults.songs.length > 0 ? (
+                                <section aria-labelledby="live-search-songs">
+                                  <h3 id="live-search-songs" className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
+                                    Songs
+                                  </h3>
+                                  <ul className="space-y-1">
+                                    {searchResults.songs.map((song) => (
+                                      <li key={song.id}>
+                                        <Link
+                                          href={`/songs/${song.id}`}
+                                          onClick={onCloseSearch}
+                                          className="flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
+                                        >
+                                          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
+                                            <Music2 className="size-4" />
+                                          </span>
+                                          <span className="min-w-0 flex-1">
+                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{song.title}</span>
+                                            <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">{song.artist || song.album || "Artist not set"}</span>
+                                          </span>
+                                          {song.status === "archived" ? (
+                                            <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-800">Archived</span>
+                                          ) : null}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </section>
                               ) : null}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  ) : null}
-
-                  {searchResults.setlists.length > 0 ? (
-                    <section aria-labelledby="live-search-setlists">
-                      <h3 id="live-search-setlists" className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
-                        Setlists and services
-                      </h3>
-                      <ul className="space-y-1">
-                        {searchResults.setlists.map((setlist) => (
-                          <li key={setlist.id}>
-                            <Link
-                              href={`/setlists/${setlist.id}`}
-                              onClick={onCloseSearch}
-                              className="flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
-                            >
-                              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
-                                {setlist.service_date ? <CalendarDays className="size-4" /> : <ListMusic className="size-4" />}
-                              </span>
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{setlist.name}</span>
-                                <span className="mt-0.5 block text-xs text-[var(--muted)]">
-                                  {setlist.service_date
-                                    ? new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${setlist.service_date}T00:00:00Z`))
-                                    : "Date not set"}
-                                </span>
-                              </span>
-                              <span className="rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]">
-                                {setlist.status.charAt(0).toUpperCase() + setlist.status.slice(1)}
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  ) : null}
-                </div>
-              )}
-            </div>
-            <div className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-[10px] text-[var(--muted)] sm:px-5">
-              Results update as you type. Search is limited to your current church workspace.
-            </div>
-          </section>
-        </div>
-      ) : null}
+            
+                              {searchResults.setlists.length > 0 ? (
+                                <section aria-labelledby="live-search-setlists">
+                                  <h3 id="live-search-setlists" className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
+                                    Setlists and services
+                                  </h3>
+                                  <ul className="space-y-1">
+                                    {searchResults.setlists.map((setlist) => (
+                                      <li key={setlist.id}>
+                                        <Link
+                                          href={`/setlists/${setlist.id}`}
+                                          onClick={onCloseSearch}
+                                          className="flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
+                                        >
+                                          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
+                                            {setlist.service_date ? <CalendarDays className="size-4" /> : <ListMusic className="size-4" />}
+                                          </span>
+                                          <span className="min-w-0 flex-1">
+                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{setlist.name}</span>
+                                            <span className="mt-0.5 block text-xs text-[var(--muted)]">
+                                              {setlist.service_date
+                                                ? new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${setlist.service_date}T00:00:00Z`))
+                                                : "Date not set"}
+                                            </span>
+                                          </span>
+                                          <span className="rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]">
+                                            {setlist.status.charAt(0).toUpperCase() + setlist.status.slice(1)}
+                                          </span>
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </section>
+                              ) : null}
+                            </div>
+                          )}
+                        </div>
+                        <div className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-[10px] text-[var(--muted)] sm:px-5">
+                          Results update as you type. Search is limited to your current church workspace.
+                        </div>
+                      </section>
+                    </div>
+            
+          ,
+          document.body
+        )
+        : null}
     </div>
   )
 }

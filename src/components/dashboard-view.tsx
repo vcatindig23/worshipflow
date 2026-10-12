@@ -20,6 +20,7 @@ import {
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+import WorkspaceSidebarAction from "@/components/workspace-sidebar-action"
 import ProfileAvatar from "@/components/profile-avatar"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 
@@ -164,6 +165,27 @@ export default function DashboardView({
                     : item.href === "/chat"
                       ? workspace.unreadChatNotificationCount
                       : 0
+
+                if (item.href === "/search") {
+                  return (
+                    <WorkspaceSidebarAction
+                      key={item.href}
+                      action="search"
+                      label={item.label}
+                    />
+                  )
+                }
+
+                if (item.href === "/notifications") {
+                  return (
+                    <WorkspaceSidebarAction
+                      key={item.href}
+                      action="notifications"
+                      label={item.label}
+                      unreadCount={badgeCount}
+                    />
+                  )
+                }
 
                 return (
                   <Link
