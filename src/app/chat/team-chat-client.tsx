@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Check,
   ChevronUp,
+  Copy,
   LoaderCircle,
   MessageCircle,
   MessagesSquare,
@@ -277,6 +278,7 @@ export default function TeamChatClient({
   const [messages, setMessages] = useState(initialMessages)
   const [pinnedMessages, setPinnedMessages] = useState(initialPinnedMessages)
   const [isPinningMessage, startPinningMessage] = useTransition()
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const [hasMoreMessages, setHasMoreMessages] = useState(
     initialMessages.length === 100
   )
@@ -782,6 +784,18 @@ export default function TeamChatClient({
       })
       setHasMoreMessages(result.hasMore)
     })
+  }
+
+  async function handleCopyMessage(message: TeamChatMessage) {
+    try {
+      await navigator.clipboard.writeText(message.body)
+      setCopiedMessageId(message.id)
+      window.setTimeout(() => {
+        setCopiedMessageId((current) => current === message.id ? null : current)
+      }, 1800)
+    } catch {
+      setError("This browser could not copy the message. Please select and copy it manually.")
+    }
   }
 
   function handleTogglePinned(message: TeamChatMessage) {
@@ -1354,7 +1368,20 @@ export default function TeamChatClient({
                             ) : null}
                             <button
                               type="button"
-                              onClick={() => handleStartReply(message)
+                              onClick={() => void handleCopyMessage(message)}
+                              aria-label={copiedMessageId === message.id ? "Message copied" : "Copy message text"}
+                              className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)]"
+                            >
+                              {copiedMessageId === message.id ? (
+                                <Check className="size-3" />
+                              ) : (
+                                <Copy className="size-3" />
+                              )}
+                              {copiedMessageId === message.id ? "Copied" : "Copy"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleStartReply(message)}
                               disabled={isSavingEdit || isDeletingMessage}
                               aria-label={`Reply to ${displayName}'s message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
                               className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)] disabled:opacity-50"
