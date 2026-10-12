@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import {
   BookOpen,
   CalendarDays,
@@ -100,6 +100,8 @@ export default function WorshipFlowShell({
   const [mobileOpen, setMobileOpen] =
     useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const handleOpenSearch = useCallback(() => setSearchOpen(true), [])
+  const handleCloseSearch = useCallback(() => setSearchOpen(false), [])
 
   const navigationContent = (
     <>
@@ -127,7 +129,7 @@ export default function WorshipFlowShell({
               type="button"
               onClick={() => {
                 setMobileOpen(false)
-                setSearchOpen(true)
+                handleOpenSearch()
               }}
               aria-haspopup="dialog"
               aria-expanded={searchOpen}
@@ -269,8 +271,8 @@ export default function WorshipFlowShell({
 
           <WorkspaceHeaderActions
             searchOpen={searchOpen}
-            onOpenSearch={() => setSearchOpen(true)}
-            onCloseSearch={() => setSearchOpen(false)}
+            onOpenSearch={handleOpenSearch}
+            onCloseSearch={handleCloseSearch}
           />
         </header>
 

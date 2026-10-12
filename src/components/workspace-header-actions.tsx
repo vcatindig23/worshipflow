@@ -156,6 +156,36 @@ export default function WorkspaceHeaderActions({
   }, [refreshNotifications])
 
   useEffect(() => {
+    function handleSearchShortcut(event: KeyboardEvent) {
+      if (
+        event.key !== "/" ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.shiftKey
+      ) {
+        return
+      }
+
+      const target = event.target
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      setNotificationsOpen(false)
+      onOpenSearch()
+    }
+
+    document.addEventListener("keydown", handleSearchShortcut)
+    return () => document.removeEventListener("keydown", handleSearchShortcut)
+  }, [onOpenSearch])
+
+  useEffect(() => {
     if (!searchOpen) return
 
     searchInputRef.current?.focus()
