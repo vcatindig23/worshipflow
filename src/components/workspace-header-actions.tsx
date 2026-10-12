@@ -203,6 +203,7 @@ export default function WorkspaceHeaderActions({
   const [activities, setActivities] = useState<HeaderActivity[]>([])
   const [activityError, setActivityError] = useState("")
   const [unreadCount, setUnreadCount] = useState(0)
+  const [liveUnreadChatCount, setLiveUnreadChatCount] = useState(unreadChatCount)
   const [notificationUserId, setNotificationUserId] = useState<string | null>(null)
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
   const [isMarkingAllRead, setIsMarkingAllRead] = useState(false)
@@ -229,6 +230,7 @@ export default function WorkspaceHeaderActions({
       setActivities(result.activities)
       setActivityError(result.activityError)
       setUnreadCount(result.unreadCount)
+      setLiveUnreadChatCount(result.unreadChatCount)
       setNotificationUserId(result.userId)
     } catch {
       setNotificationError("Notifications could not be loaded. Please try again.")
@@ -261,6 +263,21 @@ export default function WorkspaceHeaderActions({
   useEffect(() => {
     setIsBrowserMounted(true)
   }, [])
+
+  useEffect(() => {
+    function refreshWhenVisible() {
+      if (document.visibilityState === "visible") {
+        void refreshNotifications()
+      }
+    }
+
+    window.addEventListener("focus", refreshWhenVisible)
+    document.addEventListener("visibilitychange", refreshWhenVisible)
+    return () => {
+      window.removeEventListener("focus", refreshWhenVisible)
+      document.removeEventListener("visibilitychange", refreshWhenVisible)
+    }
+  }, [refreshNotifications])
 
   useEffect(() => {
     function handleSearchShortcut(event: KeyboardEvent) {
@@ -476,6 +493,12 @@ export default function WorkspaceHeaderActions({
           )
         )
         setUnreadCount((count) => Math.max(0, count - 1))
+        if (
+          notification.type === "team_chat_message" ||
+          notification.type === "team_chat_mention"
+        ) {
+          setLiveUnreadChatCount((count) => Math.max(0, count - 1))
+        }
 
         const result = await markHeaderNotificationRead(notification.id)
         if (!result.success) {
@@ -515,6 +538,7 @@ export default function WorkspaceHeaderActions({
           }))
         )
         setUnreadCount(0)
+        setLiveUnreadChatCount(0)
       } else {
         setNotificationError(result.error)
       }
@@ -546,13 +570,13 @@ export default function WorkspaceHeaderActions({
       <Link
         href="/chat"
         title="Team Chat"
-        aria-label={unreadChatCount > 0 ? `Team Chat, ${unreadChatCount} unread updates` : "Team Chat"}
+        aria-label={liveUnreadChatCount > 0 ? `Team Chat, ${liveUnreadChatCount} unread updates` : "Team Chat"}
         className="relative flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition hover:border-[var(--brand)] hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
       >
         <MessagesSquare className="size-[18px]" />
-        {unreadChatCount > 0 ? (
+        {liveUnreadChatCount > 0 ? (
           <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-red-600 px-1 text-[9px] font-bold text-white">
-            {unreadChatCount > 99 ? "99+" : unreadChatCount}
+            {liveUnreadChatCount > 99 ? "99+" : liveUnreadChatCount}
           </span>
         ) : null}
       </Link>

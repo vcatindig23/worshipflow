@@ -65,7 +65,7 @@ export async function loadNotificationPreview() {
   const { supabase, userId, organizationId } =
     await getHeaderNotificationContext()
 
-  const [recentResult, unreadResult, activityResult] = await Promise.all([
+  const [recentResult, unreadResult, unreadChatResult, activityResult] = await Promise.all([
     supabase
       .from("notifications")
       .select("id, type, title, body, setlist_id, read_at, created_at")
@@ -80,6 +80,13 @@ export async function loadNotificationPreview() {
       .eq("organization_id", organizationId)
       .is("read_at", null),
     supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("organization_id", organizationId)
+      .in("type", ["team_chat_message", "team_chat_mention"])
+      .is("read_at", null),
+    supabase
       .from("organization_activity")
       .select("id, actor_name, action, entity_type, entity_id, entity_name, details, created_at")
       .eq("organization_id", organizationId)
@@ -87,9 +94,9 @@ export async function loadNotificationPreview() {
       .limit(10),
   ])
 
-  if (recentResult.error || unreadResult.error) {
+  if (recentResult.error || unreadResult.error || unreadChatResult.error) {
     console.error("load_notification_preview failed:", {
-      code: recentResult.error?.code ?? unreadResult.error?.code,
+      code: recentResult.error?.code ?? unreadResult.error?.code ?? unreadChatResult.error?.code,
     })
     return {
       success: false as const,
@@ -112,6 +119,7 @@ export async function loadNotificationPreview() {
       ? "Workspace activity is temporarily unavailable."
       : "",
     unreadCount: unreadResult.count ?? 0,
+    unreadChatCount: unreadChatResult.count ?? 0,
   }
 }
 
