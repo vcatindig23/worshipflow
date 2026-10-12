@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
+  Activity,
   AtSign,
   Bell,
   CalendarDays,
@@ -10,7 +11,9 @@ import {
   LoaderCircle,
   ListMusic,
   Music2,
+  MessagesSquare,
   Search,
+  Users,
   X,
 } from "lucide-react"
 import {
@@ -22,6 +25,7 @@ import {
 } from "react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { createPortal } from "react-dom"
+import { describeActivity, type ActivityEntry } from "@/lib/activity-log"
 
 import { searchWorkspaceLive } from "@/app/search/actions"
 import {
@@ -40,10 +44,32 @@ type HeaderNotification = {
   created_at: string
 }
 
+type HeaderActivity = ActivityEntry & {
+  id: string
+  entity_type: "song" | "service" | "member"
+  entity_id: string | null
+  created_at: string
+}
+
+type CombinedFeedItem =
+  | {
+      kind: "notification"
+      id: string
+      created_at: string
+      notification: HeaderNotification
+    }
+  | {
+      kind: "activity"
+      id: string
+      created_at: string
+      activity: HeaderActivity
+    }
+
 type WorkspaceHeaderActionsProps = {
   searchOpen?: boolean
   onOpenSearch?: () => void
   onCloseSearch?: () => void
+  unreadChatCount?: number
 }
 
 type SearchSong = {
@@ -104,6 +130,33 @@ function notificationHref(notification: HeaderNotification) {
   return null
 }
 
+function activityHref(activity: HeaderActivity) {
+  if (
+    !activity.entity_id ||
+    activity.action === "song.deleted" ||
+    activity.action === "service.deleted"
+  ) {
+    return "/activity"
+  }
+
+  if (activity.entity_type === "song") {
+    return `/songs/${activity.entity_id}`
+  }
+
+  if (activity.entity_type === "service") {
+    return `/setlists/${activity.entity_id}`
+  }
+
+  return "/settings/team"
+}
+
+function ActivityFeedIcon({ type }: { type: HeaderActivity["entity_type"] }) {
+  const Icon =
+    type === "song" ? Music2 : type === "service" ? CalendarDays : Users
+
+  return <Icon className="size-4" />
+}
+
 function NotificationIcon({ type }: { type: string }) {
   if (type === "team_chat_mention") {
     return <AtSign className="size-4" />
@@ -120,6 +173,7 @@ export default function WorkspaceHeaderActions({
   searchOpen: controlledSearchOpen,
   onOpenSearch: onOpenSearchProp,
   onCloseSearch: onCloseSearchProp,
+  unreadChatCount = 0,
 }: WorkspaceHeaderActionsProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
@@ -146,6 +200,8 @@ export default function WorkspaceHeaderActions({
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState("")
   const [notifications, setNotifications] = useState<HeaderNotification[]>([])
+  const [activities, setActivities] = useState<HeaderActivity[]>([])
+  const [activityError, setActivityError] = useState("")
   const [unreadCount, setUnreadCount] = useState(0)
   const [notificationUserId, setNotificationUserId] = useState<string | null>(null)
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
@@ -170,6 +226,8 @@ export default function WorkspaceHeaderActions({
       }
 
       setNotifications(result.notifications)
+      setActivities(result.activities)
+      setActivityError(result.activityError)
       setUnreadCount(result.unreadCount)
       setNotificationUserId(result.userId)
     } catch {
@@ -178,6 +236,23 @@ export default function WorkspaceHeaderActions({
       setIsLoadingNotifications(false)
     }
   }, [])
+
+  const feedItems = useMemo<CombinedFeedItem[]>(() => [
+    ...notifications.map((notification) => ({
+      kind: "notification" as const,
+      id: `notification:${notification.id}`,
+      created_at: notification.created_at,
+      notification,
+    })),
+    ...activities.map((activity) => ({
+      kind: "activity" as const,
+      id: `activity:${activity.id}`,
+      created_at: activity.created_at,
+      activity,
+    })),
+  ].sort((first, second) =>
+    new Date(second.created_at).getTime() - new Date(first.created_at).getTime()
+  ).slice(0, 12), [activities, notifications])
 
   useEffect(() => {
     void refreshNotifications()
@@ -383,6 +458,11 @@ export default function WorkspaceHeaderActions({
     void refreshNotifications()
   }
 
+  function openActivity(activity: HeaderActivity) {
+    setNotificationsOpen(false)
+    router.push(activityHref(activity))
+  }
+
   async function openNotification(notification: HeaderNotification) {
     setBusyNotificationId(notification.id)
     const href = notificationHref(notification)
@@ -463,6 +543,20 @@ export default function WorkspaceHeaderActions({
         </span>
       </button>
 
+      <Link
+        href="/chat"
+        title="Team Chat"
+        aria-label={unreadChatCount > 0 ? `Team Chat, ${unreadChatCount} unread updates` : "Team Chat"}
+        className="relative flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition hover:border-[var(--brand)] hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
+      >
+        <MessagesSquare className="size-[18px]" />
+        {unreadChatCount > 0 ? (
+          <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-red-600 px-1 text-[9px] font-bold text-white">
+            {unreadChatCount > 99 ? "99+" : unreadChatCount}
+          </span>
+        ) : null}
+      </Link>
+
       <div className="relative" ref={notificationsMenuRef}>
         <button
           type="button"
@@ -488,9 +582,9 @@ export default function WorkspaceHeaderActions({
           >
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-4">
               <div>
-                <h2 className="text-base font-bold text-[var(--foreground)]">Notifications</h2>
+                <h2 className="text-base font-bold text-[var(--foreground)]">Notifications & Activity</h2>
                 <p className="mt-0.5 text-xs text-[var(--muted)]">
-                  {unreadCount === 0 ? "You’re all caught up" : `${unreadCount} unread ${unreadCount === 1 ? "notification" : "notifications"}`}
+                  {unreadCount === 0 ? "Recent workspace updates" : `${unreadCount} unread ${unreadCount === 1 ? "notification" : "notifications"}`}
                 </p>
               </div>
               {unreadCount > 0 ? (
@@ -516,32 +610,72 @@ export default function WorkspaceHeaderActions({
               </p>
             ) : null}
 
+            {activityError ? (
+              <p role="status" className="border-b border-amber-100 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+                {activityError}
+              </p>
+            ) : null}
+
             <div className="min-h-0 flex-1 overflow-y-auto">
-              {isLoadingNotifications && notifications.length === 0 ? (
+              {isLoadingNotifications && feedItems.length === 0 ? (
                 <div className="flex items-center justify-center gap-2 px-5 py-10 text-sm text-[var(--muted)]">
                   <LoaderCircle className="size-4 animate-spin" />
-                  Loading notifications…
+                  Loading notifications and activity…
                 </div>
-              ) : notifications.length === 0 ? (
+              ) : feedItems.length === 0 ? (
                 <div className="px-5 py-12 text-center">
                   <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
                     <Bell className="size-5" />
                   </span>
                   <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">
-                    You’re all caught up
+                    No new updates
                   </p>
                   <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                    Team messages and service assignment updates will appear here.
+                    Notifications and changes to songs, services, and team members will appear here.
                   </p>
                 </div>
               ) : (
                 <ul className="divide-y divide-[var(--border)]">
-                  {notifications.map((notification) => {
+                  {feedItems.map((feedItem) => {
+                    if (feedItem.kind === "activity") {
+                      const activity = feedItem.activity
+
+                      return (
+                        <li key={feedItem.id}>
+                          <button
+                            type="button"
+                            onClick={() => openActivity(activity)}
+                            className="flex w-full items-start gap-3 px-4 py-3.5 text-left transition hover:bg-[var(--surface)]"
+                          >
+                            <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand)] ring-1 ring-[var(--border)]">
+                              <ActivityFeedIcon type={activity.entity_type} />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="mb-1 block text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--brand)]">
+                                Workspace activity
+                              </span>
+                              <span className="block text-sm font-semibold leading-5 text-[var(--foreground)]">
+                                {describeActivity(activity)}
+                              </span>
+                              <span className="mt-1 block truncate text-xs text-[var(--muted)]">
+                                by {activity.actor_name}
+                              </span>
+                              <span className="mt-1.5 flex items-center gap-1.5 text-[10px] font-medium text-[var(--muted)]">
+                                {formatNotificationTime(activity.created_at)}
+                                <span>· Open activity</span>
+                              </span>
+                            </span>
+                          </button>
+                        </li>
+                      )
+                    }
+
+                    const notification = feedItem.notification
                     const href = notificationHref(notification)
                     const isBusy = busyNotificationId === notification.id
 
                     return (
-                      <li key={notification.id}>
+                      <li key={feedItem.id}>
                         <button
                           type="button"
                           onClick={() => void openNotification(notification)}
@@ -572,6 +706,18 @@ export default function WorkspaceHeaderActions({
                   })}
                 </ul>
               )}
+            </div>
+            <div className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+              <Link
+                href="/activity"
+                onClick={() => setNotificationsOpen(false)}
+                className="text-xs font-semibold text-[var(--brand)] hover:underline"
+              >
+                View all activity
+              </Link>
+              <span className="text-[10px] text-[var(--muted)]">
+                {activities.length} recent activity {activities.length === 1 ? "item" : "items"}
+              </span>
             </div>
           </section>
         ) : null}

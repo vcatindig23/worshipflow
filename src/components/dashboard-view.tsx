@@ -1,7 +1,5 @@
 import Link from "next/link"
 import {
-  Activity,
-  Bell,
   CalendarDays,
   ChevronRight,
   FileText,
@@ -9,10 +7,8 @@ import {
   ListMusic,
   LogOut,
   Menu,
-  MessagesSquare,
   Music2,
   Plus,
-  Search,
   Settings,
   Users,
   UserRound,
@@ -20,7 +16,6 @@ import {
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
-import WorkspaceSidebarAction from "@/components/workspace-sidebar-action"
 import ProfileAvatar from "@/components/profile-avatar"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 
@@ -51,29 +46,9 @@ const navigation = [
     icon: CalendarDays,
   },
   {
-    label: "Search",
-    href: "/search",
-    icon: Search,
-  },
-  {
     label: "My Schedule",
     href: "/my-schedule",
     icon: UserRound,
-  },
-  {
-    label: "Team Chat",
-    href: "/chat",
-    icon: MessagesSquare,
-  },
-  {
-    label: "Notifications",
-    href: "/notifications",
-    icon: Bell,
-  },
-  {
-    label: "Activity",
-    href: "/activity",
-    icon: Activity,
   },
   {
     label: "Team",
@@ -159,33 +134,6 @@ export default function DashboardView({
             <nav className="space-y-1">
               {navigation.map((item) => {
                 const Icon = item.icon
-                const badgeCount =
-                  item.href === "/notifications"
-                    ? workspace.unreadNotificationCount
-                    : item.href === "/chat"
-                      ? workspace.unreadChatNotificationCount
-                      : 0
-
-                if (item.href === "/search") {
-                  return (
-                    <WorkspaceSidebarAction
-                      key={item.href}
-                      action="search"
-                      label={item.label}
-                    />
-                  )
-                }
-
-                if (item.href === "/notifications") {
-                  return (
-                    <WorkspaceSidebarAction
-                      key={item.href}
-                      action="notifications"
-                      label={item.label}
-                      unreadCount={badgeCount}
-                    />
-                  )
-                }
 
                 return (
                   <Link
@@ -199,11 +147,6 @@ export default function DashboardView({
                   >
                     <Icon className="size-[18px]" strokeWidth={1.8} />
                     <span>{item.label}</span>
-                    {badgeCount > 0 ? (
-                      <span className="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold">
-                        {badgeCount > 99 ? "99+" : badgeCount}
-                      </span>
-                    ) : null}
                   </Link>
                 )
               })}
@@ -282,7 +225,7 @@ export default function DashboardView({
             </div>
 
             <div className="flex items-center gap-2">
-              <WorkspaceHeaderActions />
+              <WorkspaceHeaderActions unreadChatCount={workspace.unreadChatNotificationCount} />
 
               <Link
                 href="/songs/new"

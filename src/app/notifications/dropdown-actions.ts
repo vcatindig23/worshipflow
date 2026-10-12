@@ -16,6 +16,17 @@ type HeaderNotification = {
   created_at: string
 }
 
+type HeaderActivity = {
+  id: string
+  actor_name: string
+  action: string
+  entity_type: "song" | "service" | "member"
+  entity_id: string | null
+  entity_name: string
+  details: Record<string, unknown>
+  created_at: string
+}
+
 async function getHeaderNotificationContext() {
   const supabase = await createClient()
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims()
@@ -54,7 +65,7 @@ export async function loadNotificationPreview() {
   const { supabase, userId, organizationId } =
     await getHeaderNotificationContext()
 
-  const [recentResult, unreadResult] = await Promise.all([
+  const [recentResult, unreadResult, activityResult] = await Promise.all([
     supabase
       .from("notifications")
       .select("id, type, title, body, setlist_id, read_at, created_at")
@@ -68,6 +79,12 @@ export async function loadNotificationPreview() {
       .eq("user_id", userId)
       .eq("organization_id", organizationId)
       .is("read_at", null),
+    supabase
+      .from("organization_activity")
+      .select("id, actor_name, action, entity_type, entity_id, entity_name, details, created_at")
+      .eq("organization_id", organizationId)
+      .order("created_at", { ascending: false })
+      .limit(10),
   ])
 
   if (recentResult.error || unreadResult.error) {
@@ -80,10 +97,20 @@ export async function loadNotificationPreview() {
     }
   }
 
+  if (activityResult.error) {
+    console.error("load_notification_activity failed:", {
+      code: activityResult.error.code,
+    })
+  }
+
   return {
     success: true as const,
     userId,
     notifications: (recentResult.data ?? []) as HeaderNotification[],
+    activities: (activityResult.data ?? []) as HeaderActivity[],
+    activityError: activityResult.error
+      ? "Workspace activity is temporarily unavailable."
+      : "",
     unreadCount: unreadResult.count ?? 0,
   }
 }

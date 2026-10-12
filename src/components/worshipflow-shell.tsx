@@ -2,17 +2,15 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import {
   BookOpen,
   CalendarDays,
   Church,
   LayoutDashboard,
   Menu,
-  MessagesSquare,
   Music2,
   UserRound,
-  Search,
   Settings,
   Users,
   X,
@@ -46,19 +44,9 @@ const navigation = [
     icon: CalendarDays,
   },
   {
-    href: "/search",
-    label: "Search",
-    icon: Search,
-  },
-  {
     href: "/my-schedule",
     label: "My Schedule",
     icon: UserRound,
-  },
-  {
-    href: "/chat",
-    label: "Team Chat",
-    icon: MessagesSquare,
   },
   {
     href: "/settings/team",
@@ -99,9 +87,6 @@ export default function WorshipFlowShell({
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] =
     useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const handleOpenSearch = useCallback(() => setSearchOpen(true), [])
-  const handleCloseSearch = useCallback(() => setSearchOpen(false), [])
 
   const navigationContent = (
     <>
@@ -121,25 +106,6 @@ export default function WorshipFlowShell({
             ? "bg-white/10 text-white"
             : "text-[var(--sidebar-muted)] hover:bg-white/5 hover:text-white"
         }`
-
-        if (item.href === "/search") {
-          return (
-            <button
-              key={item.href}
-              type="button"
-              onClick={() => {
-                setMobileOpen(false)
-                handleOpenSearch()
-              }}
-              aria-haspopup="dialog"
-              aria-expanded={searchOpen}
-              className={itemClass}
-            >
-              <Icon className="size-4.5" />
-              <span>{item.label}</span>
-            </button>
-          )
-        }
 
         return (
           <Link
@@ -253,7 +219,7 @@ export default function WorshipFlowShell({
       ) : null}
 
       <div className="lg:pl-64">
-        <header className={`app-header sticky top-0 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/95 px-5 backdrop-blur md:px-8 ${searchOpen ? "z-[100]" : "z-30"}`}>
+        <header className="app-header sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/95 px-5 backdrop-blur md:px-8">
           <button
             type="button"
             aria-label="Open navigation"
@@ -269,11 +235,7 @@ export default function WorshipFlowShell({
             WorshipFlow
           </div>
 
-          <WorkspaceHeaderActions
-            searchOpen={searchOpen}
-            onOpenSearch={handleOpenSearch}
-            onCloseSearch={handleCloseSearch}
-          />
+          <WorkspaceHeaderActions />
         </header>
 
         <div className="min-h-[calc(100vh-4rem)]">
