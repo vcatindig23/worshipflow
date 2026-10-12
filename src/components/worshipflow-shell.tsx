@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 
 type WorshipFlowShellProps = {
   children: React.ReactNode
@@ -98,6 +99,7 @@ export default function WorshipFlowShell({
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] =
     useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   const navigationContent = (
     <>
@@ -112,19 +114,37 @@ export default function WorshipFlowShell({
         )
 
         const Icon = item.icon
+        const itemClass = `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+          active
+            ? "bg-white/10 text-white"
+            : "text-[var(--sidebar-muted)] hover:bg-white/5 hover:text-white"
+        }`
+
+        if (item.href === "/search") {
+          return (
+            <button
+              key={item.href}
+              type="button"
+              onClick={() => {
+                setMobileOpen(false)
+                setSearchOpen(true)
+              }}
+              aria-haspopup="dialog"
+              aria-expanded={searchOpen}
+              className={itemClass}
+            >
+              <Icon className="size-4.5" />
+              <span>{item.label}</span>
+            </button>
+          )
+        }
 
         return (
           <Link
             key={item.href}
             href={item.href}
-            onClick={() =>
-              setMobileOpen(false)
-            }
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-              active
-                ? "bg-white/10 text-white"
-                : "text-[var(--sidebar-muted)] hover:bg-white/5 hover:text-white"
-            }`}
+            onClick={() => setMobileOpen(false)}
+            className={itemClass}
           >
             <Icon className="size-4.5" />
             <span>{item.label}</span>
@@ -247,9 +267,11 @@ export default function WorshipFlowShell({
             WorshipFlow
           </div>
 
-          <div className="flex size-9 items-center justify-center rounded-full border border-[var(--border)] bg-white text-sm font-semibold text-[var(--brand)]">
-            W
-          </div>
+          <WorkspaceHeaderActions
+            searchOpen={searchOpen}
+            onOpenSearch={() => setSearchOpen(true)}
+            onCloseSearch={() => setSearchOpen(false)}
+          />
         </header>
 
         <div className="min-h-[calc(100vh-4rem)]">
