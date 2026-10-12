@@ -6,7 +6,6 @@ import {
   AtSign,
   Bell,
   CalendarDays,
-  Check,
   CheckCheck,
   LoaderCircle,
   ListMusic,

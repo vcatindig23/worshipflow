@@ -253,7 +253,7 @@ export default function WorshipFlowShell({
       ) : null}
 
       <div className="lg:pl-64">
-        <header className="app-header sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/95 px-5 backdrop-blur md:px-8">
+        <header className={`app-header sticky top-0 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/95 px-5 backdrop-blur md:px-8 ${searchOpen ? "z-[100]" : "z-30"}`}>
           <button
             type="button"
             aria-label="Open navigation"
