@@ -106,7 +106,7 @@ function formatFileSize(bytes: number) {
 }
 
 function linkifyMessageBody(body: string): ReactNode {
-  const urlPattern = /https?:\\/\\/[^\\s<]+/gi
+  const urlPattern = /https?:\/\/[^\s<]+/gi
   const parts: ReactNode[] = []
   let cursor = 0
   for (const match of body.matchAll(urlPattern)) {
@@ -1489,7 +1489,7 @@ export default function TeamChatClient({
                           >
                             {activeSearch
                               ? highlightSearchTerm(message.body, activeSearch)
-                              : message.body.match(/https?:\\/\\//i)
+                              : message.body.match(/https?:\/\//i)
                                 ? linkifyMessageBody(message.body)
                                 : highlightMentionedUsers(
                                     message.body,
