@@ -462,12 +462,6 @@ export default function TeamChatClient({
                   : `Search results for “${activeSearch}”`}
             </p>
           </div>
-        ) : hasMoreMessages && messages.length > 0 ? (
-          <div className="mb-5 flex justify-center">
-            <span className="text-xs text-[var(--muted)]">
-              Load earlier messages above to browse older chat history.
-            </span>
-          </div>
         ) : null}
 
         {activeSearch && isSearching ? (
