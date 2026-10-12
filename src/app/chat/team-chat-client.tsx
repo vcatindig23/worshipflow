@@ -14,14 +14,17 @@ import {
   LoaderCircle,
   MessageCircle,
   MessagesSquare,
+  Search,
   Send,
   Wifi,
+  X,
   WifiOff,
 } from "lucide-react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import {
   loadOlderTeamChatMessages,
   markTeamChatNotificationsRead,
+  searchTeamChatMessages,
   sendTeamChatMessage,
 } from "./actions"
 
@@ -87,12 +90,17 @@ export default function TeamChatClient({
     initialMessages.length === 100
   )
   const [historyError, setHistoryError] = useState("")
+  const [searchInput, setSearchInput] = useState("")
+  const [activeSearch, setActiveSearch] = useState("")
+  const [searchResults, setSearchResults] = useState<TeamChatMessage[] | null>(null)
+  const [searchError, setSearchError] = useState("")
   const [draft, setDraft] = useState("")
   const [error, setError] = useState("")
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("connecting")
   const [isPending, startTransition] = useTransition()
   const [isLoadingOlder, startLoadingOlder] = useTransition()
+  const [isSearching, startSearching] = useTransition()
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const previousScrollPositionRef = useRef<{
@@ -175,6 +183,10 @@ export default function TeamChatClient({
   }, [currentUserId, memberNames, organizationId, supabase])
 
   useEffect(() => {
+    if (activeSearch) {
+      return
+    }
+
     const container = messagesContainerRef.current
     const previousPosition = previousScrollPositionRef.current
 
@@ -190,7 +202,48 @@ export default function TeamChatClient({
       behavior: "smooth",
       block: "end",
     })
-  }, [messages])
+  }, [messages, activeSearch])
+
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const query = searchInput.trim()
+
+    if (!query || isSearching) {
+      return
+    }
+
+    setActiveSearch(query)
+    setSearchResults(null)
+    setSearchError("")
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = 0
+    }
+
+    startSearching(async () => {
+      const result = await searchTeamChatMessages(query)
+
+      if (!result.success) {
+        setSearchError(result.error)
+        return
+      }
+
+      const matchingMessages: TeamChatMessage[] = result.messages.map(
+        (message) => ({
+          ...message,
+          authorName: memberNames.get(message.user_id) ?? "Team member",
+        })
+      )
+
+      setSearchResults(matchingMessages)
+    })
+  }
+
+  function handleClearSearch() {
+    setSearchInput("")
+    setActiveSearch("")
+    setSearchResults(null)
+    setSearchError("")
+  }
 
   function handleLoadEarlierMessages() {
     const cursor = messages[0]?.created_at
@@ -308,13 +361,75 @@ export default function TeamChatClient({
         </span>
       </div>
 
+      <div className="border-b border-[var(--border)] bg-white px-4 py-3 sm:px-6">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="flex flex-col gap-2 sm:flex-row sm:items-center"
+          role="search"
+        >
+          <div className="relative min-w-0 flex-1">
+            <label htmlFor="team-chat-search" className="sr-only">
+              Search team chat messages
+            </label>
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
+            />
+            <input
+              id="team-chat-search"
+              type="search"
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              maxLength={120}
+              placeholder="Search past team messages…"
+              disabled={isSearching}
+              className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] pl-10 pr-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10 disabled:opacity-60"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="submit"
+              disabled={isSearching || !searchInput.trim()}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-3.5 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSearching ? (
+                <LoaderCircle className="size-3.5 animate-spin" />
+              ) : (
+                <Search className="size-3.5" />
+              )}
+              <span>{isSearching ? "Searching…" : "Search"}</span>
+            </button>
+            {activeSearch || searchInput ? (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                disabled={isSearching}
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] px-3 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <X className="size-3.5" />
+                Clear
+              </button>
+            ) : null}
+          </div>
+        </form>
+        {searchError ? (
+          <p role="alert" className="mt-2 text-xs text-red-700">
+            {searchError}
+          </p>
+        ) : (
+          <p className="mt-2 text-[10px] text-[var(--muted)]">
+            Search message text across your church workspace. The latest 50 matches can be displayed.
+          </p>
+        )}
+      </div>
+
       <div
         ref={messagesContainerRef}
         className="min-h-[360px] max-h-[62vh] overflow-y-auto bg-[var(--background)]/55 px-4 py-5 sm:min-h-[440px] sm:px-6"
         aria-label="Team chat messages"
         aria-live="polite"
       >
-        {hasMoreMessages && messages.length > 0 ? (
+        {!activeSearch && hasMoreMessages && messages.length > 0 ? (
           <div className="mb-5 flex flex-col items-center gap-2">
             <button
               type="button"
@@ -337,7 +452,44 @@ export default function TeamChatClient({
           </div>
         ) : null}
 
-        {messages.length === 0 ? (
+        {activeSearch ? (
+          <div className="mb-5 rounded-xl border border-[var(--border)] bg-white px-3.5 py-3">
+            <p role="status" aria-live="polite" className="text-xs font-medium text-[var(--muted)]">
+              {isSearching
+                ? `Searching for “${activeSearch}”…`
+                : searchResults
+                  ? `${searchResults.length} ${searchResults.length === 1 ? "match" : "matches"} for “${activeSearch}”${searchResults.length === 50 ? " · showing latest 50" : ""}`
+                  : `Search results for “${activeSearch}”`}
+            </p>
+          </div>
+        ) : hasMoreMessages && messages.length > 0 ? (
+          <div className="mb-5 flex justify-center">
+            <span className="text-xs text-[var(--muted)]">
+              Load earlier messages above to browse older chat history.
+            </span>
+          </div>
+        ) : null}
+
+        {activeSearch && isSearching ? (
+          <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 text-sm text-[var(--muted)]">
+            <LoaderCircle className="size-5 animate-spin" />
+            Searching messages…
+          </div>
+        ) : null}
+
+        {activeSearch && !isSearching && searchResults?.length === 0 ? (
+          <div className="flex min-h-[240px] flex-col items-center justify-center px-5 text-center">
+            <Search className="size-7 text-[var(--muted)]" />
+            <h3 className="mt-3 text-sm font-semibold text-[var(--foreground)]">
+              No messages found
+            </h3>
+            <p className="mt-1 max-w-sm text-xs leading-5 text-[var(--muted)]">
+              Try another keyword or phrase.
+            </p>
+          </div>
+        ) : null}
+
+        {!activeSearch && messages.length === 0 ? (
           <div className="flex min-h-[320px] flex-col items-center justify-center px-5 text-center sm:min-h-[400px]">
             <div className="flex size-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-white text-[var(--brand)] shadow-sm">
               <MessageCircle className="size-6" />
@@ -349,9 +501,13 @@ export default function TeamChatClient({
               Share a rehearsal update, coordinate a service, or let the worship team know what needs attention.
             </p>
           </div>
-        ) : (
+        ) : null}
+
+        {!isSearching &&
+        ((!activeSearch && messages.length > 0) ||
+          (activeSearch && (searchResults?.length ?? 0) > 0)) ? (
           <ol className="space-y-5">
-            {messages.map((message) => {
+            {(activeSearch ? searchResults ?? [] : messages).map((message) => {
               const isOwnMessage = message.user_id === currentUserId
               const displayName = isOwnMessage ? "You" : message.authorName
 
@@ -389,7 +545,7 @@ export default function TeamChatClient({
               )
             })}
           </ol>
-        )}
+        ) : null}
         <div ref={messagesEndRef} />
       </div>
 

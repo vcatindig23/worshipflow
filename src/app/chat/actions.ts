@@ -131,3 +131,46 @@ export async function loadOlderTeamChatMessages(rawBefore: string) {
     hasMore: rows.length > 50,
   }
 }
+
+
+const teamChatSearchSchema = z.string().trim().min(1).max(120)
+
+export async function searchTeamChatMessages(rawQuery: string) {
+  const parsed = teamChatSearchSchema.safeParse(rawQuery)
+
+  if (!parsed.success) {
+    return {
+      success: false as const,
+      error: "Enter a search term of up to 120 characters.",
+    }
+  }
+
+  const workspace = await getWorkspace()
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("team_chat_messages")
+    .select("id, organization_id, user_id, body, created_at")
+    .eq("organization_id", workspace.organizationId)
+    .ilike("body", `%${parsed.data}%`)
+    .order("created_at", { ascending: false })
+    .limit(50)
+
+  if (error) {
+    console.error("search_team_chat_messages failed:", {
+      code: error.code,
+      message: error.message,
+    })
+
+    return {
+      success: false as const,
+      error: "Messages could not be searched. Please try again.",
+    }
+  }
+
+  return {
+    success: true as const,
+    query: parsed.data,
+    messages: (data ?? []) as TeamChatHistoryRow[],
+  }
+}
