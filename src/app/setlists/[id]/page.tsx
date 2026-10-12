@@ -179,6 +179,12 @@ const errorMessages: Record<
     "The service resource could not be added.",
   resource_remove_failed:
     "The service resource could not be removed.",
+  reference_file_invalid:
+    "Choose a reference file no larger than 25 MB.",
+  reference_file_type:
+    "Choose a PDF, Office document, image, or supported audio file.",
+  reference_upload_failed:
+    "The reference file could not be uploaded. Please try again.",
   timeline_invalid_title:
     "Timeline item title is required and must be 160 characters or fewer.",
   timeline_invalid_type:

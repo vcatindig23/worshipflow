@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { updateSetlist } from "../../actions"
+import FormSubmitButton from "@/components/ui/form-submit-button"
 
 type EditSetlistPageProps = {
   params: Promise<{
@@ -299,12 +300,12 @@ export default async function EditSetlistPage({
               Cancel
             </Link>
 
-            <button
-              type="submit"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+            <FormSubmitButton
+              pendingText="Saving changes…"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Save Changes
-            </button>
+            </FormSubmitButton>
           </div>
         </div>
       </form>

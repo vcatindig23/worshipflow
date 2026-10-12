@@ -3,6 +3,7 @@ import { ArrowLeft, CalendarDays } from "lucide-react"
 import { redirect } from "next/navigation"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { createSetlist } from "../actions"
+import FormSubmitButton from "@/components/ui/form-submit-button"
 
 type NewSetlistPageProps = {
   searchParams: Promise<
@@ -179,12 +180,12 @@ export default async function NewSetlistPage({
               Cancel
             </Link>
 
-            <button
-              type="submit"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+            <FormSubmitButton
+              pendingText="Creating setlist…"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Create Setlist
-            </button>
+            </FormSubmitButton>
           </div>
         </div>
       </form>

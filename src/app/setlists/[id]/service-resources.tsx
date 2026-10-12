@@ -291,7 +291,8 @@ export default async function ServiceResources({
               All workspace files are already linked to this service.
             </p>
           ) : null}
-        </form>
+          </form>
+        </div>
       ) : null}
     </section>
   )

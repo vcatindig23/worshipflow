@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ArrowLeft, Music2 } from "lucide-react"
 import { createSong } from "./actions"
 import ChordProImportEditor from "@/components/songs/chordpro-import-editor"
+import FormSubmitButton from "@/components/ui/form-submit-button"
 
 type NewSongPageProps = {
   searchParams: Promise<{
@@ -239,12 +240,12 @@ export default async function NewSongPage({
                 Cancel
               </Link>
 
-              <button
-                type="submit"
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)]"
+              <FormSubmitButton
+                pendingText="Saving song…"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Save song
-              </button>
+              </FormSubmitButton>
             </div>
           </form>
         </div>
