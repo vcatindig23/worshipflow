@@ -21,12 +21,21 @@ import {
   useState,
 } from "react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
+
+type HeaderNotification = {
+  id: string
+  type: string
+  title: string
+  body: string
+  setlist_id: string | null
+  read_at: string | null
+  created_at: string
+}
 import { searchWorkspaceLive } from "@/app/search/actions"
 import {
   loadNotificationPreview,
   markHeaderNotificationRead,
   markHeaderNotificationsRead,
-  type HeaderNotification,
 } from "@/app/notifications/dropdown-actions"
 
 type WorkspaceHeaderActionsProps = {
@@ -126,6 +135,7 @@ export default function WorkspaceHeaderActions({
   const [busyNotificationId, setBusyNotificationId] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const notificationsMenuRef = useRef<HTMLDivElement>(null)
+  const notificationRefreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const supabase = useMemo(() => createBrowserClient(), [])
 
   const refreshNotifications = useCallback(async () => {
@@ -266,12 +276,23 @@ export default function WorkspaceHeaderActions({
           filter: `user_id=eq.${notificationUserId}`,
         },
         () => {
-          void refreshNotifications()
+          if (notificationRefreshTimeoutRef.current) {
+            clearTimeout(notificationRefreshTimeoutRef.current)
+          }
+
+          notificationRefreshTimeoutRef.current = window.setTimeout(() => {
+            notificationRefreshTimeoutRef.current = null
+            void refreshNotifications()
+          }, 200)
         }
       )
       .subscribe()
 
     return () => {
+      if (notificationRefreshTimeoutRef.current) {
+        clearTimeout(notificationRefreshTimeoutRef.current)
+        notificationRefreshTimeoutRef.current = null
+      }
       void supabase.removeChannel(channel)
     }
   }, [notificationUserId, refreshNotifications, supabase])

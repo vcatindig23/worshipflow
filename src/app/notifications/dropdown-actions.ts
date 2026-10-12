@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server"
 
 const notificationIdSchema = z.string().uuid()
 
-export type HeaderNotification = {
+type HeaderNotification = {
   id: string
   type: string
   title: string
