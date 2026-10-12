@@ -51,6 +51,7 @@ export type TeamChatMember = {
 
 type TeamChatClientProps = {
   organizationId: string
+  organizationTimezone: string
   currentUserId: string
   initialMessages: TeamChatMessage[]
   members: TeamChatMember[]
@@ -72,7 +73,16 @@ function initials(name: string) {
     .join("")
 }
 
-function formatMessageTime(value: string) {
+function normalizeTimeZone(value: string) {
+  try {
+    new Intl.DateTimeFormat("en-PH", { timeZone: value })
+    return value
+  } catch {
+    return "Asia/Manila"
+  }
+}
+
+function formatMessageTime(value: string, timeZone: string) {
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
@@ -82,24 +92,30 @@ function formatMessageTime(value: string) {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone,
   }).format(date)
 }
 
-function getMessageDayKey(value: string) {
+function getMessageDayKey(value: string, timeZone: string) {
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
     return "unknown-date"
   }
 
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  const day = String(date.getDate()).padStart(2, "0")
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date)
+  const part = (type: string) =>
+    parts.find((item) => item.type === type)?.value ?? ""
 
-  return `${year}-${month}-${day}`
+  return `${part("year")}-${part("month")}-${part("day")}`
 }
 
-function formatMessageDate(value: string) {
+function formatMessageDate(value: string, timeZone: string) {
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
@@ -108,6 +124,7 @@ function formatMessageDate(value: string) {
 
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "full",
+    timeZone,
   }).format(date)
 }
 
@@ -151,10 +168,15 @@ function highlightSearchTerm(body: string, query: string): ReactNode {
 
 export default function TeamChatClient({
   organizationId,
+  organizationTimezone,
   currentUserId,
   initialMessages,
   members,
 }: TeamChatClientProps) {
+  const chatTimeZone = useMemo(
+    () => normalizeTimeZone(organizationTimezone || "Asia/Manila"),
+    [organizationTimezone]
+  )
   const [messages, setMessages] = useState(initialMessages)
   const [hasMoreMessages, setHasMoreMessages] = useState(
     initialMessages.length === 100
@@ -875,8 +897,8 @@ export default function TeamChatClient({
               const previousMessage = visibleMessages[index - 1]
               const showDateSeparator =
                 !previousMessage ||
-                getMessageDayKey(previousMessage.created_at) !==
-                  getMessageDayKey(message.created_at)
+                getMessageDayKey(previousMessage.created_at, chatTimeZone) !==
+                  getMessageDayKey(message.created_at, chatTimeZone)
               const isOwnMessage = message.user_id === currentUserId
               const displayName = isOwnMessage ? "You" : message.authorName
 
@@ -884,11 +906,11 @@ export default function TeamChatClient({
                 <Fragment key={message.id}>
                   {showDateSeparator ? (
                     <li
-                      aria-label={formatMessageDate(message.created_at)}
+                      aria-label={formatMessageDate(message.created_at, chatTimeZone)}
                       className="flex justify-center py-1"
                     >
                       <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-[10px] font-semibold text-[var(--muted)] shadow-sm">
-                        {formatMessageDate(message.created_at)}
+                        {formatMessageDate(message.created_at, chatTimeZone)}
                       </span>
                     </li>
                   ) : null}
@@ -910,7 +932,7 @@ export default function TeamChatClient({
                             dateTime={message.created_at}
                             className="text-[var(--muted)]"
                           >
-                            {formatMessageTime(message.created_at)}
+                            {formatMessageTime(message.created_at, chatTimeZone)}
                           </time>
                         </div>
                         {editingMessageId === message.id ? (
@@ -967,7 +989,7 @@ export default function TeamChatClient({
                               type="button"
                               onClick={() => handleStartEdit(message)}
                               disabled={isSavingEdit || isDeletingMessage}
-                              aria-label={`Edit your message sent at ${formatMessageTime(message.created_at)}`}
+                              aria-label={`Edit your message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
                               className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)] disabled:opacity-50"
                             >
                               <Pencil className="size-3" />
@@ -977,7 +999,7 @@ export default function TeamChatClient({
                               type="button"
                               onClick={() => handleDeleteMessage(message.id)}
                               disabled={isSavingEdit || isDeletingMessage}
-                              aria-label={`Delete your message sent at ${formatMessageTime(message.created_at)}`}
+                              aria-label={`Delete your message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
                               className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
                             >
                               {isDeletingMessage ? (

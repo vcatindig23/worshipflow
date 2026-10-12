@@ -178,6 +178,7 @@ export default async function TeamChatPage() {
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
           <TeamChatClient
             organizationId={workspace.organizationId}
+            organizationTimezone={workspace.organizationTimezone || "Asia/Manila"}
             currentUserId={workspace.userId}
             initialMessages={initialMessages}
             members={members}
