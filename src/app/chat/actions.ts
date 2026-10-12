@@ -78,3 +78,56 @@ export async function markTeamChatNotificationsRead() {
 
   return { success: true as const }
 }
+
+
+const messageCursorSchema = z.string().datetime({ offset: true })
+
+type TeamChatHistoryRow = {
+  id: string
+  organization_id: string
+  user_id: string
+  body: string
+  created_at: string
+}
+
+export async function loadOlderTeamChatMessages(rawBefore: string) {
+  const parsed = messageCursorSchema.safeParse(rawBefore)
+
+  if (!parsed.success) {
+    return {
+      success: false as const,
+      error: "The message history cursor is invalid. Refresh the page and try again.",
+    }
+  }
+
+  const workspace = await getWorkspace()
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("team_chat_messages")
+    .select("id, organization_id, user_id, body, created_at")
+    .eq("organization_id", workspace.organizationId)
+    .lt("created_at", parsed.data)
+    .order("created_at", { ascending: false })
+    .limit(51)
+
+  if (error) {
+    console.error("load_older_team_chat_messages failed:", {
+      code: error.code,
+      message: error.message,
+    })
+
+    return {
+      success: false as const,
+      error: "Earlier messages could not be loaded. Please try again.",
+    }
+  }
+
+  const rows = (data ?? []) as TeamChatHistoryRow[]
+
+  return {
+    success: true as const,
+    messages: rows.slice(0, 50).reverse(),
+    hasMore: rows.length > 50,
+  }
+}

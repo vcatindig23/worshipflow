@@ -10,6 +10,8 @@ import {
 import type { FormEvent } from "react"
 import {
   AlertCircle,
+  ChevronUp,
+  LoaderCircle,
   MessageCircle,
   MessagesSquare,
   Send,
@@ -17,7 +19,11 @@ import {
   WifiOff,
 } from "lucide-react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
-import { markTeamChatNotificationsRead, sendTeamChatMessage } from "./actions"
+import {
+  loadOlderTeamChatMessages,
+  markTeamChatNotificationsRead,
+  sendTeamChatMessage,
+} from "./actions"
 
 export type TeamChatMessage = {
   id: string
@@ -77,12 +83,22 @@ export default function TeamChatClient({
   members,
 }: TeamChatClientProps) {
   const [messages, setMessages] = useState(initialMessages)
+  const [hasMoreMessages, setHasMoreMessages] = useState(
+    initialMessages.length === 100
+  )
+  const [historyError, setHistoryError] = useState("")
   const [draft, setDraft] = useState("")
   const [error, setError] = useState("")
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("connecting")
   const [isPending, startTransition] = useTransition()
+  const [isLoadingOlder, startLoadingOlder] = useTransition()
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const previousScrollPositionRef = useRef<{
+    scrollHeight: number
+    scrollTop: number
+  } | null>(null)
   const supabase = useMemo(() => createBrowserClient(), [])
   const memberNames = useMemo(
     () => new Map(members.map((member) => [member.id, member.displayName])),
@@ -159,11 +175,66 @@ export default function TeamChatClient({
   }, [currentUserId, memberNames, organizationId, supabase])
 
   useEffect(() => {
+    const container = messagesContainerRef.current
+    const previousPosition = previousScrollPositionRef.current
+
+    if (container && previousPosition) {
+      container.scrollTop =
+        previousPosition.scrollTop +
+        (container.scrollHeight - previousPosition.scrollHeight)
+      previousScrollPositionRef.current = null
+      return
+    }
+
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     })
   }, [messages])
+
+  function handleLoadEarlierMessages() {
+    const cursor = messages[0]?.created_at
+
+    if (!cursor || isLoadingOlder) {
+      return
+    }
+
+    setHistoryError("")
+
+    startLoadingOlder(async () => {
+      const result = await loadOlderTeamChatMessages(cursor)
+
+      if (!result.success) {
+        setHistoryError(result.error)
+        return
+      }
+
+      const olderMessages: TeamChatMessage[] = result.messages.map(
+        (message) => ({
+          ...message,
+          authorName: memberNames.get(message.user_id) ?? "Team member",
+        })
+      )
+
+      const container = messagesContainerRef.current
+      if (container) {
+        previousScrollPositionRef.current = {
+          scrollHeight: container.scrollHeight,
+          scrollTop: container.scrollTop,
+        }
+      }
+
+      setMessages((current) => {
+        const currentIds = new Set(current.map((message) => message.id))
+        const uniqueOlderMessages = olderMessages.filter(
+          (message) => !currentIds.has(message.id)
+        )
+
+        return [...uniqueOlderMessages, ...current]
+      })
+      setHasMoreMessages(result.hasMore)
+    })
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -238,10 +309,34 @@ export default function TeamChatClient({
       </div>
 
       <div
+        ref={messagesContainerRef}
         className="min-h-[360px] max-h-[62vh] overflow-y-auto bg-[var(--background)]/55 px-4 py-5 sm:min-h-[440px] sm:px-6"
         aria-label="Team chat messages"
         aria-live="polite"
       >
+        {hasMoreMessages && messages.length > 0 ? (
+          <div className="mb-5 flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={handleLoadEarlierMessages}
+              disabled={isLoadingOlder}
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-3.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoadingOlder ? (
+                <LoaderCircle className="size-3.5 animate-spin" />
+              ) : (
+                <ChevronUp className="size-3.5" />
+              )}
+              {isLoadingOlder ? "Loading earlier messages…" : "Load earlier messages"}
+            </button>
+            {historyError ? (
+              <p role="alert" className="text-center text-xs text-red-700">
+                {historyError}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         {messages.length === 0 ? (
           <div className="flex min-h-[320px] flex-col items-center justify-center px-5 text-center sm:min-h-[400px]">
             <div className="flex size-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-white text-[var(--brand)] shadow-sm">
