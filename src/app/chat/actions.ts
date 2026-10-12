@@ -93,7 +93,7 @@ export async function sendTeamChatMessage(
       reply_to_message_id: parsedReplyToId.data,
       mentioned_user_ids: mentionedUserIds,
     })
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids, attachments")
     .single()
 
   if (error || !data) {
@@ -121,6 +121,148 @@ export async function sendTeamChatMessage(
   }
 }
 
+
+
+const chatAttachmentMimeTypes = new Set([
+  "image/jpeg", "image/png", "image/webp", "image/gif",
+  "application/pdf", "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain", "text/csv",
+  "audio/mpeg", "audio/mp4", "audio/wav", "audio/x-wav",
+  "video/mp4", "video/webm",
+])
+
+const MAX_CHAT_ATTACHMENT_SIZE = 25 * 1024 * 1024
+const MAX_CHAT_ATTACHMENTS = 5
+
+export async function sendTeamChatMessageWithAttachments(formData: FormData) {
+  const rawBody = formData.get("body")
+  const rawReplyToId = formData.get("replyToMessageId")
+  const rawMentionedIds = formData.get("mentionedUserIds")
+  const bodyResult = z.string().trim().max(2000).safeParse(
+    typeof rawBody === "string" ? rawBody : ""
+  )
+  const replyResult = z.string().uuid().nullable().safeParse(
+    typeof rawReplyToId === "string" && rawReplyToId ? rawReplyToId : null
+  )
+  let mentionedIdsValue: unknown = []
+  if (typeof rawMentionedIds === "string" && rawMentionedIds) {
+    try {
+      mentionedIdsValue = JSON.parse(rawMentionedIds)
+    } catch {
+      return { success: false as const, error: "The mentioned team members are invalid." }
+    }
+  }
+  const mentionsResult = z.array(z.string().uuid()).max(10).safeParse(mentionedIdsValue)
+  const files = formData.getAll("files").filter(
+    (value): value is File => value instanceof File && value.size > 0
+  )
+
+  if (!bodyResult.success || !replyResult.success || !mentionsResult.success) {
+    return { success: false as const, error: "Check the message, reply, and mentions, then try again." }
+  }
+  if (files.length > MAX_CHAT_ATTACHMENTS) {
+    return { success: false as const, error: "You can attach up to 5 files to one message." }
+  }
+  if (!bodyResult.data && files.length === 0) {
+    return { success: false as const, error: "Write a message or attach a file before sending." }
+  }
+  for (const file of files) {
+    if (file.size > MAX_CHAT_ATTACHMENT_SIZE) {
+      return { success: false as const, error: "Each attachment must be 25 MB or smaller." }
+    }
+    if (!chatAttachmentMimeTypes.has(file.type)) {
+      return {
+        success: false as const,
+        error: `“${file.name}” has a file type that Team Chat does not support.`,
+      }
+    }
+  }
+
+  const workspace = await getWorkspace()
+  const supabase = await createClient()
+  const mentionedUserIds = Array.from(new Set(mentionsResult.data))
+    .filter((userId) => userId !== workspace.userId)
+
+  if (mentionedUserIds.length > 0) {
+    const { data: mentionedMembers, error } = await supabase
+      .from("organization_members")
+      .select("user_id")
+      .eq("organization_id", workspace.organizationId)
+      .in("user_id", mentionedUserIds)
+    if (error || (mentionedMembers ?? []).length !== mentionedUserIds.length) {
+      return { success: false as const, error: "Only members of your current church workspace can be mentioned." }
+    }
+  }
+
+  if (replyResult.data) {
+    const { data: replyTarget, error } = await supabase
+      .from("team_chat_messages")
+      .select("id")
+      .eq("id", replyResult.data)
+      .eq("organization_id", workspace.organizationId)
+      .maybeSingle()
+    if (error || !replyTarget) {
+      return { success: false as const, error: "The message you are replying to is no longer available in this workspace." }
+    }
+  }
+
+  const messageId = crypto.randomUUID()
+  const attachments: import("./team-chat-client").TeamChatAttachment[] = []
+  const uploadedPaths: string[] = []
+
+  for (const file of files) {
+    const safeName = file.name
+      .normalize("NFKD")
+      .replace(/[^a-zA-Z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(-120) || "attachment"
+    const path = `${workspace.organizationId}/${workspace.userId}/${messageId}/${crypto.randomUUID()}-${safeName}`
+    const { error } = await supabase.storage
+      .from("team-chat-files")
+      .upload(path, file, { contentType: file.type, upsert: false })
+    if (error) {
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from("team-chat-files").remove(uploadedPaths)
+      }
+      console.error("upload_team_chat_attachment failed:", { code: error.name, message: error.message })
+      return { success: false as const, error: `“${file.name}” could not be uploaded. Please try again.` }
+    }
+    uploadedPaths.push(path)
+    attachments.push({ path, name: file.name, type: file.type, size: file.size })
+  }
+
+  const messageBody = bodyResult.data || (
+    files.length === 1 ? `Shared a file: ${files[0].name}` : `Shared ${files.length} files`
+  )
+  const { data, error } = await supabase
+    .from("team_chat_messages")
+    .insert({
+      id: messageId,
+      organization_id: workspace.organizationId,
+      user_id: workspace.userId,
+      body: messageBody,
+      reply_to_message_id: replyResult.data,
+      mentioned_user_ids: mentionedUserIds,
+      attachments,
+    })
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids, attachments")
+    .single()
+
+  if (error || !data) {
+    if (uploadedPaths.length > 0) {
+      await supabase.storage.from("team-chat-files").remove(uploadedPaths)
+    }
+    console.error("send_team_chat_message_with_attachments failed:", { code: error?.code, message: error?.message })
+    return { success: false as const, error: "Your message could not be sent. Please try again." }
+  }
+
+  return { success: true as const, message: data }
+}
 
 export async function markTeamChatNotificationsRead() {
   const workspace = await getWorkspace()
@@ -161,6 +303,7 @@ type TeamChatHistoryRow = {
   pinned_at: string | null
   pinned_by: string | null
   mentioned_user_ids: string[]
+  attachments: import("./team-chat-client").TeamChatAttachment[]
 }
 
 export async function loadOlderTeamChatMessages(rawBefore: string) {
@@ -178,7 +321,7 @@ export async function loadOlderTeamChatMessages(rawBefore: string) {
 
   const { data, error } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids, attachments")
     .eq("organization_id", workspace.organizationId)
     .lt("created_at", parsed.data)
     .order("created_at", { ascending: false })
@@ -223,7 +366,7 @@ export async function searchTeamChatMessages(rawQuery: string) {
 
   const { data, error } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids, attachments")
     .eq("organization_id", workspace.organizationId)
     .ilike("body", `%${parsed.data}%`)
     .order("created_at", { ascending: false })
@@ -274,7 +417,7 @@ export async function editTeamChatMessage(
     .eq("id", parsedId.data)
     .eq("organization_id", workspace.organizationId)
     .eq("user_id", workspace.userId)
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids, attachments")
     .maybeSingle()
 
   if (error || !data) {
@@ -308,6 +451,14 @@ export async function deleteTeamChatMessage(rawMessageId: string) {
   const workspace = await getWorkspace()
   const supabase = await createClient()
 
+  const { data: messageToDelete } = await supabase
+    .from("team_chat_messages")
+    .select("id, attachments")
+    .eq("id", parsedId.data)
+    .eq("organization_id", workspace.organizationId)
+    .eq("user_id", workspace.userId)
+    .maybeSingle()
+
   const { data, error } = await supabase
     .from("team_chat_messages")
     .delete()
@@ -326,6 +477,20 @@ export async function deleteTeamChatMessage(rawMessageId: string) {
     return {
       success: false as const,
       error: "This message could not be deleted. You can only delete your own messages.",
+    }
+  }
+
+  const attachmentPaths = Array.isArray(messageToDelete?.attachments)
+    ? (messageToDelete.attachments as { path?: string }[])
+        .map((attachment) => attachment.path)
+        .filter((path): path is string => typeof path === "string")
+    : []
+  if (attachmentPaths.length > 0) {
+    const { error: cleanupError } = await supabase.storage
+      .from("team-chat-files")
+      .remove(attachmentPaths)
+    if (cleanupError) {
+      console.error("delete_team_chat_attachments_cleanup_failed:", cleanupError.message)
     }
   }
 

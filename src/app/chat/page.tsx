@@ -33,6 +33,7 @@ type MessageRow = {
   pinned_at: string | null
   pinned_by: string | null
   mentioned_user_ids: string[]
+  attachments: import("./team-chat-client").TeamChatAttachment[]
 }
 
 function formatRole(role: string) {
@@ -106,7 +107,7 @@ export default async function TeamChatPage() {
 
   const { data: messageRows, error: messagesError } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids, attachments")
     .eq("organization_id", workspace.organizationId)
     .order("created_at", { ascending: false })
     .limit(100)
@@ -128,12 +129,13 @@ export default async function TeamChatPage() {
     .reverse()
     .map((message) => ({
       ...message,
+      attachments: Array.isArray(message.attachments) ? message.attachments : [],
       authorName: profileNames.get(message.user_id) ?? "Worship Member",
     }))
 
   const { data: pinnedRows, error: pinnedMessagesError } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids, attachments")
     .eq("organization_id", workspace.organizationId)
     .not("pinned_at", "is", null)
     .order("pinned_at", { ascending: false })
@@ -150,6 +152,7 @@ export default async function TeamChatPage() {
   const initialPinnedMessages: TeamChatMessage[] = ((pinnedRows ?? []) as MessageRow[])
     .map((message) => ({
       ...message,
+      attachments: Array.isArray(message.attachments) ? message.attachments : [],
       authorName: profileNames.get(message.user_id) ?? "Worship Member",
     }))
 

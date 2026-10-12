@@ -12,6 +12,10 @@ import { Fragment } from "react"
 import {
   AlertCircle,
   Check,
+  Download,
+  FileText,
+  Image as ImageIcon,
+  Paperclip,
   ChevronDown,
   ChevronUp,
   Copy,
@@ -36,9 +40,16 @@ import {
   loadOlderTeamChatMessages,
   markTeamChatNotificationsRead,
   searchTeamChatMessages,
-  sendTeamChatMessage,
+  sendTeamChatMessageWithAttachments,
   setTeamChatMessagePinned,
 } from "./actions"
+
+export type TeamChatAttachment = {
+  path: string
+  name: string
+  type: string
+  size: number
+}
 
 export type TeamChatMessage = {
   id: string
@@ -52,6 +63,7 @@ export type TeamChatMessage = {
   pinned_at: string | null
   pinned_by: string | null
   mentioned_user_ids: string[]
+  attachments: TeamChatAttachment[]
   authorName: string
 }
 
@@ -85,6 +97,40 @@ function initials(name: string) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("")
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function linkifyMessageBody(body: string): ReactNode {
+  const urlPattern = /https?:\\/\\/[^\\s<]+/gi
+  const parts: ReactNode[] = []
+  let cursor = 0
+  for (const match of body.matchAll(urlPattern)) {
+    const rawUrl = match[0]
+    const start = match.index ?? 0
+    const trimmedUrl = rawUrl.replace(/[),.!?;:]+$/, "")
+    if (start > cursor) parts.push(body.slice(cursor, start))
+    let safeUrl = ""
+    try {
+      const parsed = new URL(trimmedUrl)
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") safeUrl = parsed.toString()
+    } catch {
+      safeUrl = ""
+    }
+    if (safeUrl) {
+      parts.push(<a key={start} href={safeUrl} target="_blank" rel="noopener noreferrer" className="break-all underline underline-offset-2 hover:opacity-80">{trimmedUrl}</a>)
+      if (trimmedUrl.length < rawUrl.length) parts.push(rawUrl.slice(trimmedUrl.length))
+    } else {
+      parts.push(rawUrl)
+    }
+    cursor = start + rawUrl.length
+  }
+  if (cursor < body.length) parts.push(body.slice(cursor))
+  return parts.length ? parts : body
 }
 
 function normalizeTimeZone(value: string) {
@@ -294,6 +340,9 @@ export default function TeamChatClient({
   const [searchResults, setSearchResults] = useState<TeamChatMessage[] | null>(null)
   const [searchError, setSearchError] = useState("")
   const [draft, setDraft] = useState("")
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [attachmentUrls, setAttachmentUrls] = useState<Record<string, string>>({})
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [mentionedUserIds, setMentionedUserIds] = useState<string[]>([])
   const [mentionQuery, setMentionQuery] = useState<string | null>(null)
   const [mentionStartIndex, setMentionStartIndex] = useState<number | null>(null)
@@ -330,6 +379,35 @@ export default function TeamChatClient({
   useEffect(() => {
     void markTeamChatNotificationsRead()
   }, [organizationId])
+
+  useEffect(() => {
+    const paths = Array.from(new Set(
+      messages.flatMap((message) =>
+        (message.attachments ?? []).map((attachment) => attachment.path)
+      )
+    )).filter((path) => path && !attachmentUrls[path])
+
+    if (paths.length === 0) return
+
+    let cancelled = false
+    void Promise.all(paths.map(async (path) => {
+      const { data, error } = await supabase.storage
+        .from("team-chat-files")
+        .createSignedUrl(path, 60 * 60)
+      return { path, url: error ? null : data.signedUrl }
+    })).then((results) => {
+      if (cancelled) return
+      setAttachmentUrls((current) => {
+        const next = { ...current }
+        for (const result of results) {
+          if (result.url) next[result.path] = result.url
+        }
+        return next
+      })
+    })
+
+    return () => { cancelled = true }
+  }, [messages, attachmentUrls, supabase])
 
   useEffect(() => {
     const channel = supabase
@@ -1012,18 +1090,19 @@ export default function TeamChatClient({
     event.preventDefault()
     const body = draft.trim()
 
-    if (!body || isPending) {
+    if ((!body && selectedFiles.length === 0) || isPending) {
       return
     }
 
     setError("")
+    const formData = new FormData()
+    formData.set("body", body)
+    formData.set("replyToMessageId", replyingTo?.id ?? "")
+    formData.set("mentionedUserIds", JSON.stringify(mentionedUserIds))
+    for (const file of selectedFiles) formData.append("files", file)
 
     startTransition(async () => {
-      const result = await sendTeamChatMessage(
-        body,
-        replyingTo?.id ?? null,
-        mentionedUserIds
-      )
+      const result = await sendTeamChatMessageWithAttachments(formData)
 
       if (!result.success) {
         setError(result.error)
@@ -1051,6 +1130,8 @@ export default function TeamChatClient({
       }
       stopTypingIndicator()
       setDraft("")
+      setSelectedFiles([])
+      if (fileInputRef.current) fileInputRef.current.value = ""
       setMentionedUserIds([])
       setMentionQuery(null)
       setMentionStartIndex(null)
@@ -1408,13 +1489,40 @@ export default function TeamChatClient({
                           >
                             {activeSearch
                               ? highlightSearchTerm(message.body, activeSearch)
-                              : highlightMentionedUsers(
-                                  message.body,
-                                  message.mentioned_user_ids ?? [],
-                                  members
-                                )}
+                              : message.body.match(/https?:\\/\\//i)
+                                ? linkifyMessageBody(message.body)
+                                : highlightMentionedUsers(
+                                    message.body,
+                                    message.mentioned_user_ids ?? [],
+                                    members
+                                  )}
                           </p>
                         )}
+                        {message.attachments?.length ? (
+                          <div className="mt-2 space-y-2">
+                            {message.attachments.map((attachment) => {
+                              const url = attachmentUrls[attachment.path]
+                              const isImage = attachment.type.startsWith("image/")
+                              return (
+                                <div key={attachment.path} className={`overflow-hidden rounded-xl border ${isOwnMessage ? "border-white/20 bg-white/10" : "border-[var(--border)] bg-[var(--background)]"}`}>
+                                  {isImage && url ? (
+                                    <a href={url} target="_blank" rel="noreferrer" className="block">
+                                      <img src={url} alt={attachment.name} className="max-h-72 w-full object-contain" loading="lazy" />
+                                    </a>
+                                  ) : null}
+                                  <a href={url ?? "#"} target="_blank" rel="noreferrer" download={attachment.name} onClick={(event) => { if (!url) event.preventDefault() }} className="flex items-center gap-3 px-3 py-2.5 text-left hover:opacity-80">
+                                    {isImage ? <ImageIcon className="size-5 shrink-0" /> : <FileText className="size-5 shrink-0" />}
+                                    <span className="min-w-0 flex-1">
+                                      <span className="block break-all text-xs font-semibold">{attachment.name}</span>
+                                      <span className="mt-0.5 block text-[10px] opacity-70">{formatFileSize(attachment.size)}</span>
+                                    </span>
+                                    <Download className="size-4 shrink-0" />
+                                  </a>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        ) : null}
                         {editingMessageId !== message.id ? (
                           <div className={`mt-1.5 flex flex-wrap gap-2 text-[10px] ${isOwnMessage ? "justify-end" : "justify-start"}`}>
                             {canPinMessages ? (
@@ -1522,6 +1630,25 @@ export default function TeamChatClient({
           </div>
         ) : null}
 
+        {selectedFiles.length > 0 ? (
+          <div className="mb-3 rounded-xl border border-[var(--border)] bg-[var(--background)] p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold text-[var(--foreground)]">Attachments ({selectedFiles.length}/5)</p>
+              <button type="button" onClick={() => setSelectedFiles([])} className="text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)]">Remove all</button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {selectedFiles.map((file, index) => (
+                <span key={`${file.name}-${file.size}-${index}`} className="inline-flex max-w-full items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-2.5 py-2 text-xs">
+                  {file.type.startsWith("image/") ? <ImageIcon className="size-4 shrink-0 text-[var(--brand)]" /> : <FileText className="size-4 shrink-0 text-[var(--brand)]" />}
+                  <span className="max-w-48 truncate">{file.name}</span>
+                  <span className="shrink-0 text-[var(--muted)]">{formatFileSize(file.size)}</span>
+                  <button type="button" aria-label={`Remove ${file.name}`} onClick={() => setSelectedFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="rounded p-0.5 text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"><X className="size-3.5" /></button>
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         {replyingTo ? (
           <div className="mb-3 flex items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5">
             <Reply className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" />
@@ -1559,7 +1686,34 @@ export default function TeamChatClient({
           </p>
         ) : null}
 
-        <form onSubmit={handleSubmit} className="flex items-end gap-3">
+        <form onSubmit={handleSubmit} className="flex items-end gap-2 sm:gap-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv,audio/mpeg,audio/mp4,audio/wav,audio/x-wav,video/mp4,video/webm"
+            className="hidden"
+            onChange={(event) => {
+              const incoming = Array.from(event.target.files ?? [])
+              if (selectedFiles.length + incoming.length > 5) {
+                setError("You can attach up to 5 files to one message.")
+                event.target.value = ""
+                return
+              }
+              const oversized = incoming.find((file) => file.size > 25 * 1024 * 1024)
+              if (oversized) {
+                setError(`“${oversized.name}” is larger than 25 MB.`)
+                event.target.value = ""
+                return
+              }
+              setError("")
+              setSelectedFiles((current) => [...current, ...incoming])
+              event.target.value = ""
+            }}
+          />
+          <button type="button" onClick={() => fileInputRef.current?.click()} aria-label="Attach files or images" title="Attach files or images" className="inline-flex size-[52px] shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]">
+            <Paperclip className="size-5" />
+          </button>
           <div className="relative min-w-0 flex-1">
             {mentionQuery !== null ? (
               <div
@@ -1659,7 +1813,7 @@ export default function TeamChatClient({
           </div>
           <button
             type="submit"
-            disabled={isPending || !draft.trim()}
+            disabled={isPending || (!draft.trim() && selectedFiles.length === 0)}
             className="inline-flex h-[52px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="size-4" />
@@ -1669,7 +1823,7 @@ export default function TeamChatClient({
           </button>
         </form>
         <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-[var(--muted)]">
-          <span>Press Enter to send · Shift+Enter for a new line.</span>
+          <span>Paste links to share them · Attach up to 5 files, 25 MB each · Enter to send</span>
           <span className="shrink-0 tabular-nums">{draft.length}/2000</span>
         </div>
       </div>
