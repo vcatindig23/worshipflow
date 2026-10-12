@@ -113,21 +113,35 @@ function highlightSearchTerm(body: string, query: string): ReactNode {
     return body
   }
 
-  const escapedQuery = normalizedQuery.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")
-  const matches = body.split(new RegExp(`(${escapedQuery})`, "gi"))
+  const normalizedBody = body.toLocaleLowerCase()
+  const normalizedNeedle = normalizedQuery.toLocaleLowerCase()
+  const parts: ReactNode[] = []
+  let cursor = 0
+  let matchIndex = normalizedBody.indexOf(normalizedNeedle, cursor)
 
-  return matches.map((part, index) =>
-    part.toLocaleLowerCase() === normalizedQuery.toLocaleLowerCase() ? (
+  while (matchIndex !== -1) {
+    if (matchIndex > cursor) {
+      parts.push(body.slice(cursor, matchIndex))
+    }
+
+    parts.push(
       <mark
-        key={index}
-        className="rounded bg-amber-200 px-0.5 text-inherit dark:bg-amber-500/40"
+        key={matchIndex}
+        className="rounded bg-amber-200 px-0.5 text-amber-950 dark:bg-amber-500/40 dark:text-amber-50"
       >
-        {part}
+        {body.slice(matchIndex, matchIndex + normalizedQuery.length)}
       </mark>
-    ) : (
-      part
     )
-  )
+
+    cursor = matchIndex + normalizedQuery.length
+    matchIndex = normalizedBody.indexOf(normalizedNeedle, cursor)
+  }
+
+  if (cursor < body.length) {
+    parts.push(body.slice(cursor))
+  }
+
+  return parts.length > 0 ? parts : body
 }
 
 export default function TeamChatClient({
