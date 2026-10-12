@@ -155,6 +155,7 @@ export default function TeamChatClient({
     initialMessages.length === 100
   )
   const [historyError, setHistoryError] = useState("")
+  const [typingUserIds, setTypingUserIds] = useState<string[]>([])
   const [searchInput, setSearchInput] = useState("")
   const [activeSearch, setActiveSearch] = useState("")
   const [searchResults, setSearchResults] = useState<TeamChatMessage[] | null>(null)
@@ -173,6 +174,13 @@ export default function TeamChatClient({
     scrollTop: number
   } | null>(null)
   const supabase = useMemo(() => createBrowserClient(), [])
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+  const remoteTypingTimeoutsRef = useRef(
+    new Map<string, ReturnType<typeof setTimeout>>()
+  )
+  const stopTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isTypingRef = useRef(false)
+  const lastTypingBroadcastAtRef = useRef(0)
   const memberNames = useMemo(
     () => new Map(members.map((member) => [member.id, member.displayName])),
     [members]
@@ -184,7 +192,51 @@ export default function TeamChatClient({
 
   useEffect(() => {
     const channel = supabase
-      .channel(`team-chat-${organizationId}`)
+      .channel(`team-chat:${organizationId}`, {
+        config: { private: true },
+      })
+      .on(
+        "broadcast",
+        { event: "typing" },
+        (event: { payload: Record<string, unknown> }) => {
+          const userId = event.payload.user_id
+
+          if (typeof userId !== "string" || userId === currentUserId) {
+            return
+          }
+
+          if (event.payload.is_typing === true) {
+            setTypingUserIds((current) =>
+              current.includes(userId) ? current : [...current, userId]
+            )
+
+            const previousTimeout = remoteTypingTimeoutsRef.current.get(userId)
+            if (previousTimeout) {
+              clearTimeout(previousTimeout)
+            }
+
+            const timeout = setTimeout(() => {
+              setTypingUserIds((current) =>
+                current.filter((typingUserId) => typingUserId !== userId)
+              )
+              remoteTypingTimeoutsRef.current.delete(userId)
+            }, 2200)
+
+            remoteTypingTimeoutsRef.current.set(userId, timeout)
+            return
+          }
+
+          const previousTimeout = remoteTypingTimeoutsRef.current.get(userId)
+          if (previousTimeout) {
+            clearTimeout(previousTimeout)
+            remoteTypingTimeoutsRef.current.delete(userId)
+          }
+
+          setTypingUserIds((current) =>
+            current.filter((typingUserId) => typingUserId !== userId)
+          )
+        }
+      )
       .on(
         "postgres_changes",
         {
@@ -242,7 +294,32 @@ export default function TeamChatClient({
         }
       })
 
+    channelRef.current = channel
+
     return () => {
+      if (stopTypingTimeoutRef.current) {
+        clearTimeout(stopTypingTimeoutRef.current)
+        stopTypingTimeoutRef.current = null
+      }
+
+      if (isTypingRef.current) {
+        isTypingRef.current = false
+        void channel.send({
+          type: "broadcast",
+          event: "typing",
+          payload: { user_id: currentUserId, is_typing: false },
+        })
+      }
+
+      for (const timeout of remoteTypingTimeoutsRef.current.values()) {
+        clearTimeout(timeout)
+      }
+      remoteTypingTimeoutsRef.current.clear()
+
+      if (channelRef.current === channel) {
+        channelRef.current = null
+      }
+
       void supabase.removeChannel(channel)
     }
   }, [currentUserId, memberNames, organizationId, supabase])
@@ -268,6 +345,58 @@ export default function TeamChatClient({
       block: "end",
     })
   }, [messages, activeSearch])
+
+  function sendTypingStatus(isTyping: boolean) {
+    const channel = channelRef.current
+
+    if (!channel) {
+      return
+    }
+
+    void channel.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { user_id: currentUserId, is_typing: isTyping },
+    })
+  }
+
+  function stopTypingIndicator() {
+    if (stopTypingTimeoutRef.current) {
+      clearTimeout(stopTypingTimeoutRef.current)
+      stopTypingTimeoutRef.current = null
+    }
+
+    if (!isTypingRef.current) {
+      return
+    }
+
+    isTypingRef.current = false
+    sendTypingStatus(false)
+  }
+
+  function handleDraftChange(value: string) {
+    setDraft(value)
+
+    if (!value.trim()) {
+      stopTypingIndicator()
+      return
+    }
+
+    const now = Date.now()
+    if (!isTypingRef.current || now - lastTypingBroadcastAtRef.current >= 1000) {
+      isTypingRef.current = true
+      lastTypingBroadcastAtRef.current = now
+      sendTypingStatus(true)
+    }
+
+    if (stopTypingTimeoutRef.current) {
+      clearTimeout(stopTypingTimeoutRef.current)
+    }
+
+    stopTypingTimeoutRef.current = setTimeout(() => {
+      stopTypingIndicator()
+    }, 1800)
+  }
 
   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -384,9 +513,21 @@ export default function TeamChatClient({
 
         return [...current, sentMessage].slice(-100)
       })
+      stopTypingIndicator()
       setDraft("")
     })
   }
+
+  const visibleTypingNames = typingUserIds
+    .map((userId) => memberNames.get(userId))
+    .filter((name): name is string => Boolean(name))
+
+  const typingLabel =
+    visibleTypingNames.length === 1
+      ? `${visibleTypingNames[0]} is typing…`
+      : visibleTypingNames.length === 2
+        ? `${visibleTypingNames[0]} and ${visibleTypingNames[1]} are typing…`
+        : "Several team members are typing…"
 
   const visibleMessages = activeSearch ? searchResults ?? [] : messages
 
@@ -639,6 +780,21 @@ export default function TeamChatClient({
           </div>
         ) : null}
 
+        {visibleTypingNames.length > 0 ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="mb-3 flex items-center gap-2 px-1 text-xs text-[var(--muted)]"
+          >
+            <span aria-hidden="true" className="inline-flex items-center gap-1">
+              <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
+              <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
+              <span className="size-1.5 animate-bounce rounded-full bg-current" />
+            </span>
+            {typingLabel}
+          </p>
+        ) : null}
+
         <form onSubmit={handleSubmit} className="flex items-end gap-3">
           <div className="min-w-0 flex-1">
             <label htmlFor="team-chat-message" className="sr-only">
@@ -647,7 +803,7 @@ export default function TeamChatClient({
             <textarea
               id="team-chat-message"
               value={draft}
-              onChange={(event) => setDraft(event.target.value)}
+              onChange={(event) => handleDraftChange(event.target.value)}
               onKeyDown={(event) => {
                 if (
                   event.key !== "Enter" ||
