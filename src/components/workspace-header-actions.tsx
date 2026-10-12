@@ -322,22 +322,29 @@ export default function WorkspaceHeaderActions({
     setBusyNotificationId(notification.id)
     const href = notificationHref(notification)
 
-    if (!notification.read_at) {
-      const now = new Date().toISOString()
-      setNotifications((current) =>
-        current.map((item) =>
-          item.id === notification.id ? { ...item, read_at: now } : item
+    try {
+      if (!notification.read_at) {
+        const now = new Date().toISOString()
+        setNotifications((current) =>
+          current.map((item) =>
+            item.id === notification.id ? { ...item, read_at: now } : item
+          )
         )
-      )
-      setUnreadCount((count) => Math.max(0, count - 1))
+        setUnreadCount((count) => Math.max(0, count - 1))
 
-      const result = await markHeaderNotificationRead(notification.id)
-      if (!result.success) {
-        void refreshNotifications()
+        const result = await markHeaderNotificationRead(notification.id)
+        if (!result.success) {
+          setNotificationError(result.error)
+          void refreshNotifications()
+        }
       }
+    } catch {
+      setNotificationError("The notification could not be updated. Please try again.")
+      void refreshNotifications()
+    } finally {
+      setBusyNotificationId(null)
     }
 
-    setBusyNotificationId(null)
     setNotificationsOpen(false)
 
     if (href) {
@@ -350,23 +357,28 @@ export default function WorkspaceHeaderActions({
 
     setIsMarkingAllRead(true)
     setNotificationError("")
-    const result = await markHeaderNotificationsRead()
 
-    if (result.success) {
-      const now = new Date().toISOString()
-      setNotifications((current) =>
-        current.map((notification) => ({
-          ...notification,
-          read_at: notification.read_at ?? now,
-        }))
-      )
-      setUnreadCount(0)
-    } else {
-      setNotificationError(result.error)
+    try {
+      const result = await markHeaderNotificationsRead()
+
+      if (result.success) {
+        const now = new Date().toISOString()
+        setNotifications((current) =>
+          current.map((notification) => ({
+            ...notification,
+            read_at: notification.read_at ?? now,
+          }))
+        )
+        setUnreadCount(0)
+      } else {
+        setNotificationError(result.error)
+      }
+    } catch {
+      setNotificationError("Notifications could not be marked as read. Please try again.")
+    } finally {
+      setIsMarkingAllRead(false)
+      void refreshNotifications()
     }
-
-    setIsMarkingAllRead(false)
-    void refreshNotifications()
   }
 
   return (

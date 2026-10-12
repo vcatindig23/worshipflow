@@ -1,12 +1,12 @@
 "use server"
 
+import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import {
   normalizeGlobalSearchQuery,
   toSearchPattern,
 } from "@/lib/global-search"
-import { getWorkspace } from "@/lib/workspace/get-workspace"
 
 const liveSearchSchema = z.string().trim().max(100)
 
@@ -23,6 +23,39 @@ type LiveSearchSetlist = {
   name: string
   service_date: string | null
   status: "draft" | "published" | "archived"
+}
+
+async function getSearchContext() {
+  const supabase = await createClient()
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims()
+  const userId = claimsData?.claims?.sub
+
+  if (claimsError || !userId) {
+    redirect("/login")
+  }
+
+  const { data: membership, error: membershipError } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle()
+
+  if (membershipError) {
+    console.error("load_global_search_membership failed:", {
+      code: membershipError.code,
+    })
+    throw new Error("Unable to load your search workspace.")
+  }
+
+  if (!membership?.organization_id) {
+    redirect("/onboarding")
+  }
+
+  return {
+    supabase,
+    organizationId: membership.organization_id,
+  }
 }
 
 export async function searchWorkspaceLive(rawQuery: string) {
@@ -45,10 +78,7 @@ export async function searchWorkspaceLive(rawQuery: string) {
     }
   }
 
-  const [workspace, supabase] = await Promise.all([
-    getWorkspace(),
-    createClient(),
-  ])
+  const { supabase, organizationId } = await getSearchContext()
   const pattern = toSearchPattern(query)
 
   const [
@@ -60,28 +90,28 @@ export async function searchWorkspaceLive(rawQuery: string) {
     supabase
       .from("songs")
       .select("id, title, artist, album, status")
-      .eq("organization_id", workspace.organizationId)
+      .eq("organization_id", organizationId)
       .ilike("title", pattern)
       .order("title", { ascending: true })
       .limit(6),
     supabase
       .from("songs")
       .select("id, title, artist, album, status")
-      .eq("organization_id", workspace.organizationId)
+      .eq("organization_id", organizationId)
       .ilike("artist", pattern)
       .order("title", { ascending: true })
       .limit(6),
     supabase
       .from("setlists")
       .select("id, name, service_date, status, updated_at")
-      .eq("organization_id", workspace.organizationId)
+      .eq("organization_id", organizationId)
       .ilike("name", pattern)
       .order("updated_at", { ascending: false })
       .limit(6),
     supabase
       .from("setlists")
       .select("id, name, service_date, status, updated_at")
-      .eq("organization_id", workspace.organizationId)
+      .eq("organization_id", organizationId)
       .ilike("description", pattern)
       .order("updated_at", { ascending: false })
       .limit(6),
