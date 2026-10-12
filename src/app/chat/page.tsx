@@ -27,6 +27,9 @@ type MessageRow = {
   user_id: string
   body: string
   created_at: string
+  reply_to_message_id: string | null
+  reply_to_user_id: string | null
+  reply_to_body: string | null
 }
 
 function formatRole(role: string) {
@@ -100,7 +103,7 @@ export default async function TeamChatPage() {
 
   const { data: messageRows, error: messagesError } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
     .eq("organization_id", workspace.organizationId)
     .order("created_at", { ascending: false })
     .limit(100)

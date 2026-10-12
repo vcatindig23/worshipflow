@@ -17,6 +17,7 @@ import {
   MessageCircle,
   MessagesSquare,
   Pencil,
+  Reply,
   Search,
   Send,
   Trash2,
@@ -40,6 +41,9 @@ export type TeamChatMessage = {
   user_id: string
   body: string
   created_at: string
+  reply_to_message_id: string | null
+  reply_to_user_id: string | null
+  reply_to_body: string | null
   authorName: string
 }
 
@@ -183,6 +187,7 @@ export default function TeamChatClient({
   )
   const [historyError, setHistoryError] = useState("")
   const [typingUserIds, setTypingUserIds] = useState<string[]>([])
+  const [replyingTo, setReplyingTo] = useState<TeamChatMessage | null>(null)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editDraft, setEditDraft] = useState("")
   const [searchInput, setSearchInput] = useState("")
@@ -576,8 +581,20 @@ export default function TeamChatClient({
     })
   }
 
+  function handleStartReply(message: TeamChatMessage) {
+    setError("")
+    setEditingMessageId(null)
+    setEditDraft("")
+    setReplyingTo(message)
+  }
+
+  function handleClearReply() {
+    setReplyingTo(null)
+  }
+
   function handleStartEdit(message: TeamChatMessage) {
     setError("")
+    setReplyingTo(null)
     setEditingMessageId(message.id)
     setEditDraft(message.body)
   }
@@ -678,7 +695,7 @@ export default function TeamChatClient({
     setError("")
 
     startTransition(async () => {
-      const result = await sendTeamChatMessage(body)
+      const result = await sendTeamChatMessage(body, replyingTo?.id ?? null)
 
       if (!result.success) {
         setError(result.error)
@@ -699,6 +716,7 @@ export default function TeamChatClient({
       })
       stopTypingIndicator()
       setDraft("")
+      setReplyingTo(null)
     })
   }
 
@@ -935,6 +953,21 @@ export default function TeamChatClient({
                             {formatMessageTime(message.created_at, chatTimeZone)}
                           </time>
                         </div>
+                        {message.reply_to_body ? (
+                          <div
+                            className={`mb-1.5 max-w-full rounded-xl border-l-2 px-3 py-2 text-left text-[11px] ${isOwnMessage ? "border-white/60 bg-white/10 text-white/90" : "border-[var(--brand)]/50 bg-white text-[var(--muted)]"}`}
+                          >
+                            <p className="font-semibold">
+                              Replying to{" "}
+                              {message.reply_to_user_id
+                                ? memberNames.get(message.reply_to_user_id) ?? "Former team member"
+                                : "team member"}
+                            </p>
+                            <p className="mt-1 line-clamp-2 whitespace-pre-wrap break-words">
+                              {message.reply_to_body}
+                            </p>
+                          </div>
+                        ) : null}
                         {editingMessageId === message.id ? (
                           <div className="w-full min-w-[240px] rounded-2xl border border-[var(--brand)] bg-white p-3 shadow-sm">
                             <label htmlFor={`edit-team-chat-${message.id}`} className="sr-only">
@@ -983,32 +1016,46 @@ export default function TeamChatClient({
                               : message.body}
                           </p>
                         )}
-                        {isOwnMessage && editingMessageId !== message.id ? (
-                          <div className={`mt-1.5 flex gap-2 text-[10px] ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+                        {editingMessageId !== message.id ? (
+                          <div className={`mt-1.5 flex flex-wrap gap-2 text-[10px] ${isOwnMessage ? "justify-end" : "justify-start"}`}>
                             <button
                               type="button"
-                              onClick={() => handleStartEdit(message)}
+                              onClick={() => handleStartReply(message)}
                               disabled={isSavingEdit || isDeletingMessage}
-                              aria-label={`Edit your message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
+                              aria-label={`Reply to ${displayName}'s message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
                               className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)] disabled:opacity-50"
                             >
-                              <Pencil className="size-3" />
-                              Edit
+                              <Reply className="size-3" />
+                              Reply
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteMessage(message.id)}
-                              disabled={isSavingEdit || isDeletingMessage}
-                              aria-label={`Delete your message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
-                              className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
-                            >
-                              {isDeletingMessage ? (
-                                <LoaderCircle className="size-3 animate-spin" />
-                              ) : (
-                                <Trash2 className="size-3" />
-                              )}
-                              Delete
-                            </button>
+                            {isOwnMessage ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEdit(message)}
+                                  disabled={isSavingEdit || isDeletingMessage}
+                                  aria-label={`Edit your message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
+                                  className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)] disabled:opacity-50"
+                                >
+                                  <Pencil className="size-3" />
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteMessage(message.id)}
+                                  disabled={isSavingEdit || isDeletingMessage}
+                                  aria-label={`Delete your message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
+                                  className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                                >
+                                  {isDeletingMessage ? (
+                                    <LoaderCircle className="size-3 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="size-3" />
+                                  )}
+                                  Delete
+                                </button>
+                              </>
+                            ) : null}
                           </div>
                         ) : null}
                       </div>
@@ -1030,6 +1077,28 @@ export default function TeamChatClient({
           >
             <AlertCircle className="mt-0.5 size-4 shrink-0" />
             <p>{error}</p>
+          </div>
+        ) : null}
+
+        {replyingTo ? (
+          <div className="mb-3 flex items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5">
+            <Reply className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-[var(--foreground)]">
+                Replying to {replyingTo.user_id === currentUserId ? "yourself" : replyingTo.authorName}
+              </p>
+              <p className="mt-0.5 line-clamp-2 whitespace-pre-wrap break-words text-xs text-[var(--muted)]">
+                {replyingTo.body}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleClearReply}
+              aria-label="Cancel reply"
+              className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)]"
+            >
+              <X className="size-3.5" />
+            </button>
           </div>
         ) : null}
 

@@ -6,8 +6,16 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 
 const messageSchema = z.string().trim().min(1).max(2000)
 
-export async function sendTeamChatMessage(rawBody: string) {
+export async function sendTeamChatMessage(
+  rawBody: string,
+  rawReplyToMessageId?: string | null
+) {
   const parsed = messageSchema.safeParse(rawBody)
+  const parsedReplyToId = z
+    .string()
+    .uuid()
+    .nullable()
+    .safeParse(rawReplyToMessageId ?? null)
 
   if (!parsed.success) {
     return {
@@ -16,8 +24,31 @@ export async function sendTeamChatMessage(rawBody: string) {
     }
   }
 
+  if (!parsedReplyToId.success) {
+    return {
+      success: false as const,
+      error: "The reply target is invalid. Choose a message again.",
+    }
+  }
+
   const workspace = await getWorkspace()
   const supabase = await createClient()
+
+  if (parsedReplyToId.data) {
+    const { data: replyTarget, error: replyTargetError } = await supabase
+      .from("team_chat_messages")
+      .select("id")
+      .eq("id", parsedReplyToId.data)
+      .eq("organization_id", workspace.organizationId)
+      .maybeSingle()
+
+    if (replyTargetError || !replyTarget) {
+      return {
+        success: false as const,
+        error: "The message you are replying to is no longer available in this workspace.",
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from("team_chat_messages")
@@ -25,8 +56,9 @@ export async function sendTeamChatMessage(rawBody: string) {
       organization_id: workspace.organizationId,
       user_id: workspace.userId,
       body: parsed.data,
+      reply_to_message_id: parsedReplyToId.data,
     })
-    .select("id, organization_id, user_id, body, created_at")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
     .single()
 
   if (error || !data) {
@@ -88,6 +120,9 @@ type TeamChatHistoryRow = {
   user_id: string
   body: string
   created_at: string
+  reply_to_message_id: string | null
+  reply_to_user_id: string | null
+  reply_to_body: string | null
 }
 
 export async function loadOlderTeamChatMessages(rawBefore: string) {
@@ -105,7 +140,7 @@ export async function loadOlderTeamChatMessages(rawBefore: string) {
 
   const { data, error } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
     .eq("organization_id", workspace.organizationId)
     .lt("created_at", parsed.data)
     .order("created_at", { ascending: false })
@@ -150,7 +185,7 @@ export async function searchTeamChatMessages(rawQuery: string) {
 
   const { data, error } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
     .eq("organization_id", workspace.organizationId)
     .ilike("body", `%${parsed.data}%`)
     .order("created_at", { ascending: false })
@@ -201,7 +236,7 @@ export async function editTeamChatMessage(
     .eq("id", parsedId.data)
     .eq("organization_id", workspace.organizationId)
     .eq("user_id", workspace.userId)
-    .select("id, organization_id, user_id, body, created_at")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
     .maybeSingle()
 
   if (error || !data) {
