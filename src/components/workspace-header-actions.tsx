@@ -154,7 +154,7 @@ export default function WorkspaceHeaderActions({
   const [busyNotificationId, setBusyNotificationId] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const notificationsMenuRef = useRef<HTMLDivElement>(null)
-  const notificationRefreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const notificationRefreshTimeoutRef = useRef<number | null>(null)
   const supabase = useMemo(() => createBrowserClient(), [])
 
   const refreshNotifications = useCallback(async () => {
@@ -300,7 +300,7 @@ export default function WorkspaceHeaderActions({
         },
         () => {
           if (notificationRefreshTimeoutRef.current) {
-            clearTimeout(notificationRefreshTimeoutRef.current)
+            window.clearTimeout(notificationRefreshTimeoutRef.current)
           }
 
           notificationRefreshTimeoutRef.current = window.setTimeout(() => {
@@ -313,7 +313,7 @@ export default function WorkspaceHeaderActions({
 
     return () => {
       if (notificationRefreshTimeoutRef.current) {
-        clearTimeout(notificationRefreshTimeoutRef.current)
+        window.clearTimeout(notificationRefreshTimeoutRef.current)
         notificationRefreshTimeoutRef.current = null
       }
       void supabase.removeChannel(channel)
