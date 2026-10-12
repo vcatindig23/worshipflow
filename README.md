@@ -30,6 +30,7 @@ The goal is to make preparation easier and help every member know **what is plan
 
 ### Service planning
 - Create and manage service plans with dates, times, and descriptions.
+- Save reusable service templates from an existing plan, preserving song order, song arrangements, service notes, announcements, and the service timeline; create a new draft from a template while assigning the team separately.
 - Organize songs into a setlist and customize sections, keys, capo, tempo, and notes.
 - Add service notes and announcements.
 - Build a run of show with timed service elements, notes, and links to setlist songs.

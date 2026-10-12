@@ -7,6 +7,7 @@ import {
   BookOpen,
   CalendarDays,
   CheckCircle2,
+  Copy,
   ChevronRight,
   Edit,
   History,
@@ -27,6 +28,7 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 import ServiceResources from "./service-resources"
 import ServiceTimeline from "./service-timeline"
 import ServicePreparationChecklist from "./service-preparation-checklist"
+import { saveServiceAsTemplate } from "@/app/services/template-actions"
 import {
   addSongToSetlist,
   addSetlistTeamAssignment,
@@ -197,6 +199,10 @@ const errorMessages: Record<
     "The timeline item could not be moved.",
   completion_failed:
     "The service completion update could not be saved.",
+  template_name_invalid:
+    "Enter a template name between 1 and 120 characters.",
+  template_save_failed:
+    "The service could not be saved as a template. Make sure the service-template migration is applied.",
 }
 
 function formatDate(value: string | null) {
@@ -606,6 +612,30 @@ export default async function SetlistPage({
                 <MonitorPlay className="size-4" />
                 Live Stage
               </Link>
+            ) : null}
+
+            {canEdit ? (
+              <form action={saveServiceAsTemplate} className="flex items-center gap-2">
+                <input type="hidden" name="setlistId" value={id} />
+                <input
+                  type="text"
+                  name="templateName"
+                  required
+                  maxLength={120}
+                  defaultValue={setlist.name}
+                  aria-label="Service template name"
+                  placeholder="Template name"
+                  className="h-10 w-36 rounded-xl border border-[var(--border)] bg-white px-3 text-xs outline-none transition focus:border-[var(--brand)] sm:w-44"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                >
+                  <Copy className="size-4" />
+                  <span className="hidden sm:inline">Save template</span>
+                  <span className="sm:hidden">Save</span>
+                </button>
+              </form>
             ) : null}
 
             <PrintSetlistButton />

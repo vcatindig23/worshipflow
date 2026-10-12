@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Clock3,
   History,
+  Layers,
   ListMusic,
   Plus,
   Users,
@@ -546,6 +547,14 @@ export default async function ServicesPage({
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <Link
+            href="/services/templates"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+          >
+            <Layers className="size-4" />
+            Templates
+          </Link>
+
           <Link
             href="/services/history"
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
