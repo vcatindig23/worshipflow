@@ -52,7 +52,7 @@ The goal is to make preparation easier and help every member know **what is plan
 > **Offline note:** Live Stage can reopen previously saved chart snapshots. The rest of the WorshipFlow workspace still requires an internet connection. Open the service's Live Stage while online and wait for **Saved for offline** before relying on it offline.
 
 ### Notifications, history, and insights
-- Receive in-app notifications when service-team assignments change.
+- Receive in-app notifications when service-team assignments change or teammates send a new team chat message.
 - Review organization activity for song, service, team, and membership updates.
 - Record a completed service with attendance, actual duration, and after-service notes.
 - Browse completed services and review service insights such as attendance trends, completion rate, service duration, and frequently used songs.

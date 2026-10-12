@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Bell, CalendarDays, Check } from "lucide-react"
+import { Bell, CalendarDays, Check, MessagesSquare } from "lucide-react"
 import {
   markAllNotificationsRead,
   markNotificationRead,
@@ -9,7 +9,7 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 
 type Notification = {
   id: string
-  type: "service_assignment" | "service_assignment_removed"
+  type: "service_assignment" | "service_assignment_removed" | "team_chat_message"
   title: string
   body: string
   setlist_id: string | null
@@ -52,7 +52,7 @@ export default async function NotificationsPage() {
               Notifications
             </h1>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              Service-team changes and updates for you.
+              Team messages, service assignments, and updates for you.
             </p>
           </div>
           {unreadCount > 0 ? (
@@ -75,7 +75,7 @@ export default async function NotificationsPage() {
               You&apos;re all caught up
             </h2>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              New service assignments and changes will appear here.
+              New team chat messages, service assignments, and changes will appear here.
             </p>
           </div>
         ) : (
@@ -89,7 +89,9 @@ export default async function NotificationsPage() {
                   }`}
                 >
                   <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                    {notification.type === "service_assignment_removed" ? (
+                    {notification.type === "team_chat_message" ? (
+                      <MessagesSquare className="size-[18px]" />
+                    ) : notification.type === "service_assignment_removed" ? (
                       <Bell className="size-[18px]" />
                     ) : (
                       <CalendarDays className="size-[18px]" />
@@ -114,7 +116,14 @@ export default async function NotificationsPage() {
                       }).format(new Date(notification.created_at))}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-4">
-                      {notification.setlist_id ? (
+                      {notification.type === "team_chat_message" ? (
+                        <Link
+                          href="/chat"
+                          className="text-xs font-semibold text-[var(--brand)] hover:underline"
+                        >
+                          Open team chat
+                        </Link>
+                      ) : notification.setlist_id ? (
                         <Link
                           href={`/setlists/${notification.setlist_id}`}
                           className="text-xs font-semibold text-[var(--brand)] hover:underline"
