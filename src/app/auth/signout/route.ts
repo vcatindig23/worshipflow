@@ -8,18 +8,19 @@ export async function POST(request: NextRequest) {
   const { data } = await supabase.auth.getClaims()
 
   if (!data?.claims) {
-    return NextResponse.redirect(new URL("/login", request.url))
+    return NextResponse.redirect(new URL("/login", request.url), 303)
   }
 
   const { error } = await supabase.auth.signOut()
 
   if (error) {
     return NextResponse.redirect(
-      new URL("/error?code=sign_out_failed", request.url)
+      new URL("/error?code=sign_out_failed", request.url),
+      303
     )
   }
 
   revalidatePath("/", "layout")
 
-  return NextResponse.redirect(new URL("/login", request.url))
+  return NextResponse.redirect(new URL("/login", request.url), 303)
 }
