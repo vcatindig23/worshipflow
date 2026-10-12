@@ -41,7 +41,7 @@ The goal is to make preparation easier and help every member know **what is plan
 - Manage access through roles, including administrators, worship leaders, song editors, team members, and viewers.
 - Assign members to worship-team positions for a service.
 - Let assigned members confirm or decline, with an optional note.
-- Coordinate with the whole church workspace in **Team Chat**, with live typing indicators and message updates, pinned team messages, replies with quoted context, own-message editing and deletion, highlighted message search, date-separated conversations, paginated history, Enter-to-send, unread notifications, and workspace-scoped access.
+- Coordinate with the whole church workspace in **Team Chat**, with live typing indicators and message updates, pinned team messages, replies with quoted context, @mentions with direct notifications, own-message editing and deletion, highlighted message search, date-separated conversations, paginated history, Enter-to-send, unread notifications, and workspace-scoped access.
 - Review assignments in **My Schedule** and add scheduled services to Google Calendar.
 
 ### Live Stage

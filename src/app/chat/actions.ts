@@ -8,7 +8,8 @@ const messageSchema = z.string().trim().min(1).max(2000)
 
 export async function sendTeamChatMessage(
   rawBody: string,
-  rawReplyToMessageId?: string | null
+  rawReplyToMessageId?: string | null,
+  rawMentionedUserIds?: string[]
 ) {
   const parsed = messageSchema.safeParse(rawBody)
   const parsedReplyToId = z
@@ -31,8 +32,41 @@ export async function sendTeamChatMessage(
     }
   }
 
+  const parsedMentionedIds = z
+    .array(z.string().uuid())
+    .max(10)
+    .safeParse(rawMentionedUserIds ?? [])
+
+  if (!parsedMentionedIds.success) {
+    return {
+      success: false as const,
+      error: "You can mention up to 10 valid team members in one message.",
+    }
+  }
+
   const workspace = await getWorkspace()
   const supabase = await createClient()
+  const mentionedUserIds = Array.from(new Set(parsedMentionedIds.data))
+    .filter((userId) => userId !== workspace.userId)
+
+  if (mentionedUserIds.length > 0) {
+    const { data: mentionedMembers, error: mentionedMembersError } =
+      await supabase
+        .from("organization_members")
+        .select("user_id")
+        .eq("organization_id", workspace.organizationId)
+        .in("user_id", mentionedUserIds)
+
+    if (
+      mentionedMembersError ||
+      (mentionedMembers ?? []).length !== mentionedUserIds.length
+    ) {
+      return {
+        success: false as const,
+        error: "Only members of your current church workspace can be mentioned.",
+      }
+    }
+  }
 
   if (parsedReplyToId.data) {
     const { data: replyTarget, error: replyTargetError } = await supabase
@@ -57,8 +91,9 @@ export async function sendTeamChatMessage(
       user_id: workspace.userId,
       body: parsed.data,
       reply_to_message_id: parsedReplyToId.data,
+      mentioned_user_ids: mentionedUserIds,
     })
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
     .single()
 
   if (error || !data) {
@@ -96,7 +131,7 @@ export async function markTeamChatNotificationsRead() {
     .update({ read_at: new Date().toISOString() })
     .eq("user_id", workspace.userId)
     .eq("organization_id", workspace.organizationId)
-    .eq("type", "team_chat_message")
+    .in("type", ["team_chat_message", "team_chat_mention"])
     .is("read_at", null)
 
   if (error) {
@@ -125,6 +160,7 @@ type TeamChatHistoryRow = {
   reply_to_body: string | null
   pinned_at: string | null
   pinned_by: string | null
+  mentioned_user_ids: string[]
 }
 
 export async function loadOlderTeamChatMessages(rawBefore: string) {
@@ -142,7 +178,7 @@ export async function loadOlderTeamChatMessages(rawBefore: string) {
 
   const { data, error } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
     .eq("organization_id", workspace.organizationId)
     .lt("created_at", parsed.data)
     .order("created_at", { ascending: false })
@@ -187,7 +223,7 @@ export async function searchTeamChatMessages(rawQuery: string) {
 
   const { data, error } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
     .eq("organization_id", workspace.organizationId)
     .ilike("body", `%${parsed.data}%`)
     .order("created_at", { ascending: false })
@@ -238,7 +274,7 @@ export async function editTeamChatMessage(
     .eq("id", parsedId.data)
     .eq("organization_id", workspace.organizationId)
     .eq("user_id", workspace.userId)
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
     .maybeSingle()
 
   if (error || !data) {

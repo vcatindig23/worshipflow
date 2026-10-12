@@ -49,6 +49,7 @@ export type TeamChatMessage = {
   reply_to_body: string | null
   pinned_at: string | null
   pinned_by: string | null
+  mentioned_user_ids: string[]
   authorName: string
 }
 
@@ -177,6 +178,89 @@ function highlightSearchTerm(body: string, query: string): ReactNode {
   return parts.length > 0 ? parts : body
 }
 
+
+function highlightMentionedUsers(
+  body: string,
+  mentionedUserIds: string[],
+  members: TeamChatMember[]
+): ReactNode {
+  const mentionedNames = Array.from(
+    new Set(
+      mentionedUserIds
+        .map((userId) => members.find((member) => member.id === userId)?.displayName)
+        .filter((name): name is string => Boolean(name))
+    )
+  ).sort((first, second) => second.length - first.length)
+
+  if (mentionedNames.length === 0) {
+    return body
+  }
+
+  const normalizedBody = body.toLocaleLowerCase()
+  const ranges: { start: number; end: number; text: string; key: string }[] = []
+
+  for (const name of mentionedNames) {
+    const needle = `@${name}`.toLocaleLowerCase()
+    let cursor = 0
+    let start = normalizedBody.indexOf(needle, cursor)
+
+    while (start !== -1) {
+      const previousCharacter = start > 0 ? body[start - 1] : ""
+      if (!previousCharacter || !/[A-Za-z0-9_]/.test(previousCharacter)) {
+        ranges.push({
+          start,
+          end: start + needle.length,
+          text: body.slice(start, start + needle.length),
+          key: `${start}-${name}`,
+        })
+      }
+      cursor = start + needle.length
+      start = normalizedBody.indexOf(needle, cursor)
+    }
+  }
+
+  ranges.sort((first, second) => first.start - second.start || second.end - first.end)
+
+  const visibleRanges: typeof ranges = []
+  let consumedUntil = -1
+  for (const range of ranges) {
+    if (range.start < consumedUntil) {
+      continue
+    }
+    visibleRanges.push(range)
+    consumedUntil = range.end
+  }
+
+  if (visibleRanges.length === 0) {
+    return body
+  }
+
+  const parts: ReactNode[] = []
+  let cursor = 0
+
+  for (const range of visibleRanges) {
+    if (range.start > cursor) {
+      parts.push(body.slice(cursor, range.start))
+    }
+
+    parts.push(
+      <span
+        key={range.key}
+        className="font-semibold underline decoration-dotted underline-offset-2"
+      >
+        {range.text}
+      </span>
+    )
+    cursor = range.end
+  }
+
+  if (cursor < body.length) {
+    parts.push(body.slice(cursor))
+  }
+
+  return parts
+}
+
 export default function TeamChatClient({
   organizationId,
   organizationTimezone,
@@ -206,6 +290,9 @@ export default function TeamChatClient({
   const [searchResults, setSearchResults] = useState<TeamChatMessage[] | null>(null)
   const [searchError, setSearchError] = useState("")
   const [draft, setDraft] = useState("")
+  const [mentionedUserIds, setMentionedUserIds] = useState<string[]>([])
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null)
+  const [mentionStartIndex, setMentionStartIndex] = useState<number | null>(null)
   const [error, setError] = useState("")
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("connecting")
@@ -215,6 +302,7 @@ export default function TeamChatClient({
   const [isLoadingOlder, startLoadingOlder] = useTransition()
   const [isSearching, startSearching] = useTransition()
   const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const messageInputRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const previousScrollPositionRef = useRef<{
     scrollHeight: number
@@ -305,6 +393,9 @@ export default function TeamChatClient({
 
           const incomingMessage: TeamChatMessage = {
             ...row,
+            mentioned_user_ids: Array.isArray(row.mentioned_user_ids)
+              ? row.mentioned_user_ids
+              : [],
             authorName: memberNames.get(row.user_id) ?? "Team member",
           }
 
@@ -348,11 +439,22 @@ export default function TeamChatClient({
             typeof row.pinned_at === "string" ? row.pinned_at : null
           const pinnedBy =
             typeof row.pinned_by === "string" ? row.pinned_by : null
+          const mentionedUserIds = Array.isArray(row.mentioned_user_ids)
+            ? row.mentioned_user_ids.filter(
+                (userId): userId is string => typeof userId === "string"
+              )
+            : undefined
 
           setMessages((current) =>
             current.map((message) =>
               message.id === messageId
-                ? { ...message, body, pinned_at: pinnedAt, pinned_by: pinnedBy }
+                ? {
+                    ...message,
+                    body,
+                    pinned_at: pinnedAt,
+                    pinned_by: pinnedBy,
+                    ...(mentionedUserIds ? { mentioned_user_ids: mentionedUserIds } : {}),
+                  }
                 : message
             )
           )
@@ -514,8 +616,25 @@ export default function TeamChatClient({
     sendTypingStatus(false)
   }
 
-  function handleDraftChange(value: string) {
+  function handleDraftChange(value: string, cursor = value.length) {
     setDraft(value)
+
+    setMentionedUserIds(
+      mentionedUserIds.filter((userId) => {
+        const name = memberNames.get(userId)
+        return Boolean(name && value.includes(`@${name}`))
+      })
+    )
+
+    const textBeforeCursor = value.slice(0, cursor)
+    const mentionMatch = textBeforeCursor.match(/(?:^|\\s)@([^\\s@]{0,40})$/)
+    if (mentionMatch) {
+      setMentionQuery(mentionMatch[1])
+      setMentionStartIndex(textBeforeCursor.lastIndexOf("@"))
+    } else {
+      setMentionQuery(null)
+      setMentionStartIndex(null)
+    }
 
     if (!value.trim()) {
       stopTypingIndicator()
@@ -536,6 +655,48 @@ export default function TeamChatClient({
     stopTypingTimeoutRef.current = setTimeout(() => {
       stopTypingIndicator()
     }, 1800)
+  }
+
+  function handleSelectMention(member: TeamChatMember) {
+    if (mentionStartIndex === null) {
+      return
+    }
+
+    const cursor = messageInputRef.current?.selectionStart ?? draft.length
+    const nextBody =
+      draft.slice(0, mentionStartIndex) +
+      `@${member.displayName} ` +
+      draft.slice(cursor)
+    const nextCursor = mentionStartIndex + member.displayName.length + 2
+
+    if (nextBody.length > 2000) {
+      setError("That mention would exceed the 2,000-character message limit.")
+      setMentionQuery(null)
+      setMentionStartIndex(null)
+      return
+    }
+
+    handleDraftChange(nextBody, nextCursor)
+    setMentionedUserIds((current) => {
+      const stillPresent = current.filter((userId) => {
+        const name = memberNames.get(userId)
+        return Boolean(name && nextBody.includes(`@${name}`))
+      })
+      return stillPresent.includes(member.id)
+        ? stillPresent
+        : [...stillPresent, member.id].slice(0, 10)
+    })
+    setMentionQuery(null)
+    setMentionStartIndex(null)
+
+    requestAnimationFrame(() => {
+      const input = messageInputRef.current
+      if (!input) {
+        return
+      }
+      input.focus()
+      input.setSelectionRange(nextCursor, nextCursor)
+    })
   }
 
   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
@@ -786,7 +947,11 @@ export default function TeamChatClient({
     setError("")
 
     startTransition(async () => {
-      const result = await sendTeamChatMessage(body, replyingTo?.id ?? null)
+      const result = await sendTeamChatMessage(
+        body,
+        replyingTo?.id ?? null,
+        mentionedUserIds
+      )
 
       if (!result.success) {
         setError(result.error)
@@ -807,6 +972,9 @@ export default function TeamChatClient({
       })
       stopTypingIndicator()
       setDraft("")
+      setMentionedUserIds([])
+      setMentionQuery(null)
+      setMentionStartIndex(null)
       setReplyingTo(null)
     })
   }
@@ -823,6 +991,15 @@ export default function TeamChatClient({
         : "Several team members are typing…"
 
   const visibleMessages = activeSearch ? searchResults ?? [] : messages
+  const mentionSuggestions =
+    mentionQuery === null
+      ? []
+      : members
+          .filter((member) => member.id !== currentUserId)
+          .filter((member) =>
+            member.displayName.toLocaleLowerCase().includes(mentionQuery.toLocaleLowerCase())
+          )
+          .slice(0, 6)
 
   const connectionLabel =
     connectionState === "live"
@@ -1150,7 +1327,11 @@ export default function TeamChatClient({
                           >
                             {activeSearch
                               ? highlightSearchTerm(message.body, activeSearch)
-                              : message.body}
+                              : highlightMentionedUsers(
+                                  message.body,
+                                  message.mentioned_user_ids ?? [],
+                                  members
+                                )}
                           </p>
                         )}
                         {editingMessageId !== message.id ? (
@@ -1271,15 +1452,82 @@ export default function TeamChatClient({
         ) : null}
 
         <form onSubmit={handleSubmit} className="flex items-end gap-3">
-          <div className="min-w-0 flex-1">
+          <div className="relative min-w-0 flex-1">
+            {mentionQuery !== null ? (
+              <div
+                id="team-chat-mention-options"
+                role="listbox"
+                aria-label="Mention a team member"
+                className="absolute bottom-full z-20 mb-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-[var(--border)] bg-white p-2 shadow-xl"
+              >
+                <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                  Mention a teammate
+                </p>
+                {mentionSuggestions.length > 0 ? (
+                  mentionSuggestions.map((member) => (
+                    <button
+                      key={member.id}
+                      type="button"
+                      role="option"
+                      aria-selected="false"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => handleSelectMention(member)}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-[var(--surface)] focus:bg-[var(--surface)] focus:outline-none"
+                    >
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[10px] font-bold text-[var(--brand)]">
+                        {initials(member.displayName)}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold text-[var(--foreground)]">
+                          {member.displayName}
+                        </span>
+                        <span className="mt-0.5 block text-[10px] capitalize text-[var(--muted)]">
+                          {member.role.replaceAll("_", " ")}
+                        </span>
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="px-3 py-3 text-xs text-[var(--muted)]">
+                    No matching teammates.
+                  </p>
+                )}
+              </div>
+            ) : null}
             <label htmlFor="team-chat-message" className="sr-only">
               Write a message to your worship team
             </label>
             <textarea
+              ref={messageInputRef}
               id="team-chat-message"
               value={draft}
-              onChange={(event) => handleDraftChange(event.target.value)}
+              onChange={(event) => handleDraftChange(
+                event.target.value,
+                event.target.selectionStart
+              )}
+              aria-autocomplete="list"
+              aria-controls={mentionQuery !== null ? "team-chat-mention-options" : undefined}
+              aria-expanded={mentionQuery !== null && mentionSuggestions.length > 0}
               onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  !event.shiftKey &&
+                  !event.nativeEvent.isComposing &&
+                  mentionQuery !== null &&
+                  mentionSuggestions.length > 0
+                ) {
+                  event.preventDefault()
+                  handleSelectMention(mentionSuggestions[0])
+                  return
+                }
+
+                if (event.key === "Escape" && mentionQuery !== null) {
+                  event.preventDefault()
+                  setMentionQuery(null)
+                  setMentionStartIndex(null)
+                  return
+                }
+
                 if (
                   event.key !== "Enter" ||
                   event.shiftKey ||

@@ -32,6 +32,7 @@ type MessageRow = {
   reply_to_body: string | null
   pinned_at: string | null
   pinned_by: string | null
+  mentioned_user_ids: string[]
 }
 
 function formatRole(role: string) {
@@ -105,7 +106,7 @@ export default async function TeamChatPage() {
 
   const { data: messageRows, error: messagesError } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
     .eq("organization_id", workspace.organizationId)
     .order("created_at", { ascending: false })
     .limit(100)
@@ -132,7 +133,7 @@ export default async function TeamChatPage() {
 
   const { data: pinnedRows, error: pinnedMessagesError } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids")
     .eq("organization_id", workspace.organizationId)
     .not("pinned_at", "is", null)
     .order("pinned_at", { ascending: false })

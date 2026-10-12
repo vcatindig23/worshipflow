@@ -212,7 +212,7 @@ export async function getWorkspace(): Promise<WorkspaceData> {
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
         .eq("organization_id", membership.organization_id)
-        .eq("type", "team_chat_message")
+        .in("type", ["team_chat_message", "team_chat_mention"])
         .is("read_at", null),
     ])
 

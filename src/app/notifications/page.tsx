@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Bell, CalendarDays, Check, MessagesSquare } from "lucide-react"
+import { AtSign, Bell, CalendarDays, Check, MessagesSquare } from "lucide-react"
 import {
   markAllNotificationsRead,
   markNotificationRead,
@@ -9,7 +9,7 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 
 type Notification = {
   id: string
-  type: "service_assignment" | "service_assignment_removed" | "team_chat_message"
+  type: "service_assignment" | "service_assignment_removed" | "team_chat_message" | "team_chat_mention"
   title: string
   body: string
   setlist_id: string | null
@@ -89,7 +89,9 @@ export default async function NotificationsPage() {
                   }`}
                 >
                   <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                    {notification.type === "team_chat_message" ? (
+                    {notification.type === "team_chat_mention" ? (
+                      <AtSign className="size-[18px]" />
+                    ) : notification.type === "team_chat_message" ? (
                       <MessagesSquare className="size-[18px]" />
                     ) : notification.type === "service_assignment_removed" ? (
                       <Bell className="size-[18px]" />
@@ -116,7 +118,8 @@ export default async function NotificationsPage() {
                       }).format(new Date(notification.created_at))}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-4">
-                      {notification.type === "team_chat_message" ? (
+                      {notification.type === "team_chat_message" ||
+                      notification.type === "team_chat_mention" ? (
                         <Link
                           href="/chat"
                           className="text-xs font-semibold text-[var(--brand)] hover:underline"
