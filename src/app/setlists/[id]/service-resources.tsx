@@ -1,8 +1,8 @@
 import Link from "next/link"
-import { FileText, Link2, Trash2 } from "lucide-react"
+import { FileText, Link2, Trash2, UploadCloud } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
-import { addServiceResource, removeServiceResource } from "./service-resources-actions"
+import { addServiceResource, removeServiceResource, uploadAndAddServiceResource } from "./service-resources-actions"
 
 type ServiceResource = {
   id: string
@@ -200,7 +200,25 @@ export default async function ServiceResources({
       )}
 
       {canEdit ? (
-        <form
+        <div className="mt-4 space-y-5 border-t border-[var(--border)] pt-4">
+          <form action={uploadAndAddServiceResource} className="space-y-3 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background)] p-4">
+            <input type="hidden" name="setlistId" value={setlistId} />
+            <div className="flex items-center gap-2">
+              <UploadCloud className="size-4 text-[var(--brand)]" />
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">Upload a reference file</h3>
+            </div>
+            <p className="text-xs leading-5 text-[var(--muted)]">
+              Add a service guide, PDF chart, presentation, image, or rehearsal audio directly to this setlist. It will also be saved in your workspace library.
+            </p>
+            <input type="file" name="referenceFile" required accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.mp3,.m4a,.wav" className="block w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--brand-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--brand)]" />
+            <input type="text" name="displayName" maxLength={120} placeholder="Display name (optional)" aria-label="Reference file display name" className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]" />
+            <button type="submit" className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]">
+              Upload and attach
+            </button>
+            <p className="text-xs text-[var(--muted)]">Maximum 25 MB. PDF, Office documents, images, and supported audio files.</p>
+          </form>
+
+          <form
           action={addServiceResource}
           className="mt-4 space-y-3 border-t border-[var(--border)] pt-4"
         >
