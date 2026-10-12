@@ -6,6 +6,7 @@ import { useState } from "react"
 import {
   BookOpen,
   CalendarDays,
+  ContactRound,
   Church,
   LayoutDashboard,
   Menu,
@@ -47,6 +48,11 @@ const navigation = [
     href: "/my-schedule",
     label: "My Schedule",
     icon: UserRound,
+  },
+  {
+    href: "/profile",
+    label: "Profile",
+    icon: ContactRound,
   },
   {
     href: "/settings/team",
