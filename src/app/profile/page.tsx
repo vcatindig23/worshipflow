@@ -189,7 +189,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   if (!workspace) redirect("/onboarding")
 
   const supabase = await createClient()
-  const [profileResult, membershipResult, songsCountResult, servicesCountResult, activityResult, recentServicesResult] =
+  const [profileResult, membershipResult, songsCountResult, servicesCountResult, activityResult] =
     await Promise.all([
       supabase
         .from("profiles")
@@ -220,13 +220,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         .eq("actor_id", workspace.userId)
         .order("created_at", { ascending: false })
         .limit(8),
-      supabase
-        .from("setlists")
-        .select("id, name, service_date, service_time, status")
-        .eq("organization_id", workspace.organizationId)
-        .eq("created_by", workspace.userId)
-        .order("created_at", { ascending: false })
-        .limit(3),
     ])
 
   if (profileResult.error || !profileResult.data) {
@@ -245,7 +238,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const websiteUrl = isValidWebsite(profile.website)
   const displayName = profile.display_name?.trim() || workspace.userName || "Worship Member"
   const activityItems = (activityResult.data ?? []) as ActivityRecord[]
-  const recentServices = recentServicesResult.data ?? []
   const tabs = [
     { value: "overview", label: "Overview" },
     { value: "activity", label: "Activity" },
