@@ -1226,13 +1226,14 @@ export default function TeamChatClient({
         </section>
       ) : null}
 
-      <div
-        ref={messagesContainerRef}
-        className="relative min-h-[360px] max-h-[62vh] overflow-y-auto bg-[var(--background)]/55 px-4 py-5 sm:min-h-[440px] sm:px-6"
-        onScroll={handleMessagesScroll}
-        aria-label="Team chat messages"
-        aria-live="polite"
-      >
+      <div className="relative">
+        <div
+          ref={messagesContainerRef}
+          className="min-h-[360px] max-h-[62vh] overflow-y-auto bg-[var(--background)]/55 px-4 py-5 sm:min-h-[440px] sm:px-6"
+          onScroll={handleMessagesScroll}
+          aria-label="Team chat messages"
+          aria-live="polite"
+        >
         {!activeSearch && hasMoreMessages && messages.length > 0 ? (
           <div className="mb-5 flex flex-col items-center gap-2">
             <button
@@ -1493,6 +1494,8 @@ export default function TeamChatClient({
             })}
           </ol>
         ) : null}
+          <div ref={messagesEndRef} />
+        </div>
         {newMessageCount > 0 && !activeSearch ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-3">
             <button
@@ -1506,7 +1509,6 @@ export default function TeamChatClient({
             </button>
           </div>
         ) : null}
-        <div ref={messagesEndRef} />
       </div>
 
       <div className="border-t border-[var(--border)] bg-white px-4 py-4 sm:px-6">
