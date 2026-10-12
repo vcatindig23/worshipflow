@@ -100,8 +100,8 @@ export default function TeamChatClient({
           table: "team_chat_messages",
           filter: `organization_id=eq.${organizationId}`,
         },
-        (payload) => {
-          const row = payload.new as MessageRow
+        (payload: { new: Record<string, unknown> }) => {
+          const row = payload.new as unknown as MessageRow
 
           if (
             !row ||
@@ -131,7 +131,9 @@ export default function TeamChatClient({
           })
         }
       )
-      .subscribe((status) => {
+      .subscribe((
+        status: "SUBSCRIBED" | "CHANNEL_ERROR" | "TIMED_OUT" | "CLOSED"
+      ) => {
         if (status === "SUBSCRIBED") {
           setConnectionState("live")
         } else if (
