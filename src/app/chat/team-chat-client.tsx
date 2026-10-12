@@ -11,18 +11,23 @@ import type { FormEvent, ReactNode } from "react"
 import { Fragment } from "react"
 import {
   AlertCircle,
+  Check,
   ChevronUp,
   LoaderCircle,
   MessageCircle,
   MessagesSquare,
+  Pencil,
   Search,
   Send,
+  Trash2,
   Wifi,
   X,
   WifiOff,
 } from "lucide-react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import {
+  deleteTeamChatMessage,
+  editTeamChatMessage,
   loadOlderTeamChatMessages,
   markTeamChatNotificationsRead,
   searchTeamChatMessages,
@@ -156,6 +161,8 @@ export default function TeamChatClient({
   )
   const [historyError, setHistoryError] = useState("")
   const [typingUserIds, setTypingUserIds] = useState<string[]>([])
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editDraft, setEditDraft] = useState("")
   const [searchInput, setSearchInput] = useState("")
   const [activeSearch, setActiveSearch] = useState("")
   const [searchResults, setSearchResults] = useState<TeamChatMessage[] | null>(null)
@@ -165,6 +172,8 @@ export default function TeamChatClient({
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("connecting")
   const [isPending, startTransition] = useTransition()
+  const [isSavingEdit, startSavingEdit] = useTransition()
+  const [isDeletingMessage, startDeletingMessage] = useTransition()
   const [isLoadingOlder, startLoadingOlder] = useTransition()
   const [isSearching, startSearching] = useTransition()
   const messagesContainerRef = useRef<HTMLDivElement>(null)
@@ -280,6 +289,68 @@ export default function TeamChatClient({
           })
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "team_chat_messages",
+          filter: `organization_id=eq.${organizationId}`,
+        },
+        (payload: { new: Record<string, unknown> }) => {
+          const row = payload.new
+
+          if (typeof row.id !== "string" || typeof row.body !== "string") {
+            return
+          }
+
+          const messageId = row.id
+          const body = row.body
+
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === messageId ? { ...message, body } : message
+            )
+          )
+          setSearchResults((current) =>
+            current
+              ? current
+                  .map((message) =>
+                    message.id === messageId ? { ...message, body } : message
+                  )
+                  .filter(
+                    (message) =>
+                      !activeSearch ||
+                      message.body
+                        .toLocaleLowerCase()
+                        .includes(activeSearch.toLocaleLowerCase())
+                  )
+              : null
+          )
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "team_chat_messages",
+        },
+        (payload: { old: Record<string, unknown> }) => {
+          const messageId = payload.old.id
+
+          if (typeof messageId !== "string") {
+            return
+          }
+
+          setMessages((current) =>
+            current.filter((message) => message.id !== messageId)
+          )
+          setSearchResults((current) =>
+            current ? current.filter((message) => message.id !== messageId) : null
+          )
+        }
+      )
       .subscribe((
         status: "SUBSCRIBED" | "CHANNEL_ERROR" | "TIMED_OUT" | "CLOSED"
       ) => {
@@ -322,7 +393,7 @@ export default function TeamChatClient({
 
       void supabase.removeChannel(channel)
     }
-  }, [currentUserId, memberNames, organizationId, supabase])
+  }, [activeSearch, currentUserId, memberNames, organizationId, supabase])
 
   useEffect(() => {
     if (activeSearch) {
@@ -480,6 +551,97 @@ export default function TeamChatClient({
         return [...uniqueOlderMessages, ...current]
       })
       setHasMoreMessages(result.hasMore)
+    })
+  }
+
+  function handleStartEdit(message: TeamChatMessage) {
+    setError("")
+    setEditingMessageId(message.id)
+    setEditDraft(message.body)
+  }
+
+  function handleCancelEdit() {
+    setEditingMessageId(null)
+    setEditDraft("")
+  }
+
+  function handleSaveEdit(messageId: string) {
+    const body = editDraft.trim()
+
+    if (!body || isSavingEdit) {
+      if (!body) {
+        setError("A message cannot be empty.")
+      }
+      return
+    }
+
+    setError("")
+
+    startSavingEdit(async () => {
+      const result = await editTeamChatMessage(messageId, body)
+
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
+
+      const updatedBody = result.message.body
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === messageId ? { ...message, body: updatedBody } : message
+        )
+      )
+      setSearchResults((current) =>
+        current
+          ? current
+              .map((message) =>
+                message.id === messageId ? { ...message, body: updatedBody } : message
+              )
+              .filter(
+                (message) =>
+                  !activeSearch ||
+                  message.body
+                    .toLocaleLowerCase()
+                    .includes(activeSearch.toLocaleLowerCase())
+              )
+          : null
+      )
+      setEditingMessageId(null)
+      setEditDraft("")
+    })
+  }
+
+  function handleDeleteMessage(messageId: string) {
+    if (
+      isDeletingMessage ||
+      !window.confirm("Delete this message? This cannot be undone.")
+    ) {
+      return
+    }
+
+    setError("")
+
+    startDeletingMessage(async () => {
+      const result = await deleteTeamChatMessage(messageId)
+
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
+
+      setMessages((current) =>
+        current.filter((message) => message.id !== result.messageId)
+      )
+      setSearchResults((current) =>
+        current
+          ? current.filter((message) => message.id !== result.messageId)
+          : null
+      )
+
+      if (editingMessageId === result.messageId) {
+        setEditingMessageId(null)
+        setEditDraft("")
+      }
     })
   }
 
@@ -751,13 +913,82 @@ export default function TeamChatClient({
                             {formatMessageTime(message.created_at)}
                           </time>
                         </div>
-                        <p
-                          className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-left text-sm leading-6 shadow-sm ${isOwnMessage ? "rounded-tr-md bg-[var(--brand)] text-white" : "rounded-tl-md border border-[var(--border)] bg-white text-[var(--foreground)]"}`}
-                        >
-                          {activeSearch
-                            ? highlightSearchTerm(message.body, activeSearch)
-                            : message.body}
-                        </p>
+                        {editingMessageId === message.id ? (
+                          <div className="w-full min-w-[240px] rounded-2xl border border-[var(--brand)] bg-white p-3 shadow-sm">
+                            <label htmlFor={`edit-team-chat-${message.id}`} className="sr-only">
+                              Edit message
+                            </label>
+                            <textarea
+                              id={`edit-team-chat-${message.id}`}
+                              value={editDraft}
+                              onChange={(event) => setEditDraft(event.target.value)}
+                              maxLength={2000}
+                              rows={Math.min(5, Math.max(2, editDraft.split("\n").length))}
+                              disabled={isSavingEdit}
+                              className="max-h-40 min-h-[64px] w-full resize-y rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm leading-5 text-[var(--foreground)] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10 disabled:opacity-60"
+                            />
+                            <div className="mt-2 flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                disabled={isSavingEdit}
+                                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 text-xs font-semibold text-[var(--muted)] hover:bg-[var(--surface)] disabled:opacity-50"
+                              >
+                                <X className="size-3.5" />
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEdit(message.id)}
+                                disabled={isSavingEdit || !editDraft.trim() || editDraft.trim() === message.body}
+                                className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[var(--brand)] px-2.5 text-xs font-semibold text-white hover:bg-[var(--brand-dark)] disabled:opacity-50"
+                              >
+                                {isSavingEdit ? (
+                                  <LoaderCircle className="size-3.5 animate-spin" />
+                                ) : (
+                                  <Check className="size-3.5" />
+                                )}
+                                {isSavingEdit ? "Saving…" : "Save"}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p
+                            className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-left text-sm leading-6 shadow-sm ${isOwnMessage ? "rounded-tr-md bg-[var(--brand)] text-white" : "rounded-tl-md border border-[var(--border)] bg-white text-[var(--foreground)]"}`}
+                          >
+                            {activeSearch
+                              ? highlightSearchTerm(message.body, activeSearch)
+                              : message.body}
+                          </p>
+                        )}
+                        {isOwnMessage && editingMessageId !== message.id ? (
+                          <div className={`mt-1.5 flex gap-2 text-[10px] ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+                            <button
+                              type="button"
+                              onClick={() => handleStartEdit(message)}
+                              disabled={isSavingEdit || isDeletingMessage}
+                              aria-label={`Edit your message sent at ${formatMessageTime(message.created_at)}`}
+                              className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)] disabled:opacity-50"
+                            >
+                              <Pencil className="size-3" />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMessage(message.id)}
+                              disabled={isSavingEdit || isDeletingMessage}
+                              aria-label={`Delete your message sent at ${formatMessageTime(message.created_at)}`}
+                              className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                            >
+                              {isDeletingMessage ? (
+                                <LoaderCircle className="size-3 animate-spin" />
+                              ) : (
+                                <Trash2 className="size-3" />
+                              )}
+                              Delete
+                            </button>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   </li>

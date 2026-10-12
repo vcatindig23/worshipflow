@@ -174,3 +174,87 @@ export async function searchTeamChatMessages(rawQuery: string) {
     messages: (data ?? []) as TeamChatHistoryRow[],
   }
 }
+
+
+const teamChatMessageIdSchema = z.string().uuid()
+
+export async function editTeamChatMessage(
+  rawMessageId: string,
+  rawBody: string
+) {
+  const parsedId = teamChatMessageIdSchema.safeParse(rawMessageId)
+  const parsedBody = messageSchema.safeParse(rawBody)
+
+  if (!parsedId.success || !parsedBody.success) {
+    return {
+      success: false as const,
+      error: "Enter a valid message of up to 2,000 characters.",
+    }
+  }
+
+  const workspace = await getWorkspace()
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("team_chat_messages")
+    .update({ body: parsedBody.data })
+    .eq("id", parsedId.data)
+    .eq("organization_id", workspace.organizationId)
+    .eq("user_id", workspace.userId)
+    .select("id, organization_id, user_id, body, created_at")
+    .maybeSingle()
+
+  if (error || !data) {
+    console.error("edit_team_chat_message failed:", {
+      code: error?.code,
+      message: error?.message,
+    })
+
+    return {
+      success: false as const,
+      error: "This message could not be edited. You can only edit your own messages.",
+    }
+  }
+
+  return {
+    success: true as const,
+    message: data,
+  }
+}
+
+export async function deleteTeamChatMessage(rawMessageId: string) {
+  const parsedId = teamChatMessageIdSchema.safeParse(rawMessageId)
+
+  if (!parsedId.success) {
+    return {
+      success: false as const,
+      error: "This message could not be deleted. Refresh the page and try again.",
+    }
+  }
+
+  const workspace = await getWorkspace()
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("team_chat_messages")
+    .delete()
+    .eq("id", parsedId.data)
+    .eq("organization_id", workspace.organizationId)
+    .eq("user_id", workspace.userId)
+    .select("id")
+    .maybeSingle()
+
+  if (error || !data) {
+    console.error("delete_team_chat_message failed:", {
+      code: error?.code,
+      message: error?.message,
+    })
+
+    return {
+      success: false as const,
+      error: "This message could not be deleted. You can only delete your own messages.",
+    }
+  }
+
+  return { success: true as const, messageId: data.id }
+}
