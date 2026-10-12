@@ -17,6 +17,8 @@ import {
   MessageCircle,
   MessagesSquare,
   Pencil,
+  Pin,
+  PinOff,
   Reply,
   Search,
   Send,
@@ -33,6 +35,7 @@ import {
   markTeamChatNotificationsRead,
   searchTeamChatMessages,
   sendTeamChatMessage,
+  setTeamChatMessagePinned,
 } from "./actions"
 
 export type TeamChatMessage = {
@@ -44,6 +47,8 @@ export type TeamChatMessage = {
   reply_to_message_id: string | null
   reply_to_user_id: string | null
   reply_to_body: string | null
+  pinned_at: string | null
+  pinned_by: string | null
   authorName: string
 }
 
@@ -57,7 +62,9 @@ type TeamChatClientProps = {
   organizationId: string
   organizationTimezone: string
   currentUserId: string
+  canPinMessages: boolean
   initialMessages: TeamChatMessage[]
+  initialPinnedMessages: TeamChatMessage[]
   members: TeamChatMember[]
 }
 
@@ -174,7 +181,9 @@ export default function TeamChatClient({
   organizationId,
   organizationTimezone,
   currentUserId,
+  canPinMessages,
   initialMessages,
+  initialPinnedMessages,
   members,
 }: TeamChatClientProps) {
   const chatTimeZone = useMemo(
@@ -182,6 +191,8 @@ export default function TeamChatClient({
     [organizationTimezone]
   )
   const [messages, setMessages] = useState(initialMessages)
+  const [pinnedMessages, setPinnedMessages] = useState(initialPinnedMessages)
+  const [isPinningMessage, startPinningMessage] = useTransition()
   const [hasMoreMessages, setHasMoreMessages] = useState(
     initialMessages.length === 100
   )
@@ -333,17 +344,25 @@ export default function TeamChatClient({
 
           const messageId = row.id
           const body = row.body
+          const pinnedAt =
+            typeof row.pinned_at === "string" ? row.pinned_at : null
+          const pinnedBy =
+            typeof row.pinned_by === "string" ? row.pinned_by : null
 
           setMessages((current) =>
             current.map((message) =>
-              message.id === messageId ? { ...message, body } : message
+              message.id === messageId
+                ? { ...message, body, pinned_at: pinnedAt, pinned_by: pinnedBy }
+                : message
             )
           )
           setSearchResults((current) =>
             current
               ? current
                   .map((message) =>
-                    message.id === messageId ? { ...message, body } : message
+                    message.id === messageId
+                      ? { ...message, body, pinned_at: pinnedAt, pinned_by: pinnedBy }
+                      : message
                   )
                   .filter(
                     (message) =>
@@ -354,6 +373,29 @@ export default function TeamChatClient({
                   )
               : null
           )
+          setPinnedMessages((current) => {
+            const existing = current.filter((message) => message.id !== messageId)
+
+            if (!pinnedAt || typeof row.user_id !== "string" ||
+                typeof row.organization_id !== "string" ||
+                typeof row.created_at !== "string") {
+              return existing
+            }
+
+            const updatedMessage: TeamChatMessage = {
+              ...(row as unknown as Omit<TeamChatMessage, "authorName">),
+              body,
+              pinned_at: pinnedAt,
+              pinned_by: pinnedBy,
+              authorName: memberNames.get(row.user_id) ?? "Team member",
+            }
+
+            return [updatedMessage, ...existing]
+              .sort((first, second) =>
+                (second.pinned_at ?? "").localeCompare(first.pinned_at ?? "")
+              )
+              .slice(0, 10)
+          })
         }
       )
       .on(
@@ -578,6 +620,55 @@ export default function TeamChatClient({
         return [...uniqueOlderMessages, ...current]
       })
       setHasMoreMessages(result.hasMore)
+    })
+  }
+
+  function handleTogglePinned(message: TeamChatMessage) {
+    if (!canPinMessages || isPinningMessage) {
+      return
+    }
+
+    const shouldPin = !message.pinned_at
+    setError("")
+
+    startPinningMessage(async () => {
+      const result = await setTeamChatMessagePinned(message.id, shouldPin)
+
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
+
+      const updatedMessage: TeamChatMessage = {
+        ...result.message,
+        authorName: memberNames.get(result.message.user_id) ?? message.authorName,
+      }
+
+      setMessages((current) =>
+        current.map((item) =>
+          item.id === updatedMessage.id ? updatedMessage : item
+        )
+      )
+      setSearchResults((current) =>
+        current
+          ? current.map((item) =>
+              item.id === updatedMessage.id ? updatedMessage : item
+            )
+          : null
+      )
+      setPinnedMessages((current) => {
+        const remaining = current.filter((item) => item.id !== updatedMessage.id)
+
+        if (!updatedMessage.pinned_at) {
+          return remaining
+        }
+
+        return [updatedMessage, ...remaining]
+          .sort((first, second) =>
+            (second.pinned_at ?? "").localeCompare(first.pinned_at ?? "")
+          )
+          .slice(0, 10)
+      })
     })
   }
 
@@ -833,6 +924,52 @@ export default function TeamChatClient({
         )}
       </div>
 
+      {pinnedMessages.length > 0 ? (
+        <section
+          aria-label="Pinned team messages"
+          className="border-b border-[var(--border)] bg-[var(--surface)] px-4 py-3 sm:px-6"
+        >
+          <div className="mb-2 flex items-center gap-2">
+            <Pin className="size-3.5 text-[var(--brand)]" />
+            <h3 className="text-xs font-semibold text-[var(--foreground)]">
+              Pinned for the team
+            </h3>
+            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
+              {pinnedMessages.length}
+            </span>
+          </div>
+          <ul className="max-h-40 space-y-2 overflow-y-auto">
+            {pinnedMessages.map((message) => (
+              <li
+                key={message.id}
+                className="flex items-start gap-3 rounded-xl border border-[var(--border)] bg-white px-3 py-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold text-[var(--muted)]">
+                    {message.authorName} · {formatMessageTime(message.created_at, chatTimeZone)}
+                  </p>
+                  <p className="mt-0.5 whitespace-pre-wrap break-words text-xs leading-5 text-[var(--foreground)]">
+                    {message.body}
+                  </p>
+                </div>
+                {canPinMessages ? (
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePinned(message)}
+                    disabled={isPinningMessage}
+                    aria-label={`Unpin message from ${message.authorName}`}
+                    className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-[10px] font-semibold text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                  >
+                    <PinOff className="size-3" />
+                    Unpin
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <div
         ref={messagesContainerRef}
         className="min-h-[360px] max-h-[62vh] overflow-y-auto bg-[var(--background)]/55 px-4 py-5 sm:min-h-[440px] sm:px-6"
@@ -1018,9 +1155,25 @@ export default function TeamChatClient({
                         )}
                         {editingMessageId !== message.id ? (
                           <div className={`mt-1.5 flex flex-wrap gap-2 text-[10px] ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+                            {canPinMessages ? (
+                              <button
+                                type="button"
+                                onClick={() => handleTogglePinned(message)}
+                                disabled={isPinningMessage || isSavingEdit || isDeletingMessage}
+                                aria-label={`${message.pinned_at ? "Unpin" : "Pin"} message from ${displayName}`}
+                                className={`inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium transition disabled:opacity-50 ${message.pinned_at ? "text-[var(--brand)] hover:bg-white" : "text-[var(--muted)] hover:bg-white hover:text-[var(--foreground)]"}`}
+                              >
+                                {message.pinned_at ? (
+                                  <PinOff className="size-3" />
+                                ) : (
+                                  <Pin className="size-3" />
+                                )}
+                                {message.pinned_at ? "Unpin" : "Pin"}
+                              </button>
+                            ) : null}
                             <button
                               type="button"
-                              onClick={() => handleStartReply(message)}
+                              onClick={() => handleStartReply(message)
                               disabled={isSavingEdit || isDeletingMessage}
                               aria-label={`Reply to ${displayName}'s message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
                               className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)] disabled:opacity-50"

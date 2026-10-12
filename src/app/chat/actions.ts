@@ -58,7 +58,7 @@ export async function sendTeamChatMessage(
       body: parsed.data,
       reply_to_message_id: parsedReplyToId.data,
     })
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
     .single()
 
   if (error || !data) {
@@ -123,6 +123,8 @@ type TeamChatHistoryRow = {
   reply_to_message_id: string | null
   reply_to_user_id: string | null
   reply_to_body: string | null
+  pinned_at: string | null
+  pinned_by: string | null
 }
 
 export async function loadOlderTeamChatMessages(rawBefore: string) {
@@ -140,7 +142,7 @@ export async function loadOlderTeamChatMessages(rawBefore: string) {
 
   const { data, error } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
     .eq("organization_id", workspace.organizationId)
     .lt("created_at", parsed.data)
     .order("created_at", { ascending: false })
@@ -185,7 +187,7 @@ export async function searchTeamChatMessages(rawQuery: string) {
 
   const { data, error } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
     .eq("organization_id", workspace.organizationId)
     .ilike("body", `%${parsed.data}%`)
     .order("created_at", { ascending: false })
@@ -236,7 +238,7 @@ export async function editTeamChatMessage(
     .eq("id", parsedId.data)
     .eq("organization_id", workspace.organizationId)
     .eq("user_id", workspace.userId)
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
     .maybeSingle()
 
   if (error || !data) {
@@ -292,4 +294,56 @@ export async function deleteTeamChatMessage(rawMessageId: string) {
   }
 
   return { success: true as const, messageId: data.id }
+}
+
+
+const pinnedMessageIdSchema = z.string().uuid()
+
+export async function setTeamChatMessagePinned(
+  rawMessageId: string,
+  shouldPin: boolean
+) {
+  const parsedId = pinnedMessageIdSchema.safeParse(rawMessageId)
+  const parsedPinned = z.boolean().safeParse(shouldPin)
+
+  if (!parsedId.success || !parsedPinned.success) {
+    return {
+      success: false as const,
+      error: "Choose a valid message and try again.",
+    }
+  }
+
+  const workspace = await getWorkspace()
+
+  if (!["admin", "worship_leader"].includes(workspace.role)) {
+    return {
+      success: false as const,
+      error: "Only administrators and worship leaders can pin messages.",
+    }
+  }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc("set_team_chat_message_pinned", {
+    p_message_id: parsedId.data,
+    p_pinned: parsedPinned.data,
+  })
+
+  const pinnedMessage = Array.isArray(data) ? data[0] : data
+
+  if (error || !pinnedMessage) {
+    console.error("set_team_chat_message_pinned failed:", {
+      code: error?.code,
+      message: error?.message,
+    })
+
+    return {
+      success: false as const,
+      error: "The message could not be pinned. Check permissions and try again.",
+    }
+  }
+
+  return {
+    success: true as const,
+    message: pinnedMessage as TeamChatHistoryRow,
+  }
 }

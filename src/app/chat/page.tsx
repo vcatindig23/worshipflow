@@ -30,6 +30,8 @@ type MessageRow = {
   reply_to_message_id: string | null
   reply_to_user_id: string | null
   reply_to_body: string | null
+  pinned_at: string | null
+  pinned_by: string | null
 }
 
 function formatRole(role: string) {
@@ -103,7 +105,7 @@ export default async function TeamChatPage() {
 
   const { data: messageRows, error: messagesError } = await supabase
     .from("team_chat_messages")
-    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
     .eq("organization_id", workspace.organizationId)
     .order("created_at", { ascending: false })
     .limit(100)
@@ -123,6 +125,28 @@ export default async function TeamChatPage() {
   const initialMessages: TeamChatMessage[] = ((messageRows ?? []) as MessageRow[])
     .slice()
     .reverse()
+    .map((message) => ({
+      ...message,
+      authorName: profileNames.get(message.user_id) ?? "Worship Member",
+    }))
+
+  const { data: pinnedRows, error: pinnedMessagesError } = await supabase
+    .from("team_chat_messages")
+    .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by")
+    .eq("organization_id", workspace.organizationId)
+    .not("pinned_at", "is", null)
+    .order("pinned_at", { ascending: false })
+    .limit(10)
+
+  if (pinnedMessagesError) {
+    console.error("load_pinned_team_chat_messages failed:", {
+      code: pinnedMessagesError.code,
+      message: pinnedMessagesError.message,
+    })
+    throw new Error("Unable to load pinned team chat messages.")
+  }
+
+  const initialPinnedMessages: TeamChatMessage[] = ((pinnedRows ?? []) as MessageRow[])
     .map((message) => ({
       ...message,
       authorName: profileNames.get(message.user_id) ?? "Worship Member",
@@ -183,7 +207,9 @@ export default async function TeamChatPage() {
             organizationId={workspace.organizationId}
             organizationTimezone={workspace.organizationTimezone || "Asia/Manila"}
             currentUserId={workspace.userId}
+            canPinMessages={["admin", "worship_leader"].includes(workspace.role)}
             initialMessages={initialMessages}
+            initialPinnedMessages={initialPinnedMessages}
             members={members}
           />
 
