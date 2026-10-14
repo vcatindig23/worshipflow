@@ -3,8 +3,11 @@ import {
   Archive,
   ArrowDownUp,
   ChevronRight,
+  Grid2X2,
+  List,
   Plus,
   Search,
+  SlidersHorizontal,
   Star,
 } from "lucide-react"
 import { redirect } from "next/navigation"
@@ -129,6 +132,7 @@ export default async function SongsPage({
     getParam(params.tag)?.trim() ?? ""
   const favoriteOnly =
     getParam(params.favorite) === "true"
+  const view = getParam(params.view) === "grid" ? "grid" : "list"
 
   const sort =
     requestedSort === "recent" ? "recent" : "title"
@@ -318,6 +322,17 @@ export default async function SongsPage({
       ? undefined
       : "true",
   })
+  const hasActiveFilters = Boolean(
+    query || favoriteOnly || selectedTag || status !== "active" || sort !== "title"
+  )
+  const clearFiltersHref = buildHref(params, {
+    q: undefined,
+    sort: undefined,
+    status: undefined,
+    favorite: undefined,
+    tag: undefined,
+    view: view === "grid" ? "grid" : undefined,
+  })
 
   return (
     <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
@@ -352,6 +367,9 @@ export default async function SongsPage({
           method="get"
           className="flex flex-col gap-3 lg:flex-row"
         >
+          <input type="hidden" name="view" value={view} />
+          {favoriteOnly ? <input type="hidden" name="favorite" value="true" /> : null}
+          {selectedTag ? <input type="hidden" name="tag" value={selectedTag} /> : null}
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
 
@@ -452,7 +470,7 @@ export default async function SongsPage({
       </section>
 
       <section>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-[var(--foreground)]">
               {filteredSongs.length}{" "}
@@ -470,6 +488,41 @@ export default async function SongsPage({
                     ? `Filtered by ${selectedTag}`
                     : "Your church song catalog"}
             </p>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            {hasActiveFilters ? (
+              <Link
+                href={clearFiltersHref}
+                className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+              >
+                <SlidersHorizontal className="size-3.5" />
+                Clear filters
+              </Link>
+            ) : null}
+            <div className="inline-flex items-center rounded-xl border border-[var(--border)] bg-white p-1 shadow-sm" aria-label="Song layout">
+              <Link
+                href={buildHref(params, { view: undefined })}
+                aria-label="List view"
+                aria-current={view === "list" ? "page" : undefined}
+                title="List view"
+                className={`flex size-8 items-center justify-center rounded-lg transition ${
+                  view === "list" ? "bg-[var(--brand-soft)] text-[var(--brand)]" : "text-[var(--muted)] hover:bg-[var(--surface)]"
+                }`}
+              >
+                <List className="size-4" />
+              </Link>
+              <Link
+                href={buildHref(params, { view: "grid" })}
+                aria-label="Grid view"
+                aria-current={view === "grid" ? "page" : undefined}
+                title="Grid view"
+                className={`flex size-8 items-center justify-center rounded-lg transition ${
+                  view === "grid" ? "bg-[var(--brand-soft)] text-[var(--brand)]" : "text-[var(--muted)] hover:bg-[var(--surface)]"
+                }`}
+              >
+                <Grid2X2 className="size-4" />
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -497,7 +550,7 @@ export default async function SongsPage({
             </Link>
           </div>
         ) : (
-          <div className="grid gap-3">
+          <div className={view === "grid" ? "grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
             {filteredSongs.map((song) => {
               const preference =
                 preferencesBySong.get(song.id)
@@ -508,9 +561,13 @@ export default async function SongsPage({
               return (
                 <div
                   key={song.id}
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className={`group rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/25 hover:shadow-md focus-within:border-[var(--brand)]/25 ${
+                    view === "grid" ? "flex h-full flex-col p-5" : ""
+                  }`}
                 >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className={`flex flex-col gap-4 ${
+                    view === "grid" ? "flex-1" : "sm:flex-row sm:items-center sm:justify-between"
+                  }`}>
                     <Link
                       href={`/songs/${song.id}`}
                       className="min-w-0 flex-1"
@@ -540,9 +597,13 @@ export default async function SongsPage({
                           </div>
 
                           <p className="mt-1 truncate text-sm text-[var(--muted)]">
-                            {song.artist ||
-                              "Unknown artist"}
+                            {song.artist || "Unknown artist"}
                           </p>
+                          {song.album ? (
+                            <p className="mt-1 truncate text-xs text-[var(--muted)]">
+                              {song.album}
+                            </p>
+                          ) : null}
 
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {songTags
@@ -560,15 +621,21 @@ export default async function SongsPage({
                       </div>
                     </Link>
 
-                    <div className="flex shrink-0 items-center gap-2">
+                    <div className={`flex shrink-0 items-center gap-2 ${
+                      view === "grid" ? "mt-4 border-t border-[var(--border)] pt-3" : ""
+                    }`}>
                       {song.current_key ? (
-                        <span className="hidden rounded-full border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] md:inline-flex">
+                        <span className={`rounded-full border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] ${
+                          view === "grid" ? "inline-flex" : "hidden md:inline-flex"
+                        }`}>
                           {song.current_key}
                         </span>
                       ) : null}
 
                       {song.tempo ? (
-                        <span className="hidden rounded-full border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted)] lg:inline-flex">
+                        <span className={`rounded-full border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted)] ${
+                          view === "grid" ? "inline-flex" : "hidden lg:inline-flex"
+                        }`}>
                           {song.tempo} BPM
                         </span>
                       ) : null}
