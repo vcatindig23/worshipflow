@@ -100,7 +100,7 @@ export default function DashboardMobileNavigation({
             role="dialog"
             aria-modal="true"
             aria-label="Workspace navigation"
-            className="relative flex h-full w-[min(86vw,340px)] flex-col border-r border-white/10 bg-[var(--sidebar)] text-white shadow-2xl animate-in slide-in-from-left duration-200"
+            className="relative flex h-full w-[min(86vw,340px)] flex-col border-r border-white/10 bg-[var(--sidebar)] text-white shadow-2xl wf-drawer-enter"
           >
             <div className="flex h-[78px] shrink-0 items-center justify-between border-b border-white/10 px-5">
               <div className="flex min-w-0 items-center gap-3">
