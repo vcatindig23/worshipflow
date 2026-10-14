@@ -1,9 +1,20 @@
 "use client"
 
-import { Gauge, Minus, Pause, Play, Plus, RotateCcw, X } from "lucide-react"
+import {
+  Gauge,
+  Minus,
+  Pause,
+  Play,
+  Plus,
+  RotateCcw,
+  X,
+} from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
-import { getChordProMetadata, parseChordPro } from "@/features/chordpro/parser"
+import {
+  getChordProMetadata,
+  parseChordPro,
+} from "@/features/chordpro/parser"
 import { transposeChordProSource } from "@/features/chordpro/transpose"
 import ChordProLine from "./chordpro-line"
 
@@ -44,11 +55,9 @@ export default function SongViewer({
     getChordProMetadata(displayedSource, "key") ?? "—"
 
   useEffect(() => {
-    if (!stageMode) {
-      return
-    }
+    if (!stageMode) return
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setAutoScroll(false)
         setStageMode(false)
@@ -56,10 +65,7 @@ export default function SongViewer({
     }
 
     window.addEventListener("keydown", handleKeyDown)
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-    }
+    return () => window.removeEventListener("keydown", handleKeyDown)
   }, [stageMode])
 
   useEffect(() => {
@@ -88,42 +94,31 @@ export default function SongViewer({
 
   function resetChartPosition() {
     setAutoScroll(false)
-    if (stageMode && chartScrollRef.current) {
-      chartScrollRef.current.scrollTo({ top: 0, behavior: "smooth" })
-    } else {
-      chartScrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-    }
+    chartScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   function cycleScrollSpeed() {
-    setScrollSpeed((value) => value >= 3 ? 1 : value + 1)
+    setScrollSpeed((value) => (value >= 3 ? 1 : value + 1))
   }
 
+  // Always scroll the lyrics viewport, never the document/window.
   useEffect(() => {
     if (!autoScroll) return
 
     const intervalId = window.setInterval(() => {
-      if (stageMode) {
-        const container = chartScrollRef.current
-        if (!container) return
+      const container = chartScrollRef.current
+      if (!container) return
 
-        const atBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 3
-        if (atBottom) {
-          setAutoScroll(false)
-          return
-        }
+      const atBottom =
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 3
 
-        container.scrollTop += scrollSpeed
-        return
-      }
-
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-      if (window.scrollY >= maxScroll - 3) {
+      if (atBottom) {
         setAutoScroll(false)
         return
       }
 
-      window.scrollBy({ top: scrollSpeed, behavior: "auto" })
+      container.scrollTop += scrollSpeed
     }, 55)
 
     return () => window.clearInterval(intervalId)
@@ -132,85 +127,19 @@ export default function SongViewer({
   const chart = (
     <div
       ref={chartScrollRef}
-      className={`overflow-x-auto ${
+      aria-label={stageMode ? "Stage mode lyrics and chords" : "Song lyrics and chords"}
+      tabIndex={0}
+      className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
-          ? "h-full overflow-y-auto overscroll-contain bg-[#0d120f] text-white"
-          : "px-5 py-7 sm:px-8 sm:py-9"
+          ? "flex-1 overflow-auto bg-[#0d120f] px-6 py-8 text-white sm:px-10 sm:py-10"
+          : "h-[min(70vh,760px)] min-h-[300px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
       <div
-        className={`${
-          stageMode
-            ? "mx-auto min-h-full max-w-7xl px-6 py-10 sm:px-10 sm:py-14"
-            : "mx-auto max-w-4xl"
+        className={`mx-auto w-full max-w-4xl ${
+          stageMode ? "pb-14" : "pb-8"
         }`}
       >
-        {stageMode ? (
-          <div className="mb-10 flex items-start justify-between gap-6">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
-                Stage Mode
-              </div>
-
-              <h2 className="mt-2 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
-                {title}
-              </h2>
-
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-white/60">
-                <span>Key {displayedKey}</span>
-                <span>•</span>
-                <span>Transpose {transposeAmount >= 0 ? "+" : ""}{transposeAmount}</span>
-                <span>•</span>
-                <span>Capo {capo}</span>
-              </div>
-              <div className="mt-5 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAutoScroll((value) => !value)}
-                  aria-pressed={autoScroll}
-                  className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
-                    autoScroll
-                      ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200"
-                      : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {autoScroll ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
-                  {autoScroll ? "Pause scroll" : "Auto-scroll"}
-                </button>
-                <button
-                  type="button"
-                  onClick={cycleScrollSpeed}
-                  aria-label={`Change auto-scroll speed, currently speed ${scrollSpeed}`}
-                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
-                >
-                  <Gauge className="size-3.5" />
-                  Speed {scrollSpeed}×
-                </button>
-                <button
-                  type="button"
-                  onClick={resetChartPosition}
-                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
-                >
-                  <RotateCcw className="size-3.5" />
-                  Back to top
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setAutoScroll(false)
-                setStageMode(false)
-              }}
-              className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
-              aria-label="Exit Stage Mode"
-            >
-              <X className="size-5" />
-            </button>
-          </div>
-        ) : null}
-
         {displayLines.map((item, index) => {
           if (item.type === "blank") {
             return (
@@ -226,7 +155,7 @@ export default function SongViewer({
             return (
               <div
                 key={`section-${index}`}
-                className={`mb-3 mt-8 first:mt-0 text-[0.62em] font-bold uppercase tracking-[0.16em] ${
+                className={`mb-3 mt-8 first:mt-0 text-[0.68em] font-bold uppercase tracking-[0.16em] ${
                   stageMode
                     ? "text-white/45"
                     : "text-[var(--brand)]"
@@ -257,15 +186,108 @@ export default function SongViewer({
 
   if (stageMode) {
     return (
-      <div className="fixed inset-0 z-[100] bg-[#0d120f] text-white">
+      <div className="fixed inset-0 z-[100] flex h-dvh flex-col overflow-hidden bg-[#0d120f] text-white">
+        <header className="z-10 flex shrink-0 items-start justify-between gap-5 border-b border-white/10 bg-[#0d120f] px-5 py-4 sm:px-8 sm:py-5">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
+              Stage Mode
+            </p>
+            <h2 className="mt-1 truncate text-2xl font-semibold tracking-tight sm:text-3xl">
+              {title}
+            </h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/55 sm:gap-3 sm:text-sm">
+              <span>Key {displayedKey}</span>
+              <span aria-hidden="true">•</span>
+              <span>
+                Transpose {transposeAmount >= 0 ? "+" : ""}
+                {transposeAmount}
+              </span>
+              <span aria-hidden="true">•</span>
+              <span>Capo {capo}</span>
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setAutoScroll((value) => !value)}
+                aria-pressed={autoScroll}
+                className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
+                  autoScroll
+                    ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200"
+                    : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {autoScroll ? (
+                  <Pause className="size-3.5" />
+                ) : (
+                  <Play className="size-3.5" />
+                )}
+                {autoScroll ? "Pause scroll" : "Auto-scroll"}
+              </button>
+              <button
+                type="button"
+                onClick={cycleScrollSpeed}
+                aria-label={`Change auto-scroll speed, currently speed ${scrollSpeed}`}
+                className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+              >
+                <Gauge className="size-3.5" />
+                Speed {scrollSpeed}×
+              </button>
+              <button
+                type="button"
+                onClick={resetChartPosition}
+                className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+              >
+                <RotateCcw className="size-3.5" />
+                Back to top
+              </button>
+              <span className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/10 px-2.5 text-xs text-white/45">
+                <Minus className="size-3.5" />
+                {fontSize}px
+                <Plus className="size-3.5" />
+              </span>
+              <button
+                type="button"
+                onClick={() => setFontSize((value) => Math.max(14, value - 2))}
+                disabled={fontSize <= 14}
+                aria-label="Decrease lyrics size"
+                className="inline-flex size-9 items-center justify-center rounded-lg border border-white/15 text-white/70 transition hover:bg-white/10 disabled:opacity-30"
+              >
+                <Minus className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setFontSize((value) => Math.min(32, value + 2))}
+                disabled={fontSize >= 32}
+                aria-label="Increase lyrics size"
+                className="inline-flex size-9 items-center justify-center rounded-lg border border-white/15 text-white/70 transition hover:bg-white/10 disabled:opacity-30"
+              >
+                <Plus className="size-4" />
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setAutoScroll(false)
+              setStageMode(false)
+            }}
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
+            aria-label="Exit Stage Mode"
+          >
+            <X className="size-5" />
+          </button>
+        </header>
+
         {chart}
       </div>
     )
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-white">
-      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-white/95 px-4 py-3 backdrop-blur sm:px-5">
+    <div className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white">
+      <div className="z-10 flex shrink-0 flex-col gap-3 border-b border-[var(--border)] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div>
           <div className="text-xs font-medium text-[var(--muted)]">
             Song chart
@@ -293,7 +315,11 @@ export default function SongViewer({
                 : "border-[var(--border)] bg-white text-[var(--muted)] hover:bg-[var(--surface)]"
             }`}
           >
-            {autoScroll ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+            {autoScroll ? (
+              <Pause className="size-3.5" />
+            ) : (
+              <Play className="size-3.5" />
+            )}
             {autoScroll ? "Pause scroll" : "Auto-scroll"}
           </button>
 
@@ -343,6 +369,8 @@ export default function SongViewer({
             type="button"
             onClick={resetTranspose}
             className="min-w-12 rounded-lg border border-[var(--border)] px-2 py-2 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)]"
+            aria-label="Reset transposition"
+            title="Reset transposition"
           >
             {transposeAmount > 0 ? `+${transposeAmount}` : transposeAmount}
           </button>
@@ -357,7 +385,7 @@ export default function SongViewer({
             <Plus className="size-4" />
           </button>
 
-          <div className="ml-1 flex items-center overflow-hidden rounded-lg border border-[var(--border)]">
+          <div className="flex items-center overflow-hidden rounded-lg border border-[var(--border)]">
             <button
               type="button"
               onClick={() => changeCapo(capo - 1)}
@@ -388,13 +416,13 @@ export default function SongViewer({
             onClick={() => setFontSize((value) => Math.max(14, value - 2))}
             disabled={fontSize <= 14}
             className="rounded-lg border border-[var(--border)] p-2 text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:opacity-40"
-            aria-label="Decrease font size"
+            aria-label="Decrease lyrics size"
           >
             <Minus className="size-4" />
           </button>
 
           <span className="min-w-10 text-center text-xs font-semibold text-[var(--muted)]">
-            {fontSize}
+            {fontSize}px
           </span>
 
           <button
@@ -402,7 +430,7 @@ export default function SongViewer({
             onClick={() => setFontSize((value) => Math.min(32, value + 2))}
             disabled={fontSize >= 32}
             className="rounded-lg border border-[var(--border)] p-2 text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:opacity-40"
-            aria-label="Increase font size"
+            aria-label="Increase lyrics size"
           >
             <Plus className="size-4" />
           </button>
@@ -410,7 +438,7 @@ export default function SongViewer({
           <button
             type="button"
             onClick={() => setStageMode(true)}
-            className="ml-1 rounded-lg bg-[var(--brand)] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+            className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
           >
             Stage Mode
           </button>
