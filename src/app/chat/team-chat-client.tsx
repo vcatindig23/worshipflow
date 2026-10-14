@@ -32,6 +32,7 @@ import {
   Wifi,
   X,
   WifiOff,
+  UsersRound,
 } from "lucide-react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import {
@@ -1168,9 +1169,76 @@ export default function TeamChatClient({
         ? "Reconnecting"
         : "Connecting"
 
+  const latestMessage = messages[messages.length - 1]
+  const latestMessagePreview = latestMessage
+    ? latestMessage.body.trim() || (latestMessage.attachments.length > 0 ? "Shared an attachment" : "Message")
+    : "Start the team conversation"
+
   return (
     <section className="overflow-hidden rounded-[28px] border border-[var(--border)] bg-white shadow-[0_24px_64px_-44px_rgba(21,35,27,0.45)]">
-      <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-gradient-to-r from-white to-[var(--surface)]/55 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex min-h-0 flex-col md:h-[min(78vh,860px)] md:min-h-[620px] md:flex-row">
+        <aside className="flex max-h-[190px] shrink-0 flex-col overflow-hidden border-b border-[var(--border)] bg-[#fbfcfd] md:max-h-none md:w-[286px] md:border-b-0 md:border-r">
+          <div className="px-4 pb-4 pt-5 sm:px-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--brand)]">WorshipFlow</p>
+                <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Chats</h2>
+              </div>
+              <span className="flex size-10 items-center justify-center rounded-2xl bg-[var(--brand)] text-white shadow-sm">
+                <MessagesSquare className="size-[18px]" />
+              </span>
+            </div>
+            <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">Your church team's shared space.</p>
+          </div>
+
+          <div className="px-2.5 sm:px-3">
+            <div aria-current="page" className="flex items-center gap-3 rounded-2xl border border-[var(--brand)]/10 bg-[var(--brand-soft)] p-3 shadow-sm">
+              <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--brand)] text-white">
+                <MessagesSquare className="size-5" />
+                <span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border-2 border-[var(--brand-soft)] bg-white text-[8px] font-bold text-[var(--brand)]">
+                  {members.length > 9 ? "9+" : members.length}
+                </span>
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-2">
+                  <span className="truncate text-sm font-semibold text-[var(--foreground)]">Worship team</span>
+                  <span className="size-2 shrink-0 rounded-full bg-[var(--brand)]" aria-label={connectionLabel} />
+                </span>
+                <span className="mt-1 block truncate text-xs leading-5 text-[var(--muted)]">{latestMessagePreview}</span>
+                <span className="mt-0.5 block text-[10px] text-[var(--muted)]">{members.length} members · Shared chat</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-5 hidden min-h-0 flex-1 overflow-y-auto px-4 pb-4 md:block">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">People</h3>
+              <span className="rounded-full bg-[#eef0f3] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">{members.length}</span>
+            </div>
+            <ul className="mt-3 space-y-1">
+              {members.map((member) => (
+                <li key={member.id} className="flex min-w-0 items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-white">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[10px] font-bold text-[var(--brand)] shadow-sm">
+                    {initials(member.displayName)}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-semibold text-[var(--foreground)]">
+                      {member.id === currentUserId ? `${member.displayName} (You)` : member.displayName}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[10px] text-[var(--muted)]">{member.role.replaceAll("_", " ")}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-auto hidden border-t border-[var(--border)] px-5 py-3 md:block">
+            <p className="text-[10px] leading-5 text-[var(--muted)]">Messages are visible to members of your current church workspace.</p>
+          </div>
+        </aside>
+
+        <main className="flex min-h-[560px] min-w-0 flex-1 flex-col bg-white md:min-h-0">
+      <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex min-w-0 items-center gap-3.5">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--brand)]/10 bg-[var(--brand-soft)] text-[var(--brand)] shadow-sm">
             <MessagesSquare className="size-5" />
@@ -1310,7 +1378,7 @@ export default function TeamChatClient({
       <div className="relative">
         <div
           ref={messagesContainerRef}
-          className="h-[min(62vh,680px)] min-h-[320px] overflow-y-auto overscroll-contain scroll-smooth bg-[var(--background)]/60 px-4 py-5 sm:px-6"
+          className="h-[min(62vh,680px)] min-h-[320px] overflow-y-auto overscroll-contain bg-[#f7f8fa] px-4 py-5 sm:px-6 md:h-auto md:min-h-0 md:flex-1"
           onScroll={handleMessagesScroll}
           aria-label="Team chat messages"
           aria-live="polite"
@@ -1485,7 +1553,7 @@ export default function TeamChatClient({
                           </div>
                         ) : (
                           <p
-                            className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-left text-sm leading-6 shadow-sm ${isOwnMessage ? "rounded-tr-md bg-[var(--brand)] text-white" : "rounded-tl-md border border-[var(--border)] bg-white text-[var(--foreground)]"}`}
+                            className={`max-w-full whitespace-pre-wrap break-words rounded-[22px] px-4 py-2.5 text-left text-sm leading-[1.55] shadow-sm ${isOwnMessage ? "rounded-br-md bg-[var(--brand)] text-white shadow-[0_3px_8px_-6px_rgba(21,35,27,0.8)]" : "rounded-bl-md border border-[#e6e9ed] bg-[#eef0f3] text-[#20242a] shadow-none"}`}
                           >
                             {activeSearch
                               ? highlightSearchTerm(message.body, activeSearch)
@@ -1711,7 +1779,7 @@ export default function TeamChatClient({
               event.target.value = ""
             }}
           />
-          <button type="button" onClick={() => fileInputRef.current?.click()} aria-label="Attach files or images" title="Attach files or images" className="inline-flex size-[52px] shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]">
+          <button type="button" onClick={() => fileInputRef.current?.click()} aria-label="Attach files or images" title="Attach files or images" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[#eef0f3] text-[var(--foreground)] transition hover:bg-[#e2e5e9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25">
             <Paperclip className="size-5" />
           </button>
           <div className="relative min-w-0 flex-1">
@@ -1808,18 +1876,18 @@ export default function TeamChatClient({
               rows={2}
               placeholder="Message your worship team…"
               disabled={isPending}
-              className="max-h-40 min-h-[52px] w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm leading-5 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10 disabled:opacity-60"
+              className="max-h-40 min-h-[48px] w-full resize-y rounded-[24px] border border-transparent bg-[#f0f2f5] px-4 py-3 text-sm leading-5 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)]/25 focus:bg-white focus:ring-2 focus:ring-[var(--brand)]/10 disabled:opacity-60"
             />
           </div>
           <button
             type="submit"
             disabled={isPending || (!draft.trim() && selectedFiles.length === 0)}
-            className="inline-flex h-[52px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={isPending ? "Sending message" : "Send message"}
+            title={isPending ? "Sending message" : "Send message"}
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--brand)] p-0 text-white shadow-sm transition hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="size-4" />
-            <span className="hidden sm:inline">
-              {isPending ? "Sending" : "Send"}
-            </span>
+            <span className="sr-only">{isPending ? "Sending" : "Send message"}</span>
           </button>
         </form>
         <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-[var(--muted)]">
@@ -1827,6 +1895,7 @@ export default function TeamChatClient({
           <span className="shrink-0 tabular-nums">{draft.length}/2000</span>
         </div>
       </div>
+        </main>
+      </div>
     </section>
-  )
-}
+  )}
