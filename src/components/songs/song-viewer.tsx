@@ -50,6 +50,7 @@ export default function SongViewer({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        setAutoScroll(false)
         setStageMode(false)
       }
     }
@@ -198,7 +199,10 @@ export default function SongViewer({
 
             <button
               type="button"
-              onClick={() => setStageMode(false)}
+              onClick={() => {
+                setAutoScroll(false)
+                setStageMode(false)
+              }}
               className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
               aria-label="Exit Stage Mode"
             >
