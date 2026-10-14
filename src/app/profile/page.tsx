@@ -262,14 +262,14 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         </div>
 
         <div className="px-5 pb-6 sm:px-8">
-          <div className="-mt-12 flex flex-col gap-4 sm:-mt-14 sm:flex-row sm:items-end sm:gap-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
             <ProfileAvatar
               name={displayName}
               imageUrl={workspace.userAvatarUrl}
               sizeClassName="size-24 sm:size-32"
-              className="text-2xl ring-4 ring-white"
+              className="-mt-12 text-2xl ring-4 ring-white sm:-mt-14"
             />
-            <div className="min-w-0 flex-1 pt-1 sm:pb-1">
+            <div className="min-w-0 flex-1 pt-1 sm:pt-4 sm:pb-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">{displayName}</h1>
                 <CheckCircle2 className="size-5 text-[var(--brand)]" aria-label="WorshipFlow member" />
@@ -289,7 +289,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 ) : null}
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 pb-0 sm:pb-1">
+            <div className="flex flex-wrap gap-2 pb-0 sm:pt-4 sm:pb-1">
               <Link href="/settings/profile" className={editLinkClass}>
                 <PencilLine className="size-4" /> Edit profile
               </Link>
