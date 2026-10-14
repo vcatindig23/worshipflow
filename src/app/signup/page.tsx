@@ -19,8 +19,11 @@ const errorMessages: Record<string, string> = {
     "The application is missing its site URL configuration.",
 }
 
-const inputClassName =
-  "h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 pr-12 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+const baseInputClassName =
+  "h-12 w-full rounded-xl border border-[var(--border)] bg-white text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+
+const iconInputClassName = `${baseInputClassName} pl-10 pr-4`
+const passwordInputClassName = `${baseInputClassName} pl-3.5 pr-12`
 
 export default async function SignupPage({
   searchParams,
@@ -101,7 +104,7 @@ export default async function SignupPage({
                     minLength={2}
                     maxLength={120}
                     placeholder="Your full name"
-                    className={inputClassName.replace("pr-12", "pl-10 pr-4")}
+                    className={iconInputClassName}
                   />
                 </div>
               </div>
@@ -126,7 +129,7 @@ export default async function SignupPage({
                     required
                     maxLength={320}
                     placeholder="you@example.com"
-                    className={inputClassName.replace("pr-12", "pl-10 pr-4")}
+                    className={iconInputClassName}
                   />
                 </div>
               </div>
@@ -146,7 +149,7 @@ export default async function SignupPage({
                   maxLength={72}
                   required
                   placeholder="At least 8 characters"
-                  className={inputClassName}
+                  className={passwordInputClassName}
                 />
                 <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
                   Use at least 8 characters.
@@ -168,7 +171,7 @@ export default async function SignupPage({
                   maxLength={72}
                   required
                   placeholder="Enter your password again"
-                  className={inputClassName}
+                  className={passwordInputClassName}
                 />
               </div>
 
