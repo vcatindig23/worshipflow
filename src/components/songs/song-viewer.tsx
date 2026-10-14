@@ -1,7 +1,7 @@
 "use client"
 
-import { Minus, Plus, X } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { Gauge, Minus, Pause, Play, Plus, RotateCcw, X } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
 import { getChordProMetadata, parseChordPro } from "@/features/chordpro/parser"
 import { transposeChordProSource } from "@/features/chordpro/transpose"
@@ -21,6 +21,9 @@ export default function SongViewer({
   const [transposeAmount, setTransposeAmount] = useState(0)
   const [capo, setCapo] = useState(0)
   const [stageMode, setStageMode] = useState(false)
+  const [autoScroll, setAutoScroll] = useState(false)
+  const [scrollSpeed, setScrollSpeed] = useState(2)
+  const chartScrollRef = useRef<HTMLDivElement>(null)
 
   const displayedSource = useMemo(
     () => transposeChordProSource(source, transposeAmount),
@@ -82,11 +85,55 @@ export default function SongViewer({
     setCapo(Math.max(0, Math.min(12, value)))
   }
 
+  function resetChartPosition() {
+    setAutoScroll(false)
+    if (stageMode && chartScrollRef.current) {
+      chartScrollRef.current.scrollTo({ top: 0, behavior: "smooth" })
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
+  function cycleScrollSpeed() {
+    setScrollSpeed((value) => value >= 3 ? 1 : value + 1)
+  }
+
+  useEffect(() => {
+    if (!autoScroll) return
+
+    const intervalId = window.setInterval(() => {
+      if (stageMode) {
+        const container = chartScrollRef.current
+        if (!container) return
+
+        const atBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 3
+        if (atBottom) {
+          setAutoScroll(false)
+          return
+        }
+
+        container.scrollTop += scrollSpeed
+        return
+      }
+
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+      if (window.scrollY >= maxScroll - 3) {
+        setAutoScroll(false)
+        return
+      }
+
+      window.scrollBy({ top: scrollSpeed, behavior: "auto" })
+    }, 55)
+
+    return () => window.clearInterval(intervalId)
+  }, [autoScroll, scrollSpeed, stageMode])
+
   const chart = (
     <div
+      ref={chartScrollRef}
       className={`overflow-x-auto ${
         stageMode
-          ? "h-full bg-[#0d120f] text-white"
+          ? "h-full overflow-y-auto overscroll-contain bg-[#0d120f] text-white"
           : "px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
@@ -114,6 +161,38 @@ export default function SongViewer({
                 <span>Transpose {transposeAmount >= 0 ? "+" : ""}{transposeAmount}</span>
                 <span>•</span>
                 <span>Capo {capo}</span>
+              </div>
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAutoScroll((value) => !value)}
+                  aria-pressed={autoScroll}
+                  className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
+                    autoScroll
+                      ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200"
+                      : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {autoScroll ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+                  {autoScroll ? "Pause scroll" : "Auto-scroll"}
+                </button>
+                <button
+                  type="button"
+                  onClick={cycleScrollSpeed}
+                  aria-label={`Change auto-scroll speed, currently speed ${scrollSpeed}`}
+                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+                >
+                  <Gauge className="size-3.5" />
+                  Speed {scrollSpeed}×
+                </button>
+                <button
+                  type="button"
+                  onClick={resetChartPosition}
+                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+                >
+                  <RotateCcw className="size-3.5" />
+                  Back to top
+                </button>
               </div>
             </div>
 
@@ -200,6 +279,39 @@ export default function SongViewer({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAutoScroll((value) => !value)}
+            aria-pressed={autoScroll}
+            className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
+              autoScroll
+                ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]"
+                : "border-[var(--border)] bg-white text-[var(--muted)] hover:bg-[var(--surface)]"
+            }`}
+          >
+            {autoScroll ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+            {autoScroll ? "Pause scroll" : "Auto-scroll"}
+          </button>
+
+          <button
+            type="button"
+            onClick={cycleScrollSpeed}
+            title="Change auto-scroll speed"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)]"
+          >
+            <Gauge className="size-3.5" />
+            {scrollSpeed}×
+          </button>
+
+          <button
+            type="button"
+            onClick={resetChartPosition}
+            aria-label="Return to top of chart"
+            className="inline-flex h-9 items-center justify-center rounded-lg border border-[var(--border)] px-2.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)]"
+          >
+            <RotateCcw className="size-3.5" />
+          </button>
+
           <button
             type="button"
             onClick={() => setShowChords((value) => !value)}
