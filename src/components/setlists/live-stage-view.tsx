@@ -4,16 +4,20 @@ import Link from "next/link"
 import {
   ChevronLeft,
   ChevronRight,
+  Gauge,
   ListMusic,
   Maximize2,
   Minimize2,
   Minus,
   PanelRight,
+  Pause,
+  Play,
   Plus,
+  RotateCcw,
   Wifi,
   WifiOff,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { Session } from "@supabase/supabase-js"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
 import { getChordProMetadata, parseChordPro } from "@/features/chordpro/parser"
@@ -99,6 +103,9 @@ export default function LiveStageView({
   const [offlineSaved, setOfflineSaved] = useState(false)
   const [offlineSaveError, setOfflineSaveError] = useState<string | null>(null)
   const [showServicePanel, setShowServicePanel] = useState(false)
+  const [autoScroll, setAutoScroll] = useState(false)
+  const [scrollSpeed, setScrollSpeed] = useState(2)
+  const lyricsScrollRef = useRef<HTMLDivElement>(null)
   const currentSong = songs[currentIndex] ?? null
 
   useEffect(() => {
@@ -218,6 +225,7 @@ export default function LiveStageView({
     )
 
     if (nextIndex !== null) {
+      setAutoScroll(false)
       setCurrentIndex(nextIndex)
       setTransposeOffset(0)
     }
@@ -245,6 +253,37 @@ export default function LiveStageView({
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [changeSong])
+
+  function cycleScrollSpeed() {
+    setScrollSpeed((value) => (value >= 3 ? 1 : value + 1))
+  }
+
+  function resetLyricsScroll() {
+    setAutoScroll(false)
+    lyricsScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    if (!autoScroll) return
+
+    const intervalId = window.setInterval(() => {
+      const container = lyricsScrollRef.current
+      if (!container) return
+
+      const atBottom =
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 3
+
+      if (atBottom) {
+        setAutoScroll(false)
+        return
+      }
+
+      container.scrollTop += scrollSpeed
+    }, 55)
+
+    return () => window.clearInterval(intervalId)
+  }, [autoScroll, scrollSpeed])
 
   async function toggleFullscreen() {
     setFullscreenError(null)
@@ -278,6 +317,7 @@ export default function LiveStageView({
       if (index === undefined) {
         return
       }
+      setAutoScroll(false)
       setCurrentIndex(index)
       setTransposeOffset(0)
       setShowServicePanel(false)
@@ -369,11 +409,11 @@ export default function LiveStageView({
         </div>
       ) : (
         <>
-          <section className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-6 sm:px-10 sm:py-8">
-            <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col">
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 py-4 sm:px-10 sm:py-5">
+            <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col">
               {currentSong ? (
                 <>
-                  <div className="mb-7 flex flex-wrap items-start justify-between gap-5">
+                  <div className="mb-4 flex shrink-0 flex-wrap items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
                         {currentSong.section} · Song {currentIndex + 1}
@@ -407,6 +447,36 @@ export default function LiveStageView({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setAutoScroll((value) => !value)}
+                        aria-pressed={autoScroll}
+                        className={`inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition ${
+                          autoScroll
+                            ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
+                            : "border-white/15 text-white/75 hover:bg-white/10"
+                        }`}
+                      >
+                        {autoScroll ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+                        {autoScroll ? "Pause scroll" : "Auto-scroll"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cycleScrollSpeed}
+                        aria-label={`Change auto-scroll speed, currently speed ${scrollSpeed}`}
+                        className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-white/15 px-3 text-xs font-semibold text-white/70 transition hover:bg-white/10"
+                      >
+                        <Gauge className="size-3.5" />
+                        {scrollSpeed}×
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetLyricsScroll}
+                        aria-label="Return to top of lyrics"
+                        className="inline-flex size-10 items-center justify-center rounded-xl border border-white/15 text-white/70 transition hover:bg-white/10"
+                      >
+                        <RotateCcw className="size-4" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => setShowChords((visible) => !visible)}
@@ -458,13 +528,19 @@ export default function LiveStageView({
                   </div>
 
                   {currentSong.notes ? (
-                    <div className="mb-6 rounded-xl border border-amber-200/20 bg-amber-200/10 px-4 py-3 text-sm leading-6 text-amber-100">
+                    <div className="mb-3 shrink-0 rounded-xl border border-amber-200/20 bg-amber-200/10 px-4 py-3 text-sm leading-6 text-amber-100">
                       <span className="mr-2 font-semibold">Arrangement note</span>
                       {currentSong.notes}
                     </div>
                   ) : null}
 
-                  <div className="pb-12">
+                  <div
+                    key={currentSong.id}
+                    ref={lyricsScrollRef}
+                    tabIndex={0}
+                    aria-label="Live lyrics and chords"
+                    className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-12 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/20"
+                  >
                     {displayLines.map((line, lineIndex) => {
                         if (line.type === "blank") {
                           return <div key={`blank-${lineIndex}`} className="h-8" aria-hidden="true" />
