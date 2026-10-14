@@ -194,6 +194,10 @@ export default function WorkspaceHeaderActions({
     }
   }, [onCloseSearchProp])
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [notificationPanelPosition, setNotificationPanelPosition] = useState<{
+    top: number
+    right: number
+  } | null>(null)
   const [isBrowserMounted, setIsBrowserMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null)
@@ -211,6 +215,8 @@ export default function WorkspaceHeaderActions({
   const [busyNotificationId, setBusyNotificationId] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const notificationsMenuRef = useRef<HTMLDivElement>(null)
+  const notificationButtonRef = useRef<HTMLButtonElement>(null)
+  const notificationsPanelRef = useRef<HTMLElement>(null)
   const notificationRefreshTimeoutRef = useRef<number | null>(null)
   const supabase = useMemo(() => createBrowserClient(), [])
 
@@ -434,11 +440,46 @@ export default function WorkspaceHeaderActions({
   }, [onCloseSearch, onOpenSearch, refreshNotifications])
 
   useEffect(() => {
+    if (!notificationsOpen) {
+      setNotificationPanelPosition(null)
+      return
+    }
+
+    function updateNotificationPanelPosition() {
+      const trigger = notificationButtonRef.current
+      if (!trigger) return
+
+      const rect = trigger.getBoundingClientRect()
+      const panelWidth = Math.min(390, window.innerWidth * 0.92)
+      const maximumRight = Math.max(8, window.innerWidth - panelWidth - 8)
+      const right = Math.max(
+        8,
+        Math.min(maximumRight, window.innerWidth - rect.right)
+      )
+
+      setNotificationPanelPosition({
+        top: Math.round(rect.bottom + 8),
+        right: Math.round(right),
+      })
+    }
+
+    updateNotificationPanelPosition()
+    window.addEventListener("resize", updateNotificationPanelPosition)
+    window.addEventListener("scroll", updateNotificationPanelPosition, true)
+
+    return () => {
+      window.removeEventListener("resize", updateNotificationPanelPosition)
+      window.removeEventListener("scroll", updateNotificationPanelPosition, true)
+    }
+  }, [notificationsOpen])
+
+  useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
-      if (
-        notificationsMenuRef.current &&
-        !notificationsMenuRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node
+      const clickedTrigger = notificationsMenuRef.current?.contains(target)
+      const clickedPanel = notificationsPanelRef.current?.contains(target)
+
+      if (!clickedTrigger && !clickedPanel) {
         setNotificationsOpen(false)
       }
     }
@@ -583,6 +624,7 @@ export default function WorkspaceHeaderActions({
 
       <div className="relative" ref={notificationsMenuRef}>
         <button
+          ref={notificationButtonRef}
           type="button"
           onClick={toggleNotifications}
           aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
@@ -598,11 +640,16 @@ export default function WorkspaceHeaderActions({
           ) : null}
         </button>
 
-        {notificationsOpen ? (
+        {notificationsOpen && isBrowserMounted && notificationPanelPosition ? createPortal(
           <section
+            ref={notificationsPanelRef}
             role="dialog"
             aria-label="Notifications"
-            className="absolute right-0 top-[calc(100%+10px)] z-[70] flex max-h-[min(75vh,620px)] w-[min(92vw,390px)] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-2xl"
+            style={{
+              top: notificationPanelPosition.top,
+              right: notificationPanelPosition.right,
+            }}
+            className="fixed z-[100] flex max-h-[min(75vh,620px)] w-[min(92vw,390px)] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-4">
               <div>
@@ -744,6 +791,8 @@ export default function WorkspaceHeaderActions({
               </span>
             </div>
           </section>
+          ,
+          document.body
         ) : null}
       </div>
 
@@ -765,7 +814,7 @@ export default function WorkspaceHeaderActions({
                         <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-4 sm:px-5">
                           <Search className="size-5 shrink-0 text-[var(--brand)]" />
                           <label className="min-w-0 flex-1">
-                            <span className="sr-only">Search songs and setlists</span>
+                            <span className="sr-only">Search songs, artists, albums, setlists, and services</span>
                             <input
                               ref={searchInputRef}
                               autoComplete="off"
@@ -775,7 +824,7 @@ export default function WorkspaceHeaderActions({
                               value={searchQuery}
                               maxLength={100}
                               onChange={(event) => setSearchQuery(event.target.value)}
-                              placeholder="Search songs, artists, setlists, services…"
+                              placeholder="Search songs, artists, albums, setlists, services…"
                               className="h-9 w-full border-0 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:ring-0"
                             />
                           </label>
@@ -799,7 +848,7 @@ export default function WorkspaceHeaderActions({
                                 Search your workspace
                               </p>
                               <p className="mt-1 text-xs text-[var(--muted)]">
-                                Type at least 2 characters to find songs and setlists.
+                                Type at least 2 characters to find songs, artists, albums, and setlists.
                               </p>
                             </div>
                           ) : isSearching ? (
@@ -816,7 +865,7 @@ export default function WorkspaceHeaderActions({
                             <div className="flex min-h-[190px] flex-col items-center justify-center px-5 text-center">
                               <Search className="size-6 text-[var(--muted)]" />
                               <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">No matches found</p>
-                              <p className="mt-1 text-xs text-[var(--muted)]">Try a different song, artist, or setlist name.</p>
+                              <p className="mt-1 text-xs text-[var(--muted)]">Try a song title, artist, album, or setlist name.</p>
                             </div>
                           ) : (
                             <div className="space-y-4">
