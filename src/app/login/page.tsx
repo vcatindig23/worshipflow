@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { useActionState } from "react"
 import {
@@ -9,48 +10,69 @@ import {
   Loader2,
   Mail,
 } from "lucide-react"
-import Image from "next/image"
-import {
-  login,
-  type LoginState,
-} from "./actions"
+import PasswordInput from "@/components/auth/password-input"
+import { login, type LoginState } from "./actions"
 
 const initialState: LoginState = {
   error: "",
 }
 
+const inputClassName =
+  "h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-12 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+
 export default function LoginPage() {
-  const [state, formAction, pending] =
-    useActionState(
-      login,
-      initialState
-    )
+  const [state, formAction, pending] = useActionState(login, initialState)
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-6 py-10">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-center justify-center">
+    <main className="relative isolate min-h-screen overflow-hidden bg-[var(--background)] px-4 py-8 sm:px-6 sm:py-12">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        <div className="absolute -left-36 -top-40 size-[28rem] rounded-full bg-[var(--brand-soft)] opacity-70 blur-3xl" />
+        <div className="absolute -bottom-44 -right-32 size-[30rem] rounded-full bg-[#dce9e4] opacity-70 blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white/60 to-transparent" />
+      </div>
+
+      <div className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-md items-center justify-center sm:min-h-[calc(100svh-6rem)]">
         <div className="w-full">
-          <div className="mb-8 text-center">
-            <Image
-              src="/worshipflow-wordmark.png"
-              alt="WorshipFlow"
-              width={545}
-              height={100}
-              priority
-              className="mx-auto h-auto w-64"
-            />
+          <header className="mb-8 text-center">
+            <Link
+              href="/"
+              aria-label="WorshipFlow home"
+              className="inline-flex rounded-xl outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-4"
+            >
+              <Image
+                src="/worshipflow-wordmark.png"
+                alt="WorshipFlow"
+                width={545}
+                height={100}
+                priority
+                className="mx-auto h-auto w-56 sm:w-64"
+              />
+            </Link>
 
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)]">
-              Welcome to WorshipFlow
-            </h1>
-
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-              Sign in to manage your church&apos;s worship
-              workspace.
+            <p className="mt-7 text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
+              Your worship team, in sync
             </p>
-          </div>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+              Welcome back
+            </h1>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[var(--muted)]">
+              Sign in to prepare songs, coordinate services, and connect with your church team.
+            </p>
+          </header>
 
-          <div className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7">
+          <section className="rounded-[28px] border border-[var(--border)] bg-white/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.24)] ring-1 ring-black/[0.02] backdrop-blur sm:p-8">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold tracking-tight text-[var(--foreground)]">
+                Sign in to your account
+              </h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                Enter your account details to continue.
+              </p>
+            </div>
+
             {state.error ? (
               <div
                 role="alert"
@@ -60,21 +82,19 @@ export default function LoginPage() {
               </div>
             ) : null}
 
-            <form
-              action={formAction}
-              className="space-y-5"
-            >
+            <form action={formAction} className="space-y-5">
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                  className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
                 >
                   Email address
                 </label>
-
                 <div className="relative">
-                  <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-
+                  <Mail
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
+                  />
                   <input
                     id="email"
                     name="email"
@@ -83,7 +103,7 @@ export default function LoginPage() {
                     autoComplete="email"
                     maxLength={320}
                     placeholder="you@example.com"
-                    className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    className={inputClassName}
                   />
                 </div>
               </div>
@@ -92,31 +112,31 @@ export default function LoginPage() {
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-[var(--foreground)]"
+                    className="block text-sm font-semibold text-[var(--foreground)]"
                   >
                     Password
                   </label>
-
                   <Link
                     href="/forgot-password"
-                    className="text-xs font-semibold text-[var(--brand)] transition hover:text-[var(--brand-dark)]"
+                    className="rounded-sm text-xs font-semibold text-[var(--brand)] transition hover:text-[var(--brand-dark)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
                   >
                     Forgot password?
                   </Link>
                 </div>
 
                 <div className="relative">
-                  <KeyRound className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-
-                  <input
+                  <KeyRound
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-3.5 top-1/2 z-10 size-4 -translate-y-1/2 text-[var(--muted)]"
+                  />
+                  <PasswordInput
                     id="password"
                     name="password"
-                    type="password"
                     required
                     autoComplete="current-password"
                     maxLength={200}
                     placeholder="Enter your password"
-                    className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    className={inputClassName}
                   />
                 </div>
               </div>
@@ -124,40 +144,37 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={pending}
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {pending ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 aria-hidden="true" className="size-4 animate-spin" />
                 ) : (
-                  <ArrowRight className="size-4" />
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                  />
                 )}
-
-                {pending
-                  ? "Signing in..."
-                  : "Sign In"}
+                {pending ? "Signing in..." : "Sign in"}
               </button>
             </form>
 
             <div className="my-6 flex items-center gap-3">
               <div className="h-px flex-1 bg-[var(--border)]" />
-              <span className="text-xs text-[var(--muted)]">
-                New to WorshipFlow?
-              </span>
+              <span className="text-xs text-[var(--muted)]">New to WorshipFlow?</span>
               <div className="h-px flex-1 bg-[var(--border)]" />
             </div>
 
             <Link
               href="/signup"
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--brand)]/40 hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
             >
-              <Church className="size-4" />
-              Create an Account
+              <Church aria-hidden="true" className="size-4" />
+              Create an account
             </Link>
-          </div>
+          </section>
 
-          <p className="mt-5 text-center text-xs leading-5 text-[var(--muted)]">
-            After signing in, WorshipFlow will automatically send
-            you to your church workspace or onboarding.
+          <p className="mx-auto mt-5 max-w-sm text-center text-xs leading-5 text-[var(--muted)]">
+            After signing in, WorshipFlow will take you to your church workspace or onboarding.
           </p>
         </div>
       </div>
