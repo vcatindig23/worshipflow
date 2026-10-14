@@ -3,15 +3,17 @@ import { notFound, redirect } from "next/navigation"
 import {
   Archive,
   ArrowLeft,
+  Music2,
   Edit,
   History,
   RotateCcw,
+  Star,
   Tag,
 } from "lucide-react"
 import RecordSongOpen from "@/components/songs/record-song-open"
 import SongViewer from "@/components/songs/song-viewer"
 import DownloadChordProButton from "@/components/songs/download-chordpro-button"
-import { setSongStatus, setSongTags } from "@/app/songs/actions"
+import { setSongStatus, setSongTags, toggleFavorite } from "@/app/songs/actions"
 import { createClient } from "@/lib/supabase/server"
 
 type SongPageProps = {
@@ -159,10 +161,18 @@ export default async function SongPage({
     tags = (tagRows ?? []) as Tag[]
   }
 
+  const { data: favoritePreference } = await supabase
+    .from("song_user_preferences")
+    .select("is_favorite")
+    .eq("song_id", typedSong.id)
+    .eq("user_id", userId)
+    .maybeSingle()
+
+  const isFavorite = Boolean(favoritePreference?.is_favorite)
   const canEdit = editableRoles.includes(membership.role)
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+    <main className="mx-auto max-w-7xl space-y-7 px-4 py-6 sm:px-6 sm:py-8">
       <RecordSongOpen songId={typedSong.id} />
 
       <div className="flex flex-col gap-4">
@@ -177,8 +187,9 @@ export default async function SongPage({
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-[var(--brand-soft)] px-3 py-1 text-xs font-semibold text-[var(--brand)]">
-                Song
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
+                <Music2 className="size-3.5" />
+                Song chart
               </span>
 
               {typedSong.status === "archived" ? (
@@ -189,7 +200,7 @@ export default async function SongPage({
               ) : null}
             </div>
 
-            <h1 className="mt-3 break-words text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
+            <h1 className="mt-3 break-words text-3xl font-bold tracking-[-0.035em] text-[var(--foreground)] md:text-4xl">
               {typedSong.title}
             </h1>
 
@@ -227,6 +238,23 @@ export default async function SongPage({
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <form action={toggleFavorite}>
+              <input type="hidden" name="songId" value={typedSong.id} />
+              <input type="hidden" name="redirectTo" value={`/songs/${typedSong.id}`} />
+              <button
+                type="submit"
+                aria-label={isFavorite ? "Remove song from favorites" : "Add song to favorites"}
+                title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 ${
+                  isFavorite
+                    ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                    : "border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-[var(--surface)]"
+                }`}
+              >
+                <Star className="size-4" fill={isFavorite ? "currentColor" : "none"} />
+                {isFavorite ? "Favorited" : "Favorite"}
+              </button>
+            </form>
             <DownloadChordProButton
               source={typedSong.chordpro_source}
               title={typedSong.title}
@@ -283,8 +311,8 @@ export default async function SongPage({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="space-y-4 overflow-hidden rounded-3xl">
-          <div className="rounded-3xl border border-[var(--border)] bg-white px-6 py-5 shadow-sm">
+        <section className="min-w-0 space-y-4 overflow-hidden rounded-3xl">
+          <div className="rounded-3xl border border-[var(--border)] bg-white px-5 py-5 shadow-sm sm:px-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">
