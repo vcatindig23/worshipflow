@@ -90,7 +90,7 @@ export default function SongViewer({
     if (stageMode && chartScrollRef.current) {
       chartScrollRef.current.scrollTo({ top: 0, behavior: "smooth" })
     } else {
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      chartScrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
     }
   }
 
