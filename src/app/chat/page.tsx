@@ -1,9 +1,4 @@
-import {
-  AlertCircle,
-  MessageCircle,
-  MessagesSquare,
-  UsersRound,
-} from "lucide-react"
+import { AlertCircle } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import TeamChatClient, {
@@ -34,23 +29,6 @@ type MessageRow = {
   pinned_by: string | null
   mentioned_user_ids: string[]
   attachments: import("./team-chat-client").TeamChatAttachment[]
-}
-
-function formatRole(role: string) {
-  return role
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ")
-}
-
-function initials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("") || "WF"
 }
 
 export default async function TeamChatPage() {
@@ -157,29 +135,7 @@ export default async function TeamChatPage() {
     }))
 
   return (
-    <main className="mx-auto max-w-[1440px] space-y-6 px-4 py-6 text-[var(--foreground)] sm:px-6 sm:py-8 lg:px-8">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-xl border border-[var(--brand)]/10 bg-white px-3 py-2 text-[11px] font-semibold tracking-wide text-[var(--brand)] shadow-sm">
-            <MessagesSquare className="size-3.5" />
-            Worship Team Communication
-          </div>
-          <h1 className="text-3xl font-semibold tracking-[-0.045em] md:text-4xl">
-            Team Chat
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            One shared space for rehearsal updates, song arrangements, service reminders, and team coordination.
-          </p>
-        </div>
-        <div className="inline-flex w-fit items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 shadow-sm">
-          <UsersRound className="size-4 text-[var(--brand)]" />
-          <span className="text-sm font-semibold">{members.length}</span>
-          <span className="text-sm text-[var(--muted)]">
-            {members.length === 1 ? "workspace member" : "workspace members"}
-          </span>
-        </div>
-      </section>
-
+    <main className="mx-auto max-w-[1500px] px-2 py-3 text-[var(--foreground)] sm:px-4 sm:py-4 lg:px-6">
       {schemaUnavailable ? (
         <section
           role="status"
@@ -206,72 +162,15 @@ export default async function TeamChatPage() {
           </div>
         </section>
       ) : (
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6">
-          <TeamChatClient
-            organizationId={workspace.organizationId}
-            organizationTimezone={workspace.organizationTimezone || "Asia/Manila"}
-            currentUserId={workspace.userId}
-            canPinMessages={["admin", "worship_leader"].includes(workspace.role)}
-            initialMessages={initialMessages}
-            initialPinnedMessages={initialPinnedMessages}
-            members={members}
-          />
-
-          <aside className="space-y-4 lg:sticky lg:top-20">
-            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
-                  <UsersRound className="size-4" />
-                </span>
-                <h2 className="text-sm font-semibold">Your worship team</h2>
-              </div>
-              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                Everyone in this church workspace shares this conversation.
-              </p>
-
-              <ul className="mt-4 space-y-3">
-                {members.slice(0, 8).map((member) => (
-                  <li key={member.id} className="flex min-w-0 items-center gap-3">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[10px] font-bold text-[var(--brand)] ring-2 ring-white shadow-sm">
-                      {initials(member.displayName)}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">
-                        {member.id === workspace.userId
-                          ? `${member.displayName} (You)`
-                          : member.displayName}
-                      </span>
-                      <span className="mt-0.5 block truncate text-[11px] text-[var(--muted)]">
-                        {formatRole(member.role)}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              {members.length > 8 ? (
-                <p className="mt-3 border-t border-[var(--border)] pt-3 text-xs text-[var(--muted)]">
-                  And {members.length - 8} more{" "}
-                  {members.length - 8 === 1 ? "member" : "members"}
-                </p>
-              ) : null}
-            </section>
-
-            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
-                  <MessageCircle className="size-4" />
-                </span>
-                <h2 className="text-sm font-semibold">Chat tips</h2>
-              </div>
-              <ul className="mt-3 space-y-3 text-xs leading-5 text-[var(--muted)]">
-                <li>Use the chat for rehearsal coordination, song keys, and service updates.</li>
-                <li>Messages are visible to members of your current church workspace.</li>
-                <li>Messages update live while the chat is open and connected.</li>
-              </ul>
-            </section>
-          </aside>
-        </div>
+        <TeamChatClient
+          organizationId={workspace.organizationId}
+          organizationTimezone={workspace.organizationTimezone || "Asia/Manila"}
+          currentUserId={workspace.userId}
+          canPinMessages={["admin", "worship_leader"].includes(workspace.role)}
+          initialMessages={initialMessages}
+          initialPinnedMessages={initialPinnedMessages}
+          members={members}
+        />
       )}
     </main>
   )
