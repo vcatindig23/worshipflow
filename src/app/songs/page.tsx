@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Grid2X2,
   List,
+  Music2,
   Plus,
   Search,
   SlidersHorizontal,
@@ -499,7 +500,7 @@ export default async function SongsPage({
                 Clear filters
               </Link>
             ) : null}
-            <div className="inline-flex items-center rounded-xl border border-[var(--border)] bg-white p-1 shadow-sm" aria-label="Song layout">
+            <div role="group" aria-label="Song layout" className="inline-flex items-center rounded-xl border border-[var(--border)] bg-white p-1 shadow-sm">
               <Link
                 href={buildHref(params, { view: undefined })}
                 aria-label="List view"
@@ -577,9 +578,7 @@ export default async function SongsPage({
                           {song.status === "archived" ? (
                             <Archive className="size-4" />
                           ) : (
-                            <span className="text-sm font-bold">
-                              ♪
-                            </span>
+                            <Music2 className="size-4" strokeWidth={1.9} />
                           )}
                         </div>
 
@@ -645,6 +644,11 @@ export default async function SongsPage({
                           type="hidden"
                           name="songId"
                           value={song.id}
+                        />
+                        <input
+                          type="hidden"
+                          name="redirectTo"
+                          value={buildHref(params, {})}
                         />
 
                         <button
