@@ -255,7 +255,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           <div className="absolute right-16 -top-16 size-60 rounded-full border border-white/10" />
           <div className="absolute -bottom-28 left-[26%] size-64 rounded-full border border-white/10" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-          <div className="absolute bottom-5 left-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/75 sm:left-8">
+          <div className="absolute left-5 top-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/75 sm:left-8 sm:top-7">
             <span className="size-1.5 rounded-full bg-white/70" />
             WorshipFlow member profile
           </div>
@@ -333,7 +333,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         </div>
       </section>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]">
+      <div className={`grid items-start gap-6 ${activeTab === "activity" ? "grid-cols-1" : "lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]"}`}>
         {activeTab !== "activity" ? (
           <aside className="space-y-6">
             <section className={cardClass}>
