@@ -241,11 +241,6 @@ export default function SongViewer({
                 <RotateCcw className="size-3.5" />
                 Back to top
               </button>
-              <span className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/10 px-2.5 text-xs text-white/45">
-                <Minus className="size-3.5" />
-                {fontSize}px
-                <Plus className="size-3.5" />
-              </span>
               <button
                 type="button"
                 onClick={() => setFontSize((value) => Math.max(14, value - 2))}
