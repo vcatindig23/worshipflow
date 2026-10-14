@@ -1202,7 +1202,7 @@ export default function TeamChatClient({
               <span className="min-w-0 flex-1">
                 <span className="flex items-center justify-between gap-2">
                   <span className="truncate text-sm font-semibold text-[var(--foreground)]">Worship team</span>
-                  <span className="size-2 shrink-0 rounded-full bg-[var(--brand)]" aria-label={connectionLabel} />
+                  <span className={`size-2 shrink-0 rounded-full ${connectionState === "live" ? "bg-emerald-500" : "bg-amber-500"}`} aria-label={connectionLabel} />
                 </span>
                 <span className="mt-1 block truncate text-xs leading-5 text-[var(--muted)]">{latestMessagePreview}</span>
                 <span className="mt-0.5 block text-[10px] text-[var(--muted)]">{members.length} members · Shared chat</span>
@@ -1375,7 +1375,7 @@ export default function TeamChatClient({
         </section>
       ) : null}
 
-      <div className="relative">
+      <div className="relative flex min-h-0 flex-1 flex-col">
         <div
           ref={messagesContainerRef}
           className="h-[min(62vh,680px)] min-h-[320px] overflow-y-auto overscroll-contain bg-[#f7f8fa] px-4 py-5 sm:px-6 md:h-auto md:min-h-0 md:flex-1"
@@ -1898,4 +1898,5 @@ export default function TeamChatClient({
         </main>
       </div>
     </section>
-  )}
+  )
+}
