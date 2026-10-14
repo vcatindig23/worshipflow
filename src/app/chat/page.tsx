@@ -157,21 +157,21 @@ export default async function TeamChatPage() {
     }))
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-4 py-8 text-[var(--foreground)] sm:px-6 lg:px-8">
-      <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <main className="mx-auto max-w-[1440px] space-y-6 px-4 py-6 text-[var(--foreground)] sm:px-6 sm:py-8 lg:px-8">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-xl border border-[var(--brand)]/10 bg-white px-3 py-2 text-[11px] font-semibold tracking-wide text-[var(--brand)] shadow-sm">
             <MessagesSquare className="size-3.5" />
             Worship Team Communication
           </div>
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-[-0.045em] md:text-4xl">
             Team Chat
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Keep your worship team connected with rehearsal updates, song arrangements, service reminders, and team coordination.
+            One shared space for rehearsal updates, song arrangements, service reminders, and team coordination.
           </p>
         </div>
-        <div className="inline-flex w-fit items-center gap-2 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 shadow-sm">
+        <div className="inline-flex w-fit items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 shadow-sm">
           <UsersRound className="size-4 text-[var(--brand)]" />
           <span className="text-sm font-semibold">{members.length}</span>
           <span className="text-sm text-[var(--muted)]">
@@ -206,7 +206,7 @@ export default async function TeamChatPage() {
           </div>
         </section>
       ) : (
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6">
           <TeamChatClient
             organizationId={workspace.organizationId}
             organizationTimezone={workspace.organizationTimezone || "Asia/Manila"}
@@ -217,10 +217,12 @@ export default async function TeamChatPage() {
             members={members}
           />
 
-          <aside className="space-y-4">
-            <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <aside className="space-y-4 lg:sticky lg:top-20">
+            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5 shadow-sm">
               <div className="flex items-center gap-2">
-                <UsersRound className="size-4 text-[var(--brand)]" />
+                <span className="flex size-8 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
+                  <UsersRound className="size-4" />
+                </span>
                 <h2 className="text-sm font-semibold">Your worship team</h2>
               </div>
               <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
@@ -230,7 +232,7 @@ export default async function TeamChatPage() {
               <ul className="mt-4 space-y-3">
                 {members.slice(0, 8).map((member) => (
                   <li key={member.id} className="flex min-w-0 items-center gap-3">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[10px] font-bold text-[var(--brand)]">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--brand-soft)] text-[10px] font-bold text-[var(--brand)] ring-2 ring-white shadow-sm">
                       {initials(member.displayName)}
                     </span>
                     <span className="min-w-0 flex-1">
@@ -255,10 +257,12 @@ export default async function TeamChatPage() {
               ) : null}
             </section>
 
-            <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <section className="rounded-[24px] border border-[var(--border)] bg-white p-5 shadow-sm">
               <div className="flex items-center gap-2">
-                <MessageCircle className="size-4 text-[var(--brand)]" />
-                <h2 className="text-sm font-semibold">Good to know</h2>
+                <span className="flex size-8 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
+                  <MessageCircle className="size-4" />
+                </span>
+                <h2 className="text-sm font-semibold">Chat tips</h2>
               </div>
               <ul className="mt-3 space-y-3 text-xs leading-5 text-[var(--muted)]">
                 <li>Use the chat for rehearsal coordination, song keys, and service updates.</li>
