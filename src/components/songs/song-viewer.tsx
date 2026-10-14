@@ -250,6 +250,12 @@ export default function SongViewer({
               >
                 <Minus className="size-4" />
               </button>
+              <span
+                aria-label={`Lyrics font size ${fontSize} pixels`}
+                className="inline-flex h-9 min-w-12 items-center justify-center rounded-lg border border-white/10 px-2 text-xs tabular-nums text-white/65"
+              >
+                {fontSize}px
+              </span>
               <button
                 type="button"
                 onClick={() => setFontSize((value) => Math.min(32, value + 2))}
