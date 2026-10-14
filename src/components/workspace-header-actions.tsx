@@ -154,7 +154,7 @@ function ActivityFeedIcon({ type }: { type: HeaderActivity["entity_type"] }) {
   const Icon =
     type === "song" ? Music2 : type === "service" ? CalendarDays : Users
 
-  return <Icon className="size-4" />
+  return <Icon className="wf-icon-motion size-4 group-hover:scale-110" />
 }
 
 function NotificationIcon({ type }: { type: string }) {
@@ -163,10 +163,10 @@ function NotificationIcon({ type }: { type: string }) {
   }
 
   if (type === "team_chat_message") {
-    return <Bell className="size-4" />
+    return <Bell className="wf-icon-motion size-4 group-hover:scale-110" />
   }
 
-  return <CalendarDays className="size-4" />
+  return <CalendarDays className="wf-icon-motion size-4 group-hover:scale-110" />
 }
 
 export default function WorkspaceHeaderActions({
@@ -558,9 +558,9 @@ export default function WorkspaceHeaderActions({
         aria-label="Open global search"
         aria-haspopup="dialog"
         aria-expanded={searchOpen}
-        className="inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-medium text-[var(--muted)] shadow-sm transition hover:border-[var(--brand)] hover:bg-[var(--surface)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
+        className="group inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-medium text-[var(--muted)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:bg-[var(--surface)] hover:text-[var(--foreground)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
       >
-        <Search className="size-4" />
+        <Search className="wf-icon-motion size-4 group-hover:scale-110 group-hover:-rotate-6" />
         <span className="hidden sm:inline">Search</span>
         <span className="hidden rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 text-[10px] font-medium sm:inline">
           /
@@ -571,9 +571,9 @@ export default function WorkspaceHeaderActions({
         href="/chat"
         title="Team Chat"
         aria-label={liveUnreadChatCount > 0 ? `Team Chat, ${liveUnreadChatCount} unread updates` : "Team Chat"}
-        className="relative flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition hover:border-[var(--brand)] hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
+        className="group relative flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:bg-[var(--surface)] active:translate-y-0 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
       >
-        <MessagesSquare className="size-[18px]" />
+        <MessagesSquare className="wf-icon-motion size-[18px] group-hover:scale-110 group-hover:-rotate-3" />
         {liveUnreadChatCount > 0 ? (
           <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-red-600 px-1 text-[9px] font-bold text-white">
             {liveUnreadChatCount > 99 ? "99+" : liveUnreadChatCount}
@@ -590,7 +590,7 @@ export default function WorkspaceHeaderActions({
           aria-expanded={notificationsOpen}
           className="relative flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition hover:border-[var(--brand)] hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
         >
-          <Bell className="size-[18px]" />
+          <Bell className="wf-icon-motion wf-bell-icon size-[18px]" />
           {unreadCount > 0 ? (
             <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-red-600 px-1 text-[9px] font-bold text-white">
               {unreadCount > 99 ? "99+" : unreadCount}
@@ -616,12 +616,12 @@ export default function WorkspaceHeaderActions({
                   type="button"
                   onClick={() => void handleMarkAllRead()}
                   disabled={isMarkingAllRead}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-[var(--brand)] transition hover:bg-[var(--brand-soft)] disabled:opacity-50"
+                  className="group inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-[var(--brand)] transition hover:bg-[var(--brand-soft)] disabled:opacity-50"
                 >
                   {isMarkingAllRead ? (
                     <LoaderCircle className="size-3.5 animate-spin" />
                   ) : (
-                    <CheckCheck className="size-3.5" />
+                    <CheckCheck className="wf-icon-motion size-3.5 group-hover:scale-110" />
                   )}
                   Mark all read
                 </button>
@@ -669,7 +669,7 @@ export default function WorkspaceHeaderActions({
                           <button
                             type="button"
                             onClick={() => openActivity(activity)}
-                            className="flex w-full items-start gap-3 px-4 py-3.5 text-left transition hover:bg-[var(--surface)]"
+                            className="group flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/25"
                           >
                             <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand)] ring-1 ring-[var(--border)]">
                               <ActivityFeedIcon type={activity.entity_type} />
@@ -704,7 +704,7 @@ export default function WorkspaceHeaderActions({
                           type="button"
                           onClick={() => void openNotification(notification)}
                           disabled={isBusy}
-                          className={`flex w-full items-start gap-3 px-4 py-3.5 text-left transition hover:bg-[var(--surface)] disabled:opacity-60 ${notification.read_at ? "bg-white" : "bg-[var(--brand-soft)]/40"}`}
+                          className={`group flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/25 disabled:opacity-60 ${notification.read_at ? "bg-white" : "bg-[var(--brand-soft)]/40"}`}
                         >
                           <span className="relative mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-[var(--brand)] ring-1 ring-[var(--border)]">
                             <NotificationIcon type={notification.type} />
@@ -785,7 +785,7 @@ export default function WorkspaceHeaderActions({
                             onClick={onCloseSearch}
                             className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
                           >
-                            <X className="size-4" />
+                            <X className="wf-icon-motion size-4 group-hover:rotate-90" />
                           </button>
                         </div>
             
