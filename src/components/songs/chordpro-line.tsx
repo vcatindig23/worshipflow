@@ -19,7 +19,7 @@ export default function ChordProLine({
     (token) => token.type === "text" && token.value.trim() !== ""
   )
   const chordOnly = hasChords && !hasLyrics
-  const chordFontSize = Math.max(12, Math.round(fontSize * 0.65))
+  const chordFontSize = Math.max(13, Math.round(fontSize * 0.74))
 
   if (chordOnly) {
     if (!showChords) {
@@ -53,7 +53,7 @@ export default function ChordProLine({
       }`}
       style={{
         fontSize: `${fontSize}px`,
-        paddingTop: showChords ? `${fontSize * 1.35}px` : undefined,
+        paddingTop: showChords ? `${fontSize * 1.42}px` : undefined,
       }}
     >
       {line.tokens.map((token, tokenIndex) => {
@@ -75,7 +75,7 @@ export default function ChordProLine({
                 stageMode ? "text-sky-300" : "text-[var(--brand)]"
               }`}
               style={{
-                bottom: `${fontSize * 0.65}px`,
+                bottom: `${fontSize * 0.82}px`,
                 fontSize: `${chordFontSize}px`,
               }}
             >
