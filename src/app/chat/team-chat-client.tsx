@@ -1169,24 +1169,24 @@ export default function TeamChatClient({
         : "Connecting"
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-[var(--border)] bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-[var(--border)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+    <section className="overflow-hidden rounded-[28px] border border-[var(--border)] bg-white shadow-[0_24px_64px_-44px_rgba(21,35,27,0.45)]">
+      <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-gradient-to-r from-white to-[var(--surface)]/55 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--brand)]/10 bg-[var(--brand-soft)] text-[var(--brand)] shadow-sm">
             <MessagesSquare className="size-5" />
           </div>
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-[var(--foreground)]">
-              Worship team conversation
+            <h2 className="truncate text-base font-semibold tracking-tight text-[var(--foreground)]">
+              Team conversation
             </h2>
-            <p className="mt-0.5 text-xs text-[var(--muted)]">
-              Messages are shared with your church workspace.
+            <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+              Share updates, coordinate rehearsals, and keep everyone in sync.
             </p>
           </div>
         </div>
 
         <span
-          className="inline-flex w-fit items-center gap-2 rounded-full bg-[var(--surface)] px-3 py-1.5 text-[11px] font-semibold text-[var(--muted)]"
+          className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-[11px] font-semibold text-[var(--muted)] shadow-sm"
           role="status"
           aria-live="polite"
         >
@@ -1310,7 +1310,7 @@ export default function TeamChatClient({
       <div className="relative">
         <div
           ref={messagesContainerRef}
-          className="min-h-[360px] max-h-[62vh] overflow-y-auto bg-[var(--background)]/55 px-4 py-5 sm:min-h-[440px] sm:px-6"
+          className="h-[min(62vh,680px)] min-h-[320px] overflow-y-auto overscroll-contain scroll-smooth bg-[var(--background)]/60 px-4 py-5 sm:px-6"
           onScroll={handleMessagesScroll}
           aria-label="Team chat messages"
           aria-live="polite"
@@ -1619,7 +1619,7 @@ export default function TeamChatClient({
         ) : null}
       </div>
 
-      <div className="border-t border-[var(--border)] bg-white px-4 py-4 sm:px-6">
+      <div className="border-t border-[var(--border)] bg-gradient-to-r from-white to-[var(--surface)]/35 px-4 py-4 sm:px-6">
         {error ? (
           <div
             role="alert"
@@ -1800,7 +1800,7 @@ export default function TeamChatClient({
 
                 event.preventDefault()
 
-                if (draft.trim() && !isPending) {
+                if ((draft.trim() || selectedFiles.length > 0) && !isPending) {
                   event.currentTarget.form?.requestSubmit()
                 }
               }}
@@ -1823,7 +1823,7 @@ export default function TeamChatClient({
           </button>
         </form>
         <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-[var(--muted)]">
-          <span>Paste links to share them · Attach up to 5 files, 25 MB each · Enter to send</span>
+          <span>Paste links to share them · Attach up to 5 files, 25 MB each · Enter to send, Shift+Enter for a new line</span>
           <span className="shrink-0 tabular-nums">{draft.length}/2000</span>
         </div>
       </div>
