@@ -84,6 +84,7 @@ export async function searchWorkspaceLive(rawQuery: string) {
   const [
     songTitlesResult,
     songArtistsResult,
+    songAlbumsResult,
     setlistNamesResult,
     setlistDescriptionsResult,
   ] = await Promise.all([
@@ -99,6 +100,13 @@ export async function searchWorkspaceLive(rawQuery: string) {
       .select("id, title, artist, album, status")
       .eq("organization_id", organizationId)
       .ilike("artist", pattern)
+      .order("title", { ascending: true })
+      .limit(6),
+    supabase
+      .from("songs")
+      .select("id, title, artist, album, status")
+      .eq("organization_id", organizationId)
+      .ilike("album", pattern)
       .order("title", { ascending: true })
       .limit(6),
     supabase
@@ -120,6 +128,7 @@ export async function searchWorkspaceLive(rawQuery: string) {
   if (
     songTitlesResult.error ||
     songArtistsResult.error ||
+    songAlbumsResult.error ||
     setlistNamesResult.error ||
     setlistDescriptionsResult.error
   ) {
@@ -127,6 +136,7 @@ export async function searchWorkspaceLive(rawQuery: string) {
       code:
         songTitlesResult.error?.code ??
         songArtistsResult.error?.code ??
+        songAlbumsResult.error?.code ??
         setlistNamesResult.error?.code ??
         setlistDescriptionsResult.error?.code,
     })
@@ -142,6 +152,7 @@ export async function searchWorkspaceLive(rawQuery: string) {
       [
         ...(songTitlesResult.data ?? []),
         ...(songArtistsResult.data ?? []),
+        ...(songAlbumsResult.data ?? []),
       ].map((song) => [song.id, song as LiveSearchSong])
     ).values()
   ).slice(0, 6)
