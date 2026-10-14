@@ -1,35 +1,38 @@
 import Link from "next/link"
 import {
+  CalendarClock,
   CalendarDays,
   ContactRound,
   ChevronRight,
   FileText,
-  House,
+  FolderOpen,
+  LayoutDashboard,
   ListMusic,
   LogOut,
-  Menu,
+  MessagesSquare,
   Music2,
   Plus,
   Settings,
-  Users,
-  UserRound,
+  Settings2,
+  ShieldCheck,
+  UsersRound,
 } from "lucide-react"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ProfileAvatar from "@/components/profile-avatar"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
+import DashboardMobileNavigation from "@/components/dashboard-mobile-navigation"
 
 type DashboardViewProps = {
   workspace: WorkspaceData
-  onMenuOpen?: () => void
 }
 
 const navigation = [
   {
     label: "Dashboard",
     href: "/",
-    icon: House,
+    icon: LayoutDashboard,
   },
   {
     label: "Songs",
@@ -49,7 +52,7 @@ const navigation = [
   {
     label: "My Schedule",
     href: "/my-schedule",
-    icon: UserRound,
+    icon: CalendarClock,
   },
   {
     label: "Profile",
@@ -59,12 +62,17 @@ const navigation = [
   {
     label: "Team",
     href: "/settings/team",
-    icon: Users,
+    icon: UsersRound,
+  },
+  {
+    label: "Team Chat",
+    href: "/chat",
+    icon: MessagesSquare,
   },
   {
     label: "Files",
     href: "/files",
-    icon: FileText,
+    icon: FolderOpen,
   },
 ]
 
@@ -110,7 +118,6 @@ function formatDay(day: number) {
 
 export default function DashboardView({
   workspace,
-  onMenuOpen,
 }: DashboardViewProps) {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -145,13 +152,21 @@ export default function DashboardView({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition ${
+                    aria-current={item.href === "/" ? "page" : undefined}
+                    className={`group relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
                       item.href === "/"
-                        ? "bg-[var(--brand)] text-white"
-                        : "text-[var(--sidebar-muted)] hover:bg-white/8 hover:text-white"
+                        ? "bg-[var(--brand)] text-white shadow-sm"
+                        : "text-[var(--sidebar-muted)] hover:bg-white/[0.07] hover:text-white"
                     }`}
                   >
-                    <Icon className="size-[18px]" strokeWidth={1.8} />
+                    {item.href === "/" ? (
+                      <span aria-hidden="true" className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-[#b5d4bd]" />
+                    ) : null}
+                    <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg transition duration-200 ${
+                      item.href === "/" ? "bg-white/10 text-white" : "text-[var(--sidebar-muted)] group-hover:bg-white/10 group-hover:text-white"
+                    }`}>
+                      <Icon className="wf-icon-motion size-[18px]" strokeWidth={1.9} />
+                    </span>
                     <span>{item.label}</span>
                   </Link>
                 )
@@ -165,9 +180,11 @@ export default function DashboardView({
             <nav>
               <Link
                 href="/settings"
-                className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-[var(--sidebar-muted)] transition hover:bg-white/8 hover:text-white"
+                className="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-[var(--sidebar-muted)] transition duration-200 hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
               >
-                <Settings className="size-[18px]" strokeWidth={1.8} />
+                <span className="flex size-8 items-center justify-center rounded-lg transition group-hover:bg-white/10">
+                  <Settings2 className="wf-icon-motion size-[18px]" strokeWidth={1.9} />
+                </span>
                 <span>Settings</span>
               </Link>
             </nav>
@@ -204,9 +221,10 @@ export default function DashboardView({
                   <button
                     type="submit"
                     aria-label="Sign out"
-                    className="rounded-lg p-1.5 text-[var(--sidebar-muted)] transition hover:bg-white/8 hover:text-white"
+                    title="Sign out"
+                    className="group rounded-lg p-1.5 text-[var(--sidebar-muted)] transition hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                   >
-                    <LogOut className="size-4" />
+                    <LogOut className="wf-icon-motion size-4" />
                   </button>
                 </form>
               </div>
@@ -217,14 +235,11 @@ export default function DashboardView({
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-30 flex h-[78px] items-center border-b border-[var(--border)] bg-white/92 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
             <div className="flex min-w-0 flex-1 items-center gap-3">
-              <button
-                type="button"
-                onClick={onMenuOpen}
-                aria-label="Open navigation"
-                className="rounded-xl border border-[var(--border)] p-2.5 text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] lg:hidden"
-              >
-                <Menu className="size-5" />
-              </button>
+              <DashboardMobileNavigation
+                userName={workspace.userName}
+                role={workspace.role}
+                userAvatarUrl={workspace.userAvatarUrl}
+              />
 
               <div className="min-w-0">
                 <div className="truncate text-xs font-medium text-[var(--muted)]">
@@ -242,9 +257,9 @@ export default function DashboardView({
 
               <Link
                 href="/songs/new"
-                className="ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] sm:inline-flex"
+                className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
               >
-                <Plus className="size-4" />
+                <Plus className="wf-icon-motion size-4" />
                 New Song
               </Link>
             </div>
@@ -279,52 +294,67 @@ export default function DashboardView({
                 </div>
               ) : null}
 
-              <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
-                  <div className="text-xs font-medium text-[var(--muted)]">
-                    Songs
+              <section aria-label="Workspace overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-[var(--muted)]">Songs</div>
+                      <div className="mt-2 text-2xl font-semibold tracking-[-0.03em] tabular-nums">{workspace.songCount}</div>
+                    </div>
+                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)] transition duration-200 group-hover:scale-105 group-hover:rotate-3">
+                      <Music2 className="wf-icon-motion size-5" strokeWidth={1.9} />
+                    </span>
                   </div>
-                  <div className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-                    {workspace.songCount}
-                  </div>
-                  <div className="mt-1 text-xs text-[var(--muted)]">
+                  <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted)]">
+                    <span className="size-1.5 rounded-full bg-[var(--brand)]" />
                     Active songs in your library
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
-                  <div className="text-xs font-medium text-[var(--muted)]">
-                    Team members
+                <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-[var(--muted)]">Team members</div>
+                      <div className="mt-2 text-2xl font-semibold tracking-[-0.03em] tabular-nums">{workspace.memberCount}</div>
+                    </div>
+                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700 transition duration-200 group-hover:scale-105 group-hover:-rotate-3">
+                      <UsersRound className="wf-icon-motion size-5" strokeWidth={1.9} />
+                    </span>
                   </div>
-                  <div className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-                    {workspace.memberCount}
-                  </div>
-                  <div className="mt-1 text-xs text-[var(--muted)]">
+                  <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted)]">
+                    <span className="size-1.5 rounded-full bg-sky-600" />
                     Members in this workspace
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
-                  <div className="text-xs font-medium text-[var(--muted)]">
-                    Default service
+                <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-[var(--muted)]">Default service</div>
+                      <div className="mt-2 truncate text-lg font-semibold tracking-[-0.03em]">{workspace.defaultServiceName}</div>
+                    </div>
+                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 transition duration-200 group-hover:scale-105 group-hover:rotate-3">
+                      <CalendarClock className="wf-icon-motion size-5" strokeWidth={1.9} />
+                    </span>
                   </div>
-                  <div className="mt-2 truncate text-lg font-semibold tracking-[-0.03em]">
-                    {workspace.defaultServiceName}
-                  </div>
-                  <div className="mt-1 text-xs text-[var(--muted)]">
-                    {formatDay(workspace.defaultServiceDay)} at{" "}
-                    {formatServiceTime(workspace.defaultServiceTime)}
+                  <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted)]">
+                    <CalendarDays className="size-3.5 shrink-0" />
+                    <span>{formatDay(workspace.defaultServiceDay)} at {formatServiceTime(workspace.defaultServiceTime)}</span>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
-                  <div className="text-xs font-medium text-[var(--muted)]">
-                    Your role
+                <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-[var(--muted)]">Your role</div>
+                      <div className="mt-2 truncate text-lg font-semibold tracking-[-0.03em]">{roleLabel(workspace.role)}</div>
+                    </div>
+                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700 transition duration-200 group-hover:scale-105 group-hover:-rotate-3">
+                      <ShieldCheck className="wf-icon-motion size-5" strokeWidth={1.9} />
+                    </span>
                   </div>
-                  <div className="mt-2 text-lg font-semibold tracking-[-0.03em]">
-                    {roleLabel(workspace.role)}
-                  </div>
-                  <div className="mt-1 text-xs text-[var(--muted)]">
+                  <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted)]">
+                    <span className="size-1.5 rounded-full bg-violet-600" />
                     Workspace access level
                   </div>
                 </div>
