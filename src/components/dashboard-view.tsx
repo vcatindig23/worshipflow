@@ -4,7 +4,6 @@ import {
   CalendarDays,
   ContactRound,
   ChevronRight,
-  FileText,
   FolderOpen,
   LayoutDashboard,
   ListMusic,
