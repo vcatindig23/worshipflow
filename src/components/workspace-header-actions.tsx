@@ -224,6 +224,8 @@ export default function WorkspaceHeaderActions({
   const notificationsMenuRef = useRef<HTMLDivElement>(null)
   const notificationButtonRef = useRef<HTMLButtonElement>(null)
   const notificationsPanelRef = useRef<HTMLElement>(null)
+  const notificationTitleRef = useRef<HTMLHeadingElement>(null)
+  const notificationsReturnFocusRef = useRef<HTMLElement | null>(null)
   const notificationRefreshTimeoutRef = useRef<number | null>(null)
   const supabase = useMemo(() => createBrowserClient(), [])
   const searchResultTargets = useMemo<SearchResultTarget[]>(() => {
@@ -447,6 +449,10 @@ export default function WorkspaceHeaderActions({
 
     function handleOpenNotificationsRequest() {
       onCloseSearch()
+      notificationsReturnFocusRef.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : notificationButtonRef.current
       setNotificationsOpen(true)
       void refreshNotifications()
     }
@@ -495,6 +501,8 @@ export default function WorkspaceHeaderActions({
   }, [notificationsOpen])
 
   useEffect(() => {
+    if (!notificationsOpen) return
+
     function handlePointerDown(event: PointerEvent) {
       const target = event.target as Node
       const clickedTrigger = notificationsMenuRef.current?.contains(target)
@@ -502,11 +510,19 @@ export default function WorkspaceHeaderActions({
 
       if (!clickedTrigger && !clickedPanel) {
         setNotificationsOpen(false)
+        notificationsReturnFocusRef.current = null
       }
     }
 
     function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setNotificationsOpen(false)
+      if (event.key !== "Escape") return
+
+      event.preventDefault()
+      setNotificationsOpen(false)
+      const returnTarget =
+        notificationsReturnFocusRef.current ?? notificationButtonRef.current
+      notificationsReturnFocusRef.current = null
+      returnTarget?.focus()
     }
 
     document.addEventListener("pointerdown", handlePointerDown)
@@ -515,7 +531,17 @@ export default function WorkspaceHeaderActions({
       document.removeEventListener("pointerdown", handlePointerDown)
       document.removeEventListener("keydown", handleEscape)
     }
-  }, [])
+  }, [notificationsOpen])
+
+  useEffect(() => {
+    if (!notificationsOpen) return
+
+    const frame = window.requestAnimationFrame(() => {
+      notificationTitleRef.current?.focus()
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [notificationsOpen])
 
   useEffect(() => {
     setNotificationsOpen(false)
@@ -566,8 +592,24 @@ export default function WorkspaceHeaderActions({
 
   function toggleNotifications() {
     onCloseSearch()
+    if (!notificationsOpen) {
+      notificationsReturnFocusRef.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : notificationButtonRef.current
+    } else {
+      notificationsReturnFocusRef.current = null
+    }
     setNotificationsOpen((open) => !open)
     void refreshNotifications()
+  }
+
+  function closeNotificationsAndRestoreFocus() {
+    setNotificationsOpen(false)
+    const returnTarget =
+      notificationsReturnFocusRef.current ?? notificationButtonRef.current
+    notificationsReturnFocusRef.current = null
+    returnTarget?.focus()
   }
 
   function openActivity(activity: HeaderActivity) {
@@ -688,7 +730,10 @@ export default function WorkspaceHeaderActions({
         >
           <Bell className="wf-icon-motion wf-bell-icon size-[18px]" />
           {unreadCount > 0 ? (
-            <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-red-600 px-1 text-[9px] font-bold text-white">
+            <span
+              aria-hidden="true"
+              className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-red-600 px-1 text-[9px] font-bold text-white"
+            >
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           ) : null}
@@ -697,36 +742,56 @@ export default function WorkspaceHeaderActions({
         {notificationsOpen && isBrowserMounted && notificationPanelPosition ? createPortal(
           <section
             ref={notificationsPanelRef}
+            id="workspace-notifications-panel"
             role="dialog"
-            aria-label="Notifications"
+            aria-labelledby="workspace-notifications-title"
+            tabIndex={-1}
             style={{
               top: notificationPanelPosition.top,
               right: notificationPanelPosition.right,
             }}
-            className="fixed z-[100] flex max-h-[min(75vh,620px)] w-[min(92vw,390px)] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-2xl"
+            className="fixed z-[100] flex max-h-[min(75vh,620px)] w-[min(92vw,390px)] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-2xl outline-none"
           >
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-4">
               <div>
-                <h2 className="text-base font-bold text-[var(--foreground)]">Notifications & Activity</h2>
+                <h2
+                  ref={notificationTitleRef}
+                  id="workspace-notifications-title"
+                  tabIndex={-1}
+                  className="rounded-sm text-base font-bold text-[var(--foreground)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
+                >
+                  Notifications & Activity
+                </h2>
                 <p className="mt-0.5 text-xs text-[var(--muted)]">
                   {unreadCount === 0 ? "Recent workspace updates" : `${unreadCount} unread ${unreadCount === 1 ? "notification" : "notifications"}`}
                 </p>
               </div>
-              {unreadCount > 0 ? (
+              <div className="flex items-center gap-1">
+                {unreadCount > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleMarkAllRead()}
+                    disabled={isMarkingAllRead}
+                    className="group inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-[var(--brand)] transition hover:bg-[var(--brand-soft)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
+                  >
+                    {isMarkingAllRead ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <CheckCheck className="wf-icon-motion size-3.5 group-hover:scale-110" />
+                    )}
+                    Mark all read
+                  </button>
+                ) : null}
                 <button
                   type="button"
-                  onClick={() => void handleMarkAllRead()}
-                  disabled={isMarkingAllRead}
-                  className="group inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-[var(--brand)] transition hover:bg-[var(--brand-soft)] disabled:opacity-50"
+                  onClick={closeNotificationsAndRestoreFocus}
+                  aria-label="Close notifications"
+                  title="Close notifications"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
                 >
-                  {isMarkingAllRead ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                  ) : (
-                    <CheckCheck className="wf-icon-motion size-3.5 group-hover:scale-110" />
-                  )}
-                  Mark all read
+                  <X className="size-4" />
                 </button>
-              ) : null}
+              </div>
             </div>
 
             {notificationError ? (
