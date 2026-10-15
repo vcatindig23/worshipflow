@@ -1,6 +1,7 @@
 "use client"
 
-import Link from "next/link"\nimport { usePathname } from "next/navigation"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ArrowUp, Check, HelpCircle, MessageCircle, Moon, Sun, X } from "lucide-react"
 
@@ -19,7 +20,8 @@ const faqItems = [
   },
 ]
 
-export default function SiteUtilities() {\n  const pathname = usePathname()
+export default function SiteUtilities() {
+  const pathname = usePathname()
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [cookieVisible, setCookieVisible] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
