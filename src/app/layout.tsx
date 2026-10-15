@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   applicationName: "WorshipFlow",
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
   alternates: {
     types: {
       "text/plain": "/llms.txt",
@@ -25,12 +28,9 @@ export const metadata: Metadata = {
     siteName: "WorshipFlow",
     title: "WorshipFlow — Worship Team Planning",
     description: siteDescription,
-    url: siteUrl,
     images: [
       {
         url: "/worshipflow-brand.png",
-        width: 1200,
-        height: 630,
         alt: "WorshipFlow — tools for worship team planning",
       },
     ],
