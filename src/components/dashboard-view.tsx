@@ -280,7 +280,7 @@ export default function DashboardView({
             </div>
           </header>
 
-          <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <main id="main-content" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mx-auto max-w-[1480px]">
               <section className="mb-6">
                 <p className="text-sm font-medium text-[var(--brand)]">
