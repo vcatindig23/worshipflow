@@ -22,6 +22,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { createPortal } from "react-dom"
@@ -90,6 +91,11 @@ type SearchSetlist = {
 type SearchResults = {
   songs: SearchSong[]
   setlists: SearchSetlist[]
+}
+
+type SearchResultTarget = {
+  key: string
+  href: string
 }
 
 function formatNotificationTime(value: string) {
@@ -201,6 +207,7 @@ export default function WorkspaceHeaderActions({
   const [isBrowserMounted, setIsBrowserMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null)
+  const [activeSearchResultIndex, setActiveSearchResultIndex] = useState(0)
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState("")
   const [notifications, setNotifications] = useState<HeaderNotification[]>([])
@@ -219,6 +226,20 @@ export default function WorkspaceHeaderActions({
   const notificationsPanelRef = useRef<HTMLElement>(null)
   const notificationRefreshTimeoutRef = useRef<number | null>(null)
   const supabase = useMemo(() => createBrowserClient(), [])
+  const searchResultTargets = useMemo<SearchResultTarget[]>(() => {
+    if (!searchResults) return []
+
+    return [
+      ...searchResults.songs.map((song) => ({
+        key: `song:${song.id}`,
+        href: `/songs/${song.id}`,
+      })),
+      ...searchResults.setlists.map((setlist) => ({
+        key: `setlist:${setlist.id}`,
+        href: `/setlists/${setlist.id}`,
+      })),
+    ]
+  }, [searchResults])
 
   const refreshNotifications = useCallback(async () => {
     setIsLoadingNotifications(true)
@@ -500,6 +521,39 @@ export default function WorkspaceHeaderActions({
     setNotificationsOpen(false)
     onCloseSearch()
   }, [pathname, onCloseSearch])
+
+  function handleSearchInputKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
+    if (searchResultTargets.length === 0 || isSearching) return
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      setActiveSearchResultIndex((current) =>
+        current >= searchResultTargets.length - 1 ? 0 : current + 1
+      )
+      return
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault()
+      setActiveSearchResultIndex((current) =>
+        current <= 0 ? searchResultTargets.length - 1 : current - 1
+      )
+      return
+    }
+
+    if (event.key === "Enter" && searchResultTargets.length > 0) {
+      event.preventDefault()
+      const target =
+        searchResultTargets[
+          Math.min(activeSearchResultIndex, searchResultTargets.length - 1)
+        ] ?? searchResultTargets[0]
+
+      if (target) {
+        onCloseSearch()
+        router.push(target.href)
+      }
+    }
+  }
 
   function toggleSearch() {
     setNotificationsOpen(false)
@@ -823,7 +877,12 @@ export default function WorkspaceHeaderActions({
                               type="search"
                               value={searchQuery}
                               maxLength={100}
-                              onChange={(event) => setSearchQuery(event.target.value)}
+                              onChange={(event) => {
+                                setSearchQuery(event.target.value)
+                                setActiveSearchResultIndex(0)
+                              }}
+                              onKeyDown={handleSearchInputKeyDown}
+                              aria-keyshortcuts="ArrowDown ArrowUp Enter Escape"
                               placeholder="Search songs, artists, albums, setlists, services…"
                               className="h-9 w-full border-0 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:ring-0"
                             />
@@ -875,12 +934,13 @@ export default function WorkspaceHeaderActions({
                                     Songs
                                   </h3>
                                   <ul className="space-y-1">
-                                    {searchResults.songs.map((song) => (
+                                    {searchResults.songs.map((song, index) => (
                                       <li key={song.id}>
                                         <Link
                                           href={`/songs/${song.id}`}
                                           onClick={onCloseSearch}
-                                          className="flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
+                                          onMouseEnter={() => setActiveSearchResultIndex(index)}
+                                          className={`flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20 ${activeSearchResultIndex === index ? "bg-[var(--brand-soft)]" : ""}`}
                                         >
                                           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
                                             <Music2 className="size-4" />
@@ -905,12 +965,13 @@ export default function WorkspaceHeaderActions({
                                     Setlists and services
                                   </h3>
                                   <ul className="space-y-1">
-                                    {searchResults.setlists.map((setlist) => (
+                                    {searchResults.setlists.map((setlist, index) => (
                                       <li key={setlist.id}>
                                         <Link
                                           href={`/setlists/${setlist.id}`}
                                           onClick={onCloseSearch}
-                                          className="flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
+                                          onMouseEnter={() => setActiveSearchResultIndex(searchResults.songs.length + index)}
+                                          className={`flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20 ${activeSearchResultIndex === searchResults.songs.length + index ? "bg-[var(--brand-soft)]" : ""}`}
                                         >
                                           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
                                             {setlist.service_date ? <CalendarDays className="size-4" /> : <ListMusic className="size-4" />}
@@ -935,8 +996,20 @@ export default function WorkspaceHeaderActions({
                             </div>
                           )}
                         </div>
-                        <div className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-[10px] text-[var(--muted)] sm:px-5">
-                          Results update as you type. Search is limited to your current church workspace.
+                        <div
+                          role="status"
+                          aria-live="polite"
+                          className="sr-only"
+                        >
+                          {isSearching
+                            ? "Searching your workspace."
+                            : searchResults
+                              ? `${searchResultTargets.length} search ${searchResultTargets.length === 1 ? "result" : "results"} available.`
+                              : ""}
+                        </div>
+                        <div className="flex flex-col gap-1 border-t border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-[10px] text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                          <span>Results update as you type. Search is limited to your current church workspace.</span>
+                          <span className="whitespace-nowrap">↑ ↓ Navigate · Enter Open · Esc Close</span>
                         </div>
                       </section>
                     </div>
