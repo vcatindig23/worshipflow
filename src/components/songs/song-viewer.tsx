@@ -187,12 +187,12 @@ export default function SongViewer({
   if (stageMode) {
     return (
       <div className="fixed inset-0 z-[100] flex h-dvh flex-col overflow-hidden bg-[#0d120f] text-white">
-        <header className="z-10 flex shrink-0 items-start justify-between gap-5 border-b border-white/10 bg-[#0d120f] px-5 py-4 sm:px-8 sm:py-5">
+        <header className="z-10 flex shrink-0 items-start justify-between gap-3 border-b border-white/10 bg-[#0d120f] px-3 py-3 sm:gap-5 sm:px-8 sm:py-5">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
               Stage Mode
             </p>
-            <h2 className="mt-1 truncate text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h2 className="mt-1 truncate text-xl font-semibold tracking-tight sm:text-3xl">
               {title}
             </h2>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/55 sm:gap-3 sm:text-sm">
