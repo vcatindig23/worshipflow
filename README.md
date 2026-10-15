@@ -1,140 +1,207 @@
+<a id="readme-top"></a>
+
 <div align="center">
-  <img src="https://raw.githubusercontent.com/vcatindig23/worshipflow/main/public/worshipflow-mark.png" alt="WorshipFlow mark" width="88" />
+  <a href="https://github.com/vcatindig23/worshipflow">
+    <img src="https://raw.githubusercontent.com/vcatindig23/worshipflow/main/public/worshipflow-mark.png" alt="WorshipFlow mark" width="88" height="88">
+  </a>
+
   <h1>WorshipFlow</h1>
+
   <p><strong>Plan with purpose. Serve in unity.</strong></p>
-  <p>A shared workspace for church worship teams to organize songs, prepare services, coordinate musicians, and lead worship with confidence.</p>
+
+  <p>A shared workspace for church worship teams to organize songs, prepare services, coordinate team members, and lead worship with confidence.</p>
+
   <p>
-    <img src="https://img.shields.io/badge/Next.js-16.3.8-000000?logo=next.js&logoColor=white" alt="Next.js 16.3.8" />
-    <img src="https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white" alt="React 19" />
-    <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase&logoColor=white" alt="Supabase" />
+    <a href="https://github.com/vcatindig23/worshipflow"><strong>Explore the repository</strong></a>
+    &middot;
+    <a href="https://github.com/vcatindig23/worshipflow/issues/new/choose">Report a bug</a>
+    &middot;
+    <a href="https://github.com/vcatindig23/worshipflow/issues/new/choose">Request a feature</a>
+  </p>
+
+  <p>
+    <a href="https://github.com/vcatindig23/worshipflow/graphs/contributors"><img src="https://img.shields.io/github/contributors/vcatindig23/worshipflow?style=for-the-badge" alt="Contributors"></a>
+    <a href="https://github.com/vcatindig23/worshipflow/network/members"><img src="https://img.shields.io/github/forks/vcatindig23/worshipflow?style=for-the-badge" alt="Forks"></a>
+    <a href="https://github.com/vcatindig23/worshipflow/stargazers"><img src="https://img.shields.io/github/stars/vcatindig23/worshipflow?style=for-the-badge" alt="Stars"></a>
+    <a href="https://github.com/vcatindig23/worshipflow/issues"><img src="https://img.shields.io/github/issues/vcatindig23/worshipflow?style=for-the-badge" alt="Open issues"></a>
+  </p>
+  <p>
+    <img src="https://img.shields.io/badge/Next.js-16.3.8-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 16.3.8">
+    <img src="https://img.shields.io/badge/React-19-149ECA?style=for-the-badge&logo=react&logoColor=white" alt="React 19">
+    <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+    <img src="https://img.shields.io/badge/Supabase-Backend-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase">
   </p>
 </div>
 
 ---
 
-## Overview
+## Table of Contents
 
-WorshipFlow brings the practical work behind a worship service into one organized space. Teams can maintain a shared song catalog, build a service plan, assign and confirm team members, prepare resources, follow a run of show, and keep a record after the service.
+- [About the Project](#about-the-project)
+  - [Features](#features)
+  - [Built With](#built-with)
+  - [How It Fits Together](#how-it-fits-together)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Variables](#environment-variables)
+  - [Database Setup](#database-setup)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Security and Data Access](#security-and-data-access)
+- [Deployment](#deployment)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+- [Acknowledgments](#acknowledgments)
+
+---
+
+## About the Project
+
+WorshipFlow is a worship-team planning workspace designed to bring the practical work behind a church service into one organized place. Teams can maintain a shared song catalog, build service plans, assign and confirm team members, share resources, communicate, and review completed services.
 
 The goal is to make preparation easier and help every member know **what is planned, where they need to be, and how to prepare**.
 
-## Features
+### Features
 
-### Song library
-- Keep the church's songs and charts in a shared catalog.
-- Store lyrics and chord charts alongside song details such as key, tempo, capo, and arrangement notes.
-- View guitar chord diagrams for supported chord shapes.
-- Import and export **ChordPro** files (`.cho`, `.chopro`, and `.chordpro`).
-- Maintain song versions and song-specific preferences.
+#### Song library and chord charts
+- Maintain a shared catalog of worship songs.
+- Organize lyrics and chords with song details such as key, tempo, capo, and arrangement notes.
+- Display chord diagrams for supported chord shapes.
+- Import and export ChordPro files, including `.cho`, `.chopro`, and `.chordpro` formats.
+- Transpose chords, adjust chart text size, and show or hide chords while practicing.
 
-### Service planning
-- Create and manage service plans with dates, times, and descriptions.
-- Save reusable service templates from an existing plan, preserving song order, song arrangements, service notes, announcements, and the service timeline; create a new draft from a template while assigning the team separately.
-- Organize songs into a setlist and customize sections, keys, capo, tempo, and notes.
-- Add service notes and announcements.
-- Build a run of show with timed service elements, notes, and links to setlist songs.
-- Attach workspace files as service resources without duplicating the original files.
-- Review a service-readiness summary for scheduling, songs, team assignments, and confirmations.
+#### Service and setlist planning
+- Create and manage services with dates, times, descriptions, notes, and announcements.
+- Organize songs and service elements in a setlist.
+- Customize song order, sections, keys, capo, tempo, and arrangement notes.
+- Build a run of show with timed service elements and links to setlist songs.
+- Save reusable service templates and create new drafts from them.
+- Attach workspace files as service resources.
+- Review service readiness, team assignments, and confirmations.
 
-### Worship team coordination
-- Set up a church workspace and invite members.
-- Manage access through roles, including administrators, worship leaders, song editors, team members, and viewers.
-- Assign members to worship-team positions for a service.
-- Let assigned members confirm or decline, with an optional note.
-- Coordinate with the whole church workspace in **Team Chat**, with live typing indicators and message updates, pinned team messages, replies with quoted context, @mentions with direct notifications, own-message editing and deletion, one-click message copying, a new-message counter with jump-to-latest behavior while reading older messages, highlighted message search, live workspace search in the actual dashboard header dialog, and a combined notifications and workspace activity dropdown with unread counts and mark-as-read actions, plus a Team Chat shortcut beside the notification button in the dashboard header, date-separated conversations, paginated history, Enter-to-send, unread notifications, and workspace-scoped access.
-- Review assignments in **My Schedule** and add scheduled services to Google Calendar.
+#### Team and workspace coordination
+- Set up a church workspace and invite team members.
+- Manage role-based access for administrators, worship leaders, song editors, team members, and viewers.
+- Assign team members to worship and production positions.
+- Let assigned members confirm or decline assignments with an optional note.
+- Review upcoming assignments in My Schedule and add scheduled services to Google Calendar.
+- Coordinate in Team Chat with message updates, typing indicators, replies, pinned messages, mentions, message search, and unread indicators.
+- Search relevant workspace content from the dashboard and access notifications and workspace activity.
 
-### Live Stage
-- Present service song charts in a focused performance view.
-- Navigate through setlist songs, transpose chords, adjust chart text size, show or hide chords, and use fullscreen.
-- Save a service's chart snapshot for offline use on the current device.
+#### Live Stage
+- Present song lyrics and chords in a focused, screen-filling performance view.
+- Move through the service's songs without leaving the stage interface.
+- Transpose chords, adjust chart text size, show or hide chords, and use fullscreen.
+- Save a service's song-chart snapshot for offline access on the current device.
 
-> **Offline note:** Live Stage can reopen previously saved chart snapshots. The rest of the WorshipFlow workspace still requires an internet connection. Open the service's Live Stage while online and wait for **Saved for offline** before relying on it offline.
+> **Offline limitation:** Live Stage can reopen chart snapshots that were saved on the device. The rest of the WorshipFlow workspace still requires an internet connection. Open a service's Live Stage while online and wait for **Saved for offline** before relying on its charts offline.
 
-### Notifications, history, and insights
-- Receive in-app notifications when service-team assignments change or teammates send a new team chat message, with unread chat counts in dashboard navigation.
-- Review organization activity for song, service, team, and membership updates.
-- Record a completed service with attendance, actual duration, and after-service notes.
-- Browse completed services and review service insights such as attendance trends, completion rate, service duration, and frequently used songs.
+#### Notifications, activity, and insights
+- Receive in-app notifications for relevant service assignment changes and new team chat messages.
+- Review workspace activity relating to songs, services, teams, and membership.
+- Record completed services with attendance, actual duration, and after-service notes.
+- Browse completed services and review insights such as attendance trends, completion rate, service duration, and frequently used songs.
 
-## How it fits together
-
-```text
-Song Library
-    ↓
-Service Plan → Team Assignments & Confirmations
-    ↓
-Resources & Run of Show
-    ↓
-Live Stage
-    ↓
-After-Service History & Insights
-```
-
-## Tech stack
+### Built With
 
 | Area | Technology |
 | --- | --- |
-| Application framework | Next.js App Router |
-| UI | React, TypeScript, Tailwind CSS |
-| Authentication and backend | Supabase Auth, PostgreSQL, Storage |
+| Framework and routing | [Next.js App Router](https://nextjs.org/) |
+| UI | [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/) |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) |
+| Authentication and backend | [Supabase Auth](https://supabase.com/auth), [Supabase PostgreSQL](https://supabase.com/database), Supabase Storage |
 | Server/client Supabase integration | `@supabase/ssr`, `@supabase/supabase-js` |
-| Validation | Zod |
-| Icons | Lucide React |
-| Testing | Vitest |
+| Validation | [Zod](https://zod.dev/) |
+| Icons | [Lucide React](https://lucide.dev/) |
+| Unit testing | [Vitest](https://vitest.dev/) |
 
-## Getting started
+### How It Fits Together
+
+```text
+Song Library
+    |
+    v
+Service Plan -----> Team Assignments and Confirmations
+    |                            |
+    v                            v
+Resources and Run of Show   Team Coordination
+    |
+    v
+Live Stage
+    |
+    v
+Completed Services, History, and Insights
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## Getting Started
+
+Follow these steps to run WorshipFlow locally.
 
 ### Prerequisites
 
-- Node.js **20.9 or later**
-- npm
-- A Supabase project
+- [Node.js](https://nodejs.org/) **20.9 or later**
+- npm (included with Node.js)
+- A [Supabase](https://supabase.com/) project
 
-### 1. Clone the repository
+### Installation
 
-```bash
-git clone https://github.com/vcatindig23/worshipflow.git
-cd worshipflow
-```
+1. **Clone the repository.**
 
-### 2. Install dependencies
+   ```bash
+   git clone https://github.com/vcatindig23/worshipflow.git
+   cd worshipflow
+   ```
 
-```bash
-npm install
-```
+2. **Install dependencies.**
 
-### 3. Configure Supabase
+   ```bash
+   npm install
+   ```
 
-Create or select a project in [Supabase](https://supabase.com/). In the project's API settings, copy the project URL and **publishable key**.
+3. **Configure the environment variables.**
 
-Create a `.env.local` file in the project root:
+   Create a `.env.local` file in the project root as described in [Environment Variables](#environment-variables).
+
+4. **Set up the Supabase database.**
+
+   Apply the migrations in `supabase/migrations/` in filename/timestamp order as described in [Database Setup](#database-setup).
+
+5. **Run the development server.**
+
+   ```bash
+   npm run dev
+   ```
+
+6. Open [http://localhost:3000](http://localhost:3000).
+
+### Environment Variables
+
+In your Supabase project, open the API settings and copy the project URL and publishable key. Add them to `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
 ```
 
-Replace the sample values with your project's real values. These are the two environment variables currently read by the application.
+Replace the example values with your project's actual values. These are the two Supabase environment variables currently read by the application. Never commit real credentials to Git.
 
-Apply the SQL files in `supabase/migrations/` to a **new** database in filename/timestamp order. Use your normal Supabase migration workflow, or run the files one at a time in the Supabase SQL Editor. These migrations create the application's tables, policies, storage configuration, and database functions.
+### Database Setup
 
-If you're connecting an existing database, check which migrations have already been applied first; do not blindly re-run migrations against a database with live data.
+- For a new database, apply the SQL migration files in `supabase/migrations/` in filename/timestamp order using your preferred Supabase migration workflow or the Supabase SQL Editor.
+- For an existing database, verify which migrations have already been applied before proceeding. Do not blindly rerun migrations against a database with live data.
+- Configure Supabase Auth URL settings for the local application and each deployed domain used for sign-in, email confirmation, invitations, and password recovery.
+- Ensure the deployed Supabase project has the policies, storage configuration, and database functions required by the migrations.
 
-In Supabase Auth settings, configure the local and deployed application URLs used by sign-in, email confirmation, and password reset flows.
+### Available Scripts
 
-### 4. Start the development server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Available scripts
-
-| Command | Purpose |
+| Command | Description |
 | --- | --- |
 | `npm run dev` | Start the local development server |
 | `npm run build` | Create a production build |
@@ -143,48 +210,167 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | `npm test` | Run the Vitest test suite |
 | `npm run test:watch` | Run Vitest in watch mode |
 
-## Project structure
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## Usage
+
+A typical workflow in WorshipFlow looks like this:
+
+1. **Set up your workspace.** Create or join a church workspace and invite the people who serve on the team.
+2. **Prepare the song catalog.** Add songs and maintain their lyrics, chords, keys, tempos, and arrangement details.
+3. **Plan the service.** Create a service, arrange the setlist and run of show, add notes and resources, and assign team positions.
+4. **Confirm assignments.** Team members review My Schedule and respond to their assignments.
+5. **Rehearse and lead.** Use the song charts and Live Stage during practice or the service.
+6. **Review the service.** Record completion details and use history and insights to help prepare for future services.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## Project Structure
+
+The primary application code is organized as follows:
 
 ```text
-src/
-├── app/                  # App Router pages, layouts, and server actions
-├── components/           # Shared UI and service/song components
-└── lib/                  # Supabase clients, workspace logic, and utilities
-public/                   # App icons, manifest assets, and offline-stage files
-supabase/
-└── migrations/           # Ordered database and policy migrations
-tests/                    # Automated tests
+.
+├── public/                  # Branding, icons, manifest assets, and static files
+├── src/
+│   ├── app/                 # App Router pages, layouts, and server actions
+│   ├── components/          # Shared UI and feature components
+│   ├── features/            # Feature-specific logic, including ChordPro
+│   └── lib/                 # Supabase clients and application utilities
+├── supabase/
+│   └── migrations/          # Ordered database and policy migrations
+├── tests/                   # Automated tests
+├── package.json
+└── README.md
 ```
 
-## Access and data safety
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-- Supabase authentication is used to manage signed-in sessions.
-- Organization membership and roles determine which workspace actions members can perform.
-- Database access is protected with Supabase Row Level Security policies where configured by the migrations.
-- Use only the publishable Supabase key in `NEXT_PUBLIC_*` variables. **Never expose a Supabase secret or service-role key in browser code or commit credentials to the repository.**
-- Offline chart snapshots are stored in the browser and scoped to the signed-in account. Signing out clears the stored snapshots.
+---
+
+## Security and Data Access
+
+- Supabase Auth manages authenticated sessions.
+- Workspace membership and assigned roles determine which team and workspace actions members can perform.
+- Supabase Row Level Security policies restrict database access where configured by the migrations.
+- Only use the Supabase publishable key in `NEXT_PUBLIC_*` variables. **Never put a Supabase secret or service-role key in browser code.**
+- Do not commit `.env.local`, credentials, access tokens, or other secrets.
+- Offline chart snapshots are stored in the browser and scoped to the signed-in account. Signing out clears stored snapshots.
+
+Review the database policies and authentication redirect settings before deploying to a live church workspace.
+
+---
 
 ## Deployment
 
-WorshipFlow is a Next.js application and can be deployed to a compatible Node.js hosting platform, such as [Vercel](https://vercel.com/).
+WorshipFlow is a Next.js application and can be deployed to a compatible Node.js hosting platform such as [Vercel](https://vercel.com/).
 
 Before deploying:
 
-1. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the host's environment variables.
-2. Apply all required database migrations to the production Supabase project.
+1. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the hosting provider's environment variables.
+2. Apply the required database migrations to the production Supabase project.
 3. Configure Supabase Auth redirect URLs for the production domain.
 4. Deploy over HTTPS to support the installable app experience and service-worker features.
-5. Verify sign-in, invitations, service planning, file access, and password recovery in the deployed environment.
+5. Verify sign-in, password recovery, invitation acceptance, permissions, service planning, file access, chat, and Live Stage in the deployed environment.
 
-## Development notes
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-- Keep database changes in timestamped SQL files under `supabase/migrations/`.
-- Validate changes with `npm run lint` and `npm run build` before merging.
-- Live Stage offline support is intentionally limited to previously saved chart snapshots; it is not a full offline copy of the application.
+---
+
+## Roadmap
+
+The checklist below tracks potential improvements; it is not a promise that every item is currently in progress.
+
+- [x] Shared song catalog with lyrics and chord charts
+- [x] Service plans, setlists, team assignments, and confirmations
+- [x] Team chat, notifications, and workspace activity
+- [x] Live Stage with chart controls and saved offline snapshots
+- [x] Service history and insights
+- [ ] Expand automated test coverage for key service and team workflows
+- [ ] Add end-to-end tests for critical user journeys
+- [ ] Continue accessibility and responsive-layout testing across screen sizes
+- [ ] Expand contributor and deployment documentation
+
+For bugs, ideas, and current discussions, visit the [GitHub Issues](https://github.com/vcatindig23/worshipflow/issues) page.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## Contributing
+
+Contributions, bug reports, and suggestions are welcome.
+
+1. Fork the repository.
+2. Create a branch for your change.
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. Make your changes and add or update tests where appropriate.
+4. Run the available checks.
+
+   ```bash
+   npm run lint
+   npm run build
+   npm test
+   ```
+
+5. Commit and push your branch.
+
+   ```bash
+   git add .
+   git commit -m "Describe your change"
+   git push origin feature/your-feature-name
+   ```
+
+6. Open a pull request describing the change and the checks you ran.
+
+For larger changes, open an issue first to discuss the proposed approach. Never include real environment variables, credentials, or private church data in commits, tests, or screenshots.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## License
+
+A license file has not yet been added to this repository. Until a license is selected and included, do not assume that the project is available for redistribution, modification, or commercial reuse. Add a license that matches the project's intended use before publishing it for reuse.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## Contact
+
+- **Project repository:** [vcatindig23/worshipflow](https://github.com/vcatindig23/worshipflow)
+- **Bug reports and feature requests:** [GitHub Issues](https://github.com/vcatindig23/worshipflow/issues)
+- **Project discussions:** Use GitHub Issues to start a discussion about a proposed change.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## Acknowledgments
+
+- [Next.js](https://nextjs.org/) and [React](https://react.dev/) for the application framework and UI.
+- [Supabase](https://supabase.com/) for authentication, database, and storage.
+- [Tailwind CSS](https://tailwindcss.com/) for styling.
+- [Lucide](https://lucide.dev/) for interface icons.
+- [Zod](https://zod.dev/) for validation.
+- [Vitest](https://vitest.dev/) for testing tools.
+- [Best-README-Template](https://github.com/othneildrew/Best-README-Template) for the README layout inspiration.
 
 ---
 
 <div align="center">
+  <p><strong>WorshipFlow</strong></p>
   <p>Built to help worship teams prepare thoughtfully and serve together.</p>
-  <p><a href="https://github.com/vcatindig23/worshipflow">Repository</a></p>
+  <p><a href="https://github.com/vcatindig23/worshipflow">View the repository</a></p>
 </div>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
