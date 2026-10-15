@@ -86,7 +86,7 @@ export default function SiteUtilities() {
         onClick={toggleTheme}
         aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        className="wf-theme-toggle fixed right-4 top-4 z-[70] inline-flex size-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] sm:right-6"
+        className={`wf-theme-toggle fixed right-4 top-4 z-[70] inline-flex size-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] sm:right-6 ${pathname.startsWith("/setlists/") && pathname.endsWith("/live") || ["/login", "/signup", "/forgot-password", "/reset-password", "/check-email"].some((route) => pathname === route || pathname.startsWith(`${route}/`)) ? "hidden" : ""}`}
       >
         {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
       </button>
