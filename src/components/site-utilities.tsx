@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import Link from "next/link"\nimport { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ArrowUp, Check, HelpCircle, MessageCircle, Moon, Sun, X } from "lucide-react"
 
@@ -19,7 +19,7 @@ const faqItems = [
   },
 ]
 
-export default function SiteUtilities() {
+export default function SiteUtilities() {\n  const pathname = usePathname()
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [cookieVisible, setCookieVisible] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
@@ -84,12 +84,12 @@ export default function SiteUtilities() {
         onClick={toggleTheme}
         aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        className="wf-theme-toggle fixed bottom-20 left-4 z-[70] inline-flex size-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] sm:left-6"
+        className="wf-theme-toggle fixed right-4 top-4 z-[70] inline-flex size-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] sm:right-6"
       >
         {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
       </button>
 
-      <div className="wf-help-widget fixed bottom-4 left-4 z-[65] sm:bottom-6 sm:left-6">
+      {pathname === "/settings" ? <div className="wf-help-widget fixed bottom-4 left-4 z-[65] sm:bottom-6 sm:left-6">
         {helpOpen ? (
           <section aria-label="WorshipFlow help" className="mb-3 w-[min(90vw,360px)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
