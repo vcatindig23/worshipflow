@@ -410,7 +410,7 @@ export default function LiveStageView({
       ) : (
         <>
           <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 py-4 sm:px-10 sm:py-5">
-            <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col">
+            <div className="mx-auto flex min-h-0 w-full max-w-none flex-1 flex-col">
               {currentSong ? (
                 <>
                   <div className="mb-4 flex shrink-0 flex-wrap items-start justify-between gap-4">
@@ -539,7 +539,7 @@ export default function LiveStageView({
                     ref={lyricsScrollRef}
                     tabIndex={0}
                     aria-label="Live lyrics and chords"
-                    className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-12 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/20"
+                    className="min-h-0 flex-1 w-full overflow-y-auto overscroll-contain pb-16 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/20"
                   >
                     {displayLines.map((line, lineIndex) => {
                         if (line.type === "blank") {
