@@ -1,0 +1,19 @@
+# WorshipFlow
+
+> WorshipFlow is a web workspace for church worship teams to prepare songs, chord charts, setlists, service plans, schedules, and team communication.
+
+## Public entry points
+
+- Sign in: https://worshipflow-weld.vercel.app/login
+- Create an account: https://worshipflow-weld.vercel.app/signup
+- Password recovery: https://worshipflow-weld.vercel.app/forgot-password
+
+## Content and privacy
+
+Workspace content is account-specific and may include private church information, team conversations, uploaded files, schedules, and song materials. Do not infer that these resources are public or available for crawling. Authentication and authorization are required to access workspace data.
+
+## Technical resources
+
+- XML sitemap: https://worshipflow-weld.vercel.app/sitemap.xml
+- Robots policy: https://worshipflow-weld.vercel.app/robots.txt
+- Human-readable crawler notes: https://worshipflow-weld.vercel.app/robots.md
