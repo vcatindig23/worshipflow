@@ -114,8 +114,7 @@ function getGoogleCalendarUrl(
     ...(setlist.description
       ? [setlist.description]
       : []),
-  ].join("
-")
+  ].join("\n")
 
   const parameters =
     new URLSearchParams({
