@@ -247,8 +247,8 @@ iframe {
   --foreground: #e8eee9;
   --muted: #a0ada4;
   --border: #2d3b32;
-  --brand: #8fbea0;
-  --brand-dark: #6ca17e;
+  --brand: #365c45;
+  --brand-dark: #294735;
   --brand-soft: #20382a;
   --sidebar: #0a100c;
   --sidebar-muted: #a1afa5;
@@ -309,4 +309,29 @@ iframe {
   .wf-back-to-top {
     display: none !important;
   }
+}
+
+
+:root[data-theme="dark"] .bg-white {
+  background-color: var(--card) !important;
+}
+
+:root[data-theme="dark"] .text-slate-900,
+:root[data-theme="dark"] .text-gray-900,
+:root[data-theme="dark"] .text-zinc-900 {
+  color: var(--foreground) !important;
+}
+
+:root[data-theme="dark"] .text-slate-700,
+:root[data-theme="dark"] .text-slate-600,
+:root[data-theme="dark"] .text-gray-700,
+:root[data-theme="dark"] .text-gray-600 {
+  color: var(--muted) !important;
+}
+
+:root[data-theme="dark"] .border-slate-100,
+:root[data-theme="dark"] .border-slate-200,
+:root[data-theme="dark"] .border-gray-100,
+:root[data-theme="dark"] .border-gray-200 {
+  border-color: var(--border) !important;
 }
