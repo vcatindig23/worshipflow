@@ -335,3 +335,70 @@ iframe {
 :root[data-theme="dark"] .border-gray-200 {
   border-color: var(--border) !important;
 }
+
+
+/* Stronger contrast and surface consistency for dark mode across legacy utility classes. */
+:root[data-theme="dark"] {
+  --brand-soft: #20382a;
+  --card: #17211b;
+  --surface: #18221c;
+  --border: #34443a;
+  --muted: #b3c0b7;
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] main,
+:root[data-theme="dark"] section,
+:root[data-theme="dark"] article,
+:root[data-theme="dark"] aside {
+  color: var(--foreground);
+}
+
+:root[data-theme="dark"] [class~="bg-white"],
+:root[data-theme="dark"] [class*="bg-white/"],
+:root[data-theme="dark"] [class~="bg-slate-50"],
+:root[data-theme="dark"] [class~="bg-gray-50"],
+:root[data-theme="dark"] [class~="bg-zinc-50"] {
+  background-color: var(--card) !important;
+}
+
+:root[data-theme="dark"] [class*="text-[var(--brand)]"] {
+  color: #a5d6b3 !important;
+}
+
+:root[data-theme="dark"] [class*="text-[var(--brand-dark)]"] {
+  color: #b8e1c2 !important;
+}
+
+:root[data-theme="dark"] [class*="text-slate-950"],
+:root[data-theme="dark"] [class*="text-slate-900"],
+:root[data-theme="dark"] [class*="text-slate-800"],
+:root[data-theme="dark"] [class*="text-gray-950"],
+:root[data-theme="dark"] [class*="text-gray-900"],
+:root[data-theme="dark"] [class*="text-gray-800"],
+:root[data-theme="dark"] [class*="text-zinc-900"] {
+  color: var(--foreground) !important;
+}
+
+:root[data-theme="dark"] [class*="text-slate-700"],
+:root[data-theme="dark"] [class*="text-slate-600"],
+:root[data-theme="dark"] [class*="text-gray-700"],
+:root[data-theme="dark"] [class*="text-gray-600"],
+:root[data-theme="dark"] [class*="text-zinc-700"],
+:root[data-theme="dark"] [class*="text-zinc-600"] {
+  color: #c0ccc4 !important;
+}
+
+:root[data-theme="dark"] [class*="border-slate-"],
+:root[data-theme="dark"] [class*="border-gray-"],
+:root[data-theme="dark"] [class*="border-zinc-"] {
+  border-color: var(--border) !important;
+}
+
+:root[data-theme="dark"] .home-button {
+  background: var(--card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-loading-pulse { animation: none; }
+}
