@@ -7,6 +7,11 @@ type TeamAssignmentRow = {
   setlist_id: string
   user_id: string
   team_position: string
+  confirmation_status: "pending" | "confirmed" | "declined"
+}
+
+type SetlistSongRow = {
+  setlist_id: string
 }
 
 type MemberProfile = {
@@ -56,11 +61,21 @@ export type WorkspaceData = {
     service_date: string
     service_time: string | null
     status: "draft" | "published" | "archived"
+    readiness: {
+      songCount: number
+      confirmedAssignments: number
+      pendingAssignments: number
+      declinedAssignments: number
+      totalAssignments: number
+      percentage: number
+      status: "ready" | "needs_attention" | "incomplete"
+    }
     teamAssignments: {
       userId: string
       displayName: string
       avatarUrl: string | null
       position: string
+      confirmationStatus: "pending" | "confirmed" | "declined"
     }[]
   }[]
   myUpcomingAssignments: {
@@ -286,29 +301,45 @@ export async function getWorkspace(): Promise<WorkspaceData> {
   const upcomingSetlists = (upcomingSetlistsResult.data ??
     []) as Omit<
     WorkspaceData["upcomingSetlists"][number],
-    "teamAssignments"
+    "teamAssignments" | "readiness"
   >[]
   const assignmentsBySetlist = new Map<string, TeamAssignmentRow[]>()
+  const songCountsBySetlist = new Map<string, number>()
 
   if (upcomingSetlists.length > 0) {
-    const { data: assignmentRows, error: assignmentsError } = await supabase
-      .from("setlist_team_assignments")
-      .select("setlist_id, user_id, team_position")
-      .in(
-        "setlist_id",
-        upcomingSetlists.map((setlist) => setlist.id)
-      )
-      .order("created_at", { ascending: true })
+    const setlistIds = upcomingSetlists.map((setlist) => setlist.id)
+    const [assignmentsResult, setlistSongsResult] = await Promise.all([
+      supabase
+        .from("setlist_team_assignments")
+        .select("setlist_id, user_id, team_position, confirmation_status")
+        .in("setlist_id", setlistIds)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("setlist_songs")
+        .select("setlist_id")
+        .in("setlist_id", setlistIds),
+    ])
 
-    if (assignmentsError) {
+    if (assignmentsResult.error) {
       throw new Error("Unable to load upcoming service team assignments.")
     }
 
-    for (const assignment of (assignmentRows ?? []) as TeamAssignmentRow[]) {
+    if (setlistSongsResult.error) {
+      throw new Error("Unable to load upcoming service songs.")
+    }
+
+    for (const assignment of (assignmentsResult.data ?? []) as TeamAssignmentRow[]) {
       const setlistAssignments =
         assignmentsBySetlist.get(assignment.setlist_id) ?? []
       setlistAssignments.push(assignment)
       assignmentsBySetlist.set(assignment.setlist_id, setlistAssignments)
+    }
+
+    for (const row of (setlistSongsResult.data ?? []) as SetlistSongRow[]) {
+      songCountsBySetlist.set(
+        row.setlist_id,
+        (songCountsBySetlist.get(row.setlist_id) ?? 0) + 1
+      )
     }
   }
 
@@ -374,13 +405,48 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     unreadNotificationCount: unreadNotificationsResult.count ?? 0,
     unreadChatNotificationCount: unreadChatNotificationsResult.count ?? 0,
     recentSongs: recentSongsResult.data ?? [],
-    upcomingSetlists: upcomingSetlists.map((setlist) => ({
-      ...setlist,
-      service_time: serviceTimeAvailable
-        ? setlist.service_time
-        : null,
-      teamAssignments: (assignmentsBySetlist.get(setlist.id) ?? []).map(
-        (assignment) => ({
+    upcomingSetlists: upcomingSetlists.map((setlist) => {
+      const assignments = assignmentsBySetlist.get(setlist.id) ?? []
+      const songCount = songCountsBySetlist.get(setlist.id) ?? 0
+      const confirmedAssignments = assignments.filter(
+        (assignment) => assignment.confirmation_status === "confirmed"
+      ).length
+      const pendingAssignments = assignments.filter(
+        (assignment) => assignment.confirmation_status === "pending"
+      ).length
+      const declinedAssignments = assignments.filter(
+        (assignment) => assignment.confirmation_status === "declined"
+      ).length
+      const totalAssignments = assignments.length
+      const checks = [
+        Boolean(setlist.service_date && setlist.service_time),
+        songCount > 0,
+        totalAssignments > 0,
+        totalAssignments > 0 && confirmedAssignments === totalAssignments,
+      ]
+      const percentage = Math.round(
+        (checks.filter(Boolean).length / checks.length) * 100
+      )
+      const readinessStatus =
+        percentage === 100
+          ? "ready"
+          : percentage >= 50
+            ? "needs_attention"
+            : "incomplete"
+
+      return {
+        ...setlist,
+        service_time: serviceTimeAvailable ? setlist.service_time : null,
+        readiness: {
+          songCount,
+          confirmedAssignments,
+          pendingAssignments,
+          declinedAssignments,
+          totalAssignments,
+          percentage,
+          status: readinessStatus as "ready" | "needs_attention" | "incomplete",
+        },
+        teamAssignments: assignments.map((assignment) => ({
           userId: assignment.user_id,
           displayName: profileNames.get(assignment.user_id) ?? "Name not set",
           avatarUrl:
@@ -388,9 +454,10 @@ export async function getWorkspace(): Promise<WorkspaceData> {
               profilesById.get(assignment.user_id)?.avatar_url ?? ""
             ) ?? null,
           position: assignment.team_position,
-        })
-      ),
-    })),
+          confirmationStatus: assignment.confirmation_status,
+        })),
+      }
+    }),
     myUpcomingAssignments,
   }
 }
