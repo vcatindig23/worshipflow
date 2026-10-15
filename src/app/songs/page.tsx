@@ -55,6 +55,26 @@ type Tag = {
   name: string
 }
 
+type SongSort =
+  | "title"
+  | "recent"
+  | "artist"
+  | "album"
+  | "newest"
+  | "updated"
+  | "tempo-asc"
+  | "tempo-desc"
+
+type TempoBucket = "all" | "slow" | "moderate" | "upbeat" | "unset"
+
+const tempoBucketLabels: Record<TempoBucket, string> = {
+  all: "Any tempo",
+  slow: "Slow · up to 80 BPM",
+  moderate: "Mid-tempo · 81–119 BPM",
+  upbeat: "Upbeat · 120+ BPM",
+  unset: "Tempo not set",
+}
+
 const editableRoles = [
   "admin",
   "worship_leader",
@@ -131,12 +151,37 @@ export default async function SongsPage({
     getParam(params.status) ?? "active"
   const selectedTag =
     getParam(params.tag)?.trim() ?? ""
+  const requestedKey = getParam(params.key)?.trim() ?? ""
+  const requestedTempo = getParam(params.tempo) ?? "all"
   const favoriteOnly =
     getParam(params.favorite) === "true"
   const view = getParam(params.view) === "grid" ? "grid" : "list"
 
-  const sort =
-    requestedSort === "recent" ? "recent" : "title"
+  const validSorts: SongSort[] = [
+    "title",
+    "recent",
+    "artist",
+    "album",
+    "newest",
+    "updated",
+    "tempo-asc",
+    "tempo-desc",
+  ]
+  const sort: SongSort = validSorts.includes(requestedSort as SongSort)
+    ? (requestedSort as SongSort)
+    : "title"
+  const validTempoBuckets: TempoBucket[] = [
+    "all",
+    "slow",
+    "moderate",
+    "upbeat",
+    "unset",
+  ]
+  const tempoBucket: TempoBucket = validTempoBuckets.includes(
+    requestedTempo as TempoBucket
+  )
+    ? (requestedTempo as TempoBucket)
+    : "all"
 
   const status =
     requestedStatus === "archived"
@@ -168,6 +213,16 @@ export default async function SongsPage({
 
   const songs = (songRows ?? []) as Song[]
   const songIds = songs.map((song) => song.id)
+  const availableKeys = Array.from(
+    new Set(
+      songs
+        .map((song) => song.current_key?.trim())
+        .filter((key): key is string => Boolean(key))
+    )
+  ).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
+  const selectedKey = availableKeys.find(
+    (key) => key.toLocaleLowerCase("en") === requestedKey.toLocaleLowerCase("en")
+  ) ?? ""
 
   let preferences: Preference[] = []
   let songTagRows: SongTagRow[] = []
@@ -260,6 +315,30 @@ export default async function SongsPage({
       return false
     }
 
+    if (
+      selectedKey &&
+      song.current_key?.trim().toLocaleLowerCase("en") !==
+        selectedKey.toLocaleLowerCase("en")
+    ) {
+      return false
+    }
+
+    if (tempoBucket === "unset" && song.tempo !== null) {
+      return false
+    }
+    if (tempoBucket === "slow" && (song.tempo === null || song.tempo > 80)) {
+      return false
+    }
+    if (
+      tempoBucket === "moderate" &&
+      (song.tempo === null || song.tempo < 81 || song.tempo > 119)
+    ) {
+      return false
+    }
+    if (tempoBucket === "upbeat" && (song.tempo === null || song.tempo < 120)) {
+      return false
+    }
+
     if (!query) {
       return true
     }
@@ -268,6 +347,8 @@ export default async function SongsPage({
       song.title,
       song.artist,
       song.album,
+      song.current_key,
+      song.tempo === null ? null : String(song.tempo),
       ...songTags.map((tag) => tag.name),
     ]
       .filter(Boolean)
@@ -279,40 +360,55 @@ export default async function SongsPage({
     )
   })
 
-  if (sort === "recent") {
-    filteredSongs.sort((a, b) => {
-      const aOpened =
-        preferencesBySong.get(
-          a.id
-        )?.last_opened_at
-
-      const bOpened =
-        preferencesBySong.get(
-          b.id
-        )?.last_opened_at
-
-      if (!aOpened && !bOpened) {
-        return a.title.localeCompare(b.title)
-      }
-
-      if (!aOpened) {
-        return 1
-      }
-
-      if (!bOpened) {
-        return -1
-      }
-
-      return (
-        new Date(bOpened).getTime() -
-        new Date(aOpened).getTime()
-      )
+  const compareTitles = (a: Song, b: Song) =>
+    a.title.localeCompare(b.title, "en", { sensitivity: "base" })
+  const compareNullableText = (a: string | null, b: string | null) =>
+    (a?.trim() ?? "").localeCompare(b?.trim() ?? "", "en", {
+      sensitivity: "base",
+      numeric: true,
     })
-  } else {
-    filteredSongs.sort((a, b) =>
-      a.title.localeCompare(b.title)
-    )
-  }
+
+  filteredSongs.sort((a, b) => {
+    if (sort === "recent") {
+      const aOpened = preferencesBySong.get(a.id)?.last_opened_at
+      const bOpened = preferencesBySong.get(b.id)?.last_opened_at
+      if (!aOpened && !bOpened) return compareTitles(a, b)
+      if (!aOpened) return 1
+      if (!bOpened) return -1
+      return new Date(bOpened).getTime() - new Date(aOpened).getTime() ||
+        compareTitles(a, b)
+    }
+
+    if (sort === "newest") {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime() ||
+        compareTitles(a, b)
+    }
+
+    if (sort === "updated") {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime() ||
+        compareTitles(a, b)
+    }
+
+    if (sort === "artist") {
+      return compareNullableText(a.artist, b.artist) || compareTitles(a, b)
+    }
+
+    if (sort === "album") {
+      return compareNullableText(a.album, b.album) || compareTitles(a, b)
+    }
+
+    if (sort === "tempo-asc" || sort === "tempo-desc") {
+      if (a.tempo === null && b.tempo === null) return compareTitles(a, b)
+      if (a.tempo === null) return 1
+      if (b.tempo === null) return -1
+      const tempoDifference = sort === "tempo-asc"
+        ? a.tempo - b.tempo
+        : b.tempo - a.tempo
+      return tempoDifference || compareTitles(a, b)
+    }
+
+    return compareTitles(a, b)
+  })
 
   const canEdit = editableRoles.includes(
     workspace.role
@@ -324,7 +420,13 @@ export default async function SongsPage({
       : "true",
   })
   const hasActiveFilters = Boolean(
-    query || favoriteOnly || selectedTag || status !== "active" || sort !== "title"
+    query ||
+    favoriteOnly ||
+    selectedTag ||
+    selectedKey ||
+    tempoBucket !== "all" ||
+    status !== "active" ||
+    sort !== "title"
   )
   const clearFiltersHref = buildHref(params, {
     q: undefined,
@@ -332,8 +434,17 @@ export default async function SongsPage({
     status: undefined,
     favorite: undefined,
     tag: undefined,
+    key: undefined,
+    tempo: undefined,
     view: view === "grid" ? "grid" : undefined,
   })
+  const filterDescriptions = [
+    status === "archived" ? "Archived songs" : status === "all" ? "Active and archived songs" : null,
+    favoriteOnly ? "Favorites" : null,
+    selectedTag ? "Tag: " + selectedTag : null,
+    selectedKey ? "Key: " + selectedKey : null,
+    tempoBucket !== "all" ? tempoBucketLabels[tempoBucket] : null,
+  ].filter((description): description is string => Boolean(description))
 
   return (
     <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
@@ -366,7 +477,7 @@ export default async function SongsPage({
         <form
           action="/songs"
           method="get"
-          className="flex flex-col gap-3 lg:flex-row"
+          className="flex flex-col gap-3 2xl:flex-row"
         >
           <input type="hidden" name="view" value={view} />
           {favoriteOnly ? <input type="hidden" name="favorite" value="true" /> : null}
@@ -387,12 +498,14 @@ export default async function SongsPage({
             defaultValue={sort}
             className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
           >
-            <option value="title">
-              Title A–Z
-            </option>
-            <option value="recent">
-              Recently Used
-            </option>
+            <option value="title">Title A–Z</option>
+            <option value="artist">Artist A–Z</option>
+            <option value="album">Album A–Z</option>
+            <option value="recent">Recently Used</option>
+            <option value="newest">Recently Added</option>
+            <option value="updated">Recently Updated</option>
+            <option value="tempo-asc">Slowest Tempo</option>
+            <option value="tempo-desc">Fastest Tempo</option>
           </select>
 
           <select
@@ -409,6 +522,29 @@ export default async function SongsPage({
             <option value="all">
               All Songs
             </option>
+          </select>
+
+          <select
+            name="key"
+            defaultValue={selectedKey}
+            aria-label="Filter by musical key"
+            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
+          >
+            <option value="">All keys</option>
+            {availableKeys.map((key) => (
+              <option key={key} value={key}>{key}</option>
+            ))}
+          </select>
+
+          <select
+            name="tempo"
+            defaultValue={tempoBucket}
+            aria-label="Filter by tempo"
+            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
+          >
+            {Object.entries(tempoBucketLabels).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
           </select>
 
           <button
@@ -481,14 +617,27 @@ export default async function SongsPage({
             </p>
 
             <p className="mt-1 text-xs text-[var(--muted)]">
-              {status === "archived"
-                ? "Showing archived songs"
-                : favoriteOnly
-                  ? "Showing your favorites"
-                  : selectedTag
-                    ? `Filtered by ${selectedTag}`
-                    : "Your church song catalog"}
+              {filterDescriptions.length
+                ? filterDescriptions.join(" · ")
+                : "Your church song catalog"}
             </p>
+            {sort !== "title" ? (
+              <p className="mt-1 text-[11px] text-[var(--muted)]">
+                Sorted by {sort === "recent"
+                  ? "recently used"
+                  : sort === "newest"
+                    ? "recently added"
+                    : sort === "updated"
+                      ? "recently updated"
+                      : sort === "artist"
+                        ? "artist"
+                        : sort === "album"
+                          ? "album"
+                          : sort === "tempo-asc"
+                            ? "slowest tempo"
+                            : "fastest tempo"}
+              </p>
+            ) : null}
           </div>
           <div className="flex items-center justify-between gap-2">
             {hasActiveFilters ? (
