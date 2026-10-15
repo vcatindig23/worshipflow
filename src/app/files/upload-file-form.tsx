@@ -127,7 +127,6 @@ export default function UploadFileForm({
 
       router.refresh()
     } catch (uploadError) {
-      console.error("Workspace file upload failed:", uploadError)
       setError(getUploadErrorMessage(uploadError))
     } finally {
       setUploading(false)
