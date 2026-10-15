@@ -20,7 +20,7 @@ export default function HomeButton() {
       href="/"
       aria-label="Go to home dashboard"
       title="Go to home dashboard"
-      className="home-button fixed bottom-4 right-4 z-40 inline-flex h-11 items-center gap-2 rounded-full border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] shadow-lg transition hover:border-[var(--brand)] hover:bg-[var(--brand-soft)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)] sm:bottom-6 sm:right-6"
+      className={`home-button fixed ${pathname === "/chat" ? "bottom-24 sm:bottom-24" : "bottom-4 sm:bottom-6"} right-4 z-30 inline-flex h-11 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--foreground)] shadow-lg transition hover:border-[var(--brand)] hover:bg-[var(--brand-soft)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)] sm:right-6`}
     >
       <House className="size-4" />
       <span>Home</span>
