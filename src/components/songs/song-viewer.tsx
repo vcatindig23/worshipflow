@@ -27,7 +27,7 @@ export default function SongViewer({
   source,
   title = "Song chart",
 }: SongViewerProps) {
-  const [fontSize, setFontSize] = useState(18)
+  const [fontSize, setFontSize] = useState(24)
   const [showChords, setShowChords] = useState(true)
   const [transposeAmount, setTransposeAmount] = useState(0)
   const [capo, setCapo] = useState(0)
@@ -132,12 +132,12 @@ export default function SongViewer({
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
           ? "flex-1 overflow-auto bg-[#0d120f] px-6 py-8 text-white sm:px-10 sm:py-10"
-          : "h-[calc(100dvh-230px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
+          : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
       <div
         className={`mx-auto w-full max-w-none ${
-          stageMode ? "pb-14" : "pb-8"
+          stageMode ? "mx-auto max-w-[1500px] pb-14 text-center" : "pb-8"
         }`}
       >
         {displayLines.map((item, index) => {
@@ -258,8 +258,8 @@ export default function SongViewer({
               </span>
               <button
                 type="button"
-                onClick={() => setFontSize((value) => Math.min(32, value + 2))}
-                disabled={fontSize >= 32}
+                onClick={() => setFontSize((value) => Math.min(40, value + 2))}
+                disabled={fontSize >= 40}
                 aria-label="Increase lyrics size"
                 className="inline-flex size-9 items-center justify-center rounded-lg border border-white/15 text-white/70 transition hover:bg-white/10 disabled:opacity-30"
               >
