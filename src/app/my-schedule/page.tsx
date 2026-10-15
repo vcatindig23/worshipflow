@@ -442,6 +442,16 @@ export default async function MySchedulePage({
         )}
       </nav>
 
+      <ScheduleViewToggle
+        entries={setlists.map((setlist) => ({
+          id: setlist.id,
+          name: setlist.name,
+          description: setlist.description,
+          service_date: setlist.service_date,
+          service_time: setlist.service_time,
+          status: setlist.status,
+        }))}
+      >
       <section>
         <p className="mb-4 text-sm font-semibold text-[var(--foreground)]">
           {setlists.length}{" "}
@@ -673,6 +683,7 @@ export default async function MySchedulePage({
           </div>
         )}
       </section>
+      </ScheduleViewToggle>
     </main>
   )
 }
