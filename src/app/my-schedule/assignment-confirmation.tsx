@@ -228,12 +228,12 @@ export default function AssignmentConfirmation({
         </div>
 
         {!showDeclineForm ? (
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
               onClick={handleConfirm}
               disabled={isPending}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[var(--brand)] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[var(--brand)] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Check className="size-3.5" />
               {isPending
@@ -248,7 +248,7 @@ export default function AssignmentConfirmation({
                 setShowDeclineForm(true)
               }}
               disabled={isPending}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <X className="size-3.5" />
               Decline
@@ -287,7 +287,7 @@ export default function AssignmentConfirmation({
               </p>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <button
                 type="button"
                 onClick={() => {
@@ -296,7 +296,7 @@ export default function AssignmentConfirmation({
                   setError("")
                 }}
                 disabled={isPending}
-                className="flex-1 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-10 flex-1 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -305,7 +305,7 @@ export default function AssignmentConfirmation({
                 type="button"
                 onClick={handleDecline}
                 disabled={isPending}
-                className="flex-1 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-10 flex-1 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPending
                   ? "Saving..."
