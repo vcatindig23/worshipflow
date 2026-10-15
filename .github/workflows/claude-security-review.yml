@@ -1,0 +1,40 @@
+name: Claude Security Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      focus:
+        description: "Optional area to prioritize"
+        required: false
+        default: "authorization, RLS, input validation, XSS, uploads, secrets, rate limiting, SQL safety, and webhook verification"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  security-review:
+    name: Claude code security review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Review security controls
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Perform a read-only security review of this repository. Focus on:
+            ${{ inputs.focus }}
+
+            Inspect the real code and migrations. Prioritize exploitable issues,
+            trace authorization from route to server action to database policy,
+            and verify SECURITY DEFINER functions check identity and role.
+            Do not modify files. Do not print secrets or sensitive user data.
+            Return findings with severity, affected file/line, realistic impact,
+            evidence, and a specific remediation. Distinguish confirmed issues
+            from items that require provider-dashboard verification. Do not
+            claim that controls are present without citing their implementation.
+          claude_args: "--max-turns 8"
