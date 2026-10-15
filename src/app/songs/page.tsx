@@ -2,6 +2,7 @@ import Link from "next/link"
 import {
   Archive,
   ArrowDownUp,
+  ChevronDown,
   ChevronRight,
   Grid2X2,
   List,
@@ -438,7 +439,17 @@ export default async function SongsPage({
     tempo: undefined,
     view: view === "grid" ? "grid" : undefined,
   })
+  const activeFilterCount = [
+    query,
+    favoriteOnly ? "favorite" : "",
+    selectedTag,
+    selectedKey,
+    tempoBucket !== "all" ? tempoBucket : "",
+    status !== "active" ? status : "",
+    sort !== "title" ? sort : "",
+  ].filter(Boolean).length
   const filterDescriptions = [
+    query ? "Search: " + query : null,
     status === "archived" ? "Archived songs" : status === "all" ? "Active and archived songs" : null,
     favoriteOnly ? "Favorites" : null,
     selectedTag ? "Tag: " + selectedTag : null,
@@ -473,7 +484,30 @@ export default async function SongsPage({
         </Link>
       </section>
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+      <section className="rounded-3xl border border-[var(--border)] bg-white p-3 shadow-sm sm:p-4">
+        <details className="group">
+          <summary className="flex cursor-pointer list-none items-center gap-3 rounded-2xl px-2 py-2 outline-none transition hover:bg-[var(--surface)] focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 [&::-webkit-details-marker]:hidden">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+              <SlidersHorizontal className="size-[18px]" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-[var(--foreground)]">Search & filters</span>
+              <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">
+                {hasActiveFilters
+                  ? filterDescriptions.length
+                    ? filterDescriptions.join(" · ")
+                    : "Custom sorting applied"
+                  : "Search songs, sort your library, or filter by key, tempo, and tags."}
+              </span>
+            </span>
+            {activeFilterCount > 0 ? (
+              <span className="hidden shrink-0 rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-[10px] font-semibold text-[var(--brand)] sm:inline-flex">
+                {activeFilterCount} active
+              </span>
+            ) : null}
+            <ChevronDown className="size-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="mt-3 border-t border-[var(--border)] px-1 pb-1 pt-4">
         <form
           action="/songs"
           method="get"
@@ -604,6 +638,8 @@ export default async function SongsPage({
             </Link>
           ))}
         </div>
+          </div>
+        </details>
       </section>
 
       <section>
