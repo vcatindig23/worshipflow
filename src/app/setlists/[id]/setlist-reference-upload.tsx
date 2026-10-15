@@ -65,7 +65,6 @@ export default function SetlistReferenceUpload({ setlistId, organizationId }: { 
       upsert: false,
     })
     if (uploadError) {
-      console.error("Setlist reference upload failed:", uploadError.message)
       setError(uploadError.message.toLowerCase().includes("row-level security")
         ? "Your account is not allowed to upload files. Ask a worship leader or editor to check file permissions."
         : "The reference file could not be uploaded. Please try again.")
