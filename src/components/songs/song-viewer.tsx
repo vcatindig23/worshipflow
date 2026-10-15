@@ -132,11 +132,11 @@ export default function SongViewer({
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
           ? "flex-1 overflow-auto bg-[#0d120f] px-6 py-8 text-white sm:px-10 sm:py-10"
-          : "h-[min(70vh,760px)] min-h-[300px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
+          : "h-[calc(100dvh-250px)] min-h-[360px] max-h-[900px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
       <div
-        className={`mx-auto w-full max-w-4xl ${
+        className={`mx-auto w-full max-w-none ${
           stageMode ? "pb-14" : "pb-8"
         }`}
       >
@@ -287,8 +287,8 @@ export default function SongViewer({
   }
 
   return (
-    <div className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white">
-      <div className="z-10 flex shrink-0 flex-col gap-3 border-b border-[var(--border)] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+    <div className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+      <div className="z-10 flex shrink-0 flex-col gap-3 border-b border-[var(--border)] bg-[var(--card)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div>
           <div className="text-xs font-medium text-[var(--muted)]">
             Song chart
