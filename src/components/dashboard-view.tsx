@@ -2,6 +2,9 @@ import Link from "next/link"
 import {
   CalendarClock,
   CalendarDays,
+  CheckCircle2,
+  CircleAlert,
+  Clock3,
   ContactRound,
   ChevronRight,
   FolderOpen,
@@ -118,6 +121,19 @@ function formatDay(day: number) {
 export default function DashboardView({
   workspace,
 }: DashboardViewProps) {
+  const upcomingServiceCount = workspace.upcomingSetlists.length
+  const servicesNeedingAttention = workspace.upcomingSetlists.filter(
+    (setlist) => setlist.readiness.status !== "ready"
+  ).length
+  const pendingTeamConfirmations = workspace.upcomingSetlists.reduce(
+    (total, setlist) => total + setlist.readiness.pendingAssignments,
+    0
+  )
+  const declinedTeamConfirmations = workspace.upcomingSetlists.reduce(
+    (total, setlist) => total + setlist.readiness.declinedAssignments,
+    0
+  )
+
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="flex min-h-screen">
@@ -359,6 +375,155 @@ export default function DashboardView({
                 </div>
               </section>
 
+              <section className="mt-6 grid gap-4 md:grid-cols-3">
+                <Link
+                  href="/songs/new"
+                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                    <Plus className="size-5" />
+                  </div>
+
+                  <div className="mt-4 text-sm font-semibold">
+                    Create a song
+                  </div>
+
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                    Add lyrics, chords, key, tempo, and song details.
+                  </p>
+
+                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--brand)]">
+                    Get started
+                    <ChevronRight className="size-3.5" />
+                  </div>
+                </Link>
+
+                <Link
+                  href="/setlists"
+                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                    <ListMusic className="size-5" />
+                  </div>
+
+                  <div className="mt-4 text-sm font-semibold">
+                    Build a setlist
+                  </div>
+
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                    Arrange your worship songs and prepare the service flow.
+                  </p>
+
+                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--brand)]">
+                    Open setlists
+                    <ChevronRight className="size-3.5" />
+                  </div>
+                </Link>
+
+                <Link
+                  href="/settings"
+                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                    <Settings className="size-5" />
+                  </div>
+
+                  <div className="mt-4 text-sm font-semibold">
+                    Update church details
+                  </div>
+
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                    Keep your workspace information and service defaults
+                    current.
+                  </p>
+
+                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--brand)]">
+                    Open settings
+                    <ChevronRight className="size-3.5" />
+                  </div>
+                </Link>
+              </section>
+
+              <section aria-labelledby="dashboard-priorities-title" className="mt-6">
+                <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h3 id="dashboard-priorities-title" className="text-base font-semibold">
+                      Team priorities
+                    </h3>
+                    <p className="mt-1 text-xs text-[var(--muted)]">
+                      Readiness and responses for your next {upcomingServiceCount === 1 ? "scheduled service" : upcomingServiceCount + " scheduled services"}.
+                    </p>
+                  </div>
+                  <Link href="/services" className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--brand)] hover:underline">
+                    Review all services <ChevronRight className="size-3.5" />
+                  </Link>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-3">
+                  <Link
+                    href="/services"
+                    className="group rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)]/30 hover:shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--muted)]">Services needing attention</p>
+                        <p className="mt-2 text-2xl font-semibold tabular-nums">{servicesNeedingAttention}</p>
+                      </div>
+                      <span className="flex size-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand)]">
+                        {servicesNeedingAttention === 0 ? <CheckCircle2 className="size-5" /> : <CircleAlert className="size-5" />}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+                      {upcomingServiceCount === 0
+                        ? "Schedule a service to begin tracking readiness."
+                        : servicesNeedingAttention === 0
+                          ? "All readiness checks are clear for your upcoming plans."
+                          : "Check the schedule, song list, team assignments, and responses."}
+                    </p>
+                  </Link>
+
+                  <Link
+                    href="/services"
+                    className="group rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)]/30 hover:shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--muted)]">Pending team confirmations</p>
+                        <p className="mt-2 text-2xl font-semibold tabular-nums">{pendingTeamConfirmations}</p>
+                      </div>
+                      <span className="flex size-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand)]">
+                        <Clock3 className="size-5" />
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+                      {declinedTeamConfirmations > 0
+                        ? declinedTeamConfirmations + " declined response" + (declinedTeamConfirmations === 1 ? "" : "s") + " also need follow-up."
+                        : pendingTeamConfirmations === 0
+                          ? "No team responses are waiting for the next scheduled services."
+                          : "Follow up with assigned members who have not responded yet."}
+                    </p>
+                  </Link>
+
+                  <Link
+                    href="/my-schedule"
+                    className="group rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)]/30 hover:shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--muted)]">Your commitments</p>
+                        <p className="mt-2 text-lg font-semibold">My Schedule</p>
+                      </div>
+                      <span className="flex size-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand)]">
+                        <CalendarClock className="size-5" />
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+                      Confirm your own assignments and review upcoming service details.
+                    </p>
+                  </Link>
+                </div>
+              </section>
+
               <section className="mt-6 rounded-2xl border border-[var(--border)] bg-white">
                 <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4 sm:px-6">
                   <div>
@@ -423,13 +588,91 @@ export default function DashboardView({
                               ? ` · ${formatServiceTime(setlist.service_time)}`
                               : ""}
                           </p>
+                          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                            <span className={"rounded-full px-2.5 py-1 text-[10px] font-semibold " + (
+                              setlist.readiness.status === "ready"
+                                ? "bg-emerald-50 text-emerald-800"
+                                : setlist.readiness.status === "needs_attention"
+                                  ? "bg-amber-50 text-amber-800"
+                                  : "bg-rose-50 text-rose-800"
+                            )}>
+                              {setlist.readiness.status === "ready"
+                                ? "Ready"
+                                : setlist.readiness.status === "needs_attention"
+                                  ? "Needs attention"
+                                  : "Incomplete"}
+                            </span>
+                            <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-[10px] font-medium text-[var(--muted)]">
+                              {setlist.readiness.songCount} songs
+                            </span>
+                            <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-[10px] font-medium text-[var(--muted)]">
+                              {setlist.readiness.confirmedAssignments}/{setlist.readiness.totalAssignments} confirmed
+                            </span>
+                          </div>
+                          <div
+                            className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--surface)]"
+                            role="progressbar"
+                            aria-label={setlist.name + " readiness"}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={setlist.readiness.percentage}
+                          >
+                            <div
+                              className={"h-full rounded-full transition-all " + (
+                                setlist.readiness.status === "ready"
+                                  ? "bg-emerald-500"
+                                  : setlist.readiness.status === "needs_attention"
+                                    ? "bg-amber-500"
+                                    : "bg-rose-500"
+                              )}
+                              style={{ width: String(setlist.readiness.percentage) + "%" }}
+                            />
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-[10px] leading-4 text-[var(--muted)]">
+                            {!setlist.service_time ? <span>Set service time</span> : null}
+                            {setlist.readiness.songCount === 0 ? <span>Add songs</span> : null}
+                            {setlist.readiness.totalAssignments === 0 ? <span>Assign team</span> : null}
+                            {setlist.readiness.pendingAssignments > 0 ? (
+                              <span>{setlist.readiness.pendingAssignments} awaiting confirmation</span>
+                            ) : null}
+                            {setlist.readiness.declinedAssignments > 0 ? (
+                              <span>{setlist.readiness.declinedAssignments} declined</span>
+                            ) : null}
+                            {setlist.readiness.status === "ready" ? <span>All readiness checks passed</span> : null}
+                          </div>
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {setlist.teamAssignments.length > 0 ? (
                               setlist.teamAssignments.map((assignment) => (
                                 <span
                                   key={`${assignment.userId}-${assignment.position}`}
+                                  title={
+                                    assignment.confirmationStatus === "confirmed"
+                                      ? "Confirmed"
+                                      : assignment.confirmationStatus === "declined"
+                                        ? "Declined"
+                                        : "Awaiting confirmation"
+                                  }
+                                  aria-label={
+                                    assignment.displayName + ", " +
+                                    getTeamPositionLabel(assignment.position) + ", " +
+                                    (assignment.confirmationStatus === "confirmed"
+                                      ? "confirmed"
+                                      : assignment.confirmationStatus === "declined"
+                                        ? "declined"
+                                        : "awaiting confirmation")
+                                  }
                                   className="inline-flex items-center gap-1 rounded-full bg-[var(--surface)] py-1 pl-1 pr-2 text-[10px] text-[var(--foreground)]"
                                 >
+                                  <span
+                                    aria-hidden="true"
+                                    className={"size-1.5 shrink-0 rounded-full " + (
+                                      assignment.confirmationStatus === "confirmed"
+                                        ? "bg-emerald-500"
+                                        : assignment.confirmationStatus === "declined"
+                                          ? "bg-rose-500"
+                                          : "bg-amber-500"
+                                    )}
+                                  />
                                   <ProfileAvatar
                                     name={assignment.displayName}
                                     imageUrl={assignment.avatarUrl}
@@ -662,74 +905,7 @@ export default function DashboardView({
                 </div>
               </section>
 
-              <section className="mt-6 grid gap-4 md:grid-cols-3">
-                <Link
-                  href="/songs/new"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                    <Plus className="size-5" />
-                  </div>
 
-                  <div className="mt-4 text-sm font-semibold">
-                    Create a song
-                  </div>
-
-                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                    Add lyrics, chords, key, tempo, and song details.
-                  </p>
-
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--brand)]">
-                    Get started
-                    <ChevronRight className="size-3.5" />
-                  </div>
-                </Link>
-
-                <Link
-                  href="/setlists"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                    <ListMusic className="size-5" />
-                  </div>
-
-                  <div className="mt-4 text-sm font-semibold">
-                    Build a setlist
-                  </div>
-
-                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                    Arrange your worship songs and prepare the service flow.
-                  </p>
-
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--brand)]">
-                    Open setlists
-                    <ChevronRight className="size-3.5" />
-                  </div>
-                </Link>
-
-                <Link
-                  href="/settings"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                    <Settings className="size-5" />
-                  </div>
-
-                  <div className="mt-4 text-sm font-semibold">
-                    Update church details
-                  </div>
-
-                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                    Keep your workspace information and service defaults
-                    current.
-                  </p>
-
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--brand)]">
-                    Open settings
-                    <ChevronRight className="size-3.5" />
-                  </div>
-                </Link>
-              </section>
             </div>
           </main>
         </div>
