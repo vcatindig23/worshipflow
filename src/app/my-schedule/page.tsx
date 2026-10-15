@@ -14,7 +14,8 @@ import {
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
-import AssignmentConfirmation from "./assignment-confirmation"\nimport ScheduleViewToggle from "./schedule-view-toggle"
+import AssignmentConfirmation from "./assignment-confirmation"
+import ScheduleViewToggle from "./schedule-view-toggle"
 
 type MySchedulePageProps = {
   searchParams: Promise<
@@ -113,7 +114,8 @@ function getGoogleCalendarUrl(
     ...(setlist.description
       ? [setlist.description]
       : []),
-  ].join("\n")
+  ].join("
+")
 
   const parameters =
     new URLSearchParams({
