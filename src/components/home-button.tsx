@@ -7,7 +7,11 @@ import { House } from "lucide-react"
 export default function HomeButton() {
   const pathname = usePathname()
 
-  if (pathname === "/") {
+  if (
+    pathname === "/" ||
+    ["/login", "/signup", "/forgot-password", "/reset-password", "/check-email"].some((route) => pathname === route || pathname.startsWith(`${route}/`)) ||
+    (pathname.startsWith("/setlists/") && pathname.endsWith("/live"))
+  ) {
     return null
   }
 
