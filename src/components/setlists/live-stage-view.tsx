@@ -549,7 +549,7 @@ export default function LiveStageView({
                     ref={lyricsScrollRef}
                     tabIndex={0}
                     aria-label="Live lyrics and chords"
-                    className="min-h-0 flex-1 w-full overflow-y-auto overscroll-contain pb-16 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/20"
+                    className="min-h-0 flex-1 w-full overflow-y-auto overscroll-contain pb-16 pr-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/20"
                   >
                     {displayLines.map((line, lineIndex) => {
                         if (line.type === "blank") {
