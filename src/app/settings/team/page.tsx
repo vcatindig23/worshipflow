@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import {
   ArrowLeft,
   CheckCircle2,
+  ChevronDown,
   Search,
   SlidersHorizontal,
   UserMinus,
@@ -498,7 +499,7 @@ export default async function TeamSettingsPage({
       ) : null}
 
       <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
-        <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
               Church Members
@@ -515,11 +516,35 @@ export default async function TeamSettingsPage({
             </p>
           </div>
 
+          <details className="group w-full xl:max-w-[440px]">
+            <summary className="flex cursor-pointer list-none items-center gap-3 rounded-xl border border-[var(--border)] bg-white px-3.5 py-3 outline-none transition hover:border-[var(--brand)]/30 hover:bg-[var(--surface)] focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 [&::-webkit-details-marker]:hidden">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
+                <Search className="size-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-[var(--foreground)]">Search & filter members</span>
+                <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">
+                  {query
+                    ? "Search: " + query + (selectedRole !== "all" ? " · " + roleLabels[selectedRole] : "")
+                    : selectedRole !== "all"
+                      ? "Role: " + roleLabels[selectedRole]
+                      : "Find by name, worship position, or role"}
+                </span>
+              </span>
+              {query || selectedRole !== "all" ? (
+                <span className="shrink-0 rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-[10px] font-semibold text-[var(--brand)]">
+                  Active
+                </span>
+              ) : null}
+              <ChevronDown className="size-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-180" />
+            </summary>
+
+            <div className="mt-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3">
           <form
             action="/settings/team"
             method="get"
             role="search"
-            className="flex flex-col gap-2 sm:flex-row xl:w-[560px]"
+            className="flex flex-col gap-2 sm:flex-row sm:flex-wrap"
           >
             <label className="relative min-w-0 flex-1">
               <span className="sr-only">Search members by name or worship position</span>
@@ -567,6 +592,8 @@ export default async function TeamSettingsPage({
               </Link>
             ) : null}
           </form>
+            </div>
+          </details>
         </div>
 
         <div className="divide-y divide-[var(--border)]">
