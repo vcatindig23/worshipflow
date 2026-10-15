@@ -1,6 +1,14 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { AlertCircle } from "lucide-react"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+
+export const metadata: Metadata = {
+  title: "Something went wrong",
+  description:
+    "Resolve a WorshipFlow sign-in or workspace error and return to your account.",
+  alternates: { canonical: "/error" },
+}
 
 type ErrorPageProps = {
   searchParams: Promise<{
