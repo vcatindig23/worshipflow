@@ -37,6 +37,9 @@ export default function SiteUtilities() {
       document.documentElement.dataset.theme = "light"
     }
 
+    const mainContent = document.getElementById("main-content") ?? document.querySelector("main")
+    if (mainContent && !mainContent.id) mainContent.id = "main-content"
+
     const updateScroll = () => {
       const scrollable = document.documentElement.scrollHeight - window.innerHeight
       setProgress(scrollable > 0 ? Math.min(100, (window.scrollY / scrollable) * 100) : 0)
