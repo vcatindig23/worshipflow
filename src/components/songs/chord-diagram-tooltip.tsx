@@ -260,7 +260,7 @@ export default function ChordDiagramTooltip({
                 </p>
               ) : null}
               <div className="mt-1 flex justify-center gap-3 text-[9px] text-[var(--muted)]">
-                {["E", "A", "D", "G", "B", "e"].map((string) => (
+                {["E", "A", "D", "G", "B", "E"].map((string) => (
                   <span key={string}>{string}</span>
                 ))}
               </div>
