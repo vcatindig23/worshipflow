@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import {
+  House,
   ChevronLeft,
   ChevronRight,
   Gauge,
@@ -343,6 +344,15 @@ export default function LiveStageView({
           <span className="hidden text-xs text-white/50 sm:inline">
             {songs.length ? currentIndex + 1 : 0} / {songs.length}
           </span>
+          <Link
+            href="/"
+            aria-label="Go to home dashboard"
+            title="Go to home dashboard"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-white/15 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+          >
+            <House className="size-4" />
+            <span className="hidden sm:inline">Home</span>
+          </Link>
           <span
             role="status"
             aria-live="polite"
