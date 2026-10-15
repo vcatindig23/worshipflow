@@ -1687,7 +1687,7 @@ export default function TeamChatClient({
         ) : null}
       </div>
 
-      <div className="border-t border-[var(--border)] bg-gradient-to-r from-white to-[var(--surface)]/35 px-4 py-4 sm:px-6">
+      <div className="border-t border-[var(--border)] bg-gradient-to-r from-white to-[var(--surface)]/35 px-3 py-3 sm:px-6 sm:py-4">
         {error ? (
           <div
             role="alert"
@@ -1891,7 +1891,7 @@ export default function TeamChatClient({
           </button>
         </form>
         <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-[var(--muted)]">
-          <span>Paste links to share them · Attach up to 5 files, 25 MB each · Enter to send, Shift+Enter for a new line</span>
+          <span className="min-w-0 leading-4">Attach up to 5 files · Enter to send, Shift+Enter for a new line</span>
           <span className="shrink-0 tabular-nums">{draft.length}/2000</span>
         </div>
       </div>
