@@ -3,12 +3,49 @@ import HomeButton from "@/components/home-button"
 import OfflineSupport from "@/components/offline-support"
 import "./globals.css"
 
+const siteUrl = "https://worshipflow-weld.vercel.app"
+const siteDescription =
+  "WorshipFlow helps church worship teams organize songs, chords, setlists, service plans, schedules, and team communication."
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "WorshipFlow",
+    default: "WorshipFlow — Worship Team Planning",
     template: "%s | WorshipFlow",
   },
-  description: "A worship workspace for songs, chords, setlists, services, and teams.",
+  description: siteDescription,
+  applicationName: "WorshipFlow",
+  alternates: {
+    types: {
+      "text/plain": "/llms.txt",
+    },
+  },
+  openGraph: {
+    type: "website",
+    siteName: "WorshipFlow",
+    title: "WorshipFlow — Worship Team Planning",
+    description: siteDescription,
+    url: siteUrl,
+    images: [
+      {
+        url: "/worshipflow-brand.png",
+        width: 1200,
+        height: 630,
+        alt: "WorshipFlow — tools for worship team planning",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "WorshipFlow — Worship Team Planning",
+    description: siteDescription,
+    images: [
+      {
+        url: "/worshipflow-brand.png",
+        alt: "WorshipFlow — tools for worship team planning",
+      },
+    ],
+  },
   appleWebApp: {
     capable: true,
     title: "WorshipFlow",
@@ -24,6 +61,26 @@ export const viewport: Viewport = {
   themeColor: "#365c45",
 }
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      name: "WorshipFlow",
+      url: siteUrl,
+      description: siteDescription,
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "WorshipFlow",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      url: siteUrl,
+      description: siteDescription,
+    },
+  ],
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,6 +89,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+          }}
+        />
         {children}
         <HomeButton />
         <OfflineSupport />
