@@ -339,7 +339,7 @@ export default async function ServicesHistoryPage({
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
               {query || period !== "all"
                 ? "Try a different search term or date range, or clear your filters."
-                : "Complete a service after worship to start building your church&apos;s history."}
+                : "Complete a service after worship to start building your church's history."}
             </p>
             {query || period !== "all" ? (
               <Link
