@@ -3,6 +3,8 @@ import { redirect } from "next/navigation"
 import {
   ArrowLeft,
   CheckCircle2,
+  Search,
+  SlidersHorizontal,
   UserMinus,
   Users,
 } from "lucide-react"
@@ -58,6 +60,10 @@ const roleLabels: Record<string, string> = {
 const teamPositionOptions = Object.entries(
   teamPositionLabels
 )
+
+function getParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
+}
 
 const errorMessages: Record<string, string> = {
   invalid_invitation:
@@ -304,6 +310,34 @@ export default async function TeamSettingsPage({
       ? errorMessages[errorKey] ??
         "The requested action could not be completed."
       : ""
+  const query = getParam(params.q)?.trim() ?? ""
+  const requestedRole = getParam(params.role) ?? "all"
+  const selectedRole = Object.prototype.hasOwnProperty.call(
+    roleLabels,
+    requestedRole
+  )
+    ? requestedRole
+    : "all"
+  const normalizedQuery = query.toLocaleLowerCase("en")
+  const filteredMembers = members.filter((member) => {
+    if (selectedRole !== "all" && member.role !== selectedRole) {
+      return false
+    }
+
+    const profile = profileMap.get(member.user_id)
+    const displayName = profile?.display_name?.trim() || "Name not set"
+    const searchableText = [
+      displayName,
+      roleLabels[member.role] ?? member.role,
+      ...(member.team_positions ?? []).map(
+        (position) => teamPositionLabels[position] ?? position
+      ),
+    ]
+      .join(" ")
+      .toLocaleLowerCase("en")
+
+    return !normalizedQuery || searchableText.includes(normalizedQuery)
+  })
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-6 py-8">
@@ -464,20 +498,79 @@ export default async function TeamSettingsPage({
       ) : null}
 
       <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
-        <div className="mb-5">
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">
-            Church Members
-          </h2>
+        <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">
+              Church Members
+            </h2>
 
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-            {canManageTeam
-              ? "Administrators can change app access and worship-team positions."
-              : "Application access and worship-team positions for your church members."}
-          </p>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+              {canManageTeam
+                ? "Administrators can change app access and worship-team positions."
+                : "Application access and worship-team positions for your church members."}
+            </p>
+
+            <p className="mt-2 text-xs font-medium text-[var(--muted)]" aria-live="polite">
+              Showing {filteredMembers.length} of {members.length} members
+            </p>
+          </div>
+
+          <form
+            action="/settings/team"
+            method="get"
+            role="search"
+            className="flex flex-col gap-2 sm:flex-row xl:w-[560px]"
+          >
+            <label className="relative min-w-0 flex-1">
+              <span className="sr-only">Search members by name or worship position</span>
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
+              <input
+                type="search"
+                name="q"
+                value={query}
+                maxLength={100}
+                placeholder="Search name or worship position..."
+                className="h-10 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              />
+            </label>
+
+            <label>
+              <span className="sr-only">Filter members by workspace role</span>
+              <select
+                name="role"
+                value={selectedRole}
+                className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)] sm:w-44"
+              >
+                <option value="all">All workspace roles</option>
+                <option value="admin">Administrator</option>
+                <option value="worship_leader">Worship Leader</option>
+                <option value="song_editor">Song Editor</option>
+                <option value="team_member">Team Member</option>
+                <option value="viewer">Viewer</option>
+              </select>
+            </label>
+
+            <button
+              type="submit"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+            >
+              <SlidersHorizontal className="size-4" />
+              Filter
+            </button>
+
+            {query || selectedRole !== "all" ? (
+              <Link
+                href="/settings/team"
+                className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 text-sm font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+              >
+                Clear
+              </Link>
+            ) : null}
+          </form>
         </div>
 
         <div className="divide-y divide-[var(--border)]">
-          {members.map(
+          {filteredMembers.map(
             (member) => {
               const profile =
                 profileMap.get(
@@ -677,18 +770,29 @@ export default async function TeamSettingsPage({
             }
           )}
 
-          {members.length === 0 &&
+          {filteredMembers.length === 0 &&
           !membersResult.error ? (
             <div className="py-12 text-center">
               <Users className="mx-auto size-8 text-[var(--muted)]" />
 
               <p className="mt-3 text-sm font-medium text-[var(--foreground)]">
-                No members found
+                {members.length === 0 ? "No members found" : "No members match your filters"}
               </p>
 
               <p className="mt-1 text-sm text-[var(--muted)]">
-                Invite your worship team to get started.
+                {members.length === 0
+                  ? "Invite your worship team to get started."
+                  : "Try a different name, worship position, or workspace role."}
               </p>
+
+              {members.length > 0 ? (
+                <Link
+                  href="/settings/team"
+                  className="mt-3 inline-flex text-sm font-semibold text-[var(--brand)] hover:underline"
+                >
+                  Clear filters
+                </Link>
+              ) : null}
             </div>
           ) : null}
         </div>
