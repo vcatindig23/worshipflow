@@ -71,9 +71,7 @@ function getUploadErrorMessage(error: unknown) {
     return "Supabase rejected the configured publishable API key. Check the project's Data API settings; do not use a secret key in browser code."
   }
 
-  return message
-    ? `Upload failed: ${message}`
-    : "The file could not be uploaded because storage returned an unknown error."
+  return "The file could not be uploaded. Please check the file type and size, then try again."
 }
 
 export default function UploadFileForm({
