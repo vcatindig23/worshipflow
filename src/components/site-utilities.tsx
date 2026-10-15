@@ -120,7 +120,7 @@ export default function SiteUtilities() {
           {helpOpen ? <X className="size-4" /> : <HelpCircle className="size-4" />}
           <span>Help</span>
         </button>
-      </div>
+      </div> : null}
 
       {showTop ? (
         <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Scroll back to top" title="Back to top" className="wf-back-to-top fixed bottom-20 right-4 z-[60] inline-flex size-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] sm:bottom-20 sm:right-6">
