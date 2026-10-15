@@ -14,7 +14,7 @@ import {
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
-import AssignmentConfirmation from "./assignment-confirmation"
+import AssignmentConfirmation from "./assignment-confirmation"\nimport ScheduleViewToggle from "./schedule-view-toggle"
 
 type MySchedulePageProps = {
   searchParams: Promise<
