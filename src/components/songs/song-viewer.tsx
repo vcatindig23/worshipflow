@@ -132,7 +132,7 @@ export default function SongViewer({
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
           ? "flex-1 overflow-auto bg-[#0d120f] px-6 py-8 text-white sm:px-10 sm:py-10"
-          : "h-[calc(100dvh-250px)] min-h-[360px] max-h-[900px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
+          : "h-[calc(100dvh-230px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
       <div
