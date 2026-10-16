@@ -53,3 +53,25 @@ export const joinInvitationSchema = z.object({
 export function isAdministrator(role: unknown): boolean {
   return role === "admin"
 }
+
+export const setlistEditorRoles = [
+  "admin",
+  "worship_leader",
+  "song_editor",
+] as const
+
+export const setlistLeaderRoles = [
+  "admin",
+  "worship_leader",
+] as const
+
+/**
+ * Shared allowlist check for server actions. An absent, malformed, or
+ * unrecognized role never grants an operation.
+ */
+export function hasAnyRole(
+  role: unknown,
+  allowedRoles: readonly string[]
+): boolean {
+  return typeof role === "string" && allowedRoles.includes(role)
+}
