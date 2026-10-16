@@ -402,3 +402,97 @@ iframe {
 @media (prefers-reduced-motion: reduce) {
   .wf-loading-pulse { animation: none; }
 }
+
+
+/* Shared loading feedback for route transitions, form actions, and page skeletons. */
+.wf-navigation-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 160;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.wf-navigation-progress::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 36%;
+  border-radius: 0 999px 999px 0;
+  background: var(--brand);
+  content: "";
+  transform: translateX(-110%);
+}
+
+html[data-wf-navigation-loading="true"] .wf-navigation-progress {
+  opacity: 1;
+}
+
+html[data-wf-navigation-loading="true"] .wf-navigation-progress::before {
+  animation: wf-route-progress 1050ms ease-in-out infinite;
+}
+
+@keyframes wf-route-progress {
+  0% { transform: translateX(-110%); }
+  48% { transform: translateX(115%); }
+  100% { transform: translateX(330%); }
+}
+
+button.wf-action-loading {
+  cursor: progress;
+  opacity: 0.86;
+}
+
+button.wf-action-loading::after {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-inline-start: 0.55rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  content: "";
+  vertical-align: -0.12rem;
+  animation: wf-action-spin 700ms linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes wf-action-spin {
+  to { transform: rotate(360deg); }
+}
+
+.wf-skeleton {
+  background-color: var(--surface);
+  background-image: linear-gradient(
+    100deg,
+    var(--surface) 25%,
+    color-mix(in srgb, var(--surface) 62%, var(--border)) 45%,
+    var(--surface) 65%
+  );
+  background-size: 200% 100%;
+  animation: wf-skeleton-shimmer 1250ms ease-in-out infinite;
+}
+
+.wf-skeleton-dark {
+  background-color: #29362d !important;
+  background-image: linear-gradient(100deg, #29362d 25%, #3b4b40 45%, #29362d 65%) !important;
+}
+
+@keyframes wf-skeleton-shimmer {
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-navigation-progress,
+  .wf-skeleton,
+  .wf-skeleton-dark,
+  button.wf-action-loading::after {
+    animation: none !important;
+  }
+
+  .wf-navigation-progress {
+    transition: none;
+  }
+}
