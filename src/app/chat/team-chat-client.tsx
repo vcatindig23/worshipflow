@@ -45,6 +45,10 @@ import {
   setTeamChatMessagePinned,
 } from "./actions"
 
+function currentTimeMs() {
+  return Date.now()
+}
+
 export type TeamChatAttachment = {
   path: string
   name: string
@@ -757,7 +761,7 @@ export default function TeamChatClient({
       return
     }
 
-    const now = Date.now()
+    const now = currentTimeMs()
     if (!isTypingRef.current || now - lastTypingBroadcastAtRef.current >= 1000) {
       isTypingRef.current = true
       lastTypingBroadcastAtRef.current = now
@@ -1188,7 +1192,7 @@ export default function TeamChatClient({
                 <MessagesSquare className="size-[18px]" />
               </span>
             </div>
-            <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">Your church team's shared space.</p>
+            <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">Your church team&apos;s shared space.</p>
           </div>
 
           <div className="px-2.5 sm:px-3">
