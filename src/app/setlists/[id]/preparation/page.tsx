@@ -97,7 +97,7 @@ function buildScheduleEvents(schedules: SetlistSchedule[]): ScheduleEvent[] {
   const events: ScheduleEvent[] = []
 
   for (const schedule of schedules) {
-    if (schedule.status === "archived") continue
+    if (schedule.status === "archived" || schedule.completed_at) continue
 
     const serviceStart = timeToMinutes(schedule.service_time)
     if (schedule.service_date && serviceStart !== null) {
@@ -232,7 +232,7 @@ export default async function ServicePreparationPage({
   ])
 
   if (setlistResult.error || taskResult.error || schedulesResult.error) {
-    redirect(`/setlists/${id}?error=preparation_load_failed`)
+    redirect(`/setlists/${id}/preparation?error=preparation_load_failed`)
   }
   if (!setlistResult.data) notFound()
 
@@ -293,6 +293,7 @@ export default async function ServicePreparationPage({
   const saved = getParam(queryParams.saved)
   const errorMessages: Record<string, string> = {
     permission_denied: "You do not have permission to edit this service plan.",
+    preparation_load_failed: "The rehearsal plan could not be loaded. Please refresh and try again.",
     invalid_rehearsal_date: "Enter a valid rehearsal date.",
     invalid_rehearsal_time: "Enter a valid rehearsal start time.",
     invalid_rehearsal_end_time: "Rehearsal end time must be later than the start time.",
