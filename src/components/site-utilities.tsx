@@ -99,10 +99,7 @@ export default function SiteUtilities() {
       }
 
       if (destination.origin !== window.location.origin) return
-      if (
-        destination.pathname === window.location.pathname &&
-        destination.search === window.location.search
-      ) {
+      if (destination.pathname === window.location.pathname) {
         return
       }
 
