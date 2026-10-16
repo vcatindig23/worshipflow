@@ -7,6 +7,9 @@ import {
   teamPositionSchema,
   teamPositionsSchema,
   uuidSchema,
+  hasAnyRole,
+  setlistEditorRoles,
+  setlistLeaderRoles,
 } from "../../src/lib/team-access-validation"
 
 describe("team invitation input validation", () => {
@@ -151,5 +154,31 @@ describe("identifier validation", () => {
     ).toBe(true)
     expect(uuidSchema.safeParse("../../admin").success).toBe(false)
     expect(uuidSchema.safeParse("").success).toBe(false)
+  })
+})
+
+describe("setlist access role matrix", () => {
+  it("allows only editors to change setlist content and assignments", () => {
+    for (const role of ["admin", "worship_leader", "song_editor"]) {
+      expect(hasAnyRole(role, setlistEditorRoles)).toBe(true)
+    }
+
+    for (const role of ["team_member", "viewer", "", null, undefined, "Admin"]) {
+      expect(hasAnyRole(role, setlistEditorRoles)).toBe(false)
+    }
+  })
+
+  it("limits setlist lifecycle actions to administrators and worship leaders", () => {
+    expect(hasAnyRole("admin", setlistLeaderRoles)).toBe(true)
+    expect(hasAnyRole("worship_leader", setlistLeaderRoles)).toBe(true)
+    expect(hasAnyRole("song_editor", setlistLeaderRoles)).toBe(false)
+    expect(hasAnyRole("team_member", setlistLeaderRoles)).toBe(false)
+    expect(hasAnyRole("viewer", setlistLeaderRoles)).toBe(false)
+  })
+
+  it("does not grant access for malformed role types", () => {
+    expect(hasAnyRole({ role: "admin" }, setlistEditorRoles)).toBe(false)
+    expect(hasAnyRole(["admin"], setlistLeaderRoles)).toBe(false)
+    expect(hasAnyRole(0, setlistEditorRoles)).toBe(false)
   })
 })
