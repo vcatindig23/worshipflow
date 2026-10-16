@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   ChevronRight,
   Edit,
+  FileDown,
   History,
   Music2,
   MonitorPlay,
@@ -670,6 +671,14 @@ export default async function SetlistPage({
                 </button>
               </form>
             ) : null}
+
+            <Link
+              href={`/setlists/${id}/print`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            >
+              <FileDown className="size-4" />
+              Service plan PDF
+            </Link>
 
             <PrintSetlistButton />
 
