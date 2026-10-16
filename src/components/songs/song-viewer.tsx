@@ -24,12 +24,12 @@ import SongReferenceAudioManager from "./song-reference-audio-manager"
 type SongPracticePanelProps = {
   tempo?: number | null
   dark?: boolean
-  songId: string
-  organizationId: string
-  canEdit: boolean
-  referenceAudioPath: string | null
-  referenceAudioName: string | null
-  referenceAudioUrl: string | null
+  songId?: string
+  organizationId?: string
+  canEdit?: boolean
+  referenceAudioPath?: string | null
+  referenceAudioName?: string | null
+  referenceAudioUrl?: string | null
   showManager: boolean
 }
 
@@ -101,12 +101,12 @@ export default function SongViewer({
   source,
   title = "Song chart",
   tempo,
-  songId,
-  organizationId,
-  canEdit,
-  referenceAudioPath,
-  referenceAudioName,
-  referenceAudioUrl,
+  songId = "",
+  organizationId = "",
+  canEdit = false,
+  referenceAudioPath = null,
+  referenceAudioName = null,
+  referenceAudioUrl = null,
 }: SongViewerProps) {
   const [fontSize, setFontSize] = useState(24)
   const [showChords, setShowChords] = useState(true)
