@@ -151,6 +151,16 @@ function getGoogleCalendarUrl(
   return `https://calendar.google.com/calendar/render?${parameters.toString()}`
 }
 
+const swapErrorMessages: Record<string, string> = {
+  invalid_request: "Choose an eligible substitute and keep the note within 500 characters.",
+  assignment_unavailable: "That assignment is no longer available for a swap request.",
+  substitute_not_eligible: "The selected teammate is not assigned to the required position.",
+  substitute_already_assigned: "That teammate already has the same position in this service.",
+  swap_already_open: "A swap request is already open for this assignment.",
+  service_closed: "Completed or archived services cannot be swapped.",
+  request_failed: "The swap request could not be created. Please try again.",
+}
+
 const periods: {
   value: Period
   label: string
@@ -481,15 +491,7 @@ export default async function MySchedulePage({
       ) : null}
       {getParam(params.swapError) ? (
         <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {{
-            invalid_request: "Choose an eligible substitute and keep the note within 500 characters.",
-            assignment_unavailable: "That assignment is no longer available for a swap request.",
-            substitute_not_eligible: "The selected teammate is not assigned to the required position.",
-            substitute_already_assigned: "That teammate already has the same position in this service.",
-            swap_already_open: "A swap request is already open for this assignment.",
-            service_closed: "Completed or archived services cannot be swapped.",
-            request_failed: "The swap request could not be created. Please try again.",
-          }[getParam(params.swapError) ?? ""] ?? "The swap request could not be completed."}
+          {swapErrorMessages[getParam(params.swapError) ?? ""] ?? "The swap request could not be completed."}
         </div>
       ) : null}
 
