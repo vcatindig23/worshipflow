@@ -1,18 +1,9 @@
 "use server"
 
 import { redirect } from "next/navigation"
-import { z } from "zod"
 import { hashInviteCode } from "@/lib/invitations/code"
 import { createClient } from "@/lib/supabase/server"
-
-const joinSchema = z.object({
-  code: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .min(8)
-    .max(64),
-})
+import { joinInvitationSchema } from "@/lib/team-access-validation"
 
 const errorMap: Record<
   string,
@@ -33,7 +24,7 @@ const errorMap: Record<
 export async function joinOrganization(
   formData: FormData
 ) {
-  const parsed = joinSchema.safeParse({
+  const parsed = joinInvitationSchema.safeParse({
     code: formData.get("code"),
   })
 
