@@ -116,7 +116,7 @@ export async function removeSongReferenceAudio(
 
   const access = await validateSongAudioAccess(parsedSongId.data)
   if ("error" in access) {
-    return { ok: false, error: access.error }
+    return { ok: false, error: access.error ?? "save_failed" }
   }
 
   const { workspace, supabase, song } = access
