@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   ChevronRight,
   Edit,
+  FileDown,
   History,
   Music2,
   MonitorPlay,
@@ -29,6 +30,8 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 import ServiceResources from "./service-resources"
 import ServiceTimeline from "./service-timeline"
 import ServicePreparationChecklist from "./service-preparation-checklist"
+import AnnouncementAcknowledgment from "./announcement-acknowledgment"
+import SetlistSwapRequestsPanel from "./swap-requests-panel"
 import { saveServiceAsTemplate } from "@/app/services/template-actions"
 import {
   addSongToSetlist,
@@ -669,6 +672,14 @@ export default async function SetlistPage({
               </form>
             ) : null}
 
+            <Link
+              href={`/setlists/${id}/print`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            >
+              <FileDown className="size-4" />
+              Service plan PDF
+            </Link>
+
             <PrintSetlistButton />
 
             {canEdit ? (
@@ -792,6 +803,7 @@ export default async function SetlistPage({
               <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">
                 {setlist.announcements}
               </p>
+              <AnnouncementAcknowledgment setlistId={id} />
             </article>
           ) : null}
 
@@ -807,6 +819,13 @@ export default async function SetlistPage({
           ) : null}
         </section>
       ) : null}
+
+      <SetlistSwapRequestsPanel
+        setlistId={id}
+        canManage={canManageStatus}
+        errorKey={typeof queryParams.coordinationError === "string" ? queryParams.coordinationError : ""}
+        notice={typeof queryParams.swapResponse === "string" || typeof queryParams.swapResolved === "string" ? "1" : ""}
+      />
 
       <ServiceTimeline setlistId={id} canEdit={canEdit} />
 

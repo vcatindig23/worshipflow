@@ -84,12 +84,15 @@ The goal is to make preparation easier and help every member know **what is plan
 - Duplicate an existing service plan while resetting its date, completion state, and team confirmations.
 - Schedule rehearsals with their own date, start/end time, location, and preparation notes.
 - Maintain service-specific preparation tasks and flag overlapping service/rehearsal commitments for shared team members.
+- Track which assigned members have acknowledged the current service announcements; acknowledgments reset when announcement text changes.
+- Print a dedicated service plan with the worship order, run of show, team assignments, rehearsal details, preparation tasks, and linked resource names; use the browser print dialog to save it as PDF.
 
 #### Team and workspace coordination
 - Set up a church workspace and invite team members.
 - Manage role-based access for administrators, worship leaders, song editors, team members, and viewers.
 - Assign team members to worship and production positions.
 - Let assigned members confirm or decline assignments with an optional note.
+- Let members request an assignment swap, the proposed substitute accept or decline, and a worship leader approve or decline the final change.
 - Review upcoming assignments in My Schedule and add scheduled services to Google Calendar.
 - Coordinate in Team Chat with message updates, typing indicators, replies, pinned messages, mentions, message search, and unread indicators.
 - Search relevant workspace content from the dashboard and access notifications and workspace activity.
@@ -103,7 +106,8 @@ The goal is to make preparation easier and help every member know **what is plan
 > **Offline limitation:** Live Stage can reopen chart snapshots that were saved on the device. The rest of the WorshipFlow workspace still requires an internet connection. Open a service's Live Stage while online and wait for **Saved for offline** before relying on its charts offline.
 
 #### Notifications, activity, and insights
-- Receive in-app notifications for relevant service assignment changes and new team chat messages.
+- Receive in-app notifications for service assignment changes, team chat messages, announcement updates, and swap-request decisions.
+- Receive scheduled in-app reminders roughly 24 hours and one hour before upcoming services when a service date and start time are set.
 - Review workspace activity relating to songs, services, teams, and membership.
 - Record completed services with attendance, actual duration, and after-service notes.
 - Browse completed services and review insights such as attendance trends, completion rate, service duration, and frequently used songs.
@@ -293,6 +297,9 @@ The checklist below tracks potential improvements; it is not a promise that ever
 - [x] Team chat, notifications, and workspace activity
 - [x] Live Stage with chart controls and saved offline snapshots
 - [x] Service history and insights
+- [x] Service announcement acknowledgments and assignment swap workflow
+- [x] Scheduled in-app service reminders
+- [x] Print-ready service plan with browser Save as PDF support
 - [ ] Expand automated test coverage for key service and team workflows
 - [ ] Add end-to-end tests for critical user journeys
 - [ ] Continue accessibility and responsive-layout testing across screen sizes
