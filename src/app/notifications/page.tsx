@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { AtSign, Bell, CalendarDays, Check, MessagesSquare } from "lucide-react"
+import { AtSign, Bell, CalendarDays, Check, MessagesSquare, ArrowLeftRight } from "lucide-react"
 import {
   markAllNotificationsRead,
   markNotificationRead,
@@ -9,7 +9,15 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 
 type Notification = {
   id: string
-  type: "service_assignment" | "service_assignment_removed" | "team_chat_message" | "team_chat_mention"
+  type:
+    | "service_assignment"
+    | "service_assignment_removed"
+    | "team_chat_message"
+    | "team_chat_mention"
+    | "service_announcement"
+    | "assignment_swap_request"
+    | "assignment_swap_status"
+    | "service_reminder"
   title: string
   body: string
   setlist_id: string | null
@@ -75,7 +83,7 @@ export default async function NotificationsPage() {
               You&apos;re all caught up
             </h2>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              New team chat messages, service assignments, and changes will appear here.
+              Service reminders, announcements, swap requests, team chat, and assignment changes will appear here.
             </p>
           </div>
         ) : (
@@ -93,7 +101,9 @@ export default async function NotificationsPage() {
                       <AtSign className="size-[18px]" />
                     ) : notification.type === "team_chat_message" ? (
                       <MessagesSquare className="size-[18px]" />
-                    ) : notification.type === "service_assignment_removed" ? (
+                    ) : notification.type === "assignment_swap_request" || notification.type === "assignment_swap_status" ? (
+                      <ArrowLeftRight className="size-[18px]" />
+                    ) : notification.type === "service_assignment_removed" || notification.type === "service_announcement" ? (
                       <Bell className="size-[18px]" />
                     ) : (
                       <CalendarDays className="size-[18px]" />
