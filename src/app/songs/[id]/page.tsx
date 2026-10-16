@@ -34,6 +34,7 @@ type Song = {
   time_signature: string | null
   capo: number | null
   chordpro_source: string
+  reference_audio_path: string | null
   notes: string | null
   status: "active" | "archived"
   created_at: string
@@ -107,6 +108,7 @@ export default async function SongPage({
         time_signature,
         capo,
         chordpro_source,
+        reference_audio_path,
         notes,
         status,
         created_at,
@@ -129,6 +131,29 @@ export default async function SongPage({
   if (typedSong.organization_id !== membership.organization_id) {
     notFound()
   }
+
+  let referenceAudioUrl: string | null = null
+  const referenceAudioPath = typedSong.reference_audio_path
+  const expectedAudioPrefix = membership.organization_id + "/"
+  if (
+    referenceAudioPath &&
+    referenceAudioPath.startsWith(expectedAudioPrefix) &&
+    referenceAudioPath.split("/").length === 2
+  ) {
+    const { data: audioData, error: audioError } = await supabase.storage
+      .from("workspace-files")
+      .createSignedUrl(referenceAudioPath, 3600)
+
+    if (!audioError && audioData?.signedUrl) {
+      referenceAudioUrl = audioData.signedUrl
+    }
+  }
+
+  const referenceAudioName = referenceAudioPath
+    ?.split("/")
+    .pop()
+    ?.replace(/^[0-9a-f-]{36}-/i, "")
+    .trim() || null
 
   const [{ data: songTagRows }, { data: versions }] =
     await Promise.all([
@@ -337,6 +362,12 @@ export default async function SongPage({
             source={typedSong.chordpro_source}
             title={typedSong.title}
             tempo={typedSong.tempo}
+            songId={typedSong.id}
+            organizationId={membership.organization_id}
+            canEdit={canEdit}
+            referenceAudioPath={referenceAudioPath}
+            referenceAudioName={referenceAudioName}
+            referenceAudioUrl={referenceAudioUrl}
           />
         </section>
 
