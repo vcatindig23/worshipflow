@@ -16,6 +16,7 @@ import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import AssignmentConfirmation from "./assignment-confirmation"
 import ScheduleViewToggle from "./schedule-view-toggle"
+import { requestAssignmentSwap } from "./swap-actions"
 
 type MySchedulePageProps = {
   searchParams: Promise<
@@ -42,6 +43,19 @@ type Setlist = {
   service_date: string | null
   service_time: string | null
   status: "draft" | "published" | "archived"
+}
+
+type WorkspaceMember = {
+  user_id: string
+  team_positions: string[]
+}
+
+type SwapRequest = {
+  id: string
+  assignment_id: string
+  substitute_user_id: string
+  status: "pending" | "substitute_accepted" | "approved" | "declined" | "cancelled"
+  created_at: string
 }
 
 type Period =
@@ -223,6 +237,58 @@ export default async function MySchedulePage({
       )
     )
   )
+
+  const assignmentIds = memberAssignments.map((assignment) => assignment.id)
+  const [membersResult, swapRequestsResult, serviceAssignmentsResult] = await Promise.all([
+    supabase
+      .from("organization_members")
+      .select("user_id, team_positions")
+      .eq("organization_id", workspace.organizationId),
+    assignmentIds.length > 0
+      ? supabase
+          .from("setlist_assignment_swap_requests")
+          .select("id, assignment_id, substitute_user_id, status, created_at")
+          .eq("organization_id", workspace.organizationId)
+          .in("assignment_id", assignmentIds)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
+    setlistIds.length > 0
+      ? supabase
+          .from("setlist_team_assignments")
+          .select("setlist_id, user_id, team_position")
+          .in("setlist_id", setlistIds)
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  const workspaceMembers = (membersResult.data ?? []) as WorkspaceMember[]
+  const swapFeatureAvailable = !swapRequestsResult.error && !membersResult.error && !serviceAssignmentsResult.error
+  const swapRequests = (swapRequestsResult.data ?? []) as SwapRequest[]
+  const latestSwapByAssignment = new Map<string, SwapRequest>()
+  for (const request of swapRequests) {
+    if (!latestSwapByAssignment.has(request.assignment_id)) {
+      latestSwapByAssignment.set(request.assignment_id, request)
+    }
+  }
+
+  const occupiedPositionsBySetlist = new Map<string, Set<string>>()
+  for (const assignment of serviceAssignmentsResult.data ?? []) {
+    const key = `${assignment.setlist_id}|${assignment.team_position}`
+    const occupied = occupiedPositionsBySetlist.get(key) ?? new Set<string>()
+    occupied.add(assignment.user_id)
+    occupiedPositionsBySetlist.set(key, occupied)
+  }
+
+  const namesByMemberId = new Map<string, string>()
+  if (workspaceMembers.length > 0) {
+    const { data: memberProfiles } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", workspaceMembers.map((member) => member.user_id))
+
+    for (const profile of memberProfiles ?? []) {
+      namesByMemberId.set(profile.id, profile.display_name?.trim() || "Team member")
+    }
+  }
 
   let setlists: Setlist[] = []
 
@@ -407,6 +473,25 @@ export default async function MySchedulePage({
           ) : null}
         </div>
       </section>
+
+      {getParam(params.swapRequested) === "1" ? (
+        <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          Swap request sent. Your proposed substitute and worship leaders have been notified.
+        </div>
+      ) : null}
+      {getParam(params.swapError) ? (
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {{
+            invalid_request: "Choose an eligible substitute and keep the note within 500 characters.",
+            assignment_unavailable: "That assignment is no longer available for a swap request.",
+            substitute_not_eligible: "The selected teammate is not assigned to the required position.",
+            substitute_already_assigned: "That teammate already has the same position in this service.",
+            swap_already_open: "A swap request is already open for this assignment.",
+            service_closed: "Completed or archived services cannot be swapped.",
+            request_failed: "The swap request could not be created. Please try again.",
+          }[getParam(params.swapError) ?? ""] ?? "The swap request could not be completed."}
+        </div>
+      ) : null}
 
       <nav
         aria-label="My service schedule"
@@ -652,6 +737,85 @@ export default async function MySchedulePage({
                             )
                           )}
                         </div>
+                      </div>
+                    ) : null}
+
+                    {swapFeatureAvailable && assignmentsForService.length > 0 && setlist.status !== "archived" && (!setlist.service_date || setlist.service_date >= today) && period !== "past" ? (
+                      <div className="space-y-3 border-t border-[var(--border)] pt-3">
+                        <p className="text-xs font-semibold text-[var(--foreground)]">Need a substitute?</p>
+                        {assignmentsForService.map((assignment) => {
+                          const previousRequest = latestSwapByAssignment.get(assignment.id)
+                          const requestIsOpen = previousRequest?.status === "pending" || previousRequest?.status === "substitute_accepted"
+                          const candidates = workspaceMembers.filter((member) =>
+                            member.user_id !== workspace.userId &&
+                            member.team_positions.includes(assignment.team_position) &&
+                            !(occupiedPositionsBySetlist.get(`${setlist.id}|${assignment.team_position}`) ?? new Set<string>()).has(member.user_id)
+                          )
+
+                          return (
+                            <div key={assignment.id} className="rounded-xl bg-[var(--surface)] p-3">
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold text-[var(--foreground)]">
+                                    {getTeamPositionLabel(assignment.team_position)}
+                                  </p>
+                                  {previousRequest && requestIsOpen ? (
+                                    <p className="mt-1 text-xs text-[var(--muted)]">
+                                      {previousRequest.status === "pending"
+                                        ? `Swap request sent to ${namesByMemberId.get(previousRequest.substitute_user_id) ?? "your proposed substitute"}; waiting for their response.`
+                                        : "Your proposed substitute accepted. Waiting for worship-leader approval."}
+                                    </p>
+                                  ) : previousRequest?.status === "declined" ? (
+                                    <p className="mt-1 text-xs text-rose-700">Your last swap request was declined.</p>
+                                  ) : null}
+                                </div>
+                                {!requestIsOpen && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
+                                  <details className="shrink-0">
+                                    <summary className="cursor-pointer list-none rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
+                                      Request a swap
+                                    </summary>
+                                    <form action={requestAssignmentSwap} className="mt-3 w-full space-y-3 rounded-xl border border-[var(--border)] bg-white p-3 sm:min-w-[300px]">
+                                      <input type="hidden" name="assignmentId" value={assignment.id} />
+                                      <div>
+                                        <label htmlFor={`swap-substitute-${assignment.id}`} className="mb-1.5 block text-xs font-medium text-[var(--foreground)]">Eligible substitute</label>
+                                        <select
+                                          id={`swap-substitute-${assignment.id}`}
+                                          name="substituteUserId"
+                                          required
+                                          defaultValue=""
+                                          className="h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                                        >
+                                          <option value="" disabled>Select a teammate</option>
+                                          {candidates.map((member) => (
+                                            <option key={member.user_id} value={member.user_id}>
+                                              {namesByMemberId.get(member.user_id) ?? "Team member"}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <div>
+                                        <label htmlFor={`swap-reason-${assignment.id}`} className="mb-1.5 block text-xs font-medium text-[var(--foreground)]">Reason (optional)</label>
+                                        <textarea
+                                          id={`swap-reason-${assignment.id}`}
+                                          name="reason"
+                                          maxLength={500}
+                                          rows={2}
+                                          placeholder="Share why you need a substitute."
+                                          className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+                                        />
+                                      </div>
+                                      <button type="submit" className="inline-flex h-9 w-full items-center justify-center rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
+                                        Send swap request
+                                      </button>
+                                    </form>
+                                  </details>
+                                ) : !requestIsOpen && candidates.length === 0 ? (
+                                  <p className="text-xs text-[var(--muted)]">No eligible substitute is available for this position.</p>
+                                ) : null}
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
                     ) : null}
 
