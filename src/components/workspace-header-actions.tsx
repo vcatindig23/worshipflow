@@ -22,6 +22,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
@@ -96,6 +97,18 @@ type SearchResults = {
 type SearchResultTarget = {
   key: string
   href: string
+}
+
+function subscribeToMountedState() {
+  return () => {}
+}
+
+function getMountedStateSnapshot() {
+  return true
+}
+
+function getServerMountedStateSnapshot() {
+  return false
 }
 
 function formatNotificationTime(value: string) {
@@ -204,7 +217,11 @@ export default function WorkspaceHeaderActions({
     top: number
     right: number
   } | null>(null)
-  const [isBrowserMounted, setIsBrowserMounted] = useState(false)
+  const isBrowserMounted = useSyncExternalStore(
+    subscribeToMountedState,
+    getMountedStateSnapshot,
+    getServerMountedStateSnapshot
+  )
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null)
   const [activeSearchResultIndex, setActiveSearchResultIndex] = useState(0)
@@ -286,12 +303,10 @@ export default function WorkspaceHeaderActions({
   ).slice(0, 12), [activities, notifications])
 
   useEffect(() => {
+    // Start the initial remote-data sync after this render is committed.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshNotifications()
   }, [refreshNotifications])
-
-  useEffect(() => {
-    setIsBrowserMounted(true)
-  }, [])
 
   useEffect(() => {
     function refreshWhenVisible() {
@@ -355,6 +370,8 @@ export default function WorkspaceHeaderActions({
 
   useEffect(() => {
     if (!searchOpen) {
+      // Reset search UI state when the controlled or internal dialog closes.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchQuery("")
       setSearchResults(null)
       setSearchError("")
@@ -467,10 +484,7 @@ export default function WorkspaceHeaderActions({
   }, [onCloseSearch, onOpenSearch, refreshNotifications])
 
   useEffect(() => {
-    if (!notificationsOpen) {
-      setNotificationPanelPosition(null)
-      return
-    }
+    if (!notificationsOpen) return
 
     function updateNotificationPanelPosition() {
       const trigger = notificationButtonRef.current
@@ -544,6 +558,8 @@ export default function WorkspaceHeaderActions({
   }, [notificationsOpen])
 
   useEffect(() => {
+    // Route changes should always dismiss transient search and notification panels.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNotificationsOpen(false)
     onCloseSearch()
   }, [pathname, onCloseSearch])
