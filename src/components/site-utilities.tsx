@@ -32,6 +32,8 @@ export default function SiteUtilities() {
     try {
       const storedTheme = window.localStorage.getItem("worshipflow-theme")
       const nextTheme = storedTheme === "dark" ? "dark" : "light"
+      // Intentional client-side preference hydration; keep the server render deterministic.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(nextTheme)
       document.documentElement.dataset.theme = nextTheme
       setCookieVisible(window.localStorage.getItem("worshipflow-cookie-notice") !== "accepted")
