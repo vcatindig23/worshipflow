@@ -852,7 +852,6 @@ export async function duplicateSetlist(formData: FormData) {
 
   const {
     supabase,
-    organizationId,
     role,
   } = await getMembership()
 
