@@ -411,7 +411,7 @@ export async function updateMemberTeamPositions(
     role: currentRole,
   } = await getCurrentMembership()
 
-  if (currentRole !== "admin") {
+  if (!isAdministrator(currentRole)) {
     redirect("/settings/team?error=administrator_required")
   }
 
@@ -467,7 +467,7 @@ export async function removeMember(
     userId: currentUserId,
   } = await getCurrentMembership()
 
-  if (role !== "admin") {
+  if (!isAdministrator(role)) {
     redirect(
       "/settings/team?error=administrator_required"
     )
