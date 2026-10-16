@@ -29,6 +29,8 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 import ServiceResources from "./service-resources"
 import ServiceTimeline from "./service-timeline"
 import ServicePreparationChecklist from "./service-preparation-checklist"
+import AnnouncementAcknowledgment from "./announcement-acknowledgment"
+import SetlistSwapRequestsPanel from "./swap-requests-panel"
 import { saveServiceAsTemplate } from "@/app/services/template-actions"
 import {
   addSongToSetlist,
@@ -792,6 +794,7 @@ export default async function SetlistPage({
               <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">
                 {setlist.announcements}
               </p>
+              <AnnouncementAcknowledgment setlistId={id} />
             </article>
           ) : null}
 
@@ -807,6 +810,8 @@ export default async function SetlistPage({
           ) : null}
         </section>
       ) : null}
+
+      <SetlistSwapRequestsPanel setlistId={id} canManage={canManageStatus} />
 
       <ServiceTimeline setlistId={id} canEdit={canEdit} />
 
