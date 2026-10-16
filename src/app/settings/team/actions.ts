@@ -2,56 +2,18 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { z } from "zod"
 import {
   generateInviteCode,
   hashInviteCode,
 } from "@/lib/invitations/code"
 import { createClient } from "@/lib/supabase/server"
-
-const invitationSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .email()
-    .max(320),
-  role: z.enum([
-    "worship_leader",
-    "song_editor",
-    "team_member",
-    "viewer",
-  ]),
-})
-
-const memberRoleSchema = z.enum([
-  "admin",
-  "worship_leader",
-  "song_editor",
-  "team_member",
-  "viewer",
-])
-
-const teamPositionSchema = z.enum([
-  "worship_leader",
-  "singer",
-  "lead_guitarist",
-  "rhythm_guitarist",
-  "acoustic_guitarist",
-  "electric_guitarist",
-  "bassist",
-  "keyboardist",
-  "pianist",
-  "drummer",
-  "percussionist",
-  "violinist",
-  "cellist",
-  "sound_engineer",
-  "audio_visual",
-  "choir_member",
-  "other",
-])
-
-const uuidSchema = z.string().uuid()
+import {
+  invitationSchema,
+  isAdministrator,
+  memberRoleSchema,
+  teamPositionsSchema,
+  uuidSchema,
+} from "@/lib/team-access-validation"
 
 export type InvitationState = {
   success: boolean
@@ -139,7 +101,7 @@ export async function createInvitation(
     role,
   } = await getCurrentMembership()
 
-  if (role !== "admin") {
+  if (!isAdministrator(role)) {
     return {
       success: false,
       code: "",
@@ -311,8 +273,12 @@ export async function revokeInvitation(
     )
   }
 
-  const { supabase } =
+  const { supabase, role } =
     await getCurrentMembership()
+
+  if (!isAdministrator(role)) {
+    redirect("/settings/team?error=administrator_required")
+  }
 
   const { error } =
     await supabase.rpc(
@@ -380,7 +346,7 @@ export async function updateMemberRole(
     role: currentRole,
   } = await getCurrentMembership()
 
-  if (currentRole !== "admin") {
+  if (!isAdministrator(currentRole)) {
     redirect(
       "/settings/team?error=administrator_required"
     )
@@ -431,10 +397,9 @@ export async function updateMemberTeamPositions(
   const parsedUserId = uuidSchema.safeParse(
     String(formData.get("userId") ?? "").trim()
   )
-  const parsedPositions = z
-    .array(teamPositionSchema)
-    .max(10)
-    .safeParse(formData.getAll("teamPositions"))
+  const parsedPositions = teamPositionsSchema.safeParse(
+    formData.getAll("teamPositions")
+  )
 
   if (!parsedUserId.success || !parsedPositions.success) {
     redirect("/settings/team?error=invalid_team_positions")
