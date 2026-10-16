@@ -303,35 +303,11 @@ For bugs, ideas, and current discussions, visit the [GitHub Issues](https://gith
 
 ## Contributing
 
-Contributions, bug reports, and suggestions are welcome.
+Bug reports, feature ideas, and security reports are welcome through [GitHub Issues](https://github.com/vcatindig23/worshipflow/issues).
 
-1. Fork the repository.
-2. Create a branch for your change.
+WorshipFlow is currently distributed under a proprietary license. Making the source repository public on GitHub does not grant general permission to reuse, modify, deploy, or redistribute the project code. Please describe proposed improvements in an issue first. Do not publish modified copies or submit code contributions unless the repository owner has provided prior written permission and any required contribution terms.
 
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-3. Make your changes and add or update tests where appropriate.
-4. Run the available checks.
-
-   ```bash
-   npm run lint
-   npm run build
-   npm test
-   ```
-
-5. Commit and push your branch.
-
-   ```bash
-   git add .
-   git commit -m "Describe your change"
-   git push origin feature/your-feature-name
-   ```
-
-6. Open a pull request describing the change and the checks you ran.
-
-For larger changes, open an issue first to discuss the proposed approach. Never include real environment variables, credentials, or private church data in commits, tests, or screenshots.
+Never include real environment variables, credentials, access tokens, or private church data in issues, patches, tests, or screenshots.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -339,7 +315,9 @@ For larger changes, open an issue first to discuss the proposed approach. Never 
 
 ## License
 
-A license file has not yet been added to this repository. Until a license is selected and included, do not assume that the project is available for redistribution, modification, or commercial reuse. Add a license that matches the project's intended use before publishing it for reuse.
+WorshipFlow is proprietary software. Project code and other materials owned by the repository owner are covered by the [WorshipFlow Proprietary Software License](LICENSE). No general permission is granted to reuse, modify, deploy, or redistribute those materials without prior written permission.
+
+Third-party dependencies and external assets remain subject to their own licenses. User-provided content and third-party song materials are not claimed by the project license.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
