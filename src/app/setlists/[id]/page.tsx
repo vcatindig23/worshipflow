@@ -8,6 +8,7 @@ import {
   CalendarDays,
   CheckCircle2,
   Copy,
+  ClipboardCheck,
   ChevronRight,
   Edit,
   History,
@@ -33,6 +34,7 @@ import {
   addSongToSetlist,
   addSetlistTeamAssignment,
   deleteSetlist,
+  duplicateSetlist,
   moveSetlistSong,
   removeSongFromSetlist,
   removeSetlistTeamAssignment,
@@ -209,6 +211,8 @@ const errorMessages: Record<
     "Enter a template name between 1 and 120 characters.",
   template_save_failed:
     "The service could not be saved as a template. Make sure the service-template migration is applied.",
+  duplicate_failed:
+    "The service could not be duplicated. Check your permissions and try again.",
 }
 
 function formatDate(value: string | null) {
@@ -640,6 +644,27 @@ export default async function SetlistPage({
                   <Copy className="size-4" />
                   <span className="hidden sm:inline">Save template</span>
                   <span className="sm:hidden">Save</span>
+                </button>
+              </form>
+            ) : null}
+
+            <Link
+              href={`/setlists/${id}/preparation`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            >
+              <ClipboardCheck className="size-4" />
+              Rehearsal &amp; prep
+            </Link>
+
+            {canManageStatus ? (
+              <form action={duplicateSetlist}>
+                <input type="hidden" name="setlistId" value={id} />
+                <button
+                  type="submit"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                >
+                  <Copy className="size-4" />
+                  Duplicate
                 </button>
               </form>
             ) : null}

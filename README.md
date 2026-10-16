@@ -81,6 +81,9 @@ The goal is to make preparation easier and help every member know **what is plan
 - Save reusable service templates and create new drafts from them.
 - Attach workspace files as service resources.
 - Review service readiness, team assignments, and confirmations.
+- Duplicate an existing service plan while resetting its date, completion state, and team confirmations.
+- Schedule rehearsals with their own date, start/end time, location, and preparation notes.
+- Maintain service-specific preparation tasks and flag overlapping service/rehearsal commitments for shared team members.
 
 #### Team and workspace coordination
 - Set up a church workspace and invite team members.

@@ -842,3 +842,36 @@ export async function removeSetlistTeamAssignment(
   revalidatePath("/services")
   redirect(`/setlists/${setlistId}`)
 }
+
+export async function duplicateSetlist(formData: FormData) {
+  const setlistId = String(formData.get("setlistId") ?? "").trim()
+
+  if (!uuidSchema.safeParse(setlistId).success) {
+    redirect("/setlists")
+  }
+
+  const {
+    supabase,
+    role,
+  } = await getMembership()
+
+  requireRole(role, leaderRoles)
+
+  const { data: duplicatedId, error } = await supabase.rpc(
+    "duplicate_setlist",
+    { p_setlist_id: setlistId }
+  )
+
+  if (error || typeof duplicatedId !== "string") {
+    console.error("duplicate_setlist failed:", {
+      code: error?.code,
+      message: error?.message,
+    })
+    redirect(`/setlists/${setlistId}?error=duplicate_failed`)
+  }
+
+  revalidatePath("/setlists")
+  revalidatePath("/services")
+  revalidatePath(`/setlists/${setlistId}`)
+  redirect(`/setlists/${duplicatedId}`)
+}
