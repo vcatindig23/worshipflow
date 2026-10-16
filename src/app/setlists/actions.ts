@@ -3,6 +3,13 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
+import {
+  hasAnyRole,
+  setlistEditorRoles as editorRoles,
+  setlistLeaderRoles as leaderRoles,
+  teamPositionSchema,
+  uuidSchema,
+} from "@/lib/team-access-validation"
 import { createClient } from "@/lib/supabase/server"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import {
@@ -10,43 +17,10 @@ import {
   isValidServiceTime,
 } from "@/lib/service-scheduling"
 
-const uuidSchema = z.string().uuid()
-
-const editorRoles = [
-  "admin",
-  "worship_leader",
-  "song_editor",
-] as const
-
-const leaderRoles = [
-  "admin",
-  "worship_leader",
-] as const
-
 const setlistStatusSchema = z.enum([
   "draft",
   "published",
   "archived",
-])
-
-const teamPositionSchema = z.enum([
-  "worship_leader",
-  "singer",
-  "lead_guitarist",
-  "rhythm_guitarist",
-  "acoustic_guitarist",
-  "electric_guitarist",
-  "bassist",
-  "keyboardist",
-  "pianist",
-  "drummer",
-  "percussionist",
-  "violinist",
-  "cellist",
-  "sound_engineer",
-  "audio_visual",
-  "choir_member",
-  "other",
 ])
 
 function parseOptionalInteger(
@@ -96,7 +70,7 @@ function requireRole(
   role: string,
   allowedRoles: readonly string[]
 ) {
-  if (!allowedRoles.includes(role)) {
+  if (!hasAnyRole(role, allowedRoles)) {
     redirect("/error?code=permission_denied")
   }
 }
