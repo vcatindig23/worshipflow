@@ -57,17 +57,14 @@ export default function DashboardMobileNavigation({
   userAvatarUrl,
 }: DashboardMobileNavigationProps) {
   const pathname = usePathname()
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    setOpen(false)
-  }, [pathname])
+  const [openForPathname, setOpenForPathname] = useState<string | null>(null)
+  const open = openForPathname === pathname
 
   useEffect(() => {
     if (!open) return
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false)
+      if (event.key === "Escape") setOpenForPathname(null)
     }
 
     document.addEventListener("keydown", handleKeyDown)
@@ -78,7 +75,7 @@ export default function DashboardMobileNavigation({
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => setOpenForPathname(pathname)}
         aria-label="Open navigation"
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -92,7 +89,7 @@ export default function DashboardMobileNavigation({
           <button
             type="button"
             aria-label="Close navigation menu"
-            onClick={() => setOpen(false)}
+            onClick={() => setOpenForPathname(null)}
             className="absolute inset-0 bg-slate-950/45 backdrop-blur-[2px]"
           />
 
@@ -120,7 +117,7 @@ export default function DashboardMobileNavigation({
               <button
                 type="button"
                 aria-label="Close navigation"
-                onClick={() => setOpen(false)}
+                onClick={() => setOpenForPathname(null)}
                 className="group inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-[var(--sidebar-muted)] transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
               >
                 <X className="wf-icon-motion size-5" />
@@ -138,7 +135,7 @@ export default function DashboardMobileNavigation({
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setOpen(false)}
+                    onClick={() => setOpenForPathname(null)}
                     aria-current={active ? "page" : undefined}
                     className={`group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
                       active
@@ -166,7 +163,7 @@ export default function DashboardMobileNavigation({
               </p>
               <Link
                 href="/settings"
-                onClick={() => setOpen(false)}
+                onClick={() => setOpenForPathname(null)}
                 aria-current={pathname === "/settings" || pathname.startsWith("/settings/church") ? "page" : undefined}
                 className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--sidebar-muted)] transition duration-200 hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
               >
@@ -181,7 +178,7 @@ export default function DashboardMobileNavigation({
               <div className="flex items-center gap-3 rounded-2xl bg-white/[0.06] p-3">
                 <Link
                   href="/profile"
-                  onClick={() => setOpen(false)}
+                  onClick={() => setOpenForPathname(null)}
                   className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                   aria-label={`View profile for ${userName}`}
                 >
