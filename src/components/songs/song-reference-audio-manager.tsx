@@ -172,7 +172,7 @@ export default function SongReferenceAudioManager({
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-[var(--foreground)]">Reference audio</h3>
           <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-            Attach the song's rehearsal or reference recording for your team to practice with. MP3, M4A, or WAV; up to 25 MB.
+            Attach the song&apos;s rehearsal or reference recording for your team to practice with. MP3, M4A, or WAV; up to 25 MB.
           </p>
           {currentAudioPath ? (
             <div className="mt-3 flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 sm:flex-row sm:items-center">
