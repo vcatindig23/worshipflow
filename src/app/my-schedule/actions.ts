@@ -2,20 +2,8 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { z } from "zod"
+import { setlistAssignmentResponseSchema } from "@/lib/service-assignment-validation"
 import { createClient } from "@/lib/supabase/server"
-
-const uuidSchema = z.string().uuid()
-
-const confirmationStatusSchema = z.enum([
-  "confirmed",
-  "declined",
-])
-
-const responseNoteSchema = z
-  .string()
-  .trim()
-  .max(500)
 
 export type AssignmentResponseState = {
   success: boolean
@@ -43,30 +31,20 @@ async function getCurrentUser() {
 
 export async function respondToSetlistAssignment(
   assignmentId: string,
-  status: "confirmed" | "declined",
+  status: string,
   responseNote?: string
 ): Promise<AssignmentResponseState> {
-  const parsedAssignmentId =
-    uuidSchema.safeParse(assignmentId)
+  const parsedResponse = setlistAssignmentResponseSchema.safeParse({
+    assignmentId,
+    status,
+    responseNote: responseNote ?? "",
+  })
 
-  const parsedStatus =
-    confirmationStatusSchema.safeParse(status)
-
-  const parsedNote =
-    responseNoteSchema.safeParse(
-      responseNote ?? ""
-    )
-
-  if (
-    !parsedAssignmentId.success ||
-    !parsedStatus.success ||
-    !parsedNote.success
-  ) {
+  if (!parsedResponse.success) {
     return {
       success: false,
       status: null,
-      error:
-        "The confirmation response is invalid.",
+      error: "The confirmation response is invalid.",
     }
   }
 
@@ -79,11 +57,11 @@ export async function respondToSetlistAssignment(
     "respond_to_setlist_assignment",
     {
       p_assignment_id:
-        parsedAssignmentId.data,
+        parsedResponse.data.assignmentId,
       p_status:
-        parsedStatus.data,
+        parsedResponse.data.status,
       p_response_note:
-        parsedNote.data || null,
+        parsedResponse.data.responseNote || null,
     }
   )
 
@@ -96,7 +74,7 @@ export async function respondToSetlistAssignment(
         details: error.details,
         hint: error.hint,
         assignmentId:
-          parsedAssignmentId.data,
+          parsedResponse.data.assignmentId,
         userId,
       }
     )
@@ -179,7 +157,7 @@ export async function respondToSetlistAssignment(
 
   return {
     success: true,
-    status: parsedStatus.data,
+    status: parsedResponse.data.status,
     error: "",
   }
 }
