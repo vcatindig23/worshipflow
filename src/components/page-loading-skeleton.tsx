@@ -17,14 +17,15 @@ type PageLoadingSkeletonProps = {
 };
 
 function Skeleton({ className = "" }: { className?: string }) {
-  return <div aria-hidden="true" className={\`wf-skeleton rounded-lg \${className}\`} />;
+  const tone = className.includes("!bg-[#29362d]") ? "wf-skeleton-dark" : ""
+  return <div aria-hidden="true" className={`wf-skeleton rounded-lg ${tone} ${className}`} />;
 }
 
 function PageHeading({ width = "w-56" }: { width?: string }) {
   return (
     <div className="space-y-3">
       <Skeleton className="h-3 w-24" />
-      <Skeleton className={\`h-8 max-w-full \${width}\`} />
+      <Skeleton className={`h-8 max-w-full ${width}`} />
       <Skeleton className="h-4 w-80 max-w-full" />
     </div>
   );
@@ -35,7 +36,7 @@ function SkeletonRows({ count = 5, roomy = false }: { count?: number; roomy?: bo
     <div className="space-y-3">
       {Array.from({ length: count }, (_, index) => (
         <div key={index} className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
-          <Skeleton className={\`shrink-0 rounded-xl \${roomy ? "size-12" : "size-10"}\`} />
+          <Skeleton className={`shrink-0 rounded-xl ${roomy ? "size-12" : "size-10"}`} />
           <div className="min-w-0 flex-1 space-y-2">
             <Skeleton className="h-4 w-2/5 max-w-56" />
             <Skeleton className="h-3 w-3/5 max-w-80" />
@@ -65,7 +66,7 @@ export default function PageLoadingSkeleton({ variant }: PageLoadingSkeletonProp
           <Skeleton className="h-10 w-3/4 max-w-2xl !bg-[#29362d]" />
           <div className="w-full max-w-2xl space-y-5">
             {Array.from({ length: 7 }, (_, index) => (
-              <Skeleton key={index} className={\`h-6 !bg-[#29362d] \${index % 3 === 1 ? "w-4/5" : "w-full"}\`} />
+              <Skeleton key={index} className={`h-6 !bg-[#29362d] ${index % 3 === 1 ? "w-4/5" : "w-full"}`} />
             ))}
           </div>
         </div>
@@ -95,7 +96,7 @@ export default function PageLoadingSkeleton({ variant }: PageLoadingSkeletonProp
             <div className="max-h-[60vh] space-y-5 overflow-hidden">
               {Array.from({ length: 10 }, (_, index) => (
                 <div key={index} className="space-y-2">
-                  <Skeleton className={\`h-4 \${index % 3 === 1 ? "w-2/3" : "w-4/5"}\`} />
+                  <Skeleton className={`h-4 ${index % 3 === 1 ? "w-2/3" : "w-4/5"}`} />
                   {index % 2 === 0 ? <Skeleton className="h-3 w-3/5" /> : null}
                 </div>
               ))}
