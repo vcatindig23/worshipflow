@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, FileAudio, LoaderCircle, Trash2, UploadCloud } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
@@ -69,7 +69,7 @@ export default function SongReferenceAudioManager({
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  async function handleUpload(event: React.FormEvent<HTMLFormElement>) {
+  async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (uploading || removing) return
 
