@@ -18,17 +18,95 @@ import {
 import { transposeChordProSource } from "@/features/chordpro/transpose"
 import ChordProLine from "./chordpro-line"
 import PracticeMetronome from "./practice-metronome"
+import ReferenceAudioPlayer from "./reference-audio-player"
+import SongReferenceAudioManager from "./song-reference-audio-manager"
+
+type SongPracticePanelProps = {
+  tempo?: number | null
+  dark?: boolean
+  songId: string
+  organizationId: string
+  canEdit: boolean
+  referenceAudioPath: string | null
+  referenceAudioName: string | null
+  referenceAudioUrl: string | null
+  showManager: boolean
+}
+
+function SongPracticePanel({
+  tempo,
+  dark = false,
+  songId,
+  organizationId,
+  canEdit,
+  referenceAudioPath,
+  referenceAudioName,
+  referenceAudioUrl,
+  showManager,
+}: SongPracticePanelProps) {
+  return (
+    <div className={"z-10 max-h-[min(42dvh,380px)] shrink-0 overflow-y-auto border-b p-3 sm:p-4 " + (dark ? "border-white/10 bg-[#0d120f]" : "border-[var(--border)] bg-[var(--card)]")}>
+      <div className="mx-auto max-w-7xl space-y-3">
+        {referenceAudioUrl ? (
+          <ReferenceAudioPlayer
+            key={referenceAudioPath ?? referenceAudioUrl ?? "reference-audio"}
+            src={referenceAudioUrl}
+            title={referenceAudioName || "Song reference recording"}
+            dark={dark}
+          />
+        ) : (
+          <div className={"rounded-xl border px-4 py-3 text-xs leading-5 " + (dark ? "border-white/10 bg-white/5 text-white/65" : "border-[var(--border)] bg-[var(--background)] text-[var(--muted)]")}>
+            {referenceAudioPath
+              ? "The saved reference recording is unavailable right now. Refresh the page or ask a song editor to replace it."
+              : "No reference recording is attached to this song yet. You can still practice with the metronome."}
+          </div>
+        )}
+
+        <PracticeMetronome initialTempo={tempo} dark={dark} />
+
+        {showManager && canEdit ? (
+          <details className="group rounded-xl border border-[var(--border)] bg-[var(--background)]">
+            <summary className="cursor-pointer list-none px-4 py-3 text-xs font-semibold text-[var(--foreground)] marker:hidden">
+              {referenceAudioPath ? "Manage reference audio" : "Attach reference audio"}
+              <span className="float-right text-[var(--muted)] transition group-open:rotate-180" aria-hidden="true">⌄</span>
+            </summary>
+            <div className="border-t border-[var(--border)] p-3 sm:p-4">
+              <SongReferenceAudioManager
+                songId={songId}
+                organizationId={organizationId}
+                currentAudioPath={referenceAudioPath}
+                currentAudioName={referenceAudioName}
+              />
+            </div>
+          </details>
+        ) : null}
+      </div>
+    </div>
+  )
+}
 
 type SongViewerProps = {
   source: string
   title?: string
   tempo?: number | null
+  songId?: string
+  organizationId?: string
+  canEdit?: boolean
+  referenceAudioPath?: string | null
+  referenceAudioName?: string | null
+  referenceAudioUrl?: string | null
 }
 
 export default function SongViewer({
   source,
   title = "Song chart",
   tempo,
+  songId = "",
+  organizationId = "",
+  canEdit = false,
+  referenceAudioPath = null,
+  referenceAudioName = null,
+  referenceAudioUrl = null,
 }: SongViewerProps) {
   const [fontSize, setFontSize] = useState(24)
   const [showChords, setShowChords] = useState(true)
@@ -137,7 +215,7 @@ export default function SongViewer({
         stageMode
           ? "flex-1 overflow-auto bg-[#0d120f] px-6 py-8 text-white sm:px-10 sm:py-10"
           : practiceOpen
-            ? "h-[calc(100dvh-310px)] min-h-[280px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
+            ? "h-[calc(100dvh-520px)] min-h-[280px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
             : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
@@ -297,9 +375,17 @@ export default function SongViewer({
         </header>
 
         {practiceOpen ? (
-          <div className="z-10 shrink-0 px-3 py-3 sm:px-8">
-            <PracticeMetronome initialTempo={tempo} dark />
-          </div>
+          <SongPracticePanel
+            tempo={tempo}
+            dark
+            songId={songId}
+            organizationId={organizationId}
+            canEdit={canEdit}
+            referenceAudioPath={referenceAudioPath}
+            referenceAudioName={referenceAudioName}
+            referenceAudioUrl={referenceAudioUrl}
+            showManager={false}
+          />
         ) : null}
 
         {chart}
@@ -478,9 +564,16 @@ export default function SongViewer({
       </div>
 
       {practiceOpen ? (
-        <div className="shrink-0 border-b border-[var(--border)] p-3 sm:p-4">
-          <PracticeMetronome initialTempo={tempo} />
-        </div>
+        <SongPracticePanel
+          tempo={tempo}
+          songId={songId}
+          organizationId={organizationId}
+          canEdit={canEdit}
+          referenceAudioPath={referenceAudioPath}
+          referenceAudioName={referenceAudioName}
+          referenceAudioUrl={referenceAudioUrl}
+          showManager
+        />
       ) : null}
 
       {chart}

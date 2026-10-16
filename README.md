@@ -73,6 +73,7 @@ The goal is to make preparation easier and help every member know **what is plan
 - Import and export ChordPro files, including `.cho`, `.chopro`, and `.chordpro` formats.
 - Transpose chords, adjust chart text size, and show or hide chords while practicing.
 - Use a built-in metronome with an adjustable 40–220 BPM range, four-beat count-in, tap-tempo estimation, and beat visualization while viewing a song chart or in Song Stage Mode.
+- Attach private MP3, M4A, or WAV reference recordings to songs; slow playback, repeat the full track, or loop a selected A–B section while practicing in the song chart or Song Stage Mode.
 
 #### Service and setlist planning
 - Create and manage services with dates, times, descriptions, notes, and announcements.
