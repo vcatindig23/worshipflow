@@ -811,7 +811,12 @@ export default async function SetlistPage({
         </section>
       ) : null}
 
-      <SetlistSwapRequestsPanel setlistId={id} canManage={canManageStatus} />
+      <SetlistSwapRequestsPanel
+        setlistId={id}
+        canManage={canManageStatus}
+        errorKey={typeof queryParams.coordinationError === "string" ? queryParams.coordinationError : ""}
+        notice={typeof queryParams.swapResponse === "string" || typeof queryParams.swapResolved === "string" ? "1" : ""}
+      />
 
       <ServiceTimeline setlistId={id} canEdit={canEdit} />
 
