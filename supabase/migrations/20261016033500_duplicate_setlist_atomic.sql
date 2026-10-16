@@ -1,3 +1,33 @@
+-- Keep replayed installations consistent with the assignment-response columns
+-- used by WorshipFlow's scheduling workflow.
+alter table public.setlist_team_assignments
+  add column if not exists confirmation_status text not null default 'pending',
+  add column if not exists responded_at timestamptz,
+  add column if not exists response_note text;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'setlist_team_assignments_confirmation_status_check'
+      and conrelid = 'public.setlist_team_assignments'::regclass
+  ) then
+    alter table public.setlist_team_assignments
+      add constraint setlist_team_assignments_confirmation_status_check
+      check (confirmation_status in ('pending', 'confirmed', 'declined'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'setlist_team_assignments_response_note_length_check'
+      and conrelid = 'public.setlist_team_assignments'::regclass
+  ) then
+    alter table public.setlist_team_assignments
+      add constraint setlist_team_assignments_response_note_length_check
+      check (response_note is null or char_length(response_note) <= 500);
+  end if;
+end $$;
+
 create or replace function public.duplicate_setlist(p_setlist_id uuid)
 returns uuid
 language plpgsql
