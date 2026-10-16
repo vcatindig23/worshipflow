@@ -3,9 +3,7 @@
 import { useRef, useState } from "react"
 import {
   AudioLines,
-  Check,
   Headphones,
-  Loop,
   Pause,
   Play,
   Repeat2,
@@ -245,7 +243,7 @@ export default function ReferenceAudioPlayer({
 
       <div className={"mt-4 border-t pt-4 " + border}>
         <div className="flex items-center gap-2">
-          <Loop className={"size-4 " + muted} />
+          <Repeat2 className={"size-4 " + muted} />
           <p className={"text-xs font-semibold " + foreground}>Loop practice</p>
           {sectionLoopActive ? (
             <span className={"ml-auto rounded-full px-2 py-1 text-[10px] font-semibold " + subtleSurface + " " + muted}>
