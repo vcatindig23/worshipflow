@@ -648,15 +648,13 @@ export default async function SetlistPage({
               </form>
             ) : null}
 
-            {canEdit ? (
-              <Link
-                href={`/setlists/${id}/preparation`}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
-              >
-                <ClipboardCheck className="size-4" />
-                Rehearsal &amp; prep
-              </Link>
-            ) : null}
+            <Link
+              href={`/setlists/${id}/preparation`}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            >
+              <ClipboardCheck className="size-4" />
+              Rehearsal &amp; prep
+            </Link>
 
             {canManageStatus ? (
               <form action={duplicateSetlist}>
