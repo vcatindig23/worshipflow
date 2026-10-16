@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ArrowUp, Check, HelpCircle, MessageCircle, Moon, Sun, X } from "lucide-react"
 
 const faqItems = [
@@ -27,6 +27,7 @@ export default function SiteUtilities() {
   const [helpOpen, setHelpOpen] = useState(false)
   const [showTop, setShowTop] = useState(false)
   const [progress, setProgress] = useState(0)
+  const navigationTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     try {
@@ -58,6 +59,129 @@ export default function SiteUtilities() {
     }
   }, [])
 
+  useEffect(() => {
+    const clearNavigationProgress = () => {
+      delete document.documentElement.dataset.wfNavigationLoading
+      if (navigationTimerRef.current !== null) {
+        window.clearTimeout(navigationTimerRef.current)
+        navigationTimerRef.current = null
+      }
+    }
+
+    const handleNavigationClick = (event: MouseEvent) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return
+      }
+
+      const clickedElement =
+        event.target instanceof Element ? event.target : null
+      const link = clickedElement?.closest("a")
+      if (
+        !(link instanceof HTMLAnchorElement) ||
+        link.hasAttribute("download") ||
+        (link.target && link.target !== "_self") ||
+        link.hasAttribute("data-no-progress")
+      ) {
+        return
+      }
+
+      let destination: URL
+      try {
+        destination = new URL(link.href, window.location.href)
+      } catch {
+        return
+      }
+
+      if (destination.origin !== window.location.origin) return
+      if (
+        destination.pathname === window.location.pathname &&
+        destination.search === window.location.search
+      ) {
+        return
+      }
+
+      document.documentElement.dataset.wfNavigationLoading = "true"
+      if (navigationTimerRef.current !== null) {
+        window.clearTimeout(navigationTimerRef.current)
+      }
+      navigationTimerRef.current = window.setTimeout(
+        clearNavigationProgress,
+        12000,
+      )
+    }
+
+    const handleFormSubmit = (event: SubmitEvent) => {
+      const form = event.target
+      const button = event.submitter
+      if (
+        !(form instanceof HTMLFormElement) ||
+        !(button instanceof HTMLButtonElement) ||
+        form.method.toLowerCase() === "get" ||
+        form.hasAttribute("data-no-loading-feedback") ||
+        button.disabled ||
+        button.hasAttribute("data-no-loading-feedback")
+      ) {
+        return
+      }
+
+      const previousBusyValue = button.getAttribute("aria-busy")
+      let timeoutId: number | null = null
+      let observer: MutationObserver | null = null
+      let cleared = false
+
+      const clearPendingState = () => {
+        if (cleared) return
+        cleared = true
+        if (timeoutId !== null) window.clearTimeout(timeoutId)
+        observer?.disconnect()
+        form.removeEventListener("input", clearPendingState)
+        form.removeEventListener("change", clearPendingState)
+        button.classList.remove("wf-action-loading")
+        if (previousBusyValue === null) {
+          button.removeAttribute("aria-busy")
+        } else {
+          button.setAttribute("aria-busy", previousBusyValue)
+        }
+      }
+
+      button.classList.add("wf-action-loading")
+      button.setAttribute("aria-busy", "true")
+      form.addEventListener("input", clearPendingState, { once: true })
+      form.addEventListener("change", clearPendingState, { once: true })
+      timeoutId = window.setTimeout(clearPendingState, 20000)
+      observer = new MutationObserver(clearPendingState)
+      observer.observe(form.parentElement ?? form, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      })
+    }
+
+    document.addEventListener("click", handleNavigationClick, true)
+    document.addEventListener("submit", handleFormSubmit, true)
+
+    return () => {
+      document.removeEventListener("click", handleNavigationClick, true)
+      document.removeEventListener("submit", handleFormSubmit, true)
+      clearNavigationProgress()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (document.documentElement.dataset.wfNavigationLoading !== "true") return
+    delete document.documentElement.dataset.wfNavigationLoading
+    if (navigationTimerRef.current !== null) {
+      window.clearTimeout(navigationTimerRef.current)
+      navigationTimerRef.current = null
+    }
+  }, [pathname])
+
   function toggleTheme() {
     const nextTheme = theme === "dark" ? "light" : "dark"
     setTheme(nextTheme)
@@ -82,6 +206,7 @@ export default function SiteUtilities() {
     <>
       <a href="#main-content" className="wf-skip-link">Skip to main content</a>
       <div aria-hidden="true" className="wf-scroll-progress" style={{ transform: `scaleX(${progress / 100})` }} />
+      <div aria-hidden="true" className="wf-navigation-progress" />
 
       <button
         type="button"
