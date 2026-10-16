@@ -49,6 +49,7 @@ function SongPracticePanel({
       <div className="mx-auto max-w-7xl space-y-3">
         {referenceAudioUrl ? (
           <ReferenceAudioPlayer
+            key={referenceAudioPath ?? referenceAudioUrl ?? "reference-audio"}
             src={referenceAudioUrl}
             title={referenceAudioName || "Song reference recording"}
             dark={dark}
