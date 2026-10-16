@@ -336,6 +336,7 @@ export default async function SongPage({
           <SongViewer
             source={typedSong.chordpro_source}
             title={typedSong.title}
+            tempo={typedSong.tempo}
           />
         </section>
 

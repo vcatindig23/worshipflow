@@ -17,15 +17,18 @@ import {
 } from "@/features/chordpro/parser"
 import { transposeChordProSource } from "@/features/chordpro/transpose"
 import ChordProLine from "./chordpro-line"
+import PracticeMetronome from "./practice-metronome"
 
 type SongViewerProps = {
   source: string
   title?: string
+  tempo?: number | null
 }
 
 export default function SongViewer({
   source,
   title = "Song chart",
+  tempo,
 }: SongViewerProps) {
   const [fontSize, setFontSize] = useState(24)
   const [showChords, setShowChords] = useState(true)
@@ -34,6 +37,7 @@ export default function SongViewer({
   const [stageMode, setStageMode] = useState(false)
   const [autoScroll, setAutoScroll] = useState(false)
   const [scrollSpeed, setScrollSpeed] = useState(2)
+  const [practiceOpen, setPracticeOpen] = useState(false)
   const chartScrollRef = useRef<HTMLDivElement>(null)
 
   const displayedSource = useMemo(
@@ -132,7 +136,9 @@ export default function SongViewer({
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
           ? "flex-1 overflow-auto bg-[#0d120f] px-6 py-8 text-white sm:px-10 sm:py-10"
-          : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
+          : practiceOpen
+            ? "h-[calc(100dvh-310px)] min-h-[280px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
+            : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
       <div
@@ -279,7 +285,22 @@ export default function SongViewer({
           >
             <X className="size-5" />
           </button>
+          <button
+            type="button"
+            onClick={() => setPracticeOpen((value) => !value)}
+            aria-expanded={practiceOpen}
+            className={"inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition " + (practiceOpen ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white")}
+          >
+            <Gauge className="size-3.5" />
+            Practice
+          </button>
         </header>
+
+        {practiceOpen ? (
+          <div className="z-10 shrink-0 px-3 py-3 sm:px-8">
+            <PracticeMetronome initialTempo={tempo} dark />
+          </div>
+        ) : null}
 
         {chart}
       </div>
@@ -438,6 +459,16 @@ export default function SongViewer({
 
           <button
             type="button"
+            onClick={() => setPracticeOpen((value) => !value)}
+            aria-expanded={practiceOpen}
+            className={"inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition " + (practiceOpen ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]" : "border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface)]")}
+          >
+            <Gauge className="size-3.5" />
+            Practice
+          </button>
+
+          <button
+            type="button"
             onClick={() => setStageMode(true)}
             className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
           >
@@ -445,6 +476,12 @@ export default function SongViewer({
           </button>
         </div>
       </div>
+
+      {practiceOpen ? (
+        <div className="shrink-0 border-b border-[var(--border)] p-3 sm:p-4">
+          <PracticeMetronome initialTempo={tempo} />
+        </div>
+      ) : null}
 
       {chart}
     </div>
