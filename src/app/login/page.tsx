@@ -24,7 +24,7 @@ export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState)
 
   return (
-    <main className="relative isolate min-h-screen overflow-hidden bg-[var(--background)] px-4 py-8 sm:px-6 sm:py-12">
+    <main id="main-content" className="relative isolate min-h-screen overflow-hidden bg-[var(--background)] px-4 py-8 sm:px-6 sm:py-12">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden"
