@@ -1,73 +1,14 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Mail, UserRound } from "lucide-react"
-import PasswordInput from "@/components/auth/password-input"
-import { signup } from "./actions"
-
-type SignupPageProps = {
-  searchParams: Promise<{
-    error?: string
-  }>
-}
-
-const errorMessages: Record<string, string> = {
-  invalid_details:
-    "Please check your name, email, and password. Passwords must match and contain at least 8 characters.",
-  sign_up_failed:
-    "We could not create your account. The email may already be registered.",
-  configuration_error:
-    "The application is missing its site URL configuration.",
-}
-
-const baseInputClassName =
-  "h-12 w-full rounded-xl border border-[var(--border)] bg-white text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-
-const iconInputClassName = `${baseInputClassName} pl-10 pr-4`
-const passwordInputClassName = `${baseInputClassName} pl-3.5 pr-12`
-
-export default async function SignupPage({
-  searchParams,
-}: SignupPageProps) {
-  const params = await searchParams
-  const errorMessage = params.error
-    ? errorMessages[params.error] ?? "Something went wrong."
-    : null
-
   return (
-    <main className="relative isolate min-h-screen overflow-hidden bg-[var(--background)] px-4 py-8 sm:px-6 sm:py-12">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-      >
-        <div className="absolute -left-36 -top-40 size-[28rem] rounded-full bg-[var(--brand-soft)] opacity-70 blur-3xl" />
-        <div className="absolute -bottom-44 -right-32 size-[30rem] rounded-full bg-[#dce9e4] opacity-70 blur-3xl" />
-        <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white/60 to-transparent" />
-      </div>
-
-      <div className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-md items-center justify-center sm:min-h-[calc(100svh-6rem)]">
-        <div className="w-full">
-          <header className="mb-7 text-center">
-            <Link
-              href="/"
-              aria-label="WorshipFlow home"
-              className="inline-flex rounded-xl outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-4"
-            >
-              <Image
-                src="/worshipflow-wordmark.png"
-                alt="WorshipFlow"
-                width={545}
-                height={100}
-                priority
-                className="mx-auto h-auto w-56 sm:w-64"
-              />
-            </Link>
-            <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
+    <AuthSplitLayout>
+      <div className="w-full">
+          <header className="mb-6 text-left">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
               Get started
             </p>
             <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
               Create your account
             </h1>
-            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[var(--muted)]">
+            <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--muted)]">
               Bring your songs, service plans, and worship team together in one workspace.
             </p>
           </header>
@@ -200,7 +141,6 @@ export default async function SignupPage({
             Your account helps you prepare and coordinate with your church worship team.
           </p>
         </div>
-      </div>
-    </main>
+    </AuthSplitLayout>
   )
 }
