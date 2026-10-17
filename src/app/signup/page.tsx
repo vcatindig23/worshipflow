@@ -1,3 +1,38 @@
+import Link from "next/link"
+import { Mail, UserRound } from "lucide-react"
+import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import PasswordInput from "@/components/auth/password-input"
+import { signup } from "./actions"
+
+type SignupPageProps = {
+  searchParams: Promise<{
+    error?: string
+  }>
+}
+
+const errorMessages: Record<string, string> = {
+  invalid_details:
+    "Please check your name, email, and password. Passwords must match and contain at least 8 characters.",
+  sign_up_failed:
+    "We could not create your account. The email may already be registered.",
+  configuration_error:
+    "The application is missing its site URL configuration.",
+}
+
+const baseInputClassName =
+  "h-12 w-full rounded-xl border border-[var(--border)] bg-white text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+
+const iconInputClassName = `${baseInputClassName} pl-10 pr-4`
+const passwordInputClassName = `${baseInputClassName} pl-3.5 pr-12`
+
+export default async function SignupPage({
+  searchParams,
+}: SignupPageProps) {
+  const params = await searchParams
+  const errorMessage = params.error
+    ? errorMessages[params.error] ?? "Something went wrong."
+    : null
+
   return (
     <AuthSplitLayout>
       <div className="w-full">
