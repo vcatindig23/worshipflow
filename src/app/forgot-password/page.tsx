@@ -1,46 +1,5 @@
-import Link from "next/link"
-import { ArrowLeft, KeyRound, Mail } from "lucide-react"
-import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
-import { requestPasswordReset } from "./actions"
-
-type ForgotPasswordPageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}
-
-const errorMessages: Record<string, string> = {
-  invalid_email: "Enter a valid email address.",
-  send_failed:
-    "We could not send a reset email right now. Please wait a moment and try again.",
-  configuration:
-    "Password reset is temporarily unavailable. Please contact your workspace administrator.",
-}
-
-function getParam(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
-
-export default async function ForgotPasswordPage({
-  searchParams,
-}: ForgotPasswordPageProps) {
-  const params = await searchParams
-  const sent = getParam(params.sent) === "true"
-  const errorMessage = errorMessages[getParam(params.error) ?? ""]
-
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-8 sm:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center">
-        <div className="w-full">
-          <div className="mb-8 flex justify-center">
-            <Link href="/login" className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-                <WorshipFlowLogo className="size-7" />
-              </div>
-              <span className="text-lg font-semibold tracking-[-0.025em]">
-                WorshipFlow
-              </span>
-            </Link>
-          </div>
-
+    <AuthSplitLayout>
           <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
             <div className="mb-7 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <KeyRound className="size-5" />
@@ -117,8 +76,6 @@ export default async function ForgotPasswordPage({
               Back to sign in
             </Link>
           </section>
-        </div>
-      </div>
-    </main>
+    </AuthSplitLayout>
   )
 }
