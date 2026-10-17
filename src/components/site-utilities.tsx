@@ -3,22 +3,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
-import { ArrowUp, Check, HelpCircle, MessageCircle, Moon, Sun, X } from "lucide-react"
-
-const faqItems = [
-  {
-    question: "Where can I find my assigned services?",
-    answer: "Open My Schedule to review your upcoming assignments and respond to invitations.",
-  },
-  {
-    question: "How do I manage songs and setlists?",
-    answer: "Use Songs to manage chord charts and lyrics, then add songs to a setlist or service plan.",
-  },
-  {
-    question: "How can I contact my team?",
-    answer: "Open Team Chat to message your worship team and coordinate service details.",
-  },
-]
+import { ArrowUp, BookOpen, Check, HelpCircle, MessageCircle, Moon, Sun, X } from "lucide-react"
+import FaqSearchList from "@/components/faq-search-list"
 
 export default function SiteUtilities() {
   const pathname = usePathname()
@@ -217,7 +203,7 @@ export default function SiteUtilities() {
 
       {pathname === "/settings" ? <div className="wf-help-widget fixed bottom-4 left-4 z-[65] sm:bottom-6 sm:left-6">
         {helpOpen ? (
-          <section aria-label="WorshipFlow help" className="mb-3 w-[min(90vw,360px)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-2xl">
+          <section aria-label="WorshipFlow help" className="mb-3 max-h-[85vh] w-[min(90vw,360px)] overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
               <div>
                 <h2 className="text-sm font-semibold">Quick help</h2>
@@ -227,17 +213,25 @@ export default function SiteUtilities() {
                 <X className="size-4" />
               </button>
             </div>
-            <div className="divide-y divide-[var(--border)] px-4">
-              {faqItems.map((item) => (
-                <details key={item.question} className="py-3">
-                  <summary className="cursor-pointer text-sm font-medium marker:text-[var(--brand)]">{item.question}</summary>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{item.answer}</p>
-                </details>
-              ))}
+            <div className="px-4 py-4">
+              <FaqSearchList compact />
             </div>
-            <Link href="/chat" onClick={() => setHelpOpen(false)} className="m-4 inline-flex items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]">
-              <MessageCircle className="size-4" /> Contact my team
-            </Link>
+            <div className="flex flex-col gap-2 px-4 pb-4">
+              <Link
+                href="/faq"
+                onClick={() => setHelpOpen(false)}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--brand)]/40 hover:text-[var(--brand)]"
+              >
+                <BookOpen className="size-4" /> Browse all FAQs
+              </Link>
+              <Link
+                href="/chat"
+                onClick={() => setHelpOpen(false)}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+              >
+                <MessageCircle className="size-4" /> Contact my team
+              </Link>
+            </div>
           </section>
         ) : null}
         <button type="button" onClick={() => setHelpOpen((open) => !open)} aria-expanded={helpOpen} aria-label={helpOpen ? "Close help and FAQ" : "Open help and FAQ"} className="inline-flex h-11 items-center gap-2 rounded-full bg-[var(--brand)] px-4 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2">
