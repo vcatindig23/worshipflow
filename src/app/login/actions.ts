@@ -99,6 +99,47 @@ export type OAuthSignInState = {
 
 const oauthProviderSchema = z.enum(["google", "facebook"])
 
+async function isOAuthProviderEnabled(
+  provider: z.infer<typeof oauthProviderSchema>
+): Promise<boolean | null> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  const publishableKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+
+  if (!supabaseUrl || !publishableKey) {
+    return null
+  }
+
+  try {
+    const settingsUrl = new URL("/auth/v1/settings", supabaseUrl)
+    const response = await fetch(settingsUrl, {
+      headers: { apikey: publishableKey },
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const settings: unknown = await response.json()
+    if (!settings || typeof settings !== "object") {
+      return null
+    }
+
+    const external = (settings as { external?: unknown }).external
+    if (!external || typeof external !== "object") {
+      return null
+    }
+
+    const enabled = (external as Record<string, unknown>)[provider]
+    return typeof enabled === "boolean" ? enabled : null
+  } catch {
+    return null
+  }
+}
+
 export async function startOAuthSignIn(
   _previousState: OAuthSignInState,
   formData: FormData
@@ -107,6 +148,15 @@ export async function startOAuthSignIn(
 
   if (!parsedProvider.success) {
     return { error: "Choose Google or Facebook to continue." }
+  }
+
+  const providerEnabled = await isOAuthProviderEnabled(parsedProvider.data)
+  if (providerEnabled === false) {
+    const providerLabel =
+      parsedProvider.data === "google" ? "Google" : "Facebook"
+    return {
+      error: `${providerLabel} sign-in is not enabled in Supabase Auth yet. Ask your administrator to enable the provider and add its OAuth credentials. You can still continue with email.`,
+    }
   }
 
   const siteUrl =
