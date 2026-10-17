@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { ArrowRight, KeyRound } from "lucide-react"
-import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import AuthSplitLayout from "@/components/auth/auth-layout"
 import PasswordInput from "@/components/auth/password-input"
 import { createClient } from "@/lib/supabase/server"
 import { updatePassword } from "./actions"
