@@ -1,3 +1,31 @@
+import Link from "next/link"
+import { ArrowLeft, KeyRound, Mail } from "lucide-react"
+import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import { requestPasswordReset } from "./actions"
+
+type ForgotPasswordPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+const errorMessages: Record<string, string> = {
+  invalid_email: "Enter a valid email address.",
+  send_failed:
+    "We could not send a reset email right now. Please wait a moment and try again.",
+  configuration:
+    "Password reset is temporarily unavailable. Please contact your workspace administrator.",
+}
+
+function getParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+export default async function ForgotPasswordPage({
+  searchParams,
+}: ForgotPasswordPageProps) {
+  const params = await searchParams
+  const sent = getParam(params.sent) === "true"
+  const errorMessage = errorMessages[getParam(params.error) ?? ""]
+
   return (
     <AuthSplitLayout>
           <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
