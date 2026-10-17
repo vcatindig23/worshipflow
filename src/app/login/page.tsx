@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useActionState } from "react"
 import {
   ArrowRight,
-  Church,
   KeyRound,
   Loader2,
   Mail,
@@ -52,7 +51,7 @@ export default function LoginPage() {
 
           <SocialLoginButtons />
 
-          <EmailAuthDisclosure forceOpen={Boolean(state.error)}>
+          <EmailAuthDisclosure>
             {state.error ? (
               <div
                 role="alert"
