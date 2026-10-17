@@ -1,9 +1,8 @@
 import Link from "next/link"
 import { Mail, UserRound } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
-import EmailAuthDisclosure from "@/components/auth/email-auth-disclosure"
+import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import PasswordInput from "@/components/auth/password-input"
-import SocialLoginButtons from "@/components/auth/social-login-buttons"
 import { signup } from "./actions"
 
 type SignupPageProps = {
@@ -32,7 +31,7 @@ export default async function SignupPage({
 }: SignupPageProps) {
   const params = await searchParams
   const errorMessage = params.error
-    ? errorMessages[params.error] ?? "Something went wrong."
+    ? errorMessages[params.error] ?? "Something went wrong. Please try again."
     : null
 
   return (
@@ -51,12 +50,12 @@ export default async function SignupPage({
         </header>
 
         <section className="rounded-[28px] border border-[var(--border)] bg-white/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.24)] ring-1 ring-black/[0.02] backdrop-blur sm:p-8">
-          <div className="mb-5">
+          <div className="mb-6">
             <h2 className="text-lg font-semibold tracking-tight text-[var(--foreground)]">
-              Create your account
+              Sign up with email
             </h2>
             <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-              Sign up with Google or Facebook, or continue with email.
+              Create a secure account to get started with your church team.
             </p>
           </div>
 
@@ -69,110 +68,105 @@ export default async function SignupPage({
             </div>
           ) : null}
 
-          <SocialLoginButtons />
-
-          <EmailAuthDisclosure defaultOpen={Boolean(errorMessage)}>
-            <form action={signup} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
-                >
-                  Full name
-                </label>
-                <div className="relative">
-                  <UserRound
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
-                  />
-                  <input
-                    id="fullName"
-                    name="fullName"
-                    type="text"
-                    autoComplete="name"
-                    required
-                    minLength={2}
-                    maxLength={120}
-                    placeholder="Your full name"
-                    className={iconInputClassName}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
-                >
-                  Email address
-                </label>
-                <div className="relative">
-                  <Mail
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
-                  />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    maxLength={320}
-                    placeholder="you@example.com"
-                    className={iconInputClassName}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
-                >
-                  Password
-                </label>
-                <PasswordInput
-                  id="password"
-                  name="password"
-                  autoComplete="new-password"
-                  minLength={8}
-                  maxLength={72}
-                  required
-                  placeholder="At least 8 characters"
-                  className={passwordInputClassName}
-                />
-                <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-                  Use at least 8 characters.
-                </p>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
-                >
-                  Confirm password
-                </label>
-                <PasswordInput
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  autoComplete="new-password"
-                  minLength={8}
-                  maxLength={72}
-                  required
-                  placeholder="Enter your password again"
-                  className={passwordInputClassName}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="group mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
+          <form action={signup} className="space-y-4">
+            <div>
+              <label
+                htmlFor="fullName"
+                className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
               >
-                Create account
-              </button>
-            </form>
-          </EmailAuthDisclosure>
+                Full name
+              </label>
+              <div className="relative">
+                <UserRound
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
+                />
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  minLength={2}
+                  maxLength={120}
+                  placeholder="Your full name"
+                  className={iconInputClassName}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
+              >
+                Email address
+              </label>
+              <div className="relative">
+                <Mail
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
+                />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  maxLength={320}
+                  placeholder="you@example.com"
+                  className={iconInputClassName}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
+              >
+                Password
+              </label>
+              <PasswordInput
+                id="password"
+                name="password"
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={72}
+                required
+                placeholder="At least 8 characters"
+                className={passwordInputClassName}
+              />
+              <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+                Use at least 8 characters.
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="mb-2 block text-sm font-semibold text-[var(--foreground)]"
+              >
+                Confirm password
+              </label>
+              <PasswordInput
+                id="confirmPassword"
+                name="confirmPassword"
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={72}
+                required
+                placeholder="Enter your password again"
+                className={passwordInputClassName}
+              />
+            </div>
+
+            <AuthSubmitButton
+              label="Create account"
+              pendingLabel="Creating account…"
+              className="group mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+            />
+          </form>
 
           <div className="mt-6 border-t border-[var(--border)] pt-5 text-center">
             <p className="text-sm text-[var(--muted)]">
