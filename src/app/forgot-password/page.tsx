@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { ArrowLeft, KeyRound, Mail } from "lucide-react"
-import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import AuthSplitLayout from "@/components/auth/auth-layout"
 import { requestPasswordReset } from "./actions"
 
 type ForgotPasswordPageProps = {
