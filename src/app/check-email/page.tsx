@@ -1,3 +1,16 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+import { MailCheck } from "lucide-react"
+import AuthSplitLayout from "@/components/auth/auth-split-layout"
+
+export const metadata: Metadata = {
+  title: "Check your email",
+  description:
+    "Confirm your email address to finish setting up your WorshipFlow account.",
+  alternates: { canonical: "/check-email" },
+}
+
+export default function CheckEmailPage() {
   return (
     <AuthSplitLayout>
           <div className="rounded-3xl border border-[var(--border)] bg-white p-8 text-center shadow-sm">
