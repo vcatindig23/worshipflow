@@ -1,10 +1,10 @@
 "use client"
 
 import { useActionState } from "react"
+import ParticleButton, { type ParticleButtonStatus } from "@/components/kokonutui/particle-button"
 import {
   Check,
   Clipboard,
-  Loader2,
   Send,
 } from "lucide-react"
 import {
@@ -24,6 +24,14 @@ export default function InviteMemberForm() {
       createInvitation,
       initialState
     )
+
+  const particleStatus: ParticleButtonStatus = pending
+    ? "pending"
+    : state.success && state.code
+      ? "success"
+      : state.error
+        ? "error"
+        : "idle"
 
   async function copyCode() {
     if (!state.code) {
@@ -90,21 +98,20 @@ export default function InviteMemberForm() {
         </div>
 
         <div className="flex items-end">
-          <button
+          <ParticleButton
             type="submit"
             disabled={pending}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+            status={particleStatus}
+            pendingLabel="Creating invitation..."
+            successLabel="Invitation created"
+            errorLabel="Try again"
+            icon={<Send className="size-4" />}
+            variant="default"
+            size="lg"
+            className="h-11 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
           >
-            {pending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
-
-            {pending
-              ? "Creating..."
-              : "Create Invitation"}
-          </button>
+            Create Invitation
+          </ParticleButton>
         </div>
       </div>
 
@@ -140,16 +147,20 @@ export default function InviteMemberForm() {
                 {state.code}
               </code>
 
-              <button
+              <ParticleButton
                 type="button"
-                onClick={() => void copyCode()}
-                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                aria-label="Copy invitation code"
+                onClick={copyCode}
+                pendingLabel="Copying..."
+                successLabel="Copied"
+                errorLabel="Copy failed"
+                variant="outline"
+                size="lg"
+                className="h-11 min-w-11 shrink-0 rounded-xl border border-emerald-200 bg-white px-3 text-sm font-semibold text-emerald-800 shadow-none transition hover:bg-emerald-100 sm:min-w-[96px]"
               >
                 <Clipboard className="size-4" />
-                <span className="hidden sm:inline">
-                  Copy
-                </span>
-              </button>
+                <span className="hidden sm:inline">Copy</span>
+              </ParticleButton>
             </div>
           </div>
         </div>
