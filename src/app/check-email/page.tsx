@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { MailCheck } from "lucide-react"
-import AuthSplitLayout from "@/components/auth/auth-layout"
+import AuthLayout from "@/components/auth/auth-layout"
 
 export const metadata: Metadata = {
   title: "Check your email",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function CheckEmailPage() {
   return (
-    <AuthSplitLayout>
+    <AuthLayout>
           <div className="rounded-3xl border border-[var(--border)] bg-white p-8 text-center shadow-sm">
             <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <MailCheck className="size-6" />
@@ -32,6 +32,6 @@ export default function CheckEmailPage() {
               Return to sign in
             </Link>
           </div>
-    </AuthSplitLayout>
+    </AuthLayout>
   )
 }
