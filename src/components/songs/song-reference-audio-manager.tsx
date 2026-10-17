@@ -3,6 +3,7 @@
 import { useRef, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, FileAudio, LoaderCircle, Trash2, UploadCloud } from "lucide-react"
+import ParticleButton, { type ParticleButtonStatus } from "@/components/kokonutui/particle-button"
 import { createClient } from "@/lib/supabase/client"
 import {
   removeSongReferenceAudio,
@@ -68,18 +69,21 @@ export default function SongReferenceAudioManager({
   const [removing, setRemoving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [uploadButtonStatus, setUploadButtonStatus] =
+    useState<ParticleButtonStatus>("idle")
 
-  async function handleUpload(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function uploadReferenceAudio() {
     if (uploading || removing) return
 
     const file = inputRef.current?.files?.[0]
     if (!file || file.size === 0) {
       setError("Choose an audio file to upload.")
+      setUploadButtonStatus("error")
       return
     }
     if (file.size > maxAudioFileSize) {
       setError("Audio files must be 25 MB or smaller.")
+      setUploadButtonStatus("error")
       return
     }
 
@@ -90,10 +94,12 @@ export default function SongReferenceAudioManager({
       (file.type !== "" && !audioType.accepted.includes(file.type.toLowerCase()))
     ) {
       setError("Choose an MP3, M4A, or WAV audio file.")
+      setUploadButtonStatus("error")
       return
     }
 
     setUploading(true)
+    setUploadButtonStatus("pending")
     setError("")
     setSuccess("")
     const supabase = createClient()
@@ -113,6 +119,7 @@ export default function SongReferenceAudioManager({
 
       if (uploadError) {
         setError(formatUploadError(uploadError.message))
+        setUploadButtonStatus("error")
         return
       }
 
@@ -124,17 +131,25 @@ export default function SongReferenceAudioManager({
       if (!result.ok) {
         await supabase.storage.from("workspace-files").remove([storagePath])
         setError(describeActionError(result.error))
+        setUploadButtonStatus("error")
         return
       }
 
       if (inputRef.current) inputRef.current.value = ""
       setSuccess("Reference audio attached to this song.")
+      setUploadButtonStatus("success")
       router.refresh()
     } catch {
       setError("Upload failed. Check your connection and try again.")
+      setUploadButtonStatus("error")
     } finally {
       setUploading(false)
     }
+  }
+
+  function handleUpload(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    void uploadReferenceAudio()
   }
 
   async function handleRemove() {
@@ -206,14 +221,21 @@ export default function SongReferenceAudioManager({
           aria-label="Choose a reference audio file"
           className="block w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2.5 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--brand-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--brand)] disabled:opacity-60"
         />
-        <button
-          type="submit"
+        <ParticleButton
+          type="button"
           disabled={isBusy}
-          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
+          status={uploadButtonStatus}
+          onClick={uploadReferenceAudio}
+          pendingLabel="Uploading and attaching..."
+          successLabel="Audio attached"
+          errorLabel="Try again"
+          icon={<UploadCloud className="size-4" />}
+          variant="default"
+          size="lg"
+          className="h-10 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {uploading ? <LoaderCircle className="size-4 animate-spin" /> : <UploadCloud className="size-4" />}
-          {uploading ? "Uploading and attaching…" : currentAudioPath ? "Replace reference audio" : "Upload and attach audio"}
-        </button>
+          {currentAudioPath ? "Replace reference audio" : "Upload and attach audio"}
+        </ParticleButton>
       </form>
 
       <p className="mt-2 text-[11px] leading-5 text-[var(--muted)]">
