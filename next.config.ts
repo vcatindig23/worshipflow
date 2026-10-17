@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["lucide-react"],
     serverActions: {
       bodySizeLimit: "6mb",
+      // GitHub Codespaces forwards requests through a public port URL.
+      // Trust that origin only in development; keep production's default
+      // Server Actions origin validation unchanged.
+      ...(process.env.NODE_ENV === "development"
+        ? { allowedOrigins: ["*.app.github.dev"] }
+        : {}),
     },
   },
   async headers() {
