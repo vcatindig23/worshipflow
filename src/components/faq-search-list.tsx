@@ -37,7 +37,7 @@ export default function FaqSearchList({
           placeholder="Search questions or keywords..."
           autoComplete="off"
           aria-controls={resultsId}
-          className={`h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] pl-10 pr-11 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/10 ${compact ? "h-11" : ""}`}
+          className={`${compact ? "h-11" : "h-12"} w-full rounded-xl border border-[var(--border)] bg-[var(--background)] pl-10 pr-11 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand)]/10`}
         />
         {hasQuery ? (
           <button
