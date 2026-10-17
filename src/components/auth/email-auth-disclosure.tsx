@@ -1,27 +1,19 @@
 "use client"
 
-import { useEffect, useId, useState } from "react"
+import { useId, useState } from "react"
 import { ChevronDown } from "lucide-react"
 
 type EmailAuthDisclosureProps = {
   children: React.ReactNode
   defaultOpen?: boolean
-  forceOpen?: boolean
 }
 
 export default function EmailAuthDisclosure({
   children,
   defaultOpen = false,
-  forceOpen = false,
 }: EmailAuthDisclosureProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const contentId = useId()
-
-  useEffect(() => {
-    if (forceOpen) {
-      setIsOpen(true)
-    }
-  }, [forceOpen])
 
   return (
     <div>
