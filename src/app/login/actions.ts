@@ -109,7 +109,11 @@ export async function startOAuthSignIn(
     return { error: "Choose Google or Facebook to continue." }
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "")
 
   if (!siteUrl) {
     return {
@@ -121,8 +125,17 @@ export async function startOAuthSignIn(
   let redirectTo: string
 
   try {
-    const callbackUrl = new URL("/auth/callback", siteUrl)
+    const configuredUrl = new URL(siteUrl)
+    if (
+      configuredUrl.protocol !== "https:" &&
+      !(configuredUrl.protocol === "http:" && configuredUrl.hostname === "localhost")
+    ) {
+      throw new Error("The site URL must use HTTPS.")
+    }
+
+    const callbackUrl = new URL("/auth/callback", configuredUrl.origin)
     callbackUrl.searchParams.set("next", "/")
+    callbackUrl.searchParams.set("auth_flow", "social")
     redirectTo = callbackUrl.toString()
   } catch {
     return {
@@ -134,7 +147,16 @@ export async function startOAuthSignIn(
   const supabase = await createClient()
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: parsedProvider.data,
-    options: { redirectTo },
+    options: {
+      redirectTo,
+      scopes:
+        parsedProvider.data === "facebook"
+          ? "email,public_profile"
+          : "openid email profile",
+      ...(parsedProvider.data === "google"
+        ? { queryParams: { prompt: "select_account" } }
+        : {}),
+    },
   })
 
   if (error || !data.url) {
