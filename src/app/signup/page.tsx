@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Mail, UserRound } from "lucide-react"
-import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import AuthSplitLayout from "@/components/auth/auth-layout"
 import EmailAuthDisclosure from "@/components/auth/email-auth-disclosure"
 import PasswordInput from "@/components/auth/password-input"
 import SocialLoginButtons from "@/components/auth/social-login-buttons"
