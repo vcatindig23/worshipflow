@@ -44,14 +44,23 @@ export default function AccountOptionsMenu() {
       }
     }
 
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setOpen(false)
-        setInviteOpen(false)
-        triggerRef.current?.focus()
-        return
-      }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return
+      setOpen(false)
+      setInviteOpen(false)
+      triggerRef.current?.focus()
+    }
 
+    document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("keydown", handleEscape)
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [open])
+
+  useEffect(() => {
+    function handleShortcuts(event: KeyboardEvent) {
       if (!(event.altKey && event.shiftKey) || event.ctrlKey || event.metaKey) return
       const target = event.target
       if (
@@ -66,21 +75,17 @@ export default function AccountOptionsMenu() {
         i: inviteHref,
       }
       const route = routes[event.key.toLowerCase()]
-      if (route) {
-        event.preventDefault()
-        setOpen(false)
-        setInviteOpen(false)
-        router.push(route)
-      }
+      if (!route) return
+
+      event.preventDefault()
+      setOpen(false)
+      setInviteOpen(false)
+      router.push(route)
     }
 
-    document.addEventListener("pointerdown", handlePointerDown)
-    document.addEventListener("keydown", handleKeyDown)
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown)
-      document.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [open, router])
+    document.addEventListener("keydown", handleShortcuts)
+    return () => document.removeEventListener("keydown", handleShortcuts)
+  }, [router])
 
   useEffect(() => {
     setOpen(false)
