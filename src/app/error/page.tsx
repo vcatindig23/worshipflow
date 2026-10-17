@@ -19,8 +19,6 @@ type ErrorPageProps = {
 const messages: Record<string, string> = {
   confirmation_failed:
     "The confirmation link is invalid, expired, or has already been used.",
-  social_auth_failed:
-    "Google or Facebook sign-in could not be completed. Please try again. If the problem continues, verify that the provider is enabled in Supabase Auth and that the OAuth callback URLs are configured correctly.",
   membership_load_failed:
     "Your church membership could not be loaded. Please try signing in again.",
   global_search_failed:
@@ -44,7 +42,6 @@ export default async function ErrorPage({
               <div className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
                 <WorshipFlowLogo className="size-7" />
               </div>
-
               <span className="text-lg font-semibold tracking-[-0.025em]">
                 WorshipFlow
               </span>

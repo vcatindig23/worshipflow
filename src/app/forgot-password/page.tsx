@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowLeft, KeyRound, Mail } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
+import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import { requestPasswordReset } from "./actions"
 
 type ForgotPasswordPageProps = {
@@ -86,12 +87,11 @@ export default async function ForgotPasswordPage({
                     </div>
                   </div>
 
-                  <button
-                    type="submit"
-                    className="h-12 w-full rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-                  >
-                    Send reset link
-                  </button>
+                  <AuthSubmitButton
+                    label="Send reset link"
+                    pendingLabel="Sending reset link…"
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                  />
                 </form>
               </>
             )}
