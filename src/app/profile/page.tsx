@@ -377,7 +377,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 </div>
                 <div className="sm:mt-4">
                   <p className="text-3xl font-semibold tracking-[-0.045em] tabular-nums sm:text-4xl">{activityItems.length}</p>
-                  <p className="mt-1 text-sm font-medium text-white/75">Recent contributions</p>
+                  <p className="mt-1 text-sm font-medium text-white/75">Recent activity</p>
                 </div>
               </div>
             </div>
@@ -442,19 +442,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               )}
             </section>
 
-            <section className={cardClass}>
-              <SectionHeading eyebrow="Your contribution" title="WorshipFlow activity" />
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-[var(--surface)] p-4">
-                  <div className="flex items-center gap-2 text-[var(--brand)]"><Music2 className="size-4" /><span className="text-xs font-medium text-[var(--muted)]">Songs added</span></div>
-                  <p className="mt-2 text-2xl font-bold tabular-nums text-[var(--foreground)]">{songsCountResult.count ?? 0}</p>
-                </div>
-                <div className="rounded-2xl bg-[var(--surface)] p-4">
-                  <div className="flex items-center gap-2 text-[var(--brand)]"><CalendarDays className="size-4" /><span className="text-xs font-medium text-[var(--muted)]">Services planned</span></div>
-                  <p className="mt-2 text-2xl font-bold tabular-nums text-[var(--foreground)]">{servicesCountResult.count ?? 0}</p>
-                </div>
-              </div>
-            </section>
           </aside>
         ) : null}
 
