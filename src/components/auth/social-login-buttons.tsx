@@ -28,6 +28,9 @@ function FacebookMark() {
   )
 }
 
+const buttonClassName =
+  "inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)]/40 hover:bg-[var(--surface)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+
 export default function SocialLoginButtons() {
   const [state, formAction, pending] = useActionState(
     startOAuthSignIn,
@@ -36,39 +39,39 @@ export default function SocialLoginButtons() {
 
   return (
     <div className="space-y-3">
-      <form
-        action={formAction}
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-      >
-        <button
-          type="submit"
-          name="provider"
-          value="google"
-          disabled={pending}
-          className="inline-flex h-12 items-center justify-center gap-3 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)]/40 hover:bg-[var(--surface)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {pending ? (
-            <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-          ) : (
-            <GoogleMark />
-          )}
-          Continue with Google
-        </button>
-        <button
-          type="submit"
-          name="provider"
-          value="facebook"
-          disabled={pending}
-          className="inline-flex h-12 items-center justify-center gap-3 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)]/40 hover:bg-[var(--surface)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {pending ? (
-            <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-          ) : (
-            <FacebookMark />
-          )}
-          Continue with Facebook
-        </button>
-      </form>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <form action={formAction}>
+          <input type="hidden" name="provider" value="google" />
+          <button
+            type="submit"
+            disabled={pending}
+            className={buttonClassName}
+          >
+            {pending ? (
+              <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+            ) : (
+              <GoogleMark />
+            )}
+            Continue with Google
+          </button>
+        </form>
+
+        <form action={formAction}>
+          <input type="hidden" name="provider" value="facebook" />
+          <button
+            type="submit"
+            disabled={pending}
+            className={buttonClassName}
+          >
+            {pending ? (
+              <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+            ) : (
+              <FacebookMark />
+            )}
+            Continue with Facebook
+          </button>
+        </form>
+      </div>
 
       {pending ? (
         <p role="status" className="text-center text-xs text-[var(--muted)]">
