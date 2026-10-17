@@ -406,7 +406,7 @@ export default async function TeamSettingsPage({
       ) : null}
 
       {canManageTeam ? (
-        <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+        <section id="invite-member" className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
               Invite a Team Member
