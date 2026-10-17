@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowRight, KeyRound } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
+import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import PasswordInput from "@/components/auth/password-input"
 import { createClient } from "@/lib/supabase/server"
 import { updatePassword } from "./actions"
@@ -117,12 +118,11 @@ export default async function ResetPasswordPage({
                       className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
                     />
                   </div>
-                  <button
-                    type="submit"
-                    className="h-12 w-full rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-                  >
-                    Update password
-                  </button>
+                  <AuthSubmitButton
+                    label="Update password"
+                    pendingLabel="Updating password…"
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                  />
                 </form>
               </>
             ) : (
