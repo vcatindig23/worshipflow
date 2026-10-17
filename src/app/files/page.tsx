@@ -226,10 +226,10 @@ export default async function FilesPage({
             </div>
             <div>
               <h2 className="font-semibold text-[var(--foreground)]">
-                Upload a resource
+                Upload resources
               </h2>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                Editors and worship leaders can add files for the team.
+                Drag and drop files or browse your device. Each file can be up to 25 MB.
               </p>
             </div>
           </div>
