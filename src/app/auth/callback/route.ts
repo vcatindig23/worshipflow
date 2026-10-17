@@ -13,10 +13,15 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
   const next = getSafeNextPath(searchParams.get("next"))
+  const socialFlow = searchParams.get("auth_flow") === "social"
+  const providerError =
+    searchParams.get("error") ?? searchParams.get("error_description")
+  const failureCode =
+    socialFlow || providerError ? "social_auth_failed" : "confirmation_failed"
 
-  if (!code) {
+  if (!code || providerError) {
     return NextResponse.redirect(
-      new URL("/error?code=confirmation_failed", origin)
+      new URL(`/error?code=${failureCode}`, origin)
     )
   }
 
@@ -26,8 +31,12 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code)
 
   if (exchangeError) {
+    console.error("Auth callback code exchange failed:", {
+      flow: socialFlow ? "social" : "confirmation",
+      message: exchangeError.message,
+    })
     return NextResponse.redirect(
-      new URL("/error?code=confirmation_failed", origin)
+      new URL(`/error?code=${failureCode}`, origin)
     )
   }
 
@@ -36,8 +45,12 @@ export async function GET(request: NextRequest) {
   const userId = claimsData?.claims?.sub
 
   if (claimsError || !userId) {
+    console.error("Auth callback could not validate the resulting session:", {
+      flow: socialFlow ? "social" : "confirmation",
+      message: claimsError?.message ?? "No user ID was returned.",
+    })
     return NextResponse.redirect(
-      new URL("/error?code=confirmation_failed", origin)
+      new URL(`/error?code=${failureCode}`, origin)
     )
   }
 

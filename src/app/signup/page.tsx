@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Mail, UserRound } from "lucide-react"
-import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import AuthLayout from "@/components/auth/auth-layout"
 import EmailAuthDisclosure from "@/components/auth/email-auth-disclosure"
 import PasswordInput from "@/components/auth/password-input"
 import SocialLoginButtons from "@/components/auth/social-login-buttons"
@@ -36,7 +36,7 @@ export default async function SignupPage({
     : null
 
   return (
-    <AuthSplitLayout>
+    <AuthLayout>
       <div className="w-full">
         <header className="mb-6 text-left">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
@@ -191,6 +191,6 @@ export default async function SignupPage({
           Your account helps you prepare and coordinate with your church worship team.
         </p>
       </div>
-    </AuthSplitLayout>
+    </AuthLayout>
   )
 }

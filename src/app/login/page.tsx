@@ -8,7 +8,7 @@ import {
   Loader2,
   Mail,
 } from "lucide-react"
-import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import AuthLayout from "@/components/auth/auth-layout"
 import EmailAuthDisclosure from "@/components/auth/email-auth-disclosure"
 import PasswordInput from "@/components/auth/password-input"
 import SocialLoginButtons from "@/components/auth/social-login-buttons"
@@ -25,12 +25,9 @@ export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState)
 
   return (
-    <AuthSplitLayout>
+    <AuthLayout>
       <div className="w-full">
         <header className="mb-6 text-left">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
-            Your worship team, in sync
-          </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
             Welcome back
           </h1>
@@ -153,6 +150,6 @@ export default function LoginPage() {
           After signing in, WorshipFlow will take you to your church workspace or onboarding.
         </p>
       </div>
-    </AuthSplitLayout>
+    </AuthLayout>
   )
 }

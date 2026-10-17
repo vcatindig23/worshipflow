@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { ArrowLeft, KeyRound, Mail } from "lucide-react"
-import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import AuthLayout from "@/components/auth/auth-layout"
 import { requestPasswordReset } from "./actions"
 
 type ForgotPasswordPageProps = {
@@ -27,7 +27,7 @@ export default async function ForgotPasswordPage({
   const errorMessage = errorMessages[getParam(params.error) ?? ""]
 
   return (
-    <AuthSplitLayout>
+    <AuthLayout>
           <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
             <div className="mb-7 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <KeyRound className="size-5" />
@@ -104,6 +104,6 @@ export default async function ForgotPasswordPage({
               Back to sign in
             </Link>
           </section>
-    </AuthSplitLayout>
+    </AuthLayout>
   )
 }
