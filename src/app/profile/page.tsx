@@ -333,6 +333,58 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         </div>
       </section>
 
+      {activeTab === "overview" ? (
+        <section
+          aria-label="Your WorshipFlow contribution statistics"
+          className="relative isolate -mx-4 overflow-hidden bg-gradient-to-br from-[#152b20] via-[#244a35] to-[#365c45] px-5 py-7 text-white shadow-[0_18px_45px_-28px_rgba(21,43,32,0.75)] sm:-mx-6 sm:px-8 sm:py-8 lg:-mx-8 lg:px-10"
+        >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute -right-16 -top-36 size-96 rounded-full border border-white/10" />
+            <div className="absolute -right-2 -top-24 size-72 rounded-full border border-white/10" />
+            <div className="absolute -bottom-44 left-[30%] size-80 rounded-full border border-white/[0.07]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.09),transparent_52%)]" />
+          </div>
+          <div className="relative mx-auto max-w-6xl">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/65">Your ministry at a glance</p>
+                <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] sm:text-2xl">Every contribution matters.</h2>
+              </div>
+              <p className="max-w-xs text-xs leading-5 text-white/65">A snapshot of what you’ve helped build in your worship workspace.</p>
+            </div>
+            <div className="grid grid-cols-1 divide-y divide-white/15 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              <div className="flex items-center gap-4 py-4 first:pt-0 sm:block sm:px-5 sm:py-1 sm:first:pl-0">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white">
+                  <Music2 className="size-5" strokeWidth={1.8} />
+                </div>
+                <div className="sm:mt-4">
+                  <p className="text-3xl font-semibold tracking-[-0.045em] tabular-nums sm:text-4xl">{songsCountResult.count ?? 0}</p>
+                  <p className="mt-1 text-sm font-medium text-white/75">Songs added</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 py-4 sm:block sm:px-5 sm:py-1">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white">
+                  <CalendarDays className="size-5" strokeWidth={1.8} />
+                </div>
+                <div className="sm:mt-4">
+                  <p className="text-3xl font-semibold tracking-[-0.045em] tabular-nums sm:text-4xl">{servicesCountResult.count ?? 0}</p>
+                  <p className="mt-1 text-sm font-medium text-white/75">Services planned</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 py-4 last:pb-0 sm:block sm:px-5 sm:py-1 sm:last:pr-0">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white">
+                  <Activity className="size-5" strokeWidth={1.8} />
+                </div>
+                <div className="sm:mt-4">
+                  <p className="text-3xl font-semibold tracking-[-0.045em] tabular-nums sm:text-4xl">{activityItems.length}</p>
+                  <p className="mt-1 text-sm font-medium text-white/75">Recent contributions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <div className={`grid items-start gap-6 ${activeTab === "activity" ? "grid-cols-1" : "lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)]"}`}>
         {activeTab !== "activity" ? (
           <aside className="space-y-6">
