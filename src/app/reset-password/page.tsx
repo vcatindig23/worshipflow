@@ -1,3 +1,42 @@
+import Link from "next/link"
+import { ArrowRight, KeyRound } from "lucide-react"
+import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import PasswordInput from "@/components/auth/password-input"
+import { createClient } from "@/lib/supabase/server"
+import { updatePassword } from "./actions"
+
+type ResetPasswordPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+const errorMessages: Record<string, string> = {
+  invalid_password: "Use a password between 8 and 72 characters.",
+  password_mismatch: "The passwords do not match.",
+  update_failed: "Your password could not be updated. Please try again.",
+  expired: "This reset link has expired. Request a new one to continue.",
+}
+
+function getParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+export default async function ResetPasswordPage({
+  searchParams,
+}: ResetPasswordPageProps) {
+  const params = await searchParams
+  const saved = getParam(params.saved) === "true"
+  const errorMessage = errorMessages[getParam(params.error) ?? ""]
+  const supabase = await createClient()
+  const { data: claimsData, error: claimsError } =
+    await supabase.auth.getClaims()
+  const hasSession = Boolean(claimsData?.claims?.sub)
+
+  if (claimsError) {
+    console.error("Failed to validate password reset session:", {
+      message: claimsError.message,
+    })
+  }
+
   return (
     <AuthSplitLayout>
           <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
