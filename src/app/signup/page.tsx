@@ -1,7 +1,9 @@
 import Link from "next/link"
 import { Mail, UserRound } from "lucide-react"
 import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import EmailAuthDisclosure from "@/components/auth/email-auth-disclosure"
 import PasswordInput from "@/components/auth/password-input"
+import SocialLoginButtons from "@/components/auth/social-login-buttons"
 import { signup } from "./actions"
 
 type SignupPageProps = {
@@ -36,28 +38,40 @@ export default async function SignupPage({
   return (
     <AuthSplitLayout>
       <div className="w-full">
-          <header className="mb-6 text-left">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
-              Get started
-            </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+        <header className="mb-6 text-left">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
+            Get started
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+            Create your account
+          </h1>
+          <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--muted)]">
+            Bring your songs, service plans, and worship team together in one workspace.
+          </p>
+        </header>
+
+        <section className="rounded-[28px] border border-[var(--border)] bg-white/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.24)] ring-1 ring-black/[0.02] backdrop-blur sm:p-8">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--foreground)]">
               Create your account
-            </h1>
-            <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--muted)]">
-              Bring your songs, service plans, and worship team together in one workspace.
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+              Sign up with Google or Facebook, or continue with email.
             </p>
-          </header>
+          </div>
 
-          <section className="rounded-[28px] border border-[var(--border)] bg-white/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.24)] ring-1 ring-black/[0.02] backdrop-blur sm:p-8">
-            {errorMessage ? (
-              <div
-                role="alert"
-                className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
-              >
-                {errorMessage}
-              </div>
-            ) : null}
+          {errorMessage ? (
+            <div
+              role="alert"
+              className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
+            >
+              {errorMessage}
+            </div>
+          ) : null}
 
+          <SocialLoginButtons />
+
+          <EmailAuthDisclosure defaultOpen={Boolean(errorMessage)}>
             <form action={signup} className="space-y-4">
               <div>
                 <label
@@ -158,24 +172,25 @@ export default async function SignupPage({
                 Create account
               </button>
             </form>
+          </EmailAuthDisclosure>
 
-            <div className="mt-6 border-t border-[var(--border)] pt-5 text-center">
-              <p className="text-sm text-[var(--muted)]">
-                Already have an account?{" "}
-                <Link
-                  href="/login"
-                  className="rounded-sm font-semibold text-[var(--brand)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
-                >
-                  Sign in
-                </Link>
-              </p>
-            </div>
-          </section>
+          <div className="mt-6 border-t border-[var(--border)] pt-5 text-center">
+            <p className="text-sm text-[var(--muted)]">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="rounded-sm font-semibold text-[var(--brand)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </section>
 
-          <p className="mx-auto mt-5 max-w-sm text-center text-xs leading-5 text-[var(--muted)]">
-            Your account helps you prepare and coordinate with your church worship team.
-          </p>
-        </div>
+        <p className="mx-auto mt-5 max-w-sm text-center text-xs leading-5 text-[var(--muted)]">
+          Your account helps you prepare and coordinate with your church worship team.
+        </p>
+      </div>
     </AuthSplitLayout>
   )
 }

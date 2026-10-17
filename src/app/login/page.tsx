@@ -4,13 +4,14 @@ import Link from "next/link"
 import { useActionState } from "react"
 import {
   ArrowRight,
-  Church,
   KeyRound,
   Loader2,
   Mail,
 } from "lucide-react"
 import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import EmailAuthDisclosure from "@/components/auth/email-auth-disclosure"
 import PasswordInput from "@/components/auth/password-input"
+import SocialLoginButtons from "@/components/auth/social-login-buttons"
 import { login, type LoginState } from "./actions"
 
 const initialState: LoginState = {
@@ -26,28 +27,31 @@ export default function LoginPage() {
   return (
     <AuthSplitLayout>
       <div className="w-full">
-          <header className="mb-6 text-left">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
-              Your worship team, in sync
-            </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
-              Welcome back
-            </h1>
-            <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--muted)]">
-              Sign in to prepare songs, coordinate services, and connect with your church team.
-            </p>
-          </header>
+        <header className="mb-6 text-left">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
+            Your worship team, in sync
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)] sm:text-3xl">
+            Welcome back
+          </h1>
+          <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--muted)]">
+            Sign in to prepare songs, coordinate services, and connect with your church team.
+          </p>
+        </header>
 
-          <section className="rounded-[28px] border border-[var(--border)] bg-white/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.24)] ring-1 ring-black/[0.02] backdrop-blur sm:p-8">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold tracking-tight text-[var(--foreground)]">
-                Sign in to your account
-              </h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                Enter your account details to continue.
-              </p>
-            </div>
+        <section className="rounded-[28px] border border-[var(--border)] bg-white/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.24)] ring-1 ring-black/[0.02] backdrop-blur sm:p-8">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--foreground)]">
+              Sign in to your account
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+              Choose a quick sign-in option, or use your email.
+            </p>
+          </div>
 
+          <SocialLoginButtons />
+
+          <EmailAuthDisclosure>
             {state.error ? (
               <div
                 role="alert"
@@ -132,26 +136,23 @@ export default function LoginPage() {
                 {pending ? "Signing in..." : "Sign in"}
               </button>
             </form>
+          </EmailAuthDisclosure>
+        </section>
 
-            <div className="my-6 flex items-center gap-3">
-              <div className="h-px flex-1 bg-[var(--border)]" />
-              <span className="text-xs text-[var(--muted)]">New to WorshipFlow?</span>
-              <div className="h-px flex-1 bg-[var(--border)]" />
-            </div>
+        <p className="mt-5 text-center text-sm text-[var(--muted)]">
+          New to WorshipFlow?{" "}
+          <Link
+            href="/signup"
+            className="rounded-sm font-semibold text-[var(--brand)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
+          >
+            Create an account
+          </Link>
+        </p>
 
-            <Link
-              href="/signup"
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--brand)]/40 hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
-            >
-              <Church aria-hidden="true" className="size-4" />
-              Create an account
-            </Link>
-          </section>
-
-          <p className="mx-auto mt-5 max-w-sm text-center text-xs leading-5 text-[var(--muted)]">
-            After signing in, WorshipFlow will take you to your church workspace or onboarding.
-          </p>
-        </div>
+        <p className="mx-auto mt-4 max-w-sm text-center text-xs leading-5 text-[var(--muted)]">
+          After signing in, WorshipFlow will take you to your church workspace or onboarding.
+        </p>
+      </div>
     </AuthSplitLayout>
   )
 }
