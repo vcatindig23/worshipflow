@@ -92,3 +92,73 @@ export async function login(
 
   redirect("/")
 }
+
+export type OAuthSignInState = {
+  error: string
+}
+
+const oauthProviderSchema = z.enum(["google", "facebook"])
+
+export async function startOAuthSignIn(
+  _previousState: OAuthSignInState,
+  formData: FormData
+): Promise<OAuthSignInState> {
+  const parsedProvider = oauthProviderSchema.safeParse(formData.get("provider"))
+
+  if (!parsedProvider.success) {
+    return { error: "Choose Google or Facebook to continue." }
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+
+  if (!siteUrl) {
+    return {
+      error:
+        "Social sign-in is not configured yet. Please continue with email instead.",
+    }
+  }
+
+  let redirectTo: string
+
+  try {
+    const callbackUrl = new URL("/auth/callback", siteUrl)
+    callbackUrl.searchParams.set("next", "/")
+    redirectTo = callbackUrl.toString()
+  } catch {
+    return {
+      error:
+        "Social sign-in is temporarily unavailable. Please continue with email instead.",
+    }
+  }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: parsedProvider.data,
+    options: { redirectTo },
+  })
+
+  if (error || !data.url) {
+    const providerLabel =
+      parsedProvider.data === "google" ? "Google" : "Facebook"
+
+    if (
+      error?.message.toLowerCase().includes("provider is not enabled") ||
+      error?.message.toLowerCase().includes("unsupported provider")
+    ) {
+      return {
+        error: `${providerLabel} sign-in isn't enabled in the authentication settings yet. Please use email for now or ask your administrator to enable it.`,
+      }
+    }
+
+    console.error("Failed to start social sign-in:", {
+      provider: parsedProvider.data,
+      message: error?.message ?? "OAuth URL was not returned.",
+    })
+
+    return {
+      error: `${providerLabel} sign-in couldn't start. Please try again or continue with email.`,
+    }
+  }
+
+  redirect(data.url)
+}
