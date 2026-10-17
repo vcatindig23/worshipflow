@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { MailCheck } from "lucide-react"
-import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+import AuthSplitLayout from "@/components/auth/auth-split-layout"
 
 export const metadata: Metadata = {
   title: "Check your email",
@@ -12,19 +12,7 @@ export const metadata: Metadata = {
 
 export default function CheckEmailPage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-8 sm:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center">
-        <div className="w-full">
-          <div className="mb-8 flex justify-center">
-            <Link href="/" className="flex items-center gap-3" aria-label="WorshipFlow home">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-                <WorshipFlowLogo className="size-7" />
-              </div>
-              <span className="text-lg font-semibold tracking-[-0.025em]">
-                WorshipFlow
-              </span>
-            </Link>
-          </div>
+    <AuthSplitLayout>
           <div className="rounded-3xl border border-[var(--border)] bg-white p-8 text-center shadow-sm">
             <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <MailCheck className="size-6" />
@@ -44,8 +32,6 @@ export default function CheckEmailPage() {
               Return to sign in
             </Link>
           </div>
-        </div>
-      </div>
-    </main>
+    </AuthSplitLayout>
   )
 }

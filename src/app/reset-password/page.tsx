@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowRight, KeyRound } from "lucide-react"
-import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import PasswordInput from "@/components/auth/password-input"
 import { createClient } from "@/lib/supabase/server"
 import { updatePassword } from "./actions"
 
@@ -37,20 +38,7 @@ export default async function ResetPasswordPage({
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-8 sm:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center">
-        <div className="w-full">
-          <div className="mb-8 flex justify-center">
-            <Link href="/login" className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-                <WorshipFlowLogo className="size-7" />
-              </div>
-              <span className="text-lg font-semibold tracking-[-0.025em]">
-                WorshipFlow
-              </span>
-            </Link>
-          </div>
-
+    <AuthSplitLayout>
           <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
             <div className="mb-7 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <KeyRound className="size-5" />
@@ -102,15 +90,14 @@ export default async function ResetPasswordPage({
                     >
                       New password
                     </label>
-                    <input
+                    <PasswordInput
                       id="password"
                       name="password"
-                      type="password"
                       required
                       minLength={8}
                       maxLength={72}
                       autoComplete="new-password"
-                      className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                      className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
                     />
                   </div>
                   <div>
@@ -120,15 +107,14 @@ export default async function ResetPasswordPage({
                     >
                       Confirm new password
                     </label>
-                    <input
+                    <PasswordInput
                       id="confirmPassword"
                       name="confirmPassword"
-                      type="password"
                       required
                       minLength={8}
                       maxLength={72}
                       autoComplete="new-password"
-                      className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                      className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
                     />
                   </div>
                   <button
@@ -166,8 +152,6 @@ export default async function ResetPasswordPage({
               </Link>
             ) : null}
           </section>
-        </div>
-      </div>
-    </main>
+    </AuthSplitLayout>
   )
 }
