@@ -70,9 +70,8 @@ function formatFileSize(bytes: number) {
 }
 
 function getFileIcon(file: File) {
-  if (file.type.startsWith("image/")) return ImageIcon
-
   const extension = file.name.split(".").pop()?.toLowerCase() ?? ""
+  if (file.type.startsWith("image/") || ["jpg", "jpeg", "png", "webp"].includes(extension)) return ImageIcon
   if (
     ["pdf", "doc", "docx", "ppt", "pptx"].includes(extension) ||
     file.type.includes("pdf") ||
