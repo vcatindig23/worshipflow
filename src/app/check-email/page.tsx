@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { MailCheck } from "lucide-react"
-import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import AuthSplitLayout from "@/components/auth/auth-layout"
 
 export const metadata: Metadata = {
   title: "Check your email",
