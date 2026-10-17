@@ -1,3 +1,28 @@
+"use client"
+
+import Link from "next/link"
+import { useActionState } from "react"
+import {
+  ArrowRight,
+  Church,
+  KeyRound,
+  Loader2,
+  Mail,
+} from "lucide-react"
+import AuthSplitLayout from "@/components/auth/auth-split-layout"
+import PasswordInput from "@/components/auth/password-input"
+import { login, type LoginState } from "./actions"
+
+const initialState: LoginState = {
+  error: "",
+}
+
+const inputClassName =
+  "h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-12 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+
+export default function LoginPage() {
+  const [state, formAction, pending] = useActionState(login, initialState)
+
   return (
     <AuthSplitLayout>
       <div className="w-full">
