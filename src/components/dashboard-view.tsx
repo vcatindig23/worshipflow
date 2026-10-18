@@ -11,7 +11,6 @@ import {
   LayoutDashboard,
   ListMusic,
   LogOut,
-  MessagesSquare,
   Music2,
   Plus,
   Settings,
@@ -68,10 +67,6 @@ const navigation = [
     icon: UsersRound,
   },
   {
-    label: "Team Chat",
-    href: "/chat",
-    icon: MessagesSquare,
-  },
   {
     label: "Files",
     href: "/files",
@@ -269,7 +264,9 @@ export default function DashboardView({
             </div>
 
             <div className="flex items-center gap-2">
-              <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
+              <div className="hidden sm:block">
+                <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
+              </div>
               <WorkspaceHeaderActions unreadChatCount={workspace.unreadChatNotificationCount} />
 
               <Link
