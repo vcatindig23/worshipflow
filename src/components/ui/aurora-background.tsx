@@ -23,7 +23,7 @@ export function AuroraBackground({
   return (
     <div
       className={cn(
-        "wf-aurora-background relative isolate min-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]",
+        "wf-aurora-background relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[var(--background)] text-[var(--foreground)]",
         className
       )}
       {...props}
@@ -35,7 +35,7 @@ export function AuroraBackground({
           showRadialGradient && "wf-aurora-radial"
         )}
       />
-      <div className="relative z-10 min-h-inherit">{children}</div>
+      <div className="relative z-10 w-full">{children}</div>
     </div>
   )
 }
