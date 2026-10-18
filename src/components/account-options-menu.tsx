@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import {
   CalendarDays,
   ChevronDown,
@@ -30,7 +30,6 @@ export default function AccountOptionsMenu({
 }: {
   canManageTeam: boolean
 }) {
-  const pathname = usePathname()
   const router = useRouter()
   const menuRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -97,11 +96,6 @@ export default function AccountOptionsMenu({
     document.addEventListener("keydown", handleShortcuts)
     return () => document.removeEventListener("keydown", handleShortcuts)
   }, [canManageTeam, router])
-
-  useEffect(() => {
-    setOpen(false)
-    setInviteOpen(false)
-  }, [pathname])
 
   function closeMenu() {
     setOpen(false)
