@@ -8,8 +8,10 @@ import {
   SlidersHorizontal,
   UserMinus,
   Users,
+  X,
 } from "lucide-react"
 import ProfileAvatar from "@/components/profile-avatar"
+import { TeamInvitation } from "@/components/ui/team-invitation"
 import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { createClient } from "@/lib/supabase/server"
@@ -434,66 +436,36 @@ export default async function TeamSettingsPage({
           </div>
 
           <div className="space-y-3">
-            {invitations.map(
-              (invitation) => (
-                <div
-                  key={invitation.id}
-                  className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-[var(--foreground)]">
-                      {invitation.email}
-                    </p>
-
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--muted)]">
-                      <span>
-                        {roleLabels[
-                          invitation.role
-                        ] ??
-                          invitation.role}
-                      </span>
-
-                      <span>
-                        Expires{" "}
-                        {new Intl.DateTimeFormat(
-                          "en-PH",
-                          {
-                            dateStyle:
-                              "medium",
-                          }
-                        ).format(
-                          new Date(
-                            invitation.expires_at
-                          )
-                        )}
-                      </span>
-                    </div>
-                  </div>
-
-                  <form
-                    action={
-                      revokeInvitation
-                    }
-                  >
+            {invitations.map((invitation) => (
+              <TeamInvitation
+                key={invitation.id}
+                email={invitation.email}
+                organizationName={organization.name}
+                roleLabel={
+                  roleLabels[invitation.role] ??
+                  invitation.role
+                }
+                createdAt={invitation.created_at}
+                expiresAt={invitation.expires_at}
+                actions={
+                  <form action={revokeInvitation} className="shrink-0">
                     <input
                       type="hidden"
                       name="invitationId"
-                      value={
-                        invitation.id
-                      }
+                      value={invitation.id}
                     />
-
                     <button
                       type="submit"
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-3.5 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                      aria-label={`Revoke invitation for ${invitation.email}`}
+                      title="Revoke invitation"
+                      className="inline-flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 dark:hover:bg-red-950/50 dark:hover:text-red-400"
                     >
-                      <UserMinus className="size-3.5" />
-                      Revoke
+                      <X aria-hidden="true" className="size-4" />
                     </button>
                   </form>
-                </div>
-              )
-            )}
+                }
+              />
+            ))}
           </div>
         </section>
       ) : null}
