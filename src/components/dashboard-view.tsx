@@ -67,7 +67,6 @@ const navigation = [
     icon: UsersRound,
   },
   {
-  {
     label: "Files",
     href: "/files",
     icon: FolderOpen,
