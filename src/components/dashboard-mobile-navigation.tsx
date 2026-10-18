@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   CalendarClock,
   CalendarDays,
@@ -61,12 +61,12 @@ export default function DashboardMobileNavigation({
   const drawerRef = useRef<HTMLElement>(null)
   const open = openForPathname === pathname
 
-  function closeNavigation(restoreFocus = true) {
+  const closeNavigation = useCallback((restoreFocus = true) => {
     setOpenForPathname(null)
     if (restoreFocus) {
       window.requestAnimationFrame(() => triggerRef.current?.focus())
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -121,7 +121,7 @@ export default function DashboardMobileNavigation({
       window.cancelAnimationFrame(initialFocusFrame)
       document.body.style.overflow = previousBodyOverflow
     }
-  }, [open])
+  }, [open, closeNavigation])
 
   return (
     <>
@@ -135,6 +135,7 @@ export default function DashboardMobileNavigation({
         }
         aria-label="Open navigation"
         aria-haspopup="dialog"
+        aria-controls="mobile-workspace-navigation"
         aria-expanded={open}
         className="group inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition duration-200 hover:border-[var(--brand)]/40 hover:bg-[var(--brand-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 lg:hidden"
       >
