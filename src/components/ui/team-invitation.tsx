@@ -47,7 +47,7 @@ export function TeamInvitation({
 }: TeamInvitationProps) {
   return (
     <article
-      aria-label={\`Invitation for \${email}\`}
+      aria-label={`Invitation for ${email}`}
       className={cn(
         "relative w-full rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_1px_6px_0_rgba(0,0,0,0.02)]",
         className,
