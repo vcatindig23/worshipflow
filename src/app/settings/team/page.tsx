@@ -584,27 +584,40 @@ export default async function TeamSettingsPage({
                 member.user_id ===
                 currentUserId
 
+              const profileHref = isCurrentUser
+                ? "/profile"
+                : "/profile/" + member.user_id
+
               return (
                 <div
                   key={member.user_id}
                   className="flex flex-col gap-4 py-5 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <ProfileAvatar
-                      name={displayName}
-                      imageUrl={
-                        profile?.avatar_url
-                          ? avatarUrls.get(profile.avatar_url)
-                          : null
-                      }
-                      sizeClassName="size-10"
-                    />
+                    <Link
+                      href={profileHref}
+                      aria-label={"View " + displayName + "'s profile"}
+                      className="shrink-0 rounded-full outline-none transition hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2"
+                    >
+                      <ProfileAvatar
+                        name={displayName}
+                        imageUrl={
+                          profile?.avatar_url
+                            ? avatarUrls.get(profile.avatar_url)
+                            : null
+                        }
+                        sizeClassName="size-10"
+                      />
+                    </Link>
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate font-medium text-[var(--foreground)]">
+                        <Link
+                          href={profileHref}
+                          className="truncate font-medium text-[var(--foreground)] underline-offset-4 transition hover:text-[var(--brand)] hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
+                        >
                           {displayName}
-                        </p>
+                        </Link>
 
                         {isCurrentUser ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-soft)] px-2 py-1 text-[10px] font-semibold text-[var(--brand)]">
