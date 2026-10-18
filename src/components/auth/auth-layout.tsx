@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { AuroraBackground } from "@/components/ui/aurora-background"
 
 type AuthLayoutProps = {
   children: React.ReactNode
@@ -7,20 +8,11 @@ type AuthLayoutProps = {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <main
-      id="main-content"
-      className="relative isolate min-h-screen overflow-hidden bg-[var(--background)] px-4 py-8 text-[var(--foreground)] sm:px-6 sm:py-10"
-    >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
+    <AuroraBackground className="px-4 py-8 sm:px-6 sm:py-10">
+      <main
+        id="main-content"
+        className="relative mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-[480px] flex-col sm:min-h-[calc(100svh-5rem)]"
       >
-        <div className="absolute -left-40 -top-40 size-[28rem] rounded-full bg-[var(--brand-soft)] opacity-65 blur-3xl" />
-        <div className="absolute -bottom-48 -right-36 size-[30rem] rounded-full bg-[#dce9e4] opacity-65 blur-3xl" />
-        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/60 to-transparent" />
-      </div>
-
-      <div className="relative mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-[480px] flex-col sm:min-h-[calc(100svh-5rem)]">
         <div className="my-auto w-full py-2">
           <header className="mb-7 flex flex-col items-center text-center">
             <Link
@@ -49,7 +41,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             A shared home for your worship team
           </footer>
         </div>
-      </div>
-    </main>
+      </main>
+    </AuroraBackground>
   )
 }
