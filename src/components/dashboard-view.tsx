@@ -25,6 +25,7 @@ import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ProfileAvatar from "@/components/profile-avatar"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 import DashboardMobileNavigation from "@/components/dashboard-mobile-navigation"
+import AccountOptionsMenu from "@/components/account-options-menu"
 
 type DashboardViewProps = {
   workspace: WorkspaceData
@@ -268,6 +269,7 @@ export default function DashboardView({
             </div>
 
             <div className="flex items-center gap-2">
+              <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
               <WorkspaceHeaderActions unreadChatCount={workspace.unreadChatNotificationCount} />
 
               <Link
