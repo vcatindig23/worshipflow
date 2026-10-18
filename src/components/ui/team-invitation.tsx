@@ -1,6 +1,5 @@
 import Image from "next/image"
 import {
-  Check,
   Clock3,
   Users,
 } from "lucide-react"
@@ -76,7 +75,7 @@ export function TeamInvitation({
                 Team Invitation
               </p>
               <p className="mt-0.5 break-words text-[13px] leading-5 text-[var(--muted)]">
-                Invitation sent to{" "}
+                Invitation created for{" "}
                 <span className="font-medium text-[var(--foreground)]">
                   {email}
                 </span>{" "}
@@ -89,9 +88,9 @@ export function TeamInvitation({
             </div>
 
             <div className="flex shrink-0 items-center gap-2 self-start">
-              <span className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[var(--brand-soft)] px-2.5 text-xs font-semibold text-[var(--brand)]">
-                <Check aria-hidden="true" className="size-3.5" />
-                Sent
+              <span className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs font-semibold text-[var(--muted)]">
+                <Clock3 aria-hidden="true" className="size-3.5" />
+                Pending
               </span>
               {actions}
             </div>
@@ -102,7 +101,7 @@ export function TeamInvitation({
       <div className="ml-0 mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-[var(--muted)] sm:ml-14">
         <span className="inline-flex items-center gap-1.5">
           <Clock3 aria-hidden="true" className="size-3.5" />
-          Invited {formatInvitationDate(createdAt)}
+          Created {formatInvitationDate(createdAt)}
         </span>
         <span>
           Expires {formatInvitationDate(expiresAt)}
