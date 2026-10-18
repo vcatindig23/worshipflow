@@ -7,6 +7,7 @@ import {
   useState,
   useTransition,
 } from "react"
+import Link from "next/link"
 import type { FormEvent, ReactNode } from "react"
 import { Fragment } from "react"
 import {
@@ -1355,7 +1356,14 @@ export default function TeamChatClient({
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-semibold text-[var(--muted)]">
-                    {message.authorName} · {formatMessageTime(message.created_at, chatTimeZone)}
+                    <Link
+                      href={message.user_id === currentUserId ? "/profile" : "/profile/" + message.user_id}
+                      className="underline-offset-2 hover:text-[var(--brand)] hover:underline"
+                    >
+                      {message.authorName}
+                    </Link>
+                    {" · "}
+                    {formatMessageTime(message.created_at, chatTimeZone)}
                   </p>
                   <p className="mt-0.5 whitespace-pre-wrap break-words text-xs leading-5 text-[var(--foreground)]">
                     {message.body}
@@ -1486,14 +1494,21 @@ export default function TeamChatClient({
                     <div
                       className={`flex max-w-[94%] gap-3 sm:max-w-[82%] ${isOwnMessage ? "flex-row-reverse" : "flex-row"}`}
                     >
-                      <div className="mt-5 flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[10px] font-bold text-[var(--brand)]">
+                      <Link
+                        href={message.user_id === currentUserId ? "/profile" : "/profile/" + message.user_id}
+                        aria-label={"View " + displayName + "'s profile"}
+                        className="mt-5 flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[10px] font-bold text-[var(--brand)] transition hover:ring-2 hover:ring-[var(--brand)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
+                      >
                         {isOwnMessage ? initials(members.find((member) => member.id === currentUserId)?.displayName ?? "You") : initials(message.authorName)}
-                      </div>
+                      </Link>
                       <div className={`flex min-w-0 flex-col ${isOwnMessage ? "items-end" : "items-start"}`}>
                         <div className={`mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] ${isOwnMessage ? "justify-end" : ""}`}>
-                          <span className="font-semibold text-[var(--foreground)]">
+                          <Link
+                            href={message.user_id === currentUserId ? "/profile" : "/profile/" + message.user_id}
+                            className="font-semibold text-[var(--foreground)] underline-offset-2 hover:text-[var(--brand)] hover:underline"
+                          >
                             {displayName}
-                          </span>
+                          </Link>
                           <time
                             dateTime={message.created_at}
                             className="text-[var(--muted)]"
