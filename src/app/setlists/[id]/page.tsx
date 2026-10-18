@@ -1301,19 +1301,28 @@ export default async function SetlistPage({
                     <li key={assignment.id} className="py-3">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-3">
-                          <ProfileAvatar
-                            name={teamProfileNames.get(assignment.user_id) ?? "Name not set"}
-                            imageUrl={
-                              teamAvatarUrls.get(
-                                teamProfilesById.get(assignment.user_id)?.avatar_url ?? ""
-                              ) ?? null
-                            }
-                            sizeClassName="size-9"
-                          />
+                          <Link
+                            href={assignment.user_id === workspace.userId ? "/profile" : "/profile/" + assignment.user_id}
+                            aria-label={"View " + (teamProfileNames.get(assignment.user_id) ?? "team member") + "'s profile"}
+                            className="shrink-0 rounded-full outline-none transition hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2"
+                          >
+                            <ProfileAvatar
+                              name={teamProfileNames.get(assignment.user_id) ?? "Name not set"}
+                              imageUrl={
+                                teamAvatarUrls.get(
+                                  teamProfilesById.get(assignment.user_id)?.avatar_url ?? ""
+                                ) ?? null
+                              }
+                              sizeClassName="size-9"
+                            />
+                          </Link>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-[var(--foreground)]">
+                            <Link
+                              href={assignment.user_id === workspace.userId ? "/profile" : "/profile/" + assignment.user_id}
+                              className="truncate text-sm font-medium text-[var(--foreground)] underline-offset-2 transition hover:text-[var(--brand)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
+                            >
                               {teamProfileNames.get(assignment.user_id) ?? "Name not set"}
-                            </p>
+                            </Link>
                             <p className="mt-0.5 text-xs text-[var(--muted)]">
                               {teamPositionLabels[assignment.team_position] ?? assignment.team_position}
                             </p>
