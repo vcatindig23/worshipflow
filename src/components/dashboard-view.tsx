@@ -269,7 +269,7 @@ export default function DashboardView({
             </div>
 
             <div className="flex items-center gap-2">
-              <AccountOptionsMenu />
+              <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
               <WorkspaceHeaderActions unreadChatCount={workspace.unreadChatNotificationCount} />
 
               <Link
