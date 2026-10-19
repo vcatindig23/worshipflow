@@ -24,6 +24,7 @@ import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ProfileAvatar from "@/components/profile-avatar"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 import DashboardMobileNavigation from "@/components/dashboard-mobile-navigation"
+import DashboardGuidedTour from "@/components/dashboard-guided-tour"
 import AccountOptionsMenu from "@/components/account-options-menu"
 import ThemeToggleButton from "@/components/theme-toggle-button"
 
@@ -155,7 +156,7 @@ export default function DashboardView({
               Workspace
             </div>
 
-            <nav className="space-y-1">
+            <nav aria-label="Workspace navigation" data-tour="sidebar-navigation" className="space-y-1">
               {navigation.map((item) => {
                 const Icon = item.icon
 
@@ -282,8 +283,9 @@ export default function DashboardView({
 
           <main id="main-content" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mx-auto max-w-[1480px]">
-              <section className="mb-6">
-                <p className="text-sm font-medium text-[var(--brand)]">
+              <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div data-tour="dashboard-welcome">
+                  <p className="text-sm font-medium text-[var(--brand)]">
                   Welcome back, {workspace.userName}
                 </p>
 
@@ -294,7 +296,9 @@ export default function DashboardView({
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
                   Your worship workspace is ready. Manage songs, prepare
                   worship services, and keep your team organized.
-                </p>
+                  </p>
+                </div>
+                <DashboardGuidedTour userId={workspace.userId} />
               </section>
 
               {!workspace.serviceTimeAvailable ? (
@@ -309,7 +313,7 @@ export default function DashboardView({
                 </div>
               ) : null}
 
-              <section aria-label="Workspace overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <section aria-label="Workspace overview" data-tour="workspace-overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -378,6 +382,7 @@ export default function DashboardView({
               <section className="mt-6 grid gap-4 md:grid-cols-3">
                 <Link
                   href="/songs/new"
+                  data-tour="create-song"
                   className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
@@ -400,6 +405,7 @@ export default function DashboardView({
 
                 <Link
                   href="/setlists"
+                  data-tour="build-setlist"
                   className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
@@ -444,7 +450,7 @@ export default function DashboardView({
                 </Link>
               </section>
 
-              <section aria-labelledby="dashboard-priorities-title" className="mt-6">
+              <section aria-labelledby="dashboard-priorities-title" data-tour="team-priorities" className="mt-6">
                 <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <h3 id="dashboard-priorities-title" className="text-base font-semibold">
