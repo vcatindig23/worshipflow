@@ -1,5 +1,6 @@
 import Image from "next/image"
 import DrapeBackground from "@/components/kokonutui/drape-background"
+import LandingFaq from "@/components/landing-faq"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -171,6 +172,8 @@ export default function LandingHero() {
           ))}
         </div>
       </section>
+
+      <LandingFaq />
 
       <footer className="relative z-10 border-t border-[var(--border)]/70 px-5 py-6 text-center text-xs text-[var(--muted)] sm:px-8">
         WorshipFlow · A shared home for your worship team

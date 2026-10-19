@@ -5,6 +5,7 @@ const siteUrl = "https://worshipflow-weld.vercel.app"
 export default function sitemap(): MetadataRoute.Sitemap {
   const publicRoutes = [
     { path: "/", priority: 1 },
+    { path: "/faq", priority: 0.7 },
     { path: "/login", priority: 0.8 },
     { path: "/signup", priority: 0.8 },
     { path: "/forgot-password", priority: 0.3 },

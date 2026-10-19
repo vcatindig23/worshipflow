@@ -138,6 +138,36 @@ test.describe("WorshipFlow authentication", () => {
     expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth)
   })
 
+  test("landing FAQ is interactive and the full help center is public", async ({ page }) => {
+    await page.goto("/")
+
+    const landingFaq = page.locator("#landing-faq")
+    await expect(
+      landingFaq.getByRole("heading", {
+        name: "Questions before you get started?",
+        level: 2,
+      })
+    ).toBeVisible()
+    await expect(landingFaq.locator("details")).toHaveCount(4)
+
+    const firstQuestion = landingFaq.locator("details").first()
+    await firstQuestion.locator("summary").click()
+    await expect(
+      firstQuestion.getByText(/Open My Schedule to review upcoming services/i)
+    ).toBeVisible()
+
+    await expect(
+      page.locator('script[type="application/ld+json"]').filter({ hasText: '"FAQPage"' })
+    ).toHaveCount(1)
+
+    await page.getByRole("link", { name: "Browse all help questions" }).click()
+    await expect(page).toHaveURL(/\\/faq$/)
+    await expect(
+      page.getByRole("heading", { name: "How can we help?", level: 1 })
+    ).toBeVisible()
+    await expect(page.locator('script[type="application/ld+json"]').filter({ hasText: '"FAQPage"' })).toHaveCount(1)
+  })
+
   test("workspace routes redirect unauthenticated visitors to sign-in", async ({ page }) => {
     const protectedPaths = [
       "/my-schedule",

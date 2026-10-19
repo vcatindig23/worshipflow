@@ -2,22 +2,45 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft, BookOpen, MessageCircle } from "lucide-react"
 import FaqSearchList from "@/components/faq-search-list"
+import { faqItems } from "@/lib/faq"
 
 export const metadata: Metadata = {
   title: "Help & FAQ",
   description:
     "Find answers about WorshipFlow songs, chords, service planning, schedules, team communication, and workspace settings.",
+  alternates: {
+    canonical: "/faq",
+  },
+}
+
+const faqStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
 }
 
 export default function FaqPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-9">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqStructuredData).replace(/</g, "\\u003c"),
+        }}
+      />
       <Link
         href="/"
         className="inline-flex items-center gap-2 rounded-lg text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
       >
         <ArrowLeft className="size-4" />
-        Back to workspace
+        Back to WorshipFlow
       </Link>
 
       <section className="relative mt-6 overflow-hidden rounded-3xl bg-gradient-to-br from-[#152b20] via-[#244a35] to-[#365c45] px-5 py-7 text-white shadow-[0_18px_45px_-28px_rgba(21,43,32,0.7)] sm:px-9 sm:py-10">
