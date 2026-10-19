@@ -113,6 +113,10 @@ function buildHref(
     }
   }
 
+  if (!Object.prototype.hasOwnProperty.call(updates, "page")) {
+    nextParams.delete("page")
+  }
+
   for (const [key, value] of Object.entries(updates)) {
     if (!value) {
       nextParams.delete(key)
@@ -130,6 +134,8 @@ export default async function SongsPage({
   searchParams,
 }: SongsPageProps) {
   const params = await searchParams
+  const requestedPage = Number.parseInt(getParam(params.page) ?? "1", 10)
+  const requestedPageNumber = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
   const workspace = await getWorkspace()
 
   if (!workspace) {
@@ -410,6 +416,12 @@ export default async function SongsPage({
 
     return compareTitles(a, b)
   })
+
+  const pageSize = 50
+  const totalPages = Math.max(1, Math.ceil(filteredSongs.length / pageSize))
+  const page = Math.min(requestedPageNumber, totalPages)
+  const paginatedSongs = filteredSongs.slice((page - 1) * pageSize, page * pageSize)
+  const pageHref = (targetPage: number) => buildHref(params, { page: String(targetPage) })
 
   const canEdit = editableRoles.includes(
     workspace.role
@@ -737,7 +749,7 @@ export default async function SongsPage({
           </div>
         ) : (
           <div className={view === "grid" ? "grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
-            {filteredSongs.map((song) => {
+            {paginatedSongs.map((song) => {
               const preference =
                 preferencesBySong.get(song.id)
 
@@ -925,6 +937,15 @@ export default async function SongsPage({
             })}
           </div>
         )}
+        {totalPages > 1 ? (
+          <nav aria-label="Song pages" className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+            <p className="text-sm text-[var(--muted)]">Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filteredSongs.length)} of {filteredSongs.length} songs</p>
+            <div className="flex items-center gap-2">
+              {page > 1 ? <Link href={pageHref(page - 1)} className="inline-flex h-9 items-center rounded-lg border border-[var(--border)] px-3 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface)]">Previous</Link> : null}
+              {page < totalPages ? <Link href={pageHref(page + 1)} className="inline-flex h-9 items-center rounded-lg bg-[var(--brand)] px-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]">Next</Link> : null}
+            </div>
+          </nav>
+        ) : null}
       </section>
     </main>
   )
