@@ -111,9 +111,33 @@ test.describe("WorshipFlow authentication", () => {
     ).toBeVisible()
   })
 
+  test("signed-out visitors see the animated public homepage and its calls to action", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    const desktopResponse = await page.goto("/")
+    expect(desktopResponse?.status()).toBe(200)
+
+    await expect(
+      page.getByRole("heading", { name: /Bring your worship team into harmony/i, level: 1 })
+    ).toBeVisible()
+    await expect(page.getByRole("link", { name: "Create your workspace" })).toBeVisible()
+    await expect(page.getByRole("link", { name: "I already have an account" })).toBeVisible()
+    await expect(page.locator(".wf-landing-mesh")).toBeVisible()
+    await expect(page.getByRole("heading", { name: /Everything your team needs to prepare with confidence/i })).toBeVisible()
+
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto("/")
+    await expect(page.getByRole("heading", { name: /Bring your worship team into harmony/i, level: 1 })).toBeVisible()
+    await expect(page.getByRole("link", { name: "Create your workspace" })).toBeVisible()
+
+    const dimensions = await page.evaluate(() => ({
+      viewportWidth: window.innerWidth,
+      documentWidth: document.documentElement.scrollWidth,
+    }))
+    expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth)
+  })
+
   test("workspace routes redirect unauthenticated visitors to sign-in", async ({ page }) => {
     const protectedPaths = [
-      "/",
       "/my-schedule",
       "/services",
       "/setlists",
