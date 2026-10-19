@@ -1,12 +1,14 @@
 "use client"
 
 import {
+  BookOpen,
   Gauge,
   Minus,
   Pause,
   Play,
   Plus,
   RotateCcw,
+  SlidersHorizontal,
   X,
 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -125,7 +127,9 @@ export default function SongViewer({
   const [autoScroll, setAutoScroll] = useState(false)
   const [scrollSpeed, setScrollSpeed] = useState(2)
   const [practiceOpen, setPracticeOpen] = useState(false)
+  const [mobilePracticeTab, setMobilePracticeTab] = useState<"chart" | "tools">("chart")
   const chartScrollRef = useRef<HTMLDivElement>(null)
+  const sectionElementsRef = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const displayedSource = useMemo(
     () => transposeChordProSource(source, transposeAmount),
@@ -144,6 +148,29 @@ export default function SongViewer({
 
   const displayedKey =
     getChordProMetadata(displayedSource, "key") ?? "—"
+  const practiceSections = useMemo(
+    () =>
+      displayLines.flatMap((item, index) =>
+        item.type === "section" && item.title
+          ? [{ index, title: item.title }]
+          : []
+      ),
+    [displayLines]
+  )
+
+  function jumpToSection(index: number) {
+    const container = chartScrollRef.current
+    const section = sectionElementsRef.current.get(index)
+    if (!container || !section) return
+
+    setAutoScroll(false)
+    const containerTop = container.getBoundingClientRect().top
+    const sectionTop = section.getBoundingClientRect().top
+    container.scrollTo({
+      top: container.scrollTop + sectionTop - containerTop - 16,
+      behavior: "smooth",
+    })
+  }
 
   useEffect(() => {
     if (!stageMode) return
@@ -263,6 +290,13 @@ export default function SongViewer({
             return (
               <div
                 key={`section-${index}`}
+                ref={(element) => {
+                  if (element) {
+                    sectionElementsRef.current.set(index, element)
+                  } else {
+                    sectionElementsRef.current.delete(index)
+                  }
+                }}
                 className={`mb-3 mt-8 first:mt-0 text-[0.68em] font-bold uppercase tracking-[0.16em] ${
                   stageMode
                     ? "text-white/45"
@@ -449,7 +483,13 @@ export default function SongViewer({
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-          <section className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <section
+            className={
+              "min-h-0 min-w-0 flex-1 flex-col " +
+              (mobilePracticeTab === "chart" ? "flex" : "hidden") +
+              " lg:flex"
+            }
+          >
             <div
               aria-label="Practice chart controls"
               className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--border)] bg-[var(--card)] px-3 py-2.5 sm:px-5"
@@ -565,10 +605,36 @@ export default function SongViewer({
                 </button>
               </div>
             </div>
+            {practiceSections.length > 0 ? (
+              <nav
+                aria-label="Jump to song section"
+                className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 sm:px-5"
+              >
+                <span className="shrink-0 pr-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                  Sections
+                </span>
+                {practiceSections.map((section) => (
+                  <button
+                    key={section.index}
+                    type="button"
+                    onClick={() => jumpToSection(section.index)}
+                    className="inline-flex h-9 shrink-0 items-center rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:border-[var(--brand)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand-dark)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/40"
+                  >
+                    {section.title}
+                  </button>
+                ))}
+              </nav>
+            ) : null}
             {chart}
           </section>
 
-          <aside className="h-[40dvh] min-h-0 shrink-0 border-t border-[var(--border)] lg:h-auto lg:w-[min(38vw,460px)] lg:border-l lg:border-t-0">
+          <aside
+            className={
+              "min-h-0 min-w-0 flex-1 border-t border-[var(--border)] " +
+              (mobilePracticeTab === "tools" ? "flex" : "hidden") +
+              " lg:block lg:flex-none lg:h-auto lg:w-[min(38vw,460px)] lg:border-l lg:border-t-0"
+            }
+          >
             <SongPracticePanel
               tempo={tempo}
               songId={songId}
@@ -582,6 +648,40 @@ export default function SongViewer({
             />
           </aside>
         </div>
+
+        <nav
+          aria-label="Practice workspace panels"
+          className="flex shrink-0 gap-2 border-t border-[var(--border)] bg-[var(--card)] p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden"
+        >
+          <button
+            type="button"
+            onClick={() => setMobilePracticeTab("chart")}
+            aria-pressed={mobilePracticeTab === "chart"}
+            className={
+              "inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border text-sm font-semibold transition " +
+              (mobilePracticeTab === "chart"
+                ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]"
+                : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]")
+            }
+          >
+            <BookOpen className="size-4" />
+            Chart
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobilePracticeTab("tools")}
+            aria-pressed={mobilePracticeTab === "tools"}
+            className={
+              "inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border text-sm font-semibold transition " +
+              (mobilePracticeTab === "tools"
+                ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]"
+                : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]")
+            }
+          >
+            <SlidersHorizontal className="size-4" />
+            Practice tools
+          </button>
+        </nav>
       </main>
     )
   }
@@ -738,7 +838,10 @@ export default function SongViewer({
 
           <button
             type="button"
-            onClick={() => setPracticeOpen((value) => !value)}
+            onClick={() => {
+              setMobilePracticeTab("chart")
+              setPracticeOpen((value) => !value)
+            }}
             aria-expanded={practiceOpen}
             className={"inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition " + (practiceOpen ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]" : "border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface)]")}
           >
