@@ -59,7 +59,7 @@ test.describe("WorshipFlow authentication", () => {
 
       await expect(page.locator("#main-content > div > aside")).toBeHidden()
       await expect(page.locator("#main-content > div > section")).toBeVisible()
-      await expect(page.locator("#main-content img[alt='WorshipFlow']")).toBeVisible()
+      await expect(page.locator("#main-content > div > section header img[alt='WorshipFlow']")).toBeVisible()
       await expect(page.locator(".wf-aurora-background .wf-aurora-layer")).toHaveCount(1)
       await expect(
         page.getByRole("heading", {
