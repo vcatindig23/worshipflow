@@ -194,7 +194,7 @@ export default function ReferenceAudioPlayer({
           value={Math.min(currentTime, duration || 0)}
           disabled={!duration}
           onChange={(event) => handleSeek(Number(event.currentTarget.value))}
-          className="h-8 w-full cursor-pointer touch-pan-x accent-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-45"
+          className="h-8 w-full cursor-pointer touch-pan-y accent-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-45"
         />
         <div className={"mt-1.5 flex items-center justify-between text-[11px] tabular-nums " + muted}>
           <span>{formatTime(currentTime)}</span>
