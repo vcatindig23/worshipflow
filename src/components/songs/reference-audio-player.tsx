@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 import {
+  PRACTICE_PLAYBACK_RATES,
   readSongPracticeSettings,
   updateSongPracticeSettings,
+  type PracticePlaybackRate,
 } from "@/lib/song-practice-settings"
 import {
   AudioLines,
@@ -38,7 +40,7 @@ export default function ReferenceAudioPlayer({
   const [playing, setPlaying] = useState(false)
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
-  const [playbackRate, setPlaybackRate] = useState(1)
+  const [playbackRate, setPlaybackRate] = useState<PracticePlaybackRate>(1)
   const [repeatTrack, setRepeatTrack] = useState(false)
   const [loopStart, setLoopStart] = useState<number | null>(null)
   const [loopEnd, setLoopEnd] = useState<number | null>(null)
@@ -167,9 +169,10 @@ export default function ReferenceAudioPlayer({
   function handlePlaybackRateChange(value: string) {
     const nextRate = Number(value)
     const audio = audioRef.current
-    if (!Number.isFinite(nextRate)) return
-    setPlaybackRate(nextRate)
-    if (audio) audio.playbackRate = nextRate
+    if (!PRACTICE_PLAYBACK_RATES.includes(nextRate as PracticePlaybackRate)) return
+    const supportedRate = nextRate as PracticePlaybackRate
+    setPlaybackRate(supportedRate)
+    if (audio) audio.playbackRate = supportedRate
   }
 
   return (
