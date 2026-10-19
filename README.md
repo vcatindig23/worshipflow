@@ -219,6 +219,14 @@ Replace the example values with your project's actual values. These are the two 
 | `npm test` | Run the Vitest test suite |
 | `npm run test:watch` | Run Vitest in watch mode |
 | `npm run test:e2e` | Run Playwright browser tests after building the app and installing Chromium |
+| `npm run test:e2e:workflow` | Run the authenticated multi-member service workflow (requires the isolated E2E setup below) |
+
+The browser test workflow runs the public authentication/access smoke tests on every push and pull request. The authenticated multi-member service test is opt-in and runs only on a `main` push or manual workflow dispatch after setup.
+
+**Isolated service workflow test setup:** Create a dedicated, disposable Supabase project with three test accounts in one church workspace: an administrator or worship leader, a requester, and a substitute. Give both the requester and substitute the `drummer` position, and make sure neither user is already assigned to a duplicate drummer position on the new test service. Do not use production church data or production account credentials.
+
+In GitHub Actions repository settings, set the repository variable `E2E_ENABLE_SERVICE_WORKFLOW` to `true`, then add these repository secrets: `E2E_SUPABASE_URL`, `E2E_SUPABASE_PUBLISHABLE_KEY`, `E2E_LEADER_EMAIL`, `E2E_LEADER_PASSWORD`, `E2E_REQUESTER_EMAIL`, `E2E_REQUESTER_PASSWORD`, `E2E_REQUESTER_DISPLAY_NAME`, `E2E_SUBSTITUTE_EMAIL`, `E2E_SUBSTITUTE_PASSWORD`, and `E2E_SUBSTITUTE_DISPLAY_NAME`. Credentials are supplied only to the opt-in test step; the authenticated job is skipped for pull requests. The test creates a uniquely named service plan and attempts to delete it at the end.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -305,7 +313,8 @@ The checklist below tracks potential improvements; it is not a promise that ever
 - [x] Print-ready service plan with browser Save as PDF support
 - [ ] Expand automated test coverage for key service and team workflows
 - [x] Add Playwright browser smoke tests for authentication, guest access controls, and responsive auth layouts
-- [ ] Add an isolated multi-member E2E fixture for service assignments and swap approval
+- [x] Add an opt-in multi-member browser test for service assignments and swap approval
+- [ ] Expand browser coverage for chat, uploads, and live-stage workflows
 - [ ] Continue accessibility and responsive-layout testing across screen sizes
 - [ ] Expand contributor and deployment documentation
 
