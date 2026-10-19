@@ -119,7 +119,7 @@ export default async function SetlistsPage({
   }
 
   if (query) {
-    const safeQuery = query.replace(/[^\\p{L}\\p{N} -]/gu, " ").trim()
+    const safeQuery = query.replace(/[^\p{L}\p{N} -]/gu, " ").trim()
     if (safeQuery) {
       const pattern = toSearchPattern(safeQuery)
       setlistQuery = setlistQuery.or("name.ilike." + pattern + ",description.ilike." + pattern)
