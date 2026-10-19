@@ -18,11 +18,8 @@ import {
   parseChordPro,
 } from "@/features/chordpro/parser"
 import { transposeChordProSource } from "@/features/chordpro/transpose"
-import {
-  getSongPracticeSettingsStorageKey,
-  readSongPracticeSettings,
-  updateSongPracticeSettings,
-} from "@/lib/song-practice-settings"
+import { getSongPracticeSettingsStorageKey } from "@/lib/song-practice-settings"
+import { useSongPracticePreference } from "./use-song-practice-preference"
 import ChordProLine from "./chordpro-line"
 import PracticeMetronome from "./practice-metronome"
 import ReferenceAudioPlayer from "./reference-audio-player"
@@ -133,23 +130,22 @@ export default function SongViewer({
   referenceAudioName = null,
   referenceAudioUrl = null,
 }: SongViewerProps) {
-  const [fontSize, setFontSize] = useState(24)
-  const [showChords, setShowChords] = useState(true)
-  const [transposeAmount, setTransposeAmount] = useState(0)
-  const [capo, setCapo] = useState(0)
-  const [stageMode, setStageMode] = useState(false)
-  const [autoScroll, setAutoScroll] = useState(false)
-  const [scrollSpeed, setScrollSpeed] = useState(2)
-  const [practiceOpen, setPracticeOpen] = useState(false)
-  const [mobilePracticeTab, setMobilePracticeTab] = useState<"chart" | "tools">("chart")
-  const chartScrollRef = useRef<HTMLDivElement>(null)
-  const sectionElementsRef = useRef<Map<number, HTMLDivElement>>(new Map())
   const practiceSettingsStorageKey = getSongPracticeSettingsStorageKey(
     organizationId,
     userId,
     songId
   )
-  const [settingsLoadedKey, setSettingsLoadedKey] = useState<string | null>(null)
+  const [fontSize, setFontSize] = useSongPracticePreference(practiceSettingsStorageKey, "fontSize", 24)
+  const [showChords, setShowChords] = useSongPracticePreference(practiceSettingsStorageKey, "showChords", true)
+  const [transposeAmount, setTransposeAmount] = useSongPracticePreference(practiceSettingsStorageKey, "transposeAmount", 0)
+  const [capo, setCapo] = useSongPracticePreference(practiceSettingsStorageKey, "capo", 0)
+  const [scrollSpeed, setScrollSpeed] = useSongPracticePreference(practiceSettingsStorageKey, "scrollSpeed", 2)
+  const [stageMode, setStageMode] = useState(false)
+  const [autoScroll, setAutoScroll] = useState(false)
+  const [practiceOpen, setPracticeOpen] = useState(false)
+  const [mobilePracticeTab, setMobilePracticeTab] = useState<"chart" | "tools">("chart")
+  const chartScrollRef = useRef<HTMLDivElement>(null)
+  const sectionElementsRef = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const displayedSource = useMemo(
     () => transposeChordProSource(source, transposeAmount),
@@ -177,43 +173,6 @@ export default function SongViewer({
       ),
     [displayLines]
   )
-
-  useEffect(() => {
-    if (!practiceSettingsStorageKey) return
-
-    const settings = readSongPracticeSettings(practiceSettingsStorageKey)
-    if (settings.fontSize !== undefined) setFontSize(settings.fontSize)
-    if (settings.showChords !== undefined) setShowChords(settings.showChords)
-    if (settings.transposeAmount !== undefined) setTransposeAmount(settings.transposeAmount)
-    if (settings.capo !== undefined) setCapo(settings.capo)
-    if (settings.scrollSpeed !== undefined) setScrollSpeed(settings.scrollSpeed)
-    setSettingsLoadedKey(practiceSettingsStorageKey)
-  }, [practiceSettingsStorageKey])
-
-  useEffect(() => {
-    if (
-      !practiceSettingsStorageKey ||
-      settingsLoadedKey !== practiceSettingsStorageKey
-    ) {
-      return
-    }
-
-    updateSongPracticeSettings(practiceSettingsStorageKey, {
-      fontSize,
-      showChords,
-      transposeAmount,
-      capo,
-      scrollSpeed,
-    })
-  }, [
-    practiceSettingsStorageKey,
-    settingsLoadedKey,
-    fontSize,
-    showChords,
-    transposeAmount,
-    capo,
-    scrollSpeed,
-  ])
 
   function jumpToSection(index: number) {
     const container = chartScrollRef.current
