@@ -181,7 +181,7 @@ export default function PracticeMetronome({
             onClick={() => setCountInEnabled((value) => !value)}
             disabled={running}
             aria-pressed={countInEnabled}
-            className={"inline-flex h-9 items-center rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-45 " + button}
+            className={"inline-flex h-11 items-center rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-45 sm:h-9 " + button}
           >
             {countInEnabled ? "4-beat count-in" : "No count-in"}
           </button>
@@ -189,7 +189,7 @@ export default function PracticeMetronome({
             type="button"
             onClick={tapTempo}
             aria-label="Tap to set practice tempo"
-            className={"inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold " + button}
+            className={"inline-flex h-11 items-center gap-2 rounded-lg border px-3 text-xs font-semibold " + button}
           >
             <Hand className="size-3.5" />
             Tap tempo
@@ -199,7 +199,7 @@ export default function PracticeMetronome({
             onClick={resetTempo}
             aria-label="Reset practice tempo"
             title="Reset to the song's saved tempo"
-            className={"inline-flex size-9 items-center justify-center rounded-lg border " + button}
+            className={"inline-flex size-11 items-center justify-center rounded-lg border sm:size-9 " + button}
           >
             <RotateCcw className="size-3.5" />
           </button>
@@ -224,7 +224,7 @@ export default function PracticeMetronome({
             value={tempo}
             onChange={(event) => setTempo(clampPracticeTempo(Number(event.target.value)))}
             aria-label="Practice tempo in beats per minute"
-            className="h-2 w-full cursor-pointer accent-[var(--brand)]"
+            className="h-8 w-full cursor-pointer touch-pan-y accent-[var(--brand)]"
           />
           <div className={"mt-1.5 flex justify-between text-[10px] " + muted}>
             <span>40 BPM</span>
@@ -238,14 +238,14 @@ export default function PracticeMetronome({
             onClick={() => setTempo((value) => clampPracticeTempo(value - 1))}
             disabled={tempo <= 40}
             aria-label="Decrease tempo by one BPM"
-            className={"inline-flex size-10 items-center justify-center rounded-xl border disabled:opacity-40 " + button}
+            className={"inline-flex size-11 items-center justify-center rounded-xl border disabled:opacity-40 sm:size-10 " + button}
           >
             <Minus className="size-4" />
           </button>
           <button
             type="button"
             onClick={toggleMetronome}
-            className={"inline-flex h-10 min-w-32 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition " + (running ? (dark ? "bg-white text-[#17221b]" : "bg-[var(--surface)] text-[var(--foreground)]") : "bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]")}
+            className={"inline-flex h-11 min-w-32 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition sm:h-10 " + (running ? (dark ? "bg-white text-[#17221b]" : "bg-[var(--surface)] text-[var(--foreground)]") : "bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]")}
           >
             {running ? <Pause className="size-4" /> : <Play className="size-4" />}
             {running ? "Stop metronome" : "Start metronome"}
@@ -255,7 +255,7 @@ export default function PracticeMetronome({
             onClick={() => setTempo((value) => clampPracticeTempo(value + 1))}
             disabled={tempo >= 220}
             aria-label="Increase tempo by one BPM"
-            className={"inline-flex size-10 items-center justify-center rounded-xl border disabled:opacity-40 " + button}
+            className={"inline-flex size-11 items-center justify-center rounded-xl border disabled:opacity-40 sm:size-10 " + button}
           >
             <Plus className="size-4" />
           </button>
