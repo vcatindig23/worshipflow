@@ -136,6 +136,7 @@ export default function DashboardMobileNavigation({
           )
         }
         aria-label="Open navigation"
+        data-tour="mobile-navigation"
         aria-haspopup="dialog"
         aria-controls="mobile-workspace-navigation"
         aria-expanded={open}
