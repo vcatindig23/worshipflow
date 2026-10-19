@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   CalendarClock,
   CalendarDays,
@@ -142,8 +143,8 @@ export default function DashboardMobileNavigation({
         <Menu aria-hidden="true" className="wf-icon-motion size-5" />
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-[90] isolate overflow-hidden lg:hidden">
+      {open ? createPortal(
+        <div className="fixed inset-0 z-[120] isolate overflow-hidden lg:hidden">
           <button
             type="button"
             aria-label="Close navigation menu"
@@ -292,7 +293,8 @@ export default function DashboardMobileNavigation({
               </div>
             </div>
           </aside>
-        </div>
+        </div>,
+        document.body
       ) : null}
     </>
   )
