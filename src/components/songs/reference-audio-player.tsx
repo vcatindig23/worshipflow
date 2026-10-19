@@ -1,6 +1,10 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import {
+  readSongPracticeSettings,
+  updateSongPracticeSettings,
+} from "@/lib/song-practice-settings"
 import {
   AudioLines,
   Headphones,
@@ -14,6 +18,7 @@ type ReferenceAudioPlayerProps = {
   src: string
   title: string
   dark?: boolean
+  settingsStorageKey?: string | null
 }
 
 function formatTime(seconds: number) {
@@ -27,6 +32,7 @@ export default function ReferenceAudioPlayer({
   src,
   title,
   dark = false,
+  settingsStorageKey = null,
 }: ReferenceAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying] = useState(false)
@@ -37,6 +43,31 @@ export default function ReferenceAudioPlayer({
   const [loopStart, setLoopStart] = useState<number | null>(null)
   const [loopEnd, setLoopEnd] = useState<number | null>(null)
   const [error, setError] = useState("")
+  const [settingsLoadedKey, setSettingsLoadedKey] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!settingsStorageKey) {
+      setSettingsLoadedKey(null)
+      return
+    }
+
+    const settings = readSongPracticeSettings(settingsStorageKey)
+    if (settings.playbackRate !== undefined) {
+      setPlaybackRate(settings.playbackRate)
+    }
+    setSettingsLoadedKey(settingsStorageKey)
+  }, [settingsStorageKey])
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate
+    }
+  }, [playbackRate])
+
+  useEffect(() => {
+    if (!settingsStorageKey || settingsLoadedKey !== settingsStorageKey) return
+    updateSongPracticeSettings(settingsStorageKey, { playbackRate })
+  }, [settingsStorageKey, settingsLoadedKey, playbackRate])
 
   const sectionLoopActive =
     loopStart !== null && loopEnd !== null && loopEnd > loopStart
