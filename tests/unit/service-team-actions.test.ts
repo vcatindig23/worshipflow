@@ -169,6 +169,27 @@ describe("service-team server actions", () => {
     expect(mocks.revalidatePath).toHaveBeenCalledWith(`/setlists/${setlistId}`)
   })
 
+  it("rejects a self-targeted swap before querying assignments", async () => {
+    mocks.getWorkspace.mockResolvedValue({
+      userId: requesterId,
+      organizationId,
+      role: "team_member",
+    })
+
+    await expectRedirect(
+      requestAssignmentSwap(
+        form({
+          assignmentId,
+          substituteUserId: requesterId,
+          reason: "",
+        })
+      ),
+      "/my-schedule?swapError=invalid_substitute"
+    )
+
+    expect(mocks.createClient).not.toHaveBeenCalled()
+  })
+
   it("prevents a different member from responding to the substitute's swap request", async () => {
     const { supabase } = createSupabase({
       queryData: {
