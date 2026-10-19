@@ -21,6 +21,9 @@ export async function requestAssignmentSwap(formData: FormData) {
 
   const workspace = await getWorkspace()
   if (!workspace) redirect("/onboarding")
+  if (substituteUserId === workspace.userId) {
+    redirect("/my-schedule?swapError=invalid_substitute")
+  }
 
   const supabase = await createClient()
   const { data: assignment, error: assignmentError } = await supabase
@@ -43,7 +46,8 @@ export async function requestAssignmentSwap(formData: FormData) {
   if (error) {
     console.error("request_assignment_swap failed:", { code: error.code, message: error.message })
     let key = "request_failed"
-    if (error.message.includes("SUBSTITUTE_POSITION_REQUIRED")) key = "substitute_not_eligible"
+    if (error.message.includes("INVALID_SUBSTITUTE")) key = "invalid_substitute"
+    else if (error.message.includes("SUBSTITUTE_POSITION_REQUIRED")) key = "substitute_not_eligible"
     else if (error.message.includes("SUBSTITUTE_ALREADY_ASSIGNED")) key = "substitute_already_assigned"
     else if (error.message.includes("SWAP_REQUEST_ALREADY_OPEN")) key = "swap_already_open"
     else if (error.message.includes("SERVICE_CLOSED")) key = "service_closed"
