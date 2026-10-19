@@ -161,7 +161,7 @@ test.describe("WorshipFlow authentication", () => {
     ).toHaveCount(1)
 
     await page.getByRole("link", { name: "Browse all help questions" }).click()
-    await expect(page).toHaveURL(/\\/faq$/)
+    await expect(page).toHaveURL(/faq$/)
     await expect(
       page.getByRole("heading", { name: "How can we help?", level: 1 })
     ).toBeVisible()
