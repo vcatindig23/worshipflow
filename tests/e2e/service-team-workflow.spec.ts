@@ -127,6 +127,13 @@ test.describe("isolated multi-member service workflow", () => {
       await expect(
         leader.getByRole("heading", { name: "Assignment swap requested" })
       ).toBeVisible()
+
+      // The service was created without songs, so this also verifies the live
+      // stage's intentional empty state rather than a blank or broken screen.
+      await leader.goto(`/setlists/${createdSetlistId}/live`)
+      await expect(leader.getByRole("heading", { name: "Live stage", exact: true })).toBeVisible()
+      await expect(leader.getByRole("heading", { name: "No songs in this service" })).toBeVisible()
+      await expect(leader.getByRole("link", { name: "Go to home dashboard" })).toBeVisible()
     } finally {
       if (createdSetlistId) {
         try {
