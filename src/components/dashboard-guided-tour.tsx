@@ -183,6 +183,7 @@ export default function DashboardGuidedTour({
   const launchButtonRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const nextButtonRef = useRef<HTMLButtonElement>(null)
+  const focusedStepRef = useRef<number | null>(null)
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState(false)
   const [stepIndex, setStepIndex] = useState(0)
@@ -274,12 +275,13 @@ export default function DashboardGuidedTour({
   }, [currentStep, mounted, open, stepIndex])
 
   useEffect(() => {
-    if (!open || !mounted) return
+    if (!open || !layout || focusedStepRef.current === stepIndex) return
+    focusedStepRef.current = stepIndex
     const frame = window.requestAnimationFrame(() =>
       nextButtonRef.current?.focus({ preventScroll: true }),
     )
     return () => window.cancelAnimationFrame(frame)
-  }, [mounted, open, stepIndex])
+  }, [layout, open, stepIndex])
 
   useEffect(() => {
     if (!open) return
@@ -321,6 +323,7 @@ export default function DashboardGuidedTour({
   }, [finishTour, goToNextStep, open])
 
   function startTour() {
+    focusedStepRef.current = null
     setStepIndex(0)
     setLayout(null)
     setOpen(true)
