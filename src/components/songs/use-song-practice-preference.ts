@@ -89,13 +89,18 @@ export function useSongPracticePreference<K extends keyof SongPracticeSettings>(
     getSnapshot,
     getServerSnapshot
   )
-  const [ephemeralValue, setEphemeralValue] =
-    useState<SongPracticeSettings[K]>(fallback)
+  const [ephemeral, setEphemeral] = useState<{
+    storageKey: string | null
+    value: SongPracticeSettings[K]
+    active: boolean
+  }>(() => ({ storageKey, value: fallback, active: !storageKey }))
 
   const storedValue = settings[setting]
-  const value = storageKey
-    ? (storedValue === undefined ? fallback : storedValue)
-    : ephemeralValue
+  const ephemeralIsCurrent = ephemeral.storageKey === storageKey
+  const value =
+    !storageKey || (ephemeralIsCurrent && ephemeral.active)
+      ? (ephemeralIsCurrent ? ephemeral.value : fallback)
+      : (storedValue === undefined ? fallback : storedValue)
 
   const setValue = useCallback(
     (action: SetStateAction<SongPracticeSettings[K]>) => {
@@ -105,11 +110,12 @@ export function useSongPracticePreference<K extends keyof SongPracticeSettings>(
           : action
 
       if (storageKey) {
-        updateSongPracticeSettings(storageKey, {
+        const saved = updateSongPracticeSettings(storageKey, {
           [setting]: nextValue,
         } as StoredSongPracticeSettings)
+        setEphemeral({ storageKey, value: nextValue, active: !saved })
       } else {
-        setEphemeralValue(nextValue)
+        setEphemeral({ storageKey: null, value: nextValue, active: true })
       }
     },
     [storageKey, setting, value]
