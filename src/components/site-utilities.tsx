@@ -3,8 +3,19 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
+import dynamic from "next/dynamic"
 import { ArrowUp, BookOpen, Check, HelpCircle, MessageCircle, X } from "lucide-react"
-import FaqSearchList from "@/components/faq-search-list"
+
+const FaqSearchList = dynamic(() => import("@/components/faq-search-list"), {
+  ssr: false,
+  loading: () => (
+    <div aria-label="Loading help content" className="space-y-2 py-2">
+      <div className="h-10 animate-pulse rounded-xl bg-[var(--surface)]" />
+      <div className="h-12 animate-pulse rounded-xl bg-[var(--surface)]" />
+      <div className="h-12 animate-pulse rounded-xl bg-[var(--surface)]" />
+    </div>
+  ),
+})
 
 export default function SiteUtilities() {
   const pathname = usePathname()
