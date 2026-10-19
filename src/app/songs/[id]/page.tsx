@@ -364,6 +364,7 @@ export default async function SongPage({
             tempo={typedSong.tempo}
             songId={typedSong.id}
             organizationId={membership.organization_id}
+            userId={userId}
             canEdit={canEdit}
             referenceAudioPath={referenceAudioPath}
             referenceAudioName={referenceAudioName}
