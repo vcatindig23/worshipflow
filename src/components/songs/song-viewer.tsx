@@ -179,10 +179,7 @@ export default function SongViewer({
   )
 
   useEffect(() => {
-    if (!practiceSettingsStorageKey) {
-      setSettingsLoadedKey(null)
-      return
-    }
+    if (!practiceSettingsStorageKey) return
 
     const settings = readSongPracticeSettings(practiceSettingsStorageKey)
     if (settings.fontSize !== undefined) setFontSize(settings.fontSize)
