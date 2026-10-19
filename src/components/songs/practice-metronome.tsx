@@ -6,10 +6,15 @@ import {
   clampPracticeTempo,
   estimateTapTempo,
 } from "@/lib/practice-tempo"
+import {
+  readSongPracticeSettings,
+  updateSongPracticeSettings,
+} from "@/lib/song-practice-settings"
 
 type PracticeMetronomeProps = {
   initialTempo?: number | null
   dark?: boolean
+  settingsStorageKey?: string | null
 }
 
 function scheduleClick(context: AudioContext, at: number, accented: boolean) {
@@ -29,6 +34,7 @@ function scheduleClick(context: AudioContext, at: number, accented: boolean) {
 export default function PracticeMetronome({
   initialTempo,
   dark = false,
+  settingsStorageKey = null,
 }: PracticeMetronomeProps) {
   const [tempo, setTempo] = useState(() => clampPracticeTempo(initialTempo))
   const [running, setRunning] = useState(false)
@@ -37,9 +43,31 @@ export default function PracticeMetronome({
   const [beatLabel, setBeatLabel] = useState("Ready when you are")
   const [audioError, setAudioError] = useState("")
   const [tapCount, setTapCount] = useState(0)
+  const [settingsLoadedKey, setSettingsLoadedKey] = useState<string | null>(null)
   const bpmRef = useRef(tempo)
   const audioContextRef = useRef<AudioContext | null>(null)
   const tapTimesRef = useRef<number[]>([])
+
+  useEffect(() => {
+    if (!settingsStorageKey) {
+      setSettingsLoadedKey(null)
+      return
+    }
+
+    const settings = readSongPracticeSettings(settingsStorageKey)
+    if (settings.tempo !== undefined) setTempo(settings.tempo)
+    if (settings.countInEnabled !== undefined) setCountInEnabled(settings.countInEnabled)
+    setSettingsLoadedKey(settingsStorageKey)
+  }, [settingsStorageKey])
+
+  useEffect(() => {
+    if (!settingsStorageKey || settingsLoadedKey !== settingsStorageKey) return
+
+    updateSongPracticeSettings(settingsStorageKey, {
+      tempo,
+      countInEnabled,
+    })
+  }, [settingsStorageKey, settingsLoadedKey, tempo, countInEnabled])
 
   useEffect(() => {
     bpmRef.current = tempo
