@@ -49,10 +49,7 @@ export default function PracticeMetronome({
   const tapTimesRef = useRef<number[]>([])
 
   useEffect(() => {
-    if (!settingsStorageKey) {
-      setSettingsLoadedKey(null)
-      return
-    }
+    if (!practiceSettingsStorageKey) return
 
     const settings = readSongPracticeSettings(settingsStorageKey)
     if (settings.tempo !== undefined) setTempo(settings.tempo)
