@@ -31,6 +31,7 @@ type SongPracticePanelProps = {
   referenceAudioName: string | null
   referenceAudioUrl: string | null
   showManager: boolean
+  immersive?: boolean
 }
 
 function SongPracticePanel({
@@ -43,10 +44,18 @@ function SongPracticePanel({
   referenceAudioName,
   referenceAudioUrl,
   showManager,
+  immersive = false,
 }: SongPracticePanelProps) {
   return (
-    <div className={"z-10 max-h-[min(42dvh,380px)] shrink-0 overflow-y-auto border-b p-3 sm:p-4 " + (dark ? "border-white/10 bg-[#0d120f]" : "border-[var(--border)] bg-[var(--card)]")}>
-      <div className="mx-auto max-w-7xl space-y-3">
+    <div
+      className={
+        immersive
+          ? "h-full min-h-0 overflow-y-auto bg-[var(--surface)] p-3 sm:p-4"
+          : "z-10 max-h-[min(42dvh,380px)] shrink-0 overflow-y-auto border-b p-3 sm:p-4 " +
+            (dark ? "border-white/10 bg-[#0d120f]" : "border-[var(--border)] bg-[var(--card)]")
+      }
+    >
+      <div className={immersive ? "space-y-3" : "mx-auto max-w-7xl space-y-3"}>
         {referenceAudioUrl ? (
           <ReferenceAudioPlayer
             key={referenceAudioPath ?? referenceAudioUrl ?? "reference-audio"}
@@ -142,6 +151,7 @@ export default function SongViewer({
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setAutoScroll(false)
+        setPracticeOpen(false)
         setStageMode(false)
       }
     }
@@ -151,12 +161,26 @@ export default function SongViewer({
   }, [stageMode])
 
   useEffect(() => {
-    document.body.style.overflow = stageMode ? "hidden" : ""
+    if (!practiceOpen || stageMode) return
+
+    function handlePracticeKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setAutoScroll(false)
+        setPracticeOpen(false)
+      }
+    }
+
+    window.addEventListener("keydown", handlePracticeKeyDown)
+    return () => window.removeEventListener("keydown", handlePracticeKeyDown)
+  }, [practiceOpen, stageMode])
+
+  useEffect(() => {
+    document.body.style.overflow = stageMode || practiceOpen ? "hidden" : ""
 
     return () => {
       document.body.style.overflow = ""
     }
-  }, [stageMode])
+  }, [stageMode, practiceOpen])
 
   function increaseTranspose() {
     setTransposeAmount((value) => Math.min(12, value + 1))
@@ -209,19 +233,19 @@ export default function SongViewer({
   const chart = (
     <div
       ref={chartScrollRef}
-      aria-label={stageMode ? "Stage mode lyrics and chords" : "Song lyrics and chords"}
+      aria-label={stageMode ? "Stage mode lyrics and chords" : practiceOpen ? "Practice mode lyrics and chords" : "Song lyrics and chords"}
       tabIndex={0}
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
           ? "flex-1 overflow-auto bg-[#0d120f] px-6 py-8 text-white sm:px-10 sm:py-10"
           : practiceOpen
-            ? "h-[calc(100dvh-520px)] min-h-[280px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
+            ? "min-h-0 flex-1 overflow-auto bg-[var(--card)] px-4 py-5 sm:px-8 sm:py-8"
             : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
       <div
         className={`mx-auto w-full max-w-none ${
-          stageMode ? "mx-auto max-w-[1500px] pb-14 text-center" : "pb-8"
+          stageMode ? "mx-auto max-w-[1500px] pb-14 text-center" : practiceOpen ? "mx-auto max-w-5xl pb-14" : "pb-8"
         }`}
       >
         {displayLines.map((item, index) => {
@@ -356,6 +380,7 @@ export default function SongViewer({
             type="button"
             onClick={() => {
               setAutoScroll(false)
+              setPracticeOpen(false)
               setStageMode(false)
             }}
             className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
@@ -390,6 +415,174 @@ export default function SongViewer({
 
         {chart}
       </div>
+    )
+  }
+
+  if (practiceOpen) {
+    return (
+      <main className="fixed inset-0 z-[100] flex h-dvh min-h-0 flex-col overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--card)] px-3 py-3 sm:px-6 sm:py-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--brand)] sm:text-xs">
+              <Gauge className="size-4" />
+              Practice Mode
+            </div>
+            <h1 className="mt-1 truncate text-lg font-bold tracking-tight sm:text-2xl">
+              {title}
+            </h1>
+            <p className="mt-1 truncate text-[11px] text-[var(--muted)] sm:text-xs">
+              Key {displayedKey} <span aria-hidden="true">·</span> Capo {capo} <span aria-hidden="true">·</span> Transpose {transposeAmount > 0 ? "+" : ""}{transposeAmount}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setAutoScroll(false)
+              setPracticeOpen(false)
+            }}
+            aria-label="Exit Practice Mode"
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)] sm:px-4 sm:text-sm"
+          >
+            <X className="size-4" />
+            <span className="hidden sm:inline">Exit practice</span>
+          </button>
+        </header>
+
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+          <section className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <div
+              aria-label="Practice chart controls"
+              className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--border)] bg-[var(--card)] px-3 py-2.5 sm:px-5"
+            >
+              <button
+                type="button"
+                onClick={() => setAutoScroll((value) => !value)}
+                aria-pressed={autoScroll}
+                className={"inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition " + (autoScroll ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]" : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--brand-soft)]")}
+              >
+                {autoScroll ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+                {autoScroll ? "Pause scroll" : "Auto-scroll"}
+              </button>
+              <button
+                type="button"
+                onClick={cycleScrollSpeed}
+                aria-label={`Change auto-scroll speed, currently speed ${scrollSpeed}`}
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+              >
+                <Gauge className="size-3.5" />
+                Speed {scrollSpeed}×
+              </button>
+              <button
+                type="button"
+                onClick={resetChartPosition}
+                aria-label="Back to top of practice chart"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+              >
+                <RotateCcw className="size-3.5" />
+                Top
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowChords((value) => !value)}
+                aria-pressed={showChords}
+                className={"inline-flex h-9 items-center rounded-lg border px-3 text-xs font-semibold transition " + (showChords ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]" : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]")}
+              >
+                {showChords ? "Hide chords" : "Show chords"}
+              </button>
+              <div className="flex h-9 items-center overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+                <button
+                  type="button"
+                  onClick={decreaseTranspose}
+                  disabled={transposeAmount <= -12}
+                  aria-label="Transpose down"
+                  className="inline-flex h-full items-center px-2.5 text-[var(--foreground)] transition hover:bg-[var(--brand-soft)] disabled:opacity-40"
+                >
+                  <Minus className="size-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={resetTranspose}
+                  aria-label="Reset transposition"
+                  title="Reset transposition"
+                  className="h-full min-w-11 border-x border-[var(--border)] px-2 text-xs font-semibold tabular-nums text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+                >
+                  {transposeAmount > 0 ? "+" : ""}{transposeAmount}
+                </button>
+                <button
+                  type="button"
+                  onClick={increaseTranspose}
+                  disabled={transposeAmount >= 12}
+                  aria-label="Transpose up"
+                  className="inline-flex h-full items-center px-2.5 text-[var(--foreground)] transition hover:bg-[var(--brand-soft)] disabled:opacity-40"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
+              <div className="flex h-9 items-center overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+                <button
+                  type="button"
+                  onClick={() => changeCapo(capo - 1)}
+                  disabled={capo === 0}
+                  aria-label="Decrease capo"
+                  className="inline-flex h-full items-center px-2.5 text-[var(--foreground)] transition hover:bg-[var(--brand-soft)] disabled:opacity-40"
+                >
+                  <Minus className="size-3.5" />
+                </button>
+                <span className="border-x border-[var(--border)] px-2.5 text-xs font-semibold text-[var(--foreground)]">
+                  Capo {capo}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => changeCapo(capo + 1)}
+                  disabled={capo === 12}
+                  aria-label="Increase capo"
+                  className="inline-flex h-full items-center px-2.5 text-[var(--foreground)] transition hover:bg-[var(--brand-soft)] disabled:opacity-40"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
+              <div className="ml-auto flex h-9 items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-1.5">
+                <button
+                  type="button"
+                  onClick={() => setFontSize((value) => Math.max(14, value - 2))}
+                  disabled={fontSize <= 14}
+                  aria-label="Decrease lyrics size"
+                  className="inline-flex size-7 items-center justify-center rounded-md text-[var(--foreground)] transition hover:bg-[var(--brand-soft)] disabled:opacity-40"
+                >
+                  <Minus className="size-3.5" />
+                </button>
+                <span className="min-w-12 text-center text-[11px] font-semibold tabular-nums text-[var(--muted)]">
+                  {fontSize}px
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFontSize((value) => Math.min(40, value + 2))}
+                  disabled={fontSize >= 40}
+                  aria-label="Increase lyrics size"
+                  className="inline-flex size-7 items-center justify-center rounded-md text-[var(--foreground)] transition hover:bg-[var(--brand-soft)] disabled:opacity-40"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
+            </div>
+            {chart}
+          </section>
+
+          <aside className="h-[40dvh] min-h-0 shrink-0 border-t border-[var(--border)] lg:h-auto lg:w-[min(38vw,460px)] lg:border-l lg:border-t-0">
+            <SongPracticePanel
+              tempo={tempo}
+              songId={songId}
+              organizationId={organizationId}
+              canEdit={canEdit}
+              referenceAudioPath={referenceAudioPath}
+              referenceAudioName={referenceAudioName}
+              referenceAudioUrl={referenceAudioUrl}
+              showManager
+              immersive
+            />
+          </aside>
+        </div>
+      </main>
     )
   }
 
