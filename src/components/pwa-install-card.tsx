@@ -49,7 +49,6 @@ export default function PwaInstallCard() {
       // Browser-only capabilities are read after hydration to avoid server/client markup mismatches.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setEnvironment({ isIOS, isStandalone })
-      if (isStandalone) setStatus("installed")
     }
 
     const handleAppInstalled = () => {
@@ -82,7 +81,7 @@ export default function PwaInstallCard() {
     }
   }
 
-  const isStandalone = environment?.isStandalone || status === "installed"
+  const isStandalone = environment?.isStandalone === true
   const isIOS = environment?.isIOS === true
 
   return (
@@ -129,6 +128,16 @@ export default function PwaInstallCard() {
               <p className="text-sm font-semibold text-[var(--foreground)]">WorshipFlow is open in app mode</p>
               <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
                 You’re using the installed experience. You can continue managing songs, services, and your schedule from here.
+              </p>
+            </div>
+          </div>
+        ) : status === "installed" ? (
+          <div className="flex items-start gap-3">
+            <CheckCircle2 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[var(--brand)]" />
+            <div>
+              <p className="text-sm font-semibold text-[var(--foreground)]">Installation accepted</p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                Your browser accepted the install request. Check your home screen or app list for WorshipFlow.
               </p>
             </div>
           </div>
