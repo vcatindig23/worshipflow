@@ -22,6 +22,60 @@ test.describe("WorshipFlow authentication", () => {
     await expect(password).toHaveAttribute("type", "password")
   })
 
+  test("split-screen branding panel is present on desktop for login and signup", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+
+    for (const path of ["/login", "/signup"]) {
+      const response = await page.goto(path)
+      expect(response?.status()).toBe(200)
+
+      const brandPanel = page.locator("#main-content > div > aside")
+      await expect(brandPanel).toBeVisible()
+      await expect(
+        brandPanel.getByRole("heading", { name: "Make room for what matters." })
+      ).toBeVisible()
+      await expect(
+        brandPanel.getByText("Songs, lyrics, and chords", { exact: true })
+      ).toBeVisible()
+      await expect(
+        brandPanel.getByText("Services and schedules", { exact: true })
+      ).toBeVisible()
+      await expect(page.locator("#main-content > div > section")).toBeVisible()
+      await expect(
+        page.getByRole("heading", {
+          name: path === "/login" ? "Sign in to WorshipFlow" : "Create your account",
+          level: 1,
+        })
+      ).toBeVisible()
+      await expect(page.locator(".wf-aurora-background .wf-aurora-layer")).toHaveCount(1)
+    }
+  })
+
+  test("mobile authentication keeps the aurora background and uses a stacked layout", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+
+    for (const path of ["/login", "/signup"]) {
+      await page.goto(path)
+
+      await expect(page.locator("#main-content > div > aside")).toBeHidden()
+      await expect(page.locator("#main-content > div > section")).toBeVisible()
+      await expect(page.locator("#main-content img[alt='WorshipFlow']")).toBeVisible()
+      await expect(page.locator(".wf-aurora-background .wf-aurora-layer")).toHaveCount(1)
+      await expect(
+        page.getByRole("heading", {
+          name: path === "/login" ? "Sign in to WorshipFlow" : "Create your account",
+          level: 1,
+        })
+      ).toBeVisible()
+
+      const dimensions = await page.evaluate(() => ({
+        viewportWidth: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+      }))
+      expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth)
+    }
+  })
+
   test("visitors can navigate from sign-in to sign-up", async ({ page }) => {
     await page.goto("/login")
     await page.getByRole("link", { name: "Create an account" }).click()
