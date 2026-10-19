@@ -2,24 +2,22 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { z } from "zod"
+import { assignmentSwapRequestSchema } from "@/lib/assignment-swap-validation"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 
-const uuidSchema = z.string().uuid()
-
 export async function requestAssignmentSwap(formData: FormData) {
-  const assignmentId = String(formData.get("assignmentId") ?? "").trim()
-  const substituteUserId = String(formData.get("substituteUserId") ?? "").trim()
-  const reason = String(formData.get("reason") ?? "").trim()
+  const parsedInput = assignmentSwapRequestSchema.safeParse({
+    assignmentId: String(formData.get("assignmentId") ?? ""),
+    substituteUserId: String(formData.get("substituteUserId") ?? ""),
+    reason: String(formData.get("reason") ?? ""),
+  })
 
-  if (
-    !uuidSchema.safeParse(assignmentId).success ||
-    !uuidSchema.safeParse(substituteUserId).success ||
-    reason.length > 500
-  ) {
+  if (!parsedInput.success) {
     redirect("/my-schedule?swapError=invalid_request")
   }
+
+  const { assignmentId, substituteUserId, reason } = parsedInput.data
 
   const workspace = await getWorkspace()
   if (!workspace) redirect("/onboarding")
