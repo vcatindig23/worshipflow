@@ -5,6 +5,10 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
+import {
+  assignmentSwapResolutionSchema,
+  assignmentSwapResponseSchema,
+} from "@/lib/assignment-swap-validation"
 
 const uuidSchema = z.string().uuid()
 const leaderRoles = ["admin", "worship_leader"]
@@ -36,13 +40,15 @@ export async function acknowledgeServiceAnnouncement(formData: FormData) {
 }
 
 export async function respondToAssignmentSwapRequest(formData: FormData) {
-  const requestId = getText(formData, "requestId")
-  const decision = getText(formData, "decision")
-  const responseNote = getText(formData, "responseNote")
+  const parsedInput = assignmentSwapResponseSchema.safeParse({
+    requestId: getText(formData, "requestId"),
+    decision: getText(formData, "decision"),
+    responseNote: getText(formData, "responseNote"),
+  })
 
-  if (!uuidSchema.safeParse(requestId).success || !["accept", "decline"].includes(decision)) {
-    redirect("/setlists")
-  }
+  if (!parsedInput.success) redirect("/setlists")
+
+  const { requestId, decision, responseNote } = parsedInput.data
 
   const workspace = await getWorkspace()
   if (!workspace) redirect("/onboarding")
@@ -79,13 +85,15 @@ export async function respondToAssignmentSwapRequest(formData: FormData) {
 }
 
 export async function resolveAssignmentSwapRequest(formData: FormData) {
-  const requestId = getText(formData, "requestId")
-  const decision = getText(formData, "decision")
-  const resolutionNote = getText(formData, "resolutionNote")
+  const parsedInput = assignmentSwapResolutionSchema.safeParse({
+    requestId: getText(formData, "requestId"),
+    decision: getText(formData, "decision"),
+    resolutionNote: getText(formData, "resolutionNote"),
+  })
 
-  if (!uuidSchema.safeParse(requestId).success || !["approve", "decline"].includes(decision)) {
-    redirect("/services")
-  }
+  if (!parsedInput.success) redirect("/services")
+
+  const { requestId, decision, resolutionNote } = parsedInput.data
 
   const workspace = await getWorkspace()
   if (!workspace) redirect("/onboarding")
