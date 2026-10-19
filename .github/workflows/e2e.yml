@@ -55,3 +55,56 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  service-workflow:
+    name: Authenticated multi-member service workflow
+    # Keep test-account credentials away from fork and pull-request execution.
+    if: github.event_name != 'pull_request' && vars.E2E_ENABLE_SERVICE_WORKFLOW == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.E2E_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Chromium and its system dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Run authenticated multi-member service workflow
+        run: npm run test:e2e:workflow
+        env:
+          E2E_ENABLE_SERVICE_WORKFLOW: "true"
+          E2E_LEADER_EMAIL: ${{ secrets.E2E_LEADER_EMAIL }}
+          E2E_LEADER_PASSWORD: ${{ secrets.E2E_LEADER_PASSWORD }}
+          E2E_REQUESTER_EMAIL: ${{ secrets.E2E_REQUESTER_EMAIL }}
+          E2E_REQUESTER_PASSWORD: ${{ secrets.E2E_REQUESTER_PASSWORD }}
+          E2E_REQUESTER_DISPLAY_NAME: ${{ secrets.E2E_REQUESTER_DISPLAY_NAME }}
+          E2E_SUBSTITUTE_EMAIL: ${{ secrets.E2E_SUBSTITUTE_EMAIL }}
+          E2E_SUBSTITUTE_PASSWORD: ${{ secrets.E2E_SUBSTITUTE_PASSWORD }}
+          E2E_SUBSTITUTE_DISPLAY_NAME: ${{ secrets.E2E_SUBSTITUTE_DISPLAY_NAME }}
+
+      - name: Upload authenticated Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worshipflow-authenticated-e2e-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
