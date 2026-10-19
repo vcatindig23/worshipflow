@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server"
 import { formatServiceTime } from "@/lib/service-scheduling"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
+import { toSearchPattern } from "@/lib/global-search"
 
 type SetlistsPageProps = {
   searchParams: Promise<
@@ -80,8 +81,10 @@ export default async function SetlistsPage({
   const supabase = await createClient()
   const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
 
-  const query =
-    getParam(params.q)?.trim() ?? ""
+  const query = getParam(params.q)?.trim().slice(0, 100) ?? ""
+  const requestedPage = Number.parseInt(getParam(params.page) ?? "1", 10)
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, 10_000) : 1
+  const pageSize = 25
 
   const requestedStatus =
     getParam(params.status) ?? "all"
@@ -95,7 +98,7 @@ export default async function SetlistsPage({
 
   let setlistQuery = supabase
     .from("setlists")
-    .select("*")
+    .select("*", { count: "exact" })
     .eq(
       "organization_id",
       workspace.organizationId
@@ -115,10 +118,19 @@ export default async function SetlistsPage({
     )
   }
 
+  if (query) {
+    const safeQuery = query.replace(/[^a-zA-Z0-9 -]/g, " ").trim()
+    if (safeQuery) {
+      const pattern = toSearchPattern(safeQuery)
+      setlistQuery = setlistQuery.or("name.ilike." + pattern + ",description.ilike." + pattern)
+    }
+  }
+
   const {
     data: setlistRows,
     error: setlistError,
-  } = await setlistQuery
+    count: totalSetlistsCount,
+  } = await setlistQuery.range((page - 1) * pageSize, page * pageSize - 1)
 
   if (setlistError) {
     redirect(
@@ -165,25 +177,16 @@ export default async function SetlistsPage({
     )
   }
 
-  const filteredSetlists = setlists.filter(
-    (setlist) => {
-      if (!query) {
-        return true
-      }
-
-      const searchable = [
-        setlist.name,
-        setlist.description,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-
-      return searchable.includes(
-        query.toLowerCase()
-      )
-    }
-  )
+  const filteredSetlists = setlists
+  const totalSetlists = totalSetlistsCount ?? 0
+  const totalPages = Math.max(1, Math.ceil(totalSetlists / pageSize))
+  const pageHref = (targetPage: number) => {
+    const nextParams = new URLSearchParams()
+    if (query) nextParams.set("q", query)
+    if (status !== "all") nextParams.set("status", status)
+    nextParams.set("page", String(targetPage))
+    return "/setlists?" + nextParams.toString()
+  }
 
   return (
     <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
@@ -261,10 +264,8 @@ export default async function SetlistsPage({
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-[var(--foreground)]">
-              {filteredSetlists.length}{" "}
-              {filteredSetlists.length === 1
-                ? "setlist"
-                : "setlists"}
+              {totalSetlists}{" "}
+              {totalSetlists === 1 ? "setlist" : "setlists"}
             </p>
 
             <p className="mt-1 text-xs text-[var(--muted)]">
@@ -380,6 +381,16 @@ export default async function SetlistsPage({
             )}
           </div>
         )}
+
+        {totalPages > 1 ? (
+          <nav aria-label="Setlist pages" className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+            <p className="text-sm text-[var(--muted)]">Page {page} of {totalPages}</p>
+            <div className="flex items-center gap-2">
+              {page > 1 ? <Link href={pageHref(page - 1)} className="inline-flex h-9 items-center rounded-lg border border-[var(--border)] px-3 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface)]">Previous</Link> : null}
+              {page < totalPages ? <Link href={pageHref(page + 1)} className="inline-flex h-9 items-center rounded-lg bg-[var(--brand)] px-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]">Next</Link> : null}
+            </div>
+          </nav>
+        ) : null}
       </section>
     </main>
   )
