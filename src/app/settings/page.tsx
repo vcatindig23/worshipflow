@@ -12,6 +12,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import ThemeToggleButton from "@/components/theme-toggle-button"
+import PwaInstallCard from "@/components/pwa-install-card"
 
 export default async function SettingsPage() {
   const workspace = await getWorkspace()
@@ -70,6 +71,8 @@ export default async function SettingsPage() {
         </div>
         <ThemeToggleButton variant="card" className="w-full sm:w-auto" />
       </section>
+
+      <PwaInstallCard />
 
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         <Link
