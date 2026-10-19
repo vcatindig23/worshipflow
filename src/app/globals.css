@@ -726,3 +726,21 @@ html[data-theme="dark"] .wf-landing-wordmark {
     will-change: auto;
   }
 }
+
+
+/* Theme-aware colors for the landing page's WebGL curtain. */
+.wf-landing-drape-lit {
+  color: #f4f8f1;
+}
+
+.wf-landing-drape-shade {
+  color: #b7cdb6;
+}
+
+html[data-theme="dark"] .wf-landing-drape-lit {
+  color: #9fbaa3;
+}
+
+html[data-theme="dark"] .wf-landing-drape-shade {
+  color: #24372a;
+}

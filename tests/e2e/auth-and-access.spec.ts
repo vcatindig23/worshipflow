@@ -122,6 +122,8 @@ test.describe("WorshipFlow authentication", () => {
     await expect(page.getByRole("link", { name: "Create your workspace" })).toBeVisible()
     await expect(page.getByRole("link", { name: "I already have an account" })).toBeVisible()
     await expect(page.locator(".wf-landing-mesh")).toBeVisible()
+    await expect(page.locator(".wf-landing-drape")).toBeVisible()
+    await expect(page.locator(".wf-landing-drape canvas")).toHaveCount(1)
     await expect(page.getByRole("heading", { name: /Everything your team needs to prepare with confidence/i })).toBeVisible()
 
     await page.setViewportSize({ width: 390, height: 844 })
