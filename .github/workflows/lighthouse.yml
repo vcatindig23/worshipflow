@@ -1,0 +1,29 @@
+name: Lighthouse Performance Audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 8 * * 1-5"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lighthouse-production-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Audit production sign-in and sign-up
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Run Lighthouse CI against production
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://worshipflow-vcatindig23.vercel.app/login
+            https://worshipflow-vcatindig23.vercel.app/signup
+          runs: 3
+          uploadArtifacts: true
+          temporaryPublicStorage: false
