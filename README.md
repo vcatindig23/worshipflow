@@ -218,6 +218,7 @@ Replace the example values with your project's actual values. These are the two 
 | `npm run lint` | Run ESLint |
 | `npm test` | Run the Vitest test suite |
 | `npm run test:watch` | Run Vitest in watch mode |
+| `npm run test:e2e` | Run Playwright browser tests after building the app and installing Chromium |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -303,7 +304,8 @@ The checklist below tracks potential improvements; it is not a promise that ever
 - [x] Scheduled in-app service reminders
 - [x] Print-ready service plan with browser Save as PDF support
 - [ ] Expand automated test coverage for key service and team workflows
-- [ ] Add end-to-end tests for critical user journeys
+- [x] Add Playwright browser smoke tests for authentication, guest access controls, and responsive auth layouts
+- [ ] Add an isolated multi-member E2E fixture for service assignments and swap approval
 - [ ] Continue accessibility and responsive-layout testing across screen sizes
 - [ ] Expand contributor and deployment documentation
 
