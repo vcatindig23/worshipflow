@@ -4,16 +4,32 @@ import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
 import { shouldSyncOfflineAccount } from "@/lib/offline-support-routes"
+import { captureInstallPrompt, clearInstallPrompt } from "@/lib/pwa-install"
 
 export default function OfflineSupport() {
   const pathname = usePathname()
   const shouldSyncAccount = shouldSyncOfflineAccount(pathname)
 
   useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      captureInstallPrompt(event)
+    }
+    const handleAppInstalled = () => {
+      clearInstallPrompt()
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+    window.addEventListener("appinstalled", handleAppInstalled)
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch((error: unknown) => {
         console.error("Service worker registration failed:", error)
       })
+    }
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+      window.removeEventListener("appinstalled", handleAppInstalled)
     }
   }, [])
 
