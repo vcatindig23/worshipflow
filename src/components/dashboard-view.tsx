@@ -313,8 +313,8 @@ export default function DashboardView({
                 </div>
               ) : null}
 
-              <section aria-label="Workspace overview" data-tour="workspace-overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+              <section aria-label="Workspace overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div data-tour="workspace-overview" className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-[var(--muted)]">Songs</div>
@@ -450,7 +450,7 @@ export default function DashboardView({
                 </Link>
               </section>
 
-              <section aria-labelledby="dashboard-priorities-title" data-tour="team-priorities" className="mt-6">
+              <section aria-labelledby="dashboard-priorities-title" className="mt-6">
                 <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <h3 id="dashboard-priorities-title" className="text-base font-semibold">
@@ -468,6 +468,7 @@ export default function DashboardView({
                 <div className="grid gap-3 md:grid-cols-3">
                   <Link
                     href="/services"
+                    data-tour="team-priorities"
                     className="group rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)]/30 hover:shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-3">
