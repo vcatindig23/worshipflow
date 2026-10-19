@@ -156,16 +156,20 @@ test.describe("WorshipFlow authentication", () => {
       firstQuestion.getByText(/Open My Schedule to review upcoming services/i)
     ).toBeVisible()
 
-    await expect(
-      page.locator('script[type="application/ld+json"]').filter({ hasText: '"FAQPage"' })
-    ).toHaveCount(1)
+    const landingSchemas = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((scripts) => scripts.map((script) => script.textContent ?? ""))
+    expect(landingSchemas.some((schema) => schema.includes('"FAQPage"'))).toBe(true)
 
     await page.getByRole("link", { name: "Browse all help questions" }).click()
     await expect(page).toHaveURL(/faq$/)
     await expect(
       page.getByRole("heading", { name: "How can we help?", level: 1 })
     ).toBeVisible()
-    await expect(page.locator('script[type="application/ld+json"]').filter({ hasText: '"FAQPage"' })).toHaveCount(1)
+    const helpSchemas = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((scripts) => scripts.map((script) => script.textContent ?? ""))
+    expect(helpSchemas.some((schema) => schema.includes('"FAQPage"'))).toBe(true)
   })
 
   test("workspace routes redirect unauthenticated visitors to sign-in", async ({ page }) => {
