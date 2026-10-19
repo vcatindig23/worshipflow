@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import { ArrowUp, BookOpen, HelpCircle, MessageCircle, X } from "lucide-react"
-import { captureInstallPrompt, clearInstallPrompt } from "@/lib/pwa-install"
 
 const FaqSearchList = dynamic(() => import("@/components/faq-search-list"), {
   ssr: false,
@@ -37,23 +36,6 @@ export default function SiteUtilities() {
     return () => {
       window.removeEventListener("scroll", updateScroll)
       window.removeEventListener("resize", updateScroll)
-    }
-  }, [])
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (event: Event) => {
-      captureInstallPrompt(event)
-    }
-    const handleAppInstalled = () => {
-      clearInstallPrompt()
-    }
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
-    window.addEventListener("appinstalled", handleAppInstalled)
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
-      window.removeEventListener("appinstalled", handleAppInstalled)
     }
   }, [])
 
