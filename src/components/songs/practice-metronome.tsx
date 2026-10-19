@@ -6,10 +6,7 @@ import {
   clampPracticeTempo,
   estimateTapTempo,
 } from "@/lib/practice-tempo"
-import {
-  readSongPracticeSettings,
-  updateSongPracticeSettings,
-} from "@/lib/song-practice-settings"
+import { useSongPracticePreference } from "./use-song-practice-preference"
 
 type PracticeMetronomeProps = {
   initialTempo?: number | null
@@ -36,35 +33,24 @@ export default function PracticeMetronome({
   dark = false,
   settingsStorageKey = null,
 }: PracticeMetronomeProps) {
-  const [tempo, setTempo] = useState(() => clampPracticeTempo(initialTempo))
+  const [tempo, setTempo] = useSongPracticePreference(
+    settingsStorageKey,
+    "tempo",
+    clampPracticeTempo(initialTempo)
+  )
+  const [countInEnabled, setCountInEnabled] = useSongPracticePreference(
+    settingsStorageKey,
+    "countInEnabled",
+    true
+  )
   const [running, setRunning] = useState(false)
-  const [countInEnabled, setCountInEnabled] = useState(true)
   const [activeBeat, setActiveBeat] = useState(0)
   const [beatLabel, setBeatLabel] = useState("Ready when you are")
   const [audioError, setAudioError] = useState("")
   const [tapCount, setTapCount] = useState(0)
-  const [settingsLoadedKey, setSettingsLoadedKey] = useState<string | null>(null)
   const bpmRef = useRef(tempo)
   const audioContextRef = useRef<AudioContext | null>(null)
   const tapTimesRef = useRef<number[]>([])
-
-  useEffect(() => {
-    if (!settingsStorageKey) return
-
-    const settings = readSongPracticeSettings(settingsStorageKey)
-    if (settings.tempo !== undefined) setTempo(settings.tempo)
-    if (settings.countInEnabled !== undefined) setCountInEnabled(settings.countInEnabled)
-    setSettingsLoadedKey(settingsStorageKey)
-  }, [settingsStorageKey])
-
-  useEffect(() => {
-    if (!settingsStorageKey || settingsLoadedKey !== settingsStorageKey) return
-
-    updateSongPracticeSettings(settingsStorageKey, {
-      tempo,
-      countInEnabled,
-    })
-  }, [settingsStorageKey, settingsLoadedKey, tempo, countInEnabled])
 
   useEffect(() => {
     bpmRef.current = tempo
