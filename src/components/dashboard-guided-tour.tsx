@@ -20,7 +20,8 @@ type TourStep = {
 type TourLayout = {
   spotlight: { left: number; top: number; width: number; height: number }
   tooltip: { left: number; top: number; width: number }
-  placement: "above" | "below"
+  placement: "above" | "below" | "right"
+  arrowOffset: number
 }
 
 const TOUR_VERSION = "v1"
@@ -113,15 +114,44 @@ function calculateTourLayout(
   }
 
   const tooltipWidth = Math.min(360, viewportWidth - 32)
-  const estimatedTooltipHeight = 260
+  const estimatedTooltipHeight = 352
   const gap = 18
   const roomBelow = viewportHeight - (spotlight.top + spotlight.height) - gap
   const roomAbove = spotlight.top - gap
+  const roomRight =
+    viewportWidth - spotlight.left - spotlight.width - gap
+  const canPlaceRight =
+    roomRight >= tooltipWidth + 16 &&
+    spotlight.left < viewportWidth * 0.35 &&
+    spotlight.width < viewportWidth * 0.45
+
+  if (canPlaceRight) {
+    const tooltipTop = clamp(
+      spotlight.top + spotlight.height / 2 - estimatedTooltipHeight / 2,
+      12,
+      viewportHeight - estimatedTooltipHeight - 12,
+    )
+    const arrowOffset = clamp(
+      spotlight.top + spotlight.height / 2 - tooltipTop - 8,
+      24,
+      estimatedTooltipHeight - 24,
+    )
+    return {
+      spotlight,
+      tooltip: {
+        left: spotlight.left + spotlight.width + gap,
+        top: tooltipTop,
+        width: tooltipWidth,
+      },
+      placement: "right",
+      arrowOffset,
+    }
+  }
+
   const placement: TourLayout["placement"] =
     roomBelow >= estimatedTooltipHeight || roomBelow >= roomAbove
       ? "below"
       : "above"
-
   const desiredTop =
     placement === "below"
       ? spotlight.top + spotlight.height + gap
@@ -136,7 +166,12 @@ function calculateTourLayout(
     width: tooltipWidth,
   }
 
-  return { spotlight, tooltip, placement }
+  return {
+    spotlight,
+    tooltip,
+    placement,
+    arrowOffset: 36,
+  }
 }
 
 export default function DashboardGuidedTour({
@@ -196,16 +231,14 @@ export default function DashboardGuidedTour({
   useEffect(() => {
     if (!mounted || !open) return
 
-    const selector =
+    const resolveSelector = () =>
       window.innerWidth < 1024 && currentStep.mobileSelector
         ? currentStep.mobileSelector
         : currentStep.selector
+    const selector = resolveSelector()
     const target = findVisibleTarget(selector)
 
-    if (!target) {
-      setLayout(null)
-      return
-    }
+    if (!target) return
 
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -217,11 +250,8 @@ export default function DashboardGuidedTour({
     })
 
     const updatePosition = () => {
-      const visibleTarget = findVisibleTarget(selector)
-      if (!visibleTarget) {
-        setLayout(null)
-        return
-      }
+      const visibleTarget = findVisibleTarget(resolveSelector())
+      if (!visibleTarget) return
 
       setLayout(
         calculateTourLayout(
@@ -244,12 +274,12 @@ export default function DashboardGuidedTour({
   }, [currentStep, mounted, open, stepIndex])
 
   useEffect(() => {
-    if (!open || !layout) return
+    if (!open || !mounted) return
     const frame = window.requestAnimationFrame(() =>
       nextButtonRef.current?.focus({ preventScroll: true }),
     )
     return () => window.cancelAnimationFrame(frame)
-  }, [layout, open, stepIndex])
+  }, [mounted, open, stepIndex])
 
   useEffect(() => {
     if (!open) return
@@ -393,7 +423,14 @@ export default function DashboardGuidedTour({
               >
                 <span
                   aria-hidden="true"
-                  className={`absolute ${layout.placement === "below" ? "-top-2 border-l border-t" : "-bottom-2 border-r border-b"} left-9 size-4 rotate-45 border-[var(--border)] bg-[var(--card)]`}
+                  className={`absolute size-4 rotate-45 border-[var(--border)] bg-[var(--card)] ${
+                    layout.placement === "below"
+                      ? "-top-2 left-9 border-l border-t"
+                      : layout.placement === "above"
+                        ? "-bottom-2 left-9 border-r border-b"
+                        : "-left-2 border-b border-l"
+                  }`}
+                  style={layout.placement === "right" ? { top: layout.arrowOffset } : undefined}
                 />
 
                 <div className="relative flex items-start justify-between gap-4">
