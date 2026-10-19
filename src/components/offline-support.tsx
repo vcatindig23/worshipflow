@@ -3,7 +3,6 @@
 import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
-import { clearOfflineStageSnapshots } from "@/lib/offline-stage"
 import { shouldSyncOfflineAccount } from "@/lib/offline-support-routes"
 
 export default function OfflineSupport() {
@@ -38,9 +37,11 @@ export default function OfflineSupport() {
           try {
             if (!userId) {
               localStorage.removeItem("worshipflow-offline-user")
-              void clearOfflineStageSnapshots().catch((error: unknown) => {
-                console.error("Offline stage cleanup after sign-out failed:", error)
-              })
+              void import("@/lib/offline-stage")
+                .then(({ clearOfflineStageSnapshots }) => clearOfflineStageSnapshots())
+                .catch((error: unknown) => {
+                  console.error("Offline stage cleanup after sign-out failed:", error)
+                })
               return
             }
 
@@ -50,12 +51,14 @@ export default function OfflineSupport() {
             localStorage.setItem("worshipflow-offline-user", userId)
 
             if (previousUserId && previousUserId !== userId) {
-              void clearOfflineStageSnapshots(userId).catch((error: unknown) => {
-                console.error(
-                  "Offline stage cleanup after account change failed:",
-                  error
-                )
-              })
+              void import("@/lib/offline-stage")
+                .then(({ clearOfflineStageSnapshots }) => clearOfflineStageSnapshots(userId))
+                .catch((error: unknown) => {
+                  console.error(
+                    "Offline stage cleanup after account change failed:",
+                    error
+                  )
+                })
             }
           } catch (error) {
             console.error("Unable to update offline account scope:", error)

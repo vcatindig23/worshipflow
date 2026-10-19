@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import HomeButton from "@/components/home-button"
+import HomeButtonLoader from "@/components/home-button-loader"
 import OfflineSupport from "@/components/offline-support"
 import SitePreferences from "@/components/site-preferences"
 import SiteUtilitiesLoader from "@/components/site-utilities-loader"
@@ -98,7 +98,7 @@ export default function RootLayout({
           }}
         />
         {children}
-        <HomeButton />
+        <HomeButtonLoader />
         <OfflineSupport />
         <SitePreferences />
         <SiteUtilitiesLoader />
