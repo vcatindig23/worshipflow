@@ -108,8 +108,8 @@ export function readSongPracticeSettings(
 export function updateSongPracticeSettings(
   storageKey: string | null,
   update: StoredSongPracticeSettings
-): void {
-  if (!storageKey || typeof window === "undefined") return
+): boolean {
+  if (!storageKey || typeof window === "undefined") return false
 
   try {
     const current = readSongPracticeSettings(storageKey)
@@ -122,7 +122,9 @@ export function updateSongPracticeSettings(
         detail: { key: storageKey },
       })
     )
+    return true
   } catch {
-    // Private browsing or storage quotas should never prevent practice.
+    // Let the control use an in-memory fallback if browser storage is blocked.
+    return false
   }
 }
