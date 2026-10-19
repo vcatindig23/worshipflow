@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
@@ -101,7 +102,7 @@ function getToday(timeZone: string) {
   return `${part("year")}-${part("month")}-${part("day")}`
 }
 
-export async function getWorkspace(): Promise<WorkspaceData> {
+export const getWorkspace = cache(async function getWorkspace(): Promise<WorkspaceData> {
   const supabase = await createClient()
 
   const { data: claimsData } = await supabase.auth.getClaims()
@@ -460,4 +461,4 @@ export async function getWorkspace(): Promise<WorkspaceData> {
     }),
     myUpcomingAssignments,
   }
-}
+})
