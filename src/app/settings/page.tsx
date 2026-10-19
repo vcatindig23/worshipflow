@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Building2,
   Church,
+  Palette,
   ShieldCheck,
   UserRound,
   Users,
@@ -10,6 +11,7 @@ import {
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
+import ThemeToggleButton from "@/components/theme-toggle-button"
 
 export default async function SettingsPage() {
   const workspace = await getWorkspace()
@@ -52,6 +54,21 @@ export default async function SettingsPage() {
           Manage your church workspace, team members, roles, and
           organization information.
         </p>
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex min-w-0 items-start gap-4">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
+            <Palette aria-hidden="true" className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="font-semibold text-[var(--foreground)]">Appearance</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+              Choose light or dark mode. Your preference is saved on this device and applies across WorshipFlow.
+            </p>
+          </div>
+        </div>
+        <ThemeToggleButton variant="card" className="w-full sm:w-auto" />
       </section>
 
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
