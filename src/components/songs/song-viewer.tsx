@@ -931,6 +931,7 @@ export default function SongViewer({
           referenceAudioName={referenceAudioName}
           referenceAudioUrl={referenceAudioUrl}
           showManager
+          settingsStorageKey={practiceSettingsStorageKey}
         />
       ) : null}
 
