@@ -18,6 +18,11 @@ import {
   parseChordPro,
 } from "@/features/chordpro/parser"
 import { transposeChordProSource } from "@/features/chordpro/transpose"
+import {
+  getSongPracticeSettingsStorageKey,
+  readSongPracticeSettings,
+  updateSongPracticeSettings,
+} from "@/lib/song-practice-settings"
 import ChordProLine from "./chordpro-line"
 import PracticeMetronome from "./practice-metronome"
 import ReferenceAudioPlayer from "./reference-audio-player"
@@ -33,6 +38,7 @@ type SongPracticePanelProps = {
   referenceAudioName: string | null
   referenceAudioUrl: string | null
   showManager: boolean
+  settingsStorageKey: string | null
   immersive?: boolean
 }
 
@@ -46,6 +52,7 @@ function SongPracticePanel({
   referenceAudioName,
   referenceAudioUrl,
   showManager,
+  settingsStorageKey,
   immersive = false,
 }: SongPracticePanelProps) {
   return (
@@ -60,10 +67,11 @@ function SongPracticePanel({
       <div className={immersive ? "space-y-3" : "mx-auto max-w-7xl space-y-3"}>
         {referenceAudioUrl ? (
           <ReferenceAudioPlayer
-            key={referenceAudioPath ?? referenceAudioUrl ?? "reference-audio"}
+            key={`${settingsStorageKey ?? "practice"}:${referenceAudioPath ?? referenceAudioUrl ?? "reference-audio"}`}
             src={referenceAudioUrl}
             title={referenceAudioName || "Song reference recording"}
             dark={dark}
+            settingsStorageKey={settingsStorageKey}
           />
         ) : (
           <div className={"rounded-xl border px-4 py-3 text-xs leading-5 " + (dark ? "border-white/10 bg-white/5 text-white/65" : "border-[var(--border)] bg-[var(--background)] text-[var(--muted)]")}>
@@ -73,7 +81,11 @@ function SongPracticePanel({
           </div>
         )}
 
-        <PracticeMetronome initialTempo={tempo} dark={dark} />
+        <PracticeMetronome
+          initialTempo={tempo}
+          dark={dark}
+          settingsStorageKey={settingsStorageKey}
+        />
 
         {showManager && canEdit ? (
           <details className="group rounded-xl border border-[var(--border)] bg-[var(--background)]">
@@ -102,6 +114,7 @@ type SongViewerProps = {
   tempo?: number | null
   songId?: string
   organizationId?: string
+  userId?: string
   canEdit?: boolean
   referenceAudioPath?: string | null
   referenceAudioName?: string | null
@@ -114,6 +127,7 @@ export default function SongViewer({
   tempo,
   songId = "",
   organizationId = "",
+  userId = "",
   canEdit = false,
   referenceAudioPath = null,
   referenceAudioName = null,
@@ -130,6 +144,12 @@ export default function SongViewer({
   const [mobilePracticeTab, setMobilePracticeTab] = useState<"chart" | "tools">("chart")
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const sectionElementsRef = useRef<Map<number, HTMLDivElement>>(new Map())
+  const practiceSettingsStorageKey = getSongPracticeSettingsStorageKey(
+    organizationId,
+    userId,
+    songId
+  )
+  const [settingsLoadedKey, setSettingsLoadedKey] = useState<string | null>(null)
 
   const displayedSource = useMemo(
     () => transposeChordProSource(source, transposeAmount),
@@ -157,6 +177,46 @@ export default function SongViewer({
       ),
     [displayLines]
   )
+
+  useEffect(() => {
+    if (!practiceSettingsStorageKey) {
+      setSettingsLoadedKey(null)
+      return
+    }
+
+    const settings = readSongPracticeSettings(practiceSettingsStorageKey)
+    if (settings.fontSize !== undefined) setFontSize(settings.fontSize)
+    if (settings.showChords !== undefined) setShowChords(settings.showChords)
+    if (settings.transposeAmount !== undefined) setTransposeAmount(settings.transposeAmount)
+    if (settings.capo !== undefined) setCapo(settings.capo)
+    if (settings.scrollSpeed !== undefined) setScrollSpeed(settings.scrollSpeed)
+    setSettingsLoadedKey(practiceSettingsStorageKey)
+  }, [practiceSettingsStorageKey])
+
+  useEffect(() => {
+    if (
+      !practiceSettingsStorageKey ||
+      settingsLoadedKey !== practiceSettingsStorageKey
+    ) {
+      return
+    }
+
+    updateSongPracticeSettings(practiceSettingsStorageKey, {
+      fontSize,
+      showChords,
+      transposeAmount,
+      capo,
+      scrollSpeed,
+    })
+  }, [
+    practiceSettingsStorageKey,
+    settingsLoadedKey,
+    fontSize,
+    showChords,
+    transposeAmount,
+    capo,
+    scrollSpeed,
+  ])
 
   function jumpToSection(index: number) {
     const container = chartScrollRef.current
@@ -444,6 +504,7 @@ export default function SongViewer({
             referenceAudioName={referenceAudioName}
             referenceAudioUrl={referenceAudioUrl}
             showManager={false}
+            settingsStorageKey={practiceSettingsStorageKey}
           />
         ) : null}
 
@@ -644,6 +705,7 @@ export default function SongViewer({
               referenceAudioName={referenceAudioName}
               referenceAudioUrl={referenceAudioUrl}
               showManager
+              settingsStorageKey={practiceSettingsStorageKey}
               immersive
             />
           </aside>
