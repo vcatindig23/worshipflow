@@ -3,12 +3,11 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
-import { ArrowUp, BookOpen, Check, HelpCircle, MessageCircle, Moon, Sun, X } from "lucide-react"
+import { ArrowUp, BookOpen, Check, HelpCircle, MessageCircle, X } from "lucide-react"
 import FaqSearchList from "@/components/faq-search-list"
 
 export default function SiteUtilities() {
   const pathname = usePathname()
-  const [theme, setTheme] = useState<"light" | "dark">("light")
   const [cookieVisible, setCookieVisible] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [showTop, setShowTop] = useState(false)
@@ -19,10 +18,9 @@ export default function SiteUtilities() {
     try {
       const storedTheme = window.localStorage.getItem("worshipflow-theme")
       const nextTheme = storedTheme === "dark" ? "dark" : "light"
-      // Intentional client-side preference hydration; keep the server render deterministic.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTheme(nextTheme)
       document.documentElement.dataset.theme = nextTheme
+      // Intentional cookie-notice preference hydration during mount.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCookieVisible(window.localStorage.getItem("worshipflow-cookie-notice") !== "accepted")
     } catch {
       document.documentElement.dataset.theme = "light"
@@ -165,17 +163,6 @@ export default function SiteUtilities() {
     }
   }, [pathname])
 
-  function toggleTheme() {
-    const nextTheme = theme === "dark" ? "light" : "dark"
-    setTheme(nextTheme)
-    document.documentElement.dataset.theme = nextTheme
-    try {
-      window.localStorage.setItem("worshipflow-theme", nextTheme)
-    } catch {
-      // Keep the selected theme for the current page if storage is unavailable.
-    }
-  }
-
   function acceptCookieNotice() {
     setCookieVisible(false)
     try {
@@ -190,16 +177,6 @@ export default function SiteUtilities() {
       <a href="#main-content" className="wf-skip-link">Skip to main content</a>
       <div aria-hidden="true" className="wf-scroll-progress" style={{ transform: `scaleX(${progress / 100})` }} />
       <div aria-hidden="true" className="wf-navigation-progress" />
-
-      <button
-        type="button"
-        onClick={toggleTheme}
-        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        className={`wf-theme-toggle fixed right-4 top-4 z-[70] inline-flex size-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] sm:right-6 ${pathname.startsWith("/setlists/") && pathname.endsWith("/live") || ["/login", "/signup", "/forgot-password", "/reset-password", "/check-email"].some((route) => pathname === route || pathname.startsWith(`${route}/`)) ? "hidden" : ""}`}
-      >
-        {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-      </button>
 
       {pathname === "/settings" ? <div className="wf-help-widget fixed bottom-4 left-4 z-[65] sm:bottom-6 sm:left-6">
         {helpOpen ? (

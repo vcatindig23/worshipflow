@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import ProfileAvatar from "@/components/profile-avatar"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+import ThemeToggleButton from "@/components/theme-toggle-button"
 
 type DashboardMobileNavigationProps = {
   userName: string
@@ -258,6 +259,7 @@ export default function DashboardMobileNavigation({
             </nav>
 
             <div className="shrink-0 border-t border-white/10 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+              <ThemeToggleButton className="mb-3" />
               <div className="flex items-center gap-3 rounded-2xl bg-white/[0.06] p-3">
                 <Link
                   href="/profile"

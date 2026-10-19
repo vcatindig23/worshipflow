@@ -25,6 +25,7 @@ import ProfileAvatar from "@/components/profile-avatar"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 import DashboardMobileNavigation from "@/components/dashboard-mobile-navigation"
 import AccountOptionsMenu from "@/components/account-options-menu"
+import ThemeToggleButton from "@/components/theme-toggle-button"
 
 type DashboardViewProps = {
   workspace: WorkspaceData
@@ -201,6 +202,7 @@ export default function DashboardView({
           </div>
 
           <div className="border-t border-white/8 p-3">
+            <ThemeToggleButton className="mb-2" />
             <div className="rounded-xl bg-white/5 p-3">
               <div className="flex items-center gap-2">
                 <Link
