@@ -117,6 +117,11 @@ export function updateSongPracticeSettings(
       storageKey,
       JSON.stringify({ ...current, ...update })
     )
+    window.dispatchEvent(
+      new CustomEvent("worshipflow:practice-settings-updated", {
+        detail: { key: storageKey },
+      })
+    )
   } catch {
     // Private browsing or storage quotas should never prevent practice.
   }
