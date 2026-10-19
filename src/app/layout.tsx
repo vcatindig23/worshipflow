@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next"
 import HomeButton from "@/components/home-button"
 import OfflineSupport from "@/components/offline-support"
-import SiteUtilities from "@/components/site-utilities"
+import SitePreferences from "@/components/site-preferences"
+import SiteUtilitiesLoader from "@/components/site-utilities-loader"
 import "./globals.css"
 
 const siteUrl = "https://worshipflow-weld.vercel.app"
@@ -99,7 +100,8 @@ export default function RootLayout({
         {children}
         <HomeButton />
         <OfflineSupport />
-        <SiteUtilities />
+        <SitePreferences />
+        <SiteUtilitiesLoader />
       </body>
     </html>
   )

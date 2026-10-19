@@ -1,24 +1,7 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 import { getPublicEnv } from "./env"
-
-const publicPaths = [
-  "/login",
-  "/signup",
-  "/forgot-password",
-  "/reset-password",
-  "/check-email",
-  "/error",
-  "/auth/confirm",
-  "/auth/callback",
-  "/manifest.webmanifest",
-]
-
-function isPublicPath(pathname: string) {
-  return publicPaths.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
-  )
-}
+import { isPublicPath } from "@/lib/public-paths"
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
