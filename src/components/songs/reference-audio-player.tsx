@@ -48,7 +48,7 @@ export default function ReferenceAudioPlayer({
   const [settingsLoadedKey, setSettingsLoadedKey] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!practiceSettingsStorageKey) return
+    if (!settingsStorageKey) return
 
     const settings = readSongPracticeSettings(settingsStorageKey)
     if (settings.playbackRate !== undefined) {
