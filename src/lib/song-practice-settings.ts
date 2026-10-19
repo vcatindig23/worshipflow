@@ -10,7 +10,7 @@ export type SongPracticeSettings = {
   showChords: boolean
   transposeAmount: number
   capo: number
-  scrollSpeed: 1 | 2 | 3
+  scrollSpeed: number
 }
 
 export type StoredSongPracticeSettings = Partial<SongPracticeSettings>
@@ -86,7 +86,7 @@ export function parseSongPracticeSettings(
     settings.capo = value.capo
   }
   if (isIntegerInRange(value.scrollSpeed, 1, 3)) {
-    settings.scrollSpeed = value.scrollSpeed as 1 | 2 | 3
+    settings.scrollSpeed = value.scrollSpeed
   }
 
   return settings
