@@ -194,7 +194,7 @@ export default function ReferenceAudioPlayer({
           value={Math.min(currentTime, duration || 0)}
           disabled={!duration}
           onChange={(event) => handleSeek(Number(event.currentTarget.value))}
-          className="h-2 w-full cursor-pointer accent-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-45"
+          className="h-8 w-full cursor-pointer touch-pan-x accent-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-45"
         />
         <div className={"mt-1.5 flex items-center justify-between text-[11px] tabular-nums " + muted}>
           <span>{formatTime(currentTime)}</span>
@@ -208,7 +208,7 @@ export default function ReferenceAudioPlayer({
             type="button"
             onClick={togglePlayback}
             aria-label={playing ? "Pause reference audio" : "Play reference audio"}
-            className="inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+            className="inline-flex h-11 min-w-28 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)] sm:h-10"
           >
             {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
             {playing ? "Pause" : "Play audio"}
@@ -217,7 +217,7 @@ export default function ReferenceAudioPlayer({
             type="button"
             onClick={() => handleSeek(0)}
             aria-label="Restart reference audio"
-            className={"inline-flex size-10 items-center justify-center rounded-xl border " + secondaryButton}
+            className={"inline-flex size-11 items-center justify-center rounded-xl border sm:size-10 " + secondaryButton}
           >
             <RotateCcw className="size-4" />
           </button>
@@ -229,7 +229,7 @@ export default function ReferenceAudioPlayer({
             value={playbackRate}
             onChange={(event) => handlePlaybackRateChange(event.currentTarget.value)}
             aria-label="Reference audio playback speed"
-            className={"h-9 rounded-lg border px-2.5 text-xs font-semibold outline-none focus:border-[var(--brand)] " + secondaryButton}
+            className={"h-11 rounded-lg border px-2.5 text-xs font-semibold outline-none focus:border-[var(--brand)] sm:h-9 " + secondaryButton}
           >
             <option value="0.5">0.5×</option>
             <option value="0.75">0.75×</option>
@@ -258,7 +258,7 @@ export default function ReferenceAudioPlayer({
             type="button"
             onClick={toggleTrackRepeat}
             aria-pressed={repeatTrack}
-            className={"inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold " + (repeatTrack ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
+            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold sm:h-9 " + (repeatTrack ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
           >
             <Repeat2 className="size-3.5" />
             Repeat track
@@ -268,7 +268,7 @@ export default function ReferenceAudioPlayer({
             onClick={markLoopStart}
             disabled={repeatTrack || !duration}
             aria-pressed={loopStart !== null}
-            className={"inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 " + (loopStart !== null && !repeatTrack ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
+            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 " + (loopStart !== null && !repeatTrack ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
           >
             <span className="font-bold">A</span> Set loop start
           </button>
@@ -277,7 +277,7 @@ export default function ReferenceAudioPlayer({
             onClick={markLoopEnd}
             disabled={repeatTrack || loopStart === null || !duration}
             aria-pressed={sectionLoopActive}
-            className={"inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 " + (sectionLoopActive ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
+            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 " + (sectionLoopActive ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
           >
             <span className="font-bold">B</span> Set loop end
           </button>
@@ -285,7 +285,7 @@ export default function ReferenceAudioPlayer({
             type="button"
             onClick={resetLoop}
             disabled={!sectionLoopActive && loopStart === null && !repeatTrack}
-            className={"inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 " + secondaryButton}
+            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 " + secondaryButton}
           >
             <RotateCcw className="size-3.5" />
             Clear loop
