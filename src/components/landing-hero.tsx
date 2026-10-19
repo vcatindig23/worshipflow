@@ -1,6 +1,7 @@
 import Image from "next/image"
 import DrapeBackground from "@/components/kokonutui/drape-background"
 import LandingFaq from "@/components/landing-faq"
+import LandingHowItWorks from "@/components/landing-how-it-works"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -172,6 +173,8 @@ export default function LandingHero() {
           ))}
         </div>
       </section>
+
+      <LandingHowItWorks />
 
       <LandingFaq />
 

@@ -125,6 +125,13 @@ test.describe("WorshipFlow authentication", () => {
     await expect(page.locator(".wf-landing-drape")).toBeVisible()
     await expect(page.locator(".wf-landing-drape canvas")).toHaveCount(1)
     await expect(page.getByRole("heading", { name: /Everything your team needs to prepare with confidence/i })).toBeVisible()
+    const howItWorks = page.locator("#how-it-works")
+    await expect(
+      howItWorks.getByRole("heading", { name: "From song prep to service review.", level: 2 })
+    ).toBeVisible()
+    await expect(howItWorks.locator(":scope > ol > li")).toHaveCount(3)
+    await expect(howItWorks.getByRole("link", { name: "Start your workspace" })).toHaveAttribute("href", "/signup")
+    await expect(howItWorks.getByRole("link", { name: "Explore the Help Center" })).toHaveAttribute("href", "/faq")
 
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto("/")
