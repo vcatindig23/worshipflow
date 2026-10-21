@@ -5,6 +5,7 @@ import { useEffect, useState, type MouseEvent } from "react"
 import { Check } from "lucide-react"
 
 export default function SitePreferences() {
+  const pathname = usePathname()
   const [cookieVisible, setCookieVisible] = useState(false)
 
   useEffect(() => {
