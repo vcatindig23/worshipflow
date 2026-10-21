@@ -59,6 +59,24 @@ test.describe("isolated multi-member service workflow", () => {
     try {
       await signIn(leader, leaderEmail, leaderPassword)
 
+      // Verify that the global-search modal keeps keyboard focus contained and
+      // returns focus to its trigger when dismissed.
+      const searchTrigger = leader.locator('button[aria-controls="workspace-global-search"]')
+      await searchTrigger.click()
+      const searchDialog = leader.getByRole("dialog", { name: "Global search" })
+      const searchInput = searchDialog.getByRole("searchbox", {
+        name: /Search songs, artists, albums, setlists, and services/,
+      })
+      await expect(searchInput).toBeFocused()
+      await leader.keyboard.press("Shift+Tab")
+      await expect(searchDialog.getByRole("button", { name: "Close search", exact: true })).toBeFocused()
+      await leader.keyboard.press("Tab")
+      await expect(searchInput).toBeFocused()
+      await leader.keyboard.press("Escape")
+      await expect(searchDialog).toBeHidden()
+      await expect(searchTrigger).toHaveAttribute("aria-expanded", "false")
+      await expect(searchTrigger).toBeFocused()
+
       const serviceName = `E2E QA Service ${new Date().toISOString().replace(/[:.]/g, "-")}`
       await leader.goto("/setlists/new")
       await leader.getByLabel("Setlist name").fill(serviceName)
