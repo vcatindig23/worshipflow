@@ -1,6 +1,20 @@
 import { expect, test } from "@playwright/test"
 
 test.describe("WorshipFlow authentication", () => {
+  test("skip-to-main-content link focuses the main region across public routes", async ({ page }) => {
+    for (const path of ["/", "/login", "/faq", "/privacy", "/terms"]) {
+      await page.goto(path)
+
+      const mainContent = page.locator("main").first()
+      await expect(mainContent).toBeVisible()
+      await page.getByRole("link", { name: "Skip to main content" }).click()
+
+      await expect(mainContent).toHaveAttribute("id", "main-content")
+      await expect(mainContent).toHaveAttribute("tabindex", "-1")
+      await expect(mainContent).toBeFocused()
+    }
+  })
+
   test("sign-in page exposes accessible email and password controls", async ({ page }) => {
     const response = await page.goto("/login")
 

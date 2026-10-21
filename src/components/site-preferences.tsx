@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
+import { useEffect, useState, type MouseEvent } from "react"
 import { Check } from "lucide-react"
 
 export default function SitePreferences() {
@@ -18,9 +19,26 @@ export default function SitePreferences() {
       document.documentElement.dataset.theme = "light"
     }
 
-    const mainContent = document.getElementById("main-content") ?? document.querySelector("main")
-    if (mainContent && !mainContent.id) mainContent.id = "main-content"
   }, [])
+
+  useEffect(() => {
+    const mainContent =
+      document.getElementById("main-content") ?? document.querySelector("main")
+    if (!mainContent) return
+    if (!mainContent.id) mainContent.id = "main-content"
+    mainContent.tabIndex = -1
+  }, [pathname])
+
+  function skipToMainContent(event: MouseEvent<HTMLAnchorElement>) {
+    const mainContent =
+      document.getElementById("main-content") ?? document.querySelector("main")
+    if (!mainContent) return
+
+    event.preventDefault()
+    if (!mainContent.id) mainContent.id = "main-content"
+    mainContent.tabIndex = -1
+    mainContent.focus()
+  }
 
   function acceptCookieNotice() {
     setCookieVisible(false)
@@ -33,7 +51,7 @@ export default function SitePreferences() {
 
   return (
     <>
-      <a href="#main-content" className="wf-skip-link">Skip to main content</a>
+      <a href="#main-content" onClick={skipToMainContent} className="wf-skip-link">Skip to main content</a>
       {cookieVisible ? (
         <aside aria-label="Cookie notice" className="wf-cookie-notice fixed inset-x-3 bottom-3 z-[100] mx-auto flex max-w-3xl flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-2xl sm:inset-x-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
           <div className="min-w-0">
