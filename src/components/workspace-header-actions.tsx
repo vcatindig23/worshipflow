@@ -379,8 +379,7 @@ export default function WorkspaceHeaderActions({
   useEffect(() => {
     if (!searchOpen) return
 
-    const dialog = searchDialogRef.current
-    if (!dialog) return
+    if (!searchDialogRef.current) return
 
     const previousBodyOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
@@ -396,6 +395,12 @@ export default function WorkspaceHeaderActions({
       }
 
       if (event.key !== "Tab") return
+
+      const dialog = searchDialogRef.current
+      if (!dialog) {
+        event.preventDefault()
+        return
+      }
 
       const focusableElements = dialog.querySelectorAll<HTMLElement>(
         'a[href]:not([aria-disabled="true"]), button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
