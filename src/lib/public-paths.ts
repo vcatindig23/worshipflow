@@ -1,5 +1,5 @@
 const publicPaths = [
-  "/", "/faq", "/login", "/signup", "/forgot-password", "/reset-password", "/check-email",
+  "/", "/faq", "/privacy", "/terms", "/login", "/signup", "/forgot-password", "/reset-password", "/check-email",
   "/error", "/auth/confirm", "/auth/callback", "/manifest.webmanifest",
   "/robots.txt", "/sitemap.xml",
 ] as const

@@ -179,6 +179,38 @@ test.describe("WorshipFlow authentication", () => {
     expect(helpSchemas.some((schema) => schema.includes('"FAQPage"'))).toBe(true)
   })
 
+  test("privacy and terms pages are public, linked, and responsive", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+
+    const privacyResponse = await page.goto("/privacy")
+    expect(privacyResponse?.status()).toBe(200)
+    await expect(page).toHaveTitle(/Privacy Policy.*WorshipFlow/i)
+    await expect(page.getByRole("heading", { name: "Privacy Policy", level: 1 })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Information you provide", level: 2 })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Browser storage and offline charts", level: 2 })).toBeVisible()
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/privacy$/)
+    await expect(page.getByRole("link", { name: "Terms", exact: true })).toHaveAttribute("href", "/terms")
+
+    const termsResponse = await page.goto("/terms")
+    expect(termsResponse?.status()).toBe(200)
+    await expect(page).toHaveTitle(/Terms of Service.*WorshipFlow/i)
+    await expect(page.getByRole("heading", { name: "Terms of Service", level: 1 })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Your content and permissions", level: 2 })).toBeVisible()
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/terms$/)
+    await expect(page.getByRole("link", { name: "Privacy", exact: true })).toHaveAttribute("href", "/privacy")
+
+    await page.setViewportSize({ width: 390, height: 844 })
+    for (const path of ["/privacy", "/terms"]) {
+      const response = await page.goto(path)
+      expect(response?.status()).toBe(200)
+      const dimensions = await page.evaluate(() => ({
+        viewportWidth: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+      }))
+      expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth)
+    }
+  })
+
   test("workspace routes redirect unauthenticated visitors to sign-in", async ({ page }) => {
     const protectedPaths = [
       "/my-schedule",

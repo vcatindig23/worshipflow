@@ -178,8 +178,16 @@ export default function LandingHero() {
 
       <LandingFaq />
 
-      <footer className="relative z-10 border-t border-[var(--border)]/70 px-5 py-6 text-center text-xs text-[var(--muted)] sm:px-8">
-        WorshipFlow · A shared home for your worship team
+      <footer className="relative z-10 border-t border-[var(--border)]/70 px-5 py-6 sm:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 text-xs text-[var(--muted)] sm:flex-row">
+          <p>WorshipFlow · A shared home for your worship team</p>
+          <nav aria-label="Footer navigation" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <Link href="/faq" className="rounded underline-offset-4 transition hover:text-[var(--foreground)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]">Help Center</Link>
+            <Link href="/privacy" className="rounded underline-offset-4 transition hover:text-[var(--foreground)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]">Privacy</Link>
+            <Link href="/terms" className="rounded underline-offset-4 transition hover:text-[var(--foreground)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]">Terms</Link>
+            <Link href="https://github.com/vcatindig23/worshipflow" className="rounded underline-offset-4 transition hover:text-[var(--foreground)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]">GitHub</Link>
+          </nav>
+        </div>
       </footer>
     </main>
   )
