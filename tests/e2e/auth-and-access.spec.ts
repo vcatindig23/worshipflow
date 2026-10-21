@@ -189,7 +189,7 @@ test.describe("WorshipFlow authentication", () => {
     await expect(page.getByRole("heading", { name: "Information you provide", level: 2 })).toBeVisible()
     await expect(page.getByRole("heading", { name: "Browser storage and offline charts", level: 2 })).toBeVisible()
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/privacy$/)
-    await expect(page.getByRole("link", { name: "Terms", exact: true })).toHaveAttribute("href", "/terms")
+    await expect(page.getByRole("navigation", { name: "Legal navigation" }).getByRole("link", { name: "Terms", exact: true })).toHaveAttribute("href", "/terms")
 
     const termsResponse = await page.goto("/terms")
     expect(termsResponse?.status()).toBe(200)
@@ -197,7 +197,7 @@ test.describe("WorshipFlow authentication", () => {
     await expect(page.getByRole("heading", { name: "Terms of Service", level: 1 })).toBeVisible()
     await expect(page.getByRole("heading", { name: "Your content and permissions", level: 2 })).toBeVisible()
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/terms$/)
-    await expect(page.getByRole("link", { name: "Privacy", exact: true })).toHaveAttribute("href", "/privacy")
+    await expect(page.getByRole("navigation", { name: "Legal navigation" }).getByRole("link", { name: "Privacy", exact: true })).toHaveAttribute("href", "/privacy")
 
     await page.setViewportSize({ width: 390, height: 844 })
     for (const path of ["/privacy", "/terms"]) {
