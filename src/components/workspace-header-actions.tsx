@@ -97,6 +97,7 @@ type SearchResults = {
 type SearchResultTarget = {
   key: string
   href: string
+  label: string
 }
 
 function subscribeToMountedState() {
@@ -212,6 +213,26 @@ export default function WorkspaceHeaderActions({
       setInternalSearchOpen(false)
     }
   }, [onCloseSearchProp])
+  const searchButtonRef = useRef<HTMLButtonElement>(null)
+  const searchDialogRef = useRef<HTMLElement>(null)
+  const searchReturnFocusRef = useRef<HTMLElement | null>(null)
+  const openSearchAndRememberFocus = useCallback(() => {
+    const activeElement = document.activeElement
+    if (activeElement instanceof HTMLElement && activeElement !== document.body) {
+      searchReturnFocusRef.current = activeElement
+    }
+    onOpenSearch()
+  }, [onOpenSearch])
+  const closeSearchAndRestoreFocus = useCallback(() => {
+    onCloseSearch()
+    const returnTarget = searchReturnFocusRef.current ?? searchButtonRef.current
+    searchReturnFocusRef.current = null
+    window.requestAnimationFrame(() => {
+      if (returnTarget?.isConnected) {
+        returnTarget.focus({ preventScroll: true })
+      }
+    })
+  }, [onCloseSearch])
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [notificationPanelPosition, setNotificationPanelPosition] = useState<{
     top: number
@@ -252,10 +273,12 @@ export default function WorkspaceHeaderActions({
       ...searchResults.songs.map((song) => ({
         key: `song:${song.id}`,
         href: `/songs/${song.id}`,
+        label: `Song: ${song.title}${song.artist ? `, ${song.artist}` : song.album ? `, ${song.album}` : ""}`,
       })),
       ...searchResults.setlists.map((setlist) => ({
         key: `setlist:${setlist.id}`,
         href: `/setlists/${setlist.id}`,
+        label: `Setlist or service: ${setlist.name}`,
       })),
     ]
   }, [searchResults])
@@ -346,27 +369,70 @@ export default function WorkspaceHeaderActions({
 
       event.preventDefault()
       setNotificationsOpen(false)
-      onOpenSearch()
+      openSearchAndRememberFocus()
     }
 
     document.addEventListener("keydown", handleSearchShortcut)
     return () => document.removeEventListener("keydown", handleSearchShortcut)
-  }, [onOpenSearch])
+  }, [openSearchAndRememberFocus])
 
   useEffect(() => {
     if (!searchOpen) return
 
-    searchInputRef.current?.focus()
+    const dialog = searchDialogRef.current
+    if (!dialog) return
 
-    function handleEscape(event: KeyboardEvent) {
+    const previousBodyOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    const initialFocusFrame = window.requestAnimationFrame(() => {
+      searchInputRef.current?.focus({ preventScroll: true })
+    })
+
+    function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        onCloseSearch()
+        event.preventDefault()
+        closeSearchAndRestoreFocus()
+        return
+      }
+
+      if (event.key !== "Tab") return
+
+      const focusableElements = dialog.querySelectorAll<HTMLElement>(
+        'a[href]:not([aria-disabled="true"]), button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      const firstFocusable = focusableElements.item(0)
+      const lastFocusable = focusableElements.item(focusableElements.length - 1)
+
+      if (!firstFocusable || !lastFocusable) {
+        event.preventDefault()
+        dialog.focus()
+        return
+      }
+
+      if (
+        event.shiftKey &&
+        (document.activeElement === firstFocusable ||
+          !dialog.contains(document.activeElement))
+      ) {
+        event.preventDefault()
+        lastFocusable.focus()
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === lastFocusable ||
+          !dialog.contains(document.activeElement))
+      ) {
+        event.preventDefault()
+        firstFocusable.focus()
       }
     }
 
-    document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
-  }, [searchOpen, onCloseSearch])
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      window.cancelAnimationFrame(initialFocusFrame)
+      document.body.style.overflow = previousBodyOverflow
+    }
+  }, [searchOpen, closeSearchAndRestoreFocus])
 
   useEffect(() => {
     if (!searchOpen) {
@@ -461,7 +527,7 @@ export default function WorkspaceHeaderActions({
   useEffect(() => {
     function handleOpenSearchRequest() {
       setNotificationsOpen(false)
-      onOpenSearch()
+      openSearchAndRememberFocus()
     }
 
     function handleOpenNotificationsRequest() {
@@ -481,7 +547,7 @@ export default function WorkspaceHeaderActions({
       window.removeEventListener("worshipflow:open-global-search", handleOpenSearchRequest)
       window.removeEventListener("worshipflow:open-notifications", handleOpenNotificationsRequest)
     }
-  }, [onCloseSearch, onOpenSearch, refreshNotifications])
+  }, [closeSearchAndRestoreFocus, onCloseSearch, openSearchAndRememberFocus, refreshNotifications])
 
   useEffect(() => {
     if (!notificationsOpen) return
@@ -600,9 +666,9 @@ export default function WorkspaceHeaderActions({
   function toggleSearch() {
     setNotificationsOpen(false)
     if (searchOpen) {
-      onCloseSearch()
+      closeSearchAndRestoreFocus()
     } else {
-      onOpenSearch()
+      openSearchAndRememberFocus()
     }
   }
 
@@ -706,10 +772,12 @@ export default function WorkspaceHeaderActions({
   return (
     <div className="flex items-center gap-2">
       <button
+        ref={searchButtonRef}
         type="button"
         onClick={toggleSearch}
-        aria-label="Open global search"
+        aria-label={searchOpen ? "Close global search" : "Open global search"}
         aria-haspopup="dialog"
+        aria-controls="workspace-global-search"
         aria-expanded={searchOpen}
         className="group inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-medium text-[var(--muted)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:bg-[var(--surface)] hover:text-[var(--foreground)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
       >
@@ -937,13 +1005,16 @@ export default function WorkspaceHeaderActions({
                       <button
                         type="button"
                         aria-label="Close global search"
-                        onClick={onCloseSearch}
+                        onClick={closeSearchAndRestoreFocus}
                         className="absolute inset-0 h-full w-full cursor-default"
                       />
                       <section
+                        ref={searchDialogRef}
+                        id="workspace-global-search"
                         role="dialog"
                         aria-modal="true"
                         aria-label="Global search"
+                        tabIndex={-1}
                         className="relative mx-auto mt-[4vh] flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-2xl sm:mt-[8vh]"
                       >
                         <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-4 sm:px-5">
@@ -963,6 +1034,7 @@ export default function WorkspaceHeaderActions({
                                 setActiveSearchResultIndex(0)
                               }}
                               onKeyDown={handleSearchInputKeyDown}
+                              aria-controls="workspace-global-search-results"
                               aria-keyshortcuts="ArrowDown ArrowUp Enter Escape"
                               placeholder="Search songs, artists, albums, setlists, services…"
                               className="h-9 w-full border-0 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:ring-0"
@@ -971,14 +1043,14 @@ export default function WorkspaceHeaderActions({
                           <button
                             type="button"
                             aria-label="Close search"
-                            onClick={onCloseSearch}
-                            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                            onClick={closeSearchAndRestoreFocus}
+                            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
                           >
                             <X className="wf-icon-motion size-4 group-hover:rotate-90" />
                           </button>
                         </div>
             
-                        <div className="min-h-[220px] flex-1 overflow-y-auto px-3 py-3 sm:px-4">
+                        <div id="workspace-global-search-results" className="min-h-[220px] flex-1 overflow-y-auto px-3 py-3 sm:px-4">
                           {searchQuery.trim().length < 2 ? (
                             <div className="flex min-h-[190px] flex-col items-center justify-center text-center">
                               <span className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
@@ -1080,12 +1152,15 @@ export default function WorkspaceHeaderActions({
                         <div
                           role="status"
                           aria-live="polite"
+                          aria-atomic="true"
                           className="sr-only"
                         >
                           {isSearching
                             ? "Searching your workspace."
                             : searchResults
-                              ? `${searchResultTargets.length} search ${searchResultTargets.length === 1 ? "result" : "results"} available.`
+                              ? searchResultTargets.length > 0
+                                ? `${searchResultTargets.length} search ${searchResultTargets.length === 1 ? "result" : "results"} available. Selected result ${activeSearchResultIndex + 1}: ${searchResultTargets[Math.min(activeSearchResultIndex, searchResultTargets.length - 1)]?.label}. Press Enter to open.`
+                                : "No search results available."
                               : ""}
                         </div>
                         <div className="flex flex-col gap-1 border-t border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-[10px] text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between sm:px-5">
