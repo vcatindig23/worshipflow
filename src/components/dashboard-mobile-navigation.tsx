@@ -100,6 +100,7 @@ export default function DashboardMobileNavigation({
 
       if (!firstFocusable || !lastFocusable) {
         event.preventDefault()
+        drawer.focus()
         return
       }
 
@@ -110,7 +111,11 @@ export default function DashboardMobileNavigation({
       ) {
         event.preventDefault()
         lastFocusable.focus()
-      } else if (!event.shiftKey && document.activeElement === lastFocusable) {
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === lastFocusable ||
+          !drawer.contains(document.activeElement))
+      ) {
         event.preventDefault()
         firstFocusable.focus()
       }
@@ -160,6 +165,7 @@ export default function DashboardMobileNavigation({
             role="dialog"
             aria-modal="true"
             aria-label="Workspace navigation"
+            tabIndex={-1}
             className="relative flex h-dvh w-[min(86vw,340px)] flex-col border-r border-white/10 bg-[var(--sidebar)] text-white shadow-2xl wf-drawer-enter"
           >
             <div className="flex h-[78px] shrink-0 items-center justify-between border-b border-white/10 px-5 pt-[env(safe-area-inset-top)]">

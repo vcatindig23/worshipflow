@@ -814,6 +814,7 @@ export default function WorkspaceHeaderActions({
           onClick={toggleNotifications}
           aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
           aria-haspopup="dialog"
+          aria-controls="workspace-notifications-panel"
           aria-expanded={notificationsOpen}
           className="relative flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition hover:border-[var(--brand)] hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
         >

@@ -59,6 +59,37 @@ test.describe("isolated multi-member service workflow", () => {
     try {
       await signIn(leader, leaderEmail, leaderPassword)
 
+      // Verify mobile navigation contains keyboard focus and restores it when closed.
+      await leader.setViewportSize({ width: 390, height: 844 })
+      await leader.goto("/")
+      const mobileNavTrigger = leader.locator('button[aria-controls="mobile-workspace-navigation"]')
+      await expect(mobileNavTrigger).toBeVisible()
+      await mobileNavTrigger.click()
+
+      const mobileNav = leader.getByRole("dialog", { name: "Workspace navigation" })
+      const closeNavButton = mobileNav.getByRole("button", { name: "Close navigation", exact: true })
+      const signOutButton = mobileNav.getByRole("button", { name: "Sign out", exact: true })
+      await expect(closeNavButton).toBeFocused()
+      await leader.keyboard.press("Shift+Tab")
+      await expect(signOutButton).toBeFocused()
+      await leader.keyboard.press("Tab")
+      await expect(closeNavButton).toBeFocused()
+
+      // Even if focus moves outside programmatically, Tab must not escape the drawer.
+      await leader.evaluate(() => {
+        document.querySelector<HTMLButtonElement>(
+          'button[aria-controls="mobile-workspace-navigation"]'
+        )?.focus()
+      })
+      await leader.keyboard.press("Tab")
+      await expect(closeNavButton).toBeFocused()
+
+      await leader.keyboard.press("Escape")
+      await expect(mobileNav).toBeHidden()
+      await expect(mobileNavTrigger).toHaveAttribute("aria-expanded", "false")
+      await expect(mobileNavTrigger).toBeFocused()
+      await leader.setViewportSize({ width: 1280, height: 900 })
+
       // Verify that the global-search modal keeps keyboard focus contained and
       // returns focus to its trigger when dismissed.
       const searchTrigger = leader.locator('button[aria-controls="workspace-global-search"]')
@@ -76,6 +107,19 @@ test.describe("isolated multi-member service workflow", () => {
       await expect(searchDialog).toBeHidden()
       await expect(searchTrigger).toHaveAttribute("aria-expanded", "false")
       await expect(searchTrigger).toBeFocused()
+
+      // The notifications control should expose its dialog and restore focus on Escape.
+      const notificationTrigger = leader.locator('button[aria-controls="workspace-notifications-panel"]')
+      await expect(notificationTrigger).toBeVisible()
+      await notificationTrigger.click()
+      const notificationsDialog = leader.locator("#workspace-notifications-panel")
+      await expect(notificationsDialog).toHaveAttribute("role", "dialog")
+      await expect(notificationsDialog).toBeVisible()
+      await expect(notificationTrigger).toHaveAttribute("aria-expanded", "true")
+      await leader.keyboard.press("Escape")
+      await expect(notificationsDialog).toBeHidden()
+      await expect(notificationTrigger).toHaveAttribute("aria-expanded", "false")
+      await expect(notificationTrigger).toBeFocused()
 
       const serviceName = `E2E QA Service ${new Date().toISOString().replace(/[:.]/g, "-")}`
       await leader.goto("/setlists/new")
