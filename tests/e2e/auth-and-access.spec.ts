@@ -7,7 +7,11 @@ test.describe("WorshipFlow authentication", () => {
 
       const mainContent = page.locator("main").first()
       await expect(mainContent).toBeVisible()
-      await page.getByRole("link", { name: "Skip to main content" }).click()
+      const skipLink = page.getByRole("link", { name: "Skip to main content" })
+      // The skip link is intentionally off-screen until keyboard focus reaches it.
+      await skipLink.focus()
+      await expect(skipLink).toBeInViewport()
+      await skipLink.press("Enter")
 
       await expect(mainContent).toHaveAttribute("id", "main-content")
       await expect(mainContent).toHaveAttribute("tabindex", "-1")
