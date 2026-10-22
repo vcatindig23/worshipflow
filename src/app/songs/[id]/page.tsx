@@ -170,7 +170,8 @@ export default async function SongPage({
           "id, version_number, title, artist, current_key, tempo, created_at, chordpro_source"
         )
         .eq("song_id", typedSong.id)
-        .order("version_number", { ascending: false })\n        .limit(10),
+        .order("version_number", { ascending: false })
+        .limit(10),
     ])
 
   const tagIds = (songTagRows ?? []).map(
