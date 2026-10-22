@@ -21,6 +21,7 @@ import {
 import ProfileAvatar from "@/components/profile-avatar"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ThemeToggleButton from "@/components/theme-toggle-button"
+import { isActiveNavigationPath } from "@/lib/navigation"
 
 type DashboardMobileNavigationProps = {
   userName: string
@@ -38,11 +39,6 @@ const navigation = [
   { href: "/settings/team", label: "Team", icon: UsersRound },
   { href: "/files", label: "Files", icon: FileText },
 ]
-
-function isActivePath(pathname: string, href: string) {
-  if (href === "/") return pathname === "/"
-  return pathname === href || pathname.startsWith(`${href}/`)
-}
 
 function formatRole(role: string) {
   return role
@@ -202,7 +198,7 @@ export default function DashboardMobileNavigation({
                 Workspace
               </p>
               {navigation.map((item) => {
-                const active = isActivePath(pathname, item.href)
+                const active = isActiveNavigationPath(pathname, item.href)
                 const Icon = item.icon
 
                 return (

@@ -90,6 +90,30 @@ test.describe("isolated multi-member service workflow", () => {
       await expect(mobileNavTrigger).toBeFocused()
       await leader.setViewportSize({ width: 1280, height: 900 })
 
+      // Desktop navigation must announce the active section, including nested routes.
+      await leader.goto("/songs/new")
+      const desktopWorkspaceNav = leader.getByRole("navigation", {
+        name: "Workspace navigation",
+      })
+      await expect(
+        desktopWorkspaceNav.getByRole("link", { name: "Songs" })
+      ).toHaveAttribute("aria-current", "location")
+      await expect(
+        desktopWorkspaceNav.getByRole("link", { name: "Dashboard" })
+      ).not.toHaveAttribute("aria-current", "page")
+
+      await leader.goto("/settings/church")
+      const desktopManagementNav = leader.getByRole("navigation", {
+        name: "Workspace management",
+      })
+      await expect(
+        desktopManagementNav.getByRole("link", { name: "Settings" })
+      ).toHaveAttribute("aria-current", "location")
+      await expect(
+        desktopWorkspaceNav.getByRole("link", { name: "Team" })
+      ).not.toHaveAttribute("aria-current", "page")
+      await leader.goto("/")
+
       // Verify that the global-search modal keeps keyboard focus contained and
       // returns focus to its trigger when dismissed.
       const searchTrigger = leader.locator('button[aria-controls="workspace-global-search"]')

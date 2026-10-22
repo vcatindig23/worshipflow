@@ -14,7 +14,6 @@ import {
   Music2,
   Plus,
   Settings,
-  Settings2,
   ShieldCheck,
   UsersRound,
 } from "lucide-react"
@@ -24,6 +23,7 @@ import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ProfileAvatar from "@/components/profile-avatar"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 import DashboardMobileNavigation from "@/components/dashboard-mobile-navigation"
+import DashboardDesktopNavigation from "@/components/dashboard-desktop-navigation"
 import DashboardGuidedTour from "@/components/dashboard-guided-tour"
 import AccountOptionsMenu from "@/components/account-options-menu"
 import ThemeToggleButton from "@/components/theme-toggle-button"
@@ -151,56 +151,16 @@ export default function DashboardView({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-3 py-5">
-            <div className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--sidebar-muted)]">
-              Workspace
-            </div>
-
-            <nav aria-label="Workspace navigation" data-tour="sidebar-navigation" className="space-y-1">
-              {navigation.map((item) => {
-                const Icon = item.icon
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={item.href === "/" ? "page" : undefined}
-                    className={`group relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
-                      item.href === "/"
-                        ? "bg-[var(--brand)] text-white shadow-sm"
-                        : "text-[var(--sidebar-muted)] hover:bg-white/[0.07] hover:text-white"
-                    }`}
-                  >
-                    {item.href === "/" ? (
-                      <span aria-hidden="true" className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-[#b5d4bd]" />
-                    ) : null}
-                    <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg transition duration-200 ${
-                      item.href === "/" ? "bg-white/10 text-white" : "text-[var(--sidebar-muted)] group-hover:bg-white/10 group-hover:text-white"
-                    }`}>
-                      <Icon className="wf-icon-motion size-[18px]" strokeWidth={1.9} />
-                    </span>
-                    <span>{item.label}</span>
-                  </Link>
-                )
-              })}
-            </nav>
-
-            <div className="mt-7 px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--sidebar-muted)]">
-              Manage
-            </div>
-
-            <nav>
-              <Link
-                href="/settings"
-                className="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-[var(--sidebar-muted)] transition duration-200 hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              >
-                <span className="flex size-8 items-center justify-center rounded-lg transition group-hover:bg-white/10">
-                  <Settings2 className="wf-icon-motion size-[18px]" strokeWidth={1.9} />
-                </span>
-                <span>Settings</span>
-              </Link>
-            </nav>
-          </div>
+          <DashboardDesktopNavigation
+            items={navigation.map((item) => {
+              const Icon = item.icon
+              return {
+                label: item.label,
+                href: item.href,
+                icon: <Icon aria-hidden="true" className="wf-icon-motion size-[18px]" strokeWidth={1.9} />,
+              }
+            })}
+          />
 
           <div className="border-t border-white/8 p-3">
             <ThemeToggleButton className="mb-2" />
