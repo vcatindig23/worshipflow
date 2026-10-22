@@ -744,3 +744,70 @@ html[data-theme="dark"] .wf-landing-drape-lit {
 html[data-theme="dark"] .wf-landing-drape-shade {
   color: #24372a;
 }
+
+
+/* Printable song charts: preserve lyric/chord alignment and hide controls on paper. */
+.wf-song-print-line {
+  position: relative;
+  min-height: 1.85em;
+  line-height: 1.8;
+  break-inside: avoid;
+  white-space: pre-wrap;
+}
+.wf-song-print-chord-anchor {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: baseline;
+}
+.wf-song-print-chord {
+  position: absolute;
+  bottom: 0.8em;
+  left: 0;
+  color: #285b39;
+  font-size: 0.78em;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+.wf-song-print-tab {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre;
+}
+.wf-song-print-column-break {
+  break-after: column;
+  height: 0;
+}
+.wf-song-print-page-break {
+  break-before: page;
+  height: 0;
+}
+@media print {
+  .wf-song-print-page {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .wf-song-print-controls {
+    display: none !important;
+  }
+  .wf-song-print-sheet {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+  .wf-song-print-header {
+    break-after: avoid;
+  }
+  .wf-song-print-section {
+    break-after: avoid;
+  }
+  .wf-song-print-column-break,
+  .wf-song-print-page-break {
+    display: block !important;
+  }
+}
