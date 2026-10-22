@@ -14,6 +14,7 @@ import {
 import RecordSongOpen from "@/components/songs/record-song-open"
 import SongViewer from "@/components/songs/song-viewer"
 import SongVersionComparison from "@/components/songs/song-version-comparison"
+import SongReviewPanel, { type SongReviewComment } from "@/components/songs/song-review-panel"
 import DownloadChordProButton from "@/components/songs/download-chordpro-button"
 import { setSongStatus, setSongTags, toggleFavorite } from "@/app/songs/actions"
 import { createClient } from "@/lib/supabase/server"
@@ -173,6 +174,42 @@ export default async function SongPage({
         .order("version_number", { ascending: false })
         .limit(10),
     ])
+
+  const { data: reviewThread, error: reviewThreadError } = await supabase
+    .from("song_review_threads")
+    .select("id, status")
+    .eq("song_id", typedSong.id)
+    .eq("organization_id", membership.organization_id)
+    .maybeSingle()
+
+  if (reviewThreadError) {
+    console.error("load_song_review_thread failed:", { code: reviewThreadError.code })
+  }
+
+  let reviewComments: SongReviewComment[] = []
+  if (reviewThread?.id) {
+    const { data: commentRows, error: commentsError } = await supabase
+      .from("song_review_comments")
+      .select("id, user_id, body, created_at")
+      .eq("thread_id", reviewThread.id)
+      .order("created_at", { ascending: true })
+      .limit(100)
+
+    if (commentsError) {
+      console.error("load_song_review_comments failed:", { code: commentsError.code })
+    } else if (commentRows?.length) {
+      const reviewerIds = Array.from(new Set(commentRows.map((comment) => comment.user_id)))
+      const { data: reviewerProfiles } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", reviewerIds)
+      const names = new Map((reviewerProfiles ?? []).map((profile) => [profile.id, profile.display_name]))
+      reviewComments = commentRows.map((comment) => ({
+        ...comment,
+        author_name: names.get(comment.user_id) || "Team member",
+      })) as SongReviewComment[]
+    }
+  }
 
   const tagIds = (songTagRows ?? []).map(
     (row) => row.tag_id as string
@@ -384,6 +421,12 @@ export default async function SongPage({
           <SongVersionComparison
             currentSource={typedSong.chordpro_source}
             versions={(versions ?? []) as Version[]}
+          />
+          <SongReviewPanel
+            songId={typedSong.id}
+            canEdit={canEdit}
+            initialStatus={(reviewThread?.status ?? "draft") as "draft" | "in_review" | "changes_requested" | "approved"}
+            comments={reviewComments}
           />
         </section>
 

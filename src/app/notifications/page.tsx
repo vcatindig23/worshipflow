@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { AtSign, Bell, CalendarDays, Check, MessagesSquare, ArrowLeftRight } from "lucide-react"
+import { AtSign, Bell, CalendarDays, Check, MessagesSquare, ArrowLeftRight, Music2 } from "lucide-react"
 import {
   markAllNotificationsRead,
   markNotificationRead,
@@ -18,9 +18,13 @@ type Notification = {
     | "assignment_swap_request"
     | "assignment_swap_status"
     | "service_reminder"
+    | "song_edited"
+    | "song_review_comment"
+    | "song_review_status"
   title: string
   body: string
   setlist_id: string | null
+  song_id: string | null
   read_at: string | null
   created_at: string
 }
@@ -30,7 +34,7 @@ export default async function NotificationsPage() {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("notifications")
-    .select("id, type, title, body, setlist_id, read_at, created_at")
+    .select("id, type, title, body, setlist_id, song_id, read_at, created_at")
     .eq("user_id", workspace.userId)
     .order("created_at", { ascending: false })
     .limit(100)
@@ -83,7 +87,7 @@ export default async function NotificationsPage() {
               You&apos;re all caught up
             </h2>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              Service reminders, announcements, swap requests, team chat, and assignment changes will appear here.
+              Song reviews, arrangement updates, service reminders, announcements, team chat, and assignment changes will appear here.
             </p>
           </div>
         ) : (
@@ -97,7 +101,9 @@ export default async function NotificationsPage() {
                   }`}
                 >
                   <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-                    {notification.type === "team_chat_mention" ? (
+                    {notification.type === "song_edited" || notification.type === "song_review_comment" || notification.type === "song_review_status" ? (
+                      <Music2 className="size-[18px]" />
+                    ) : notification.type === "team_chat_mention" ? (
                       <AtSign className="size-[18px]" />
                     ) : notification.type === "team_chat_message" ? (
                       <MessagesSquare className="size-[18px]" />
@@ -135,6 +141,13 @@ export default async function NotificationsPage() {
                           className="text-xs font-semibold text-[var(--brand)] hover:underline"
                         >
                           Open team chat
+                        </Link>
+                      ) : notification.song_id ? (
+                        <Link
+                          href={`/songs/${notification.song_id}`}
+                          className="text-xs font-semibold text-[var(--brand)] hover:underline"
+                        >
+                          View song
                         </Link>
                       ) : notification.setlist_id ? (
                         <Link

@@ -11,6 +11,8 @@ import {
   Search,
   SlidersHorizontal,
   Star,
+  Clock3,
+  BarChart3,
 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
@@ -44,6 +46,7 @@ type Preference = {
   song_id: string
   is_favorite: boolean
   last_opened_at: string | null
+  open_count: number
 }
 
 type SongTagRow = {
@@ -244,7 +247,7 @@ export default async function SongsPage({
       supabase
         .from("song_user_preferences")
         .select(
-          "song_id, is_favorite, last_opened_at"
+          "song_id, is_favorite, last_opened_at, open_count"
         )
         .eq("user_id", userId)
         .in("song_id", songIds),
@@ -279,6 +282,23 @@ export default async function SongsPage({
       preference,
     ])
   )
+
+  const recentlyOpened = songs
+    .filter((song) => Boolean(preferencesBySong.get(song.id)?.last_opened_at))
+    .sort((a, b) =>
+      Date.parse(preferencesBySong.get(b.id)?.last_opened_at ?? "") -
+      Date.parse(preferencesBySong.get(a.id)?.last_opened_at ?? "")
+    )
+    .slice(0, 5)
+
+  const frequentlyOpened = songs
+    .filter((song) => (preferencesBySong.get(song.id)?.open_count ?? 0) > 0)
+    .sort((a, b) =>
+      (preferencesBySong.get(b.id)?.open_count ?? 0) - (preferencesBySong.get(a.id)?.open_count ?? 0) ||
+      Date.parse(preferencesBySong.get(b.id)?.last_opened_at ?? "") -
+      Date.parse(preferencesBySong.get(a.id)?.last_opened_at ?? "")
+    )
+    .slice(0, 5)
 
   const tagsById = new Map(
     tags.map((tag) => [tag.id, tag])
@@ -494,6 +514,53 @@ export default async function SongsPage({
           <Plus className="size-4" />
           Add Song
         </Link>
+      </section>
+
+      <section aria-label="Song usage analytics" className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="size-4 text-[var(--brand)]" aria-hidden="true" />
+            <h2 className="text-sm font-semibold text-[var(--foreground)]">Frequently used</h2>
+          </div>
+          <p className="mt-1 text-xs text-[var(--muted)]">Songs you open most often on this account.</p>
+          {frequentlyOpened.length ? (
+            <ol className="mt-4 space-y-3">
+              {frequentlyOpened.map((song, index) => (
+                <li key={song.id} className="flex items-center gap-3">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] text-xs font-semibold text-[var(--muted)]" aria-label={`Rank ${index + 1}`}>{index + 1}</span>
+                  <Link href={`/songs/${song.id}`} className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--foreground)] hover:text-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/40">
+                    {song.title}
+                  </Link>
+                  <span className="shrink-0 text-xs tabular-nums text-[var(--muted)]">{preferencesBySong.get(song.id)?.open_count ?? 0} opens</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="mt-4 text-sm text-[var(--muted)]">Usage data will appear here as you open charts.</p>
+          )}
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Clock3 className="size-4 text-[var(--brand)]" aria-hidden="true" />
+            <h2 className="text-sm font-semibold text-[var(--foreground)]">Recently opened</h2>
+          </div>
+          <p className="mt-1 text-xs text-[var(--muted)]">Pick up where you left off.</p>
+          {recentlyOpened.length ? (
+            <ul className="mt-4 space-y-3">
+              {recentlyOpened.map((song) => (
+                <li key={song.id} className="flex items-center gap-3">
+                  <Music2 className="size-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
+                  <Link href={`/songs/${song.id}`} className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--foreground)] hover:text-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/40">
+                    {song.title}
+                  </Link>
+                  <time className="shrink-0 text-xs text-[var(--muted)]" dateTime={preferencesBySong.get(song.id)?.last_opened_at ?? undefined}>{formatDate(preferencesBySong.get(song.id)!.last_opened_at!)}</time>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-4 text-sm text-[var(--muted)]">Your recent songs will appear here after you view a chart.</p>
+          )}
+        </div>
       </section>
 
       <section className="rounded-3xl border border-[var(--border)] bg-white p-3 shadow-sm sm:p-4">
