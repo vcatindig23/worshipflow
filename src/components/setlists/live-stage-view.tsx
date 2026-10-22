@@ -5,6 +5,7 @@ import {
   House,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Gauge,
   ListMusic,
   Maximize2,
@@ -106,6 +107,9 @@ export default function LiveStageView({
   const [showServicePanel, setShowServicePanel] = useState(false)
   const [autoScroll, setAutoScroll] = useState(false)
   const [scrollSpeed, setScrollSpeed] = useState(2)
+  const [countdownDuration, setCountdownDuration] = useState(60)
+  const [countdownRemaining, setCountdownRemaining] = useState(60)
+  const [countdownRunning, setCountdownRunning] = useState(false)
   const lyricsScrollRef = useRef<HTMLDivElement>(null)
   const currentSong = songs[currentIndex] ?? null
 
@@ -192,6 +196,28 @@ export default function LiveStageView({
     }
   }, [setlistId, setlistName, userId, songs])
 
+  useEffect(() => {
+    if (!countdownRunning) return
+
+    const intervalId = window.setInterval(() => {
+      setCountdownRemaining((remaining) => {
+        if (remaining <= 1) {
+          setCountdownRunning(false)
+          return 0
+        }
+        return remaining - 1
+      })
+    }, 1000)
+
+    return () => window.clearInterval(intervalId)
+  }, [countdownRunning])
+
+  function formatCountdown(seconds: number) {
+    const minutes = Math.floor(seconds / 60)
+    const remainder = seconds % 60
+    return String(minutes).padStart(2, "0") + ":" + String(remainder).padStart(2, "0")
+  }
+
   const sourceKey = useMemo(
     () => getChordProMetadata(currentSong?.source ?? "", "key") ?? null,
     [currentSong?.source]
@@ -229,8 +255,10 @@ export default function LiveStageView({
       setAutoScroll(false)
       setCurrentIndex(nextIndex)
       setTransposeOffset(0)
+      setCountdownRunning(false)
+      setCountdownRemaining(countdownDuration)
     }
-  }, [currentIndex, songs.length])
+  }, [currentIndex, songs.length, countdownDuration])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -344,6 +372,40 @@ export default function LiveStageView({
           <span className="hidden text-xs text-white/50 sm:inline">
             {songs.length ? currentIndex + 1 : 0} / {songs.length}
           </span>
+          <details className="relative">
+            <summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-xl border border-white/15 px-3 text-xs font-semibold text-white/75 hover:bg-white/10">
+              <Clock className="size-4" />
+              <span aria-label="Countdown remaining">{formatCountdown(countdownRemaining)}</span>
+            </summary>
+            <div className="absolute right-0 top-full z-[220] mt-2 w-64 rounded-2xl border border-white/15 bg-[#17211b] p-4 shadow-2xl">
+              <p className="text-sm font-semibold">Transition countdown</p>
+              <p className="mt-1 text-xs leading-5 text-white/55">A local timer for rehearsal and transitions. It does not automatically advance the song.</p>
+              <label htmlFor="stage-countdown-duration" className="mt-3 block text-xs font-medium text-white/70">Duration</label>
+              <select
+                id="stage-countdown-duration"
+                value={countdownDuration}
+                onChange={(event) => {
+                  const duration = Number(event.currentTarget.value)
+                  setCountdownDuration(duration)
+                  setCountdownRemaining(duration)
+                  setCountdownRunning(false)
+                }}
+                className="mt-1.5 h-10 w-full rounded-lg border border-white/15 bg-black/20 px-3 text-sm text-white"
+              >
+                <option value={30}>30 seconds</option>
+                <option value={60}>1 minute</option>
+                <option value={90}>1 minute 30 seconds</option>
+                <option value={180}>3 minutes</option>
+                <option value={300}>5 minutes</option>
+              </select>
+              <p className="mt-3 text-center font-mono text-3xl font-semibold tabular-nums" aria-live="off">{formatCountdown(countdownRemaining)}</p>
+              {countdownRemaining === 0 ? <p role="status" className="mt-1 text-center text-xs font-semibold text-amber-200">Countdown complete</p> : null}
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => setCountdownRunning((running) => !running)} disabled={countdownRemaining === 0} className="h-9 rounded-lg bg-white px-3 text-xs font-semibold text-[#17211b] disabled:opacity-40">{countdownRunning ? "Pause" : "Start"}</button>
+                <button type="button" onClick={() => { setCountdownRunning(false); setCountdownRemaining(countdownDuration) }} className="h-9 rounded-lg border border-white/15 px-3 text-xs font-semibold text-white/80 hover:bg-white/10">Reset</button>
+              </div>
+            </div>
+          </details>
           <Link
             href="/"
             aria-label="Go to home dashboard"
