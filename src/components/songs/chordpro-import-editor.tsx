@@ -39,7 +39,6 @@ export default function ChordProImportEditor({
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const validation = validateChordPro(value)
-  const validation = validateChordPro(value)
 
   async function importFile(file: File | undefined) {
     setError("")
