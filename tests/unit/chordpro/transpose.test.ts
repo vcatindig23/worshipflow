@@ -27,6 +27,11 @@ describe("Chord transposition", () => {
     expect(transposeChord("G7sus4", 2)).toBe("A7sus4")
   })
 
+  it("normalizes Unicode enharmonic symbols before transposing", () => {
+    expect(transposeChord("C♯m7", 2)).toBe("D#m7")
+    expect(transposeChord("Bb/D♭", 2)).toBe("C/Eb")
+  })
+
   it("handles flat chords", () => {
     expect(transposeChord("Bb", 2)).toBe("C")
   })

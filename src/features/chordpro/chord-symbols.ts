@@ -38,7 +38,7 @@ export function isValidChordSymbol(input: string): boolean {
     if (!isNote(bass)) return false
   }
 
-  if (suffix.includes("/") || /[^A-Za-z0-9#+()°øΔ-]/.test(suffix)) return false
+  if ((suffix.includes("/") && !/6\\/9$/.test(suffix)) || /[^A-Za-z0-9#+()°øΔ/-]/.test(suffix)) return false
   if (suffix.includes("(") !== suffix.includes(")")) return false
 
   let remaining = suffix
