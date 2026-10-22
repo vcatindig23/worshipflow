@@ -11,7 +11,7 @@ import {
   Tag,
 } from "lucide-react"
 import RecordSongOpen from "@/components/songs/record-song-open"
-import SongViewer from "@/components/songs/song-viewer"
+import SongViewer from "@/components/songs/song-viewer"\nimport SongVersionComparison from "@/components/songs/song-version-comparison"
 import DownloadChordProButton from "@/components/songs/download-chordpro-button"
 import { setSongStatus, setSongTags, toggleFavorite } from "@/app/songs/actions"
 import { createClient } from "@/lib/supabase/server"
@@ -164,10 +164,10 @@ export default async function SongPage({
       supabase
         .from("song_versions")
         .select(
-          "id, version_number, title, artist, current_key, tempo, created_at"
+          "id, version_number, title, artist, current_key, tempo, created_at, chordpro_source"
         )
         .eq("song_id", typedSong.id)
-        .order("version_number", { ascending: false }),
+        .order("version_number", { ascending: false })\n        .limit(10),
     ])
 
   const tagIds = (songTagRows ?? []).map(
@@ -376,6 +376,10 @@ export default async function SongPage({
             referenceAudioPath={referenceAudioPath}
             referenceAudioName={referenceAudioName}
             referenceAudioUrl={referenceAudioUrl}
+          />
+          <SongVersionComparison
+            currentSource={typedSong.chordpro_source}
+            versions={(versions ?? []) as Version[]}
           />
         </section>
 
