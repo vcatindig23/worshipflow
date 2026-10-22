@@ -1,3 +1,4 @@
+import { isValidChordSymbol } from "./chord-symbols"
 import type {
   DirectiveLine,
   ParsedSong,
@@ -159,30 +160,25 @@ export function validateChordPro(source: string) {
     errors.push("Song source must not exceed 500,000 characters.")
   }
 
-  const lines = source
-    .replace(/\\r\\n/g, "\\n")
-    .replace(/\\r/g, "\\n")
-    .split("\\n")
-
+  const lines = source.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n")
   const customChordNames = new Set<string>()
+
   for (const line of lines) {
-    const definition = line.match(/^\\{\\s*define\\s*:\\s*([A-Za-z][A-Za-z0-9_-]*)\\b/i)
+    const definition = line.match(/^\{\s*define\s*:\s*([A-Za-z][A-Za-z0-9_-]*)\b/i)
     if (definition?.[1]) customChordNames.add(definition[1])
   }
 
   lines.forEach((line, index) => {
-    const openingBrackets = (line.match(/\\[/g) ?? []).length
-    const closingBrackets = (line.match(/\\]/g) ?? []).length
-
+    const openingBrackets = (line.match(/\[/g) ?? []).length
+    const closingBrackets = (line.match(/\]/g) ?? []).length
     if (openingBrackets !== closingBrackets) {
-      errors.push(`Line ${index + 1} has unmatched chord brackets.`)
+      errors.push("Line " + (index + 1) + " has unmatched chord brackets.")
     }
 
-    const openingBraces = (line.match(/\\{/g) ?? []).length
-    const closingBraces = (line.match(/\\}/g) ?? []).length
-
+    const openingBraces = (line.match(/\{/g) ?? []).length
+    const closingBraces = (line.match(/\}/g) ?? []).length
     if (openingBraces !== closingBraces) {
-      errors.push(`Line ${index + 1} has unmatched directive braces.`)
+      errors.push("Line " + (index + 1) + " has unmatched directive braces.")
     }
 
     if (sectionDirectivePattern.test(line.trim())) return
@@ -190,19 +186,16 @@ export function validateChordPro(source: string) {
     for (const match of line.matchAll(chordPattern)) {
       const chord = match[1]?.trim() ?? ""
       if (!chord) {
-        errors.push(`Line ${index + 1} contains an empty chord symbol.`)
+        errors.push("Line " + (index + 1) + " contains an empty chord symbol.")
         continue
       }
 
       const customChord = /^[A-Za-z][A-Za-z0-9_-]*$/.test(chord) && customChordNames.has(chord)
       if (!customChord && !isValidChordSymbol(chord)) {
-        errors.push(`Line ${index + 1} has unsupported chord syntax: [${chord}].`)
+        errors.push("Line " + (index + 1) + " has unsupported chord syntax: [" + chord + "].")
       }
     }
   })
 
-  return {
-    valid: errors.length === 0,
-    errors,
-  }
+  return { valid: errors.length === 0, errors }
 }

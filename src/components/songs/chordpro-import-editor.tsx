@@ -39,7 +39,8 @@ export default function ChordProImportEditor({
   const formSource = useRef<HTMLTextAreaElement>(null)
   const [value, setValue] = useState(source)
   const [message, setMessage] = useState("")
-  const [error, setError] = useState("")\n  const validation = validateChordPro(value)
+  const [error, setError] = useState("")
+  const validation = validateChordPro(value)
 
   async function importFile(file: File | undefined) {
     setError("")

@@ -9,9 +9,11 @@ import {
   RotateCcw,
   Star,
   Tag,
+  Printer,
 } from "lucide-react"
 import RecordSongOpen from "@/components/songs/record-song-open"
-import SongViewer from "@/components/songs/song-viewer"\nimport SongVersionComparison from "@/components/songs/song-version-comparison"
+import SongViewer from "@/components/songs/song-viewer"
+import SongVersionComparison from "@/components/songs/song-version-comparison"
 import DownloadChordProButton from "@/components/songs/download-chordpro-button"
 import { setSongStatus, setSongTags, toggleFavorite } from "@/app/songs/actions"
 import { createClient } from "@/lib/supabase/server"
@@ -49,6 +51,7 @@ type Version = {
   current_key: string | null
   tempo: number | null
   created_at: string
+  chordpro_source: string
 }
 
 type Tag = {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { compareChordProSources } from "../../src/features/chordpro/compare"
+import { compareChordProSources } from "../../../src/features/chordpro/compare"
 
 describe("ChordPro source comparison", () => {
   it("detects changed lyrics and chords while preserving line positions", () => {
