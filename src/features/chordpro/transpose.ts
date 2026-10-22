@@ -63,8 +63,10 @@ export function getTranspositionBetweenKeys(
   fromKey: string | null | undefined,
   toKey: string | null | undefined
 ) {
-  const fromMatch = fromKey?.match(/^([A-Ga-g])([#b]?)/)
-  const toMatch = toKey?.match(/^([A-Ga-g])([#b]?)/)
+  const normalizedFromKey = fromKey?.replace(/♯/g, "#").replace(/♭/g, "b")
+  const normalizedToKey = toKey?.replace(/♯/g, "#").replace(/♭/g, "b")
+  const fromMatch = normalizedFromKey?.match(/^([A-Ga-g])([#b]?)/)
+  const toMatch = normalizedToKey?.match(/^([A-Ga-g])([#b]?)/)
 
   if (!fromMatch || !toMatch) {
     return null
@@ -101,7 +103,7 @@ function transposeRoot(root: string, semitones: number) {
 }
 
 export function transposeChord(chord: string, semitones: number) {
-  const value = chord.trim()
+  const value = chord.trim().replace(/♯/g, "#").replace(/♭/g, "b")
 
   if (!value) {
     return chord
