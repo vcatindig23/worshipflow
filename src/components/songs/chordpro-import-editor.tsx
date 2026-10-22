@@ -2,9 +2,7 @@
 
 import { useRef, useState } from "react"
 import { FileUp } from "lucide-react"
-import {
-  getChordProMetadata,
-} from "@/features/chordpro/parser"
+import { getChordProMetadata, validateChordPro } from "@/features/chordpro/parser"
 import {
   MAX_CHORDPRO_FILE_BYTES,
   validateChordProImport,
@@ -40,6 +38,7 @@ export default function ChordProImportEditor({
   const [value, setValue] = useState(source)
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
+  const validation = validateChordPro(value)
   const validation = validateChordPro(value)
 
   async function importFile(file: File | undefined) {
@@ -157,8 +156,26 @@ export default function ChordProImportEditor({
           setMessage("")
           setError("")
         }}
+        aria-describedby="chordpro-validation"
         className={className}
       />
+      <div id="chordpro-validation" className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-3 text-xs leading-5">
+        {validation.valid ? (
+          <p className="font-medium text-emerald-700" role="status">ChordPro syntax looks valid.</p>
+        ) : (
+          <div>
+            <p className="font-semibold text-red-700">
+              {validation.errors.length} syntax issue{validation.errors.length === 1 ? "" : "s"} found
+            </p>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-red-700" role="status" aria-live="polite">
+              {validation.errors.slice(0, 8).map((validationError) => (
+                <li key={validationError}>{validationError}</li>
+              ))}
+            </ul>
+            {validation.errors.length > 8 ? <p className="mt-1 text-red-700">And {validation.errors.length - 8} more issue(s).</p> : null}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
