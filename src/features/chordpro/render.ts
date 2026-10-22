@@ -3,14 +3,16 @@ import { parseAudioTimestamp } from "./audio-timestamps"
 
 export type SongAlignment = "left" | "center" | "right"
 
+type DisplayLineBase = { line?: SongLine }
+
 export type RenderedSongSection =
-  | { type: "section"; title: string }
-  | { type: "content"; line: SongLine; alignment: SongAlignment; preformatted: boolean }
-  | { type: "blank" }
-  | { type: "audio_timestamp"; seconds: number }
-  | { type: "column_break" }
-  | { type: "new_page" }
-  | { type: "columns"; count: 1 | 2 }
+  | (DisplayLineBase & { type: "section"; title: string })
+  | (DisplayLineBase & { type: "content"; line: SongLine; alignment: SongAlignment; preformatted: boolean })
+  | (DisplayLineBase & { type: "blank" })
+  | (DisplayLineBase & { type: "audio_timestamp"; seconds: number })
+  | (DisplayLineBase & { type: "column_break" })
+  | (DisplayLineBase & { type: "new_page" })
+  | (DisplayLineBase & { type: "columns"; count: 1 | 2 })
 
 const sectionNames: Record<string, string> = {
   start_of_verse: "Verse",
