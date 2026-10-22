@@ -131,6 +131,25 @@ describe("ChordPro parser", () => {
     )
   })
 
+  it("rejects malformed chord symbols and unsupported syntax", () => {
+    const result = validateChordPro("[H#] [Cfoo] [G7/xyz]")
+    expect(result.valid).toBe(false)
+    expect(result.errors).toContain("Line 1 has unsupported chord syntax: [H#].")
+    expect(result.errors).toContain("Line 1 has unsupported chord syntax: [Cfoo].")
+    expect(result.errors).toContain("Line 1 has unsupported chord syntax: [G7/xyz].")
+  })
+
+  it("accepts extensions, alterations, slash bass, and enharmonic symbols", () => {
+    const result = validateChordPro("[Cmaj7] [Am7b5] [G7sus4] [D/F#] [Bb] [C♯m7] [C6/9]")
+    expect(result.valid).toBe(true)
+    expect(result.errors).toEqual([])
+  })
+
+  it("accepts custom chord aliases declared with define directives", () => {
+    const result = validateChordPro("{define: H base-fret 1 frets 0 2 2 1 0 0}\n[H]Custom chord")
+    expect(result.valid).toBe(true)
+  })
+
   it("accepts lyrics without chords", () => {
     const result = validateChordPro("Amazing grace how sweet the sound")
 
