@@ -140,7 +140,7 @@ describe("ChordPro parser", () => {
   })
 
   it("accepts extensions, alterations, slash bass, and enharmonic symbols", () => {
-    const result = validateChordPro("[Cmaj7] [Am7b5] [G7sus4] [D/F#] [Bb] [C♯m7] [C6/9]")
+    const result = validateChordPro("[Cmaj7] [Am7b5] [G7sus4] [D/F#] [Bb] [C♯m7] [C6/9] [C(b9)]")
     expect(result.valid).toBe(true)
     expect(result.errors).toEqual([])
   })
