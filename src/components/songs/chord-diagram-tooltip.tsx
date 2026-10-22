@@ -10,6 +10,7 @@ import {
 type ChordDiagramTooltipProps = {
   chord: string
   stageMode: boolean
+  customShape?: ChordDiagram | null
 }
 
 type TooltipPosition = {
@@ -157,13 +158,14 @@ function Diagram({
 export default function ChordDiagramTooltip({
   chord,
   stageMode,
+  customShape,
 }: ChordDiagramTooltipProps) {
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState<TooltipPosition | null>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
-  const shape = getChordDiagram(chord)
+  const shape = customShape ?? getChordDiagram(chord)
   const root = getChordRootLabel(chord)
 
   function openTooltip(element: HTMLElement) {

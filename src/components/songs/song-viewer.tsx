@@ -18,6 +18,7 @@ import {
   parseChordPro,
 } from "@/features/chordpro/parser"
 import { transposeChordProSource } from "@/features/chordpro/transpose"
+import { getChordProCustomChordShapes } from "@/features/chordpro/chord-diagrams"
 import { getSongPracticeSettingsStorageKey } from "@/lib/song-practice-settings"
 import { useSongPracticePreference } from "./use-song-practice-preference"
 import ChordProLine from "./chordpro-line"
@@ -161,6 +162,7 @@ export default function SongViewer({
     () => buildSongDisplayLines(parsedSong.lines),
     [parsedSong.lines]
   )
+  const customChordShapes = useMemo(() => getChordProCustomChordShapes(source), [source])
 
   const displayedKey =
     getChordProMetadata(displayedSource, "key") ?? "—"
@@ -335,6 +337,7 @@ export default function SongViewer({
               fontSize={fontSize}
               showChords={showChords}
               stageMode={stageMode}
+              customChordShapes={customChordShapes}
             />
           )
         })}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   getChordDiagram,
   getChordRootLabel,
+  getChordProCustomChordShapes,
 } from "../../../src/features/chordpro/chord-diagrams"
 
 describe("guitar chord diagrams", () => {
@@ -26,6 +27,17 @@ describe("guitar chord diagrams", () => {
     expect(shape?.baseFret).toBe(2)
     expect(shape?.frets).toEqual([2, 4, 2, 2, 2, 2])
     expect(shape?.fingers).toHaveLength(6)
+  })
+
+  it("loads custom chord aliases with frets and finger positions", () => {
+    const shapes = getChordProCustomChordShapes(
+      "{define: H base-fret 1 frets x 2 4 4 4 2 fingers 0 1 3 3 3 1}"
+    )
+    expect(shapes.H).toEqual({
+      frets: [-1, 2, 4, 4, 4, 2],
+      fingers: [0, 1, 3, 3, 3, 1],
+      baseFret: 1,
+    })
   })
 
   it("does not show a misleading diagram for unsupported chord qualities", () => {

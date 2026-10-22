@@ -133,3 +133,39 @@ export function getChordDiagram(chord: string): ChordDiagram | null {
 export function getChordRootLabel(chord: string) {
   return chord.trim().split("/")[0] ?? chord
 }
+
+
+/** Read standard ChordPro {define: ...} frets/fingers fields for custom chord diagrams. */
+export function getChordProCustomChordShapes(source: string): Record<string, ChordDiagram> {
+  const result: Record<string, ChordDiagram> = {}
+
+  for (const line of source.replace(/\r\n?/g, "\n").split("\n")) {
+    const definition = line.match(/^\{\s*define\s*:\s*([A-Za-z][A-Za-z0-9_-]*)(.*?)\s*\}$/i)
+    if (!definition?.[1] || !definition[2]) continue
+
+    const body = definition[2]
+    const fretsField = body.match(/\bfrets\s+(.+?)(?=\s+(?:fingers|base-fret)\s+|$)/i)
+    if (!fretsField?.[1]) continue
+
+    const frets = fretsField[1].trim().split(/\s+/).map((value) => {
+      if (/^(?:x|-)$/.test(value.toLowerCase())) return -1
+      if (/^(?:o|0)$/i.test(value)) return 0
+      return /^\d+$/.test(value) ? Number(value) : Number.NaN
+    })
+    if (frets.length !== 6 || frets.some((fret) => !Number.isInteger(fret) || fret < -1 || fret > 24)) continue
+
+    const fingersField = body.match(/\bfingers\s+(.+?)(?=\s+(?:frets|base-fret)\s+|$)/i)
+    const fingers = fingersField?.[1]
+      ? fingersField[1].trim().split(/\s+/).map((value) => /^\d+$/.test(value) ? Number(value) : 0)
+      : Array(6).fill(0)
+    if (fingers.length !== 6 || fingers.some((finger) => finger < 0 || finger > 4)) continue
+
+    const baseFretValue = body.match(/\bbase-fret\s+(\d+)/i)?.[1]
+    const baseFret = baseFretValue ? Number(baseFretValue) : 1
+    if (!Number.isInteger(baseFret) || baseFret < 1 || baseFret > 24) continue
+
+    result[definition[1]] = { frets, fingers, baseFret }
+  }
+
+  return result
+}
