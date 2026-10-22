@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Printer, Minus, Plus } from "lucide-react"
 import { parseChordPro } from "@/features/chordpro/parser"
 
@@ -29,20 +29,6 @@ export default function SongPrintSheet({
   const [template, setTemplate] = useState("personal")
   const [defaultSaved, setDefaultSaved] = useState(false)
 
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem("worshipflow-song-print-template")
-      if (!saved) return
-      const preferences = JSON.parse(saved) as { columns?: number; fontSize?: number; showChords?: boolean }
-      if (preferences.columns === 1 || preferences.columns === 2) setColumns(preferences.columns)
-      if (typeof preferences.fontSize === "number" && preferences.fontSize >= 9 && preferences.fontSize <= 20) setFontSize(preferences.fontSize)
-      if (typeof preferences.showChords === "boolean") setShowChords(preferences.showChords)
-      setTemplate("custom")
-    } catch {
-      // Ignore malformed or unavailable local browser preferences.
-    }
-  }, [])
-
   function applyTemplate(value: string) {
     setTemplate(value)
     setDefaultSaved(false)
@@ -58,6 +44,21 @@ export default function SongPrintSheet({
       setColumns(1)
       setFontSize(20)
       setShowChords(true)
+    }
+  }
+
+  function loadDefaultTemplate() {
+    try {
+      const saved = window.localStorage.getItem("worshipflow-song-print-template")
+      if (!saved) return
+      const preferences = JSON.parse(saved) as { columns?: number; fontSize?: number; showChords?: boolean }
+      if (preferences.columns === 1 || preferences.columns === 2) setColumns(preferences.columns)
+      if (typeof preferences.fontSize === "number" && preferences.fontSize >= 9 && preferences.fontSize <= 20) setFontSize(preferences.fontSize)
+      if (typeof preferences.showChords === "boolean") setShowChords(preferences.showChords)
+      setTemplate("custom")
+      setDefaultSaved(false)
+    } catch {
+      setDefaultSaved(false)
     }
   }
 
@@ -90,7 +91,7 @@ export default function SongPrintSheet({
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label htmlFor="print-template" className="mb-2 block text-xs font-semibold text-[var(--muted)]">Layout template</label>
-            <select id="print-template" value={template} onChange={(event) => applyTemplate(event.target.value)} className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm">
+            <select id="print-template" value={template} onChange={(event) => { if (event.target.value === "custom") loadDefaultTemplate(); else applyTemplate(event.target.value) }} className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm">
               <option value="personal">Personal reading</option>
               <option value="rehearsal">Rehearsal</option>
               <option value="stage">Stage</option>
