@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
+import { formatAudioTimestamp } from "@/features/chordpro/audio-timestamps"
 import {
   getChordProMetadata,
   parseChordPro,
@@ -38,6 +39,7 @@ type SongPracticePanelProps = {
   showManager: boolean
   settingsStorageKey: string | null
   immersive?: boolean
+  seekRequest?: { seconds: number; token: number } | null
 }
 
 function SongPracticePanel({
@@ -52,6 +54,7 @@ function SongPracticePanel({
   showManager,
   settingsStorageKey,
   immersive = false,
+  seekRequest = null,
 }: SongPracticePanelProps) {
   return (
     <div
@@ -70,6 +73,7 @@ function SongPracticePanel({
             title={referenceAudioName || "Song reference recording"}
             dark={dark}
             settingsStorageKey={settingsStorageKey}
+            seekRequest={seekRequest}
           />
         ) : (
           <div className={"rounded-xl border px-4 py-3 text-xs leading-5 " + (dark ? "border-white/10 bg-white/5 text-white/65" : "border-[var(--border)] bg-[var(--background)] text-[var(--muted)]")}>
@@ -145,6 +149,8 @@ export default function SongViewer({
   const [autoScroll, setAutoScroll] = useState(false)
   const [practiceOpen, setPracticeOpen] = useState(false)
   const [mobilePracticeTab, setMobilePracticeTab] = useState<"chart" | "tools">("chart")
+  const [audioSeekRequest, setAudioSeekRequest] = useState<{ seconds: number; token: number } | null>(null)
+  const [audioSeekToken, setAudioSeekToken] = useState(0)
   const chartScrollRef = useRef<HTMLDivElement>(null)
   const sectionElementsRef = useRef<Map<number, HTMLDivElement>>(new Map())
 
@@ -163,6 +169,7 @@ export default function SongViewer({
     [parsedSong.lines]
   )
   const customChordShapes = useMemo(() => getChordProCustomChordShapes(source), [source])
+  const usesTwoColumns = displayLines.some((item) => item.type === "columns" && item.count === 2)
 
   const displayedKey =
     getChordProMetadata(displayedSource, "key") ?? "—"
@@ -175,6 +182,20 @@ export default function SongViewer({
       ),
     [displayLines]
   )
+
+  function jumpToAudioTimestamp(seconds: number) {
+    if (!referenceAudioUrl) {
+      setPracticeOpen(true)
+      setMobilePracticeTab("tools")
+      return
+    }
+
+    const token = audioSeekToken + 1
+    setAudioSeekToken(token)
+    setAudioSeekRequest({ seconds, token })
+    setPracticeOpen(true)
+    setMobilePracticeTab("tools")
+  }
 
   function jumpToSection(index: number) {
     const container = chartScrollRef.current
@@ -278,6 +299,7 @@ export default function SongViewer({
   const chart = (
     <div
       ref={chartScrollRef}
+      role="region"
       aria-label={stageMode ? "Stage mode lyrics and chords" : practiceOpen ? "Practice mode lyrics and chords" : "Song lyrics and chords"}
       tabIndex={0}
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
@@ -291,17 +313,46 @@ export default function SongViewer({
       <div
         className={`mx-auto w-full max-w-none ${
           stageMode ? "mx-auto max-w-[1500px] pb-14 text-center" : practiceOpen ? "mx-auto max-w-5xl pb-14" : "pb-8"
-        }`}
+        } ${usesTwoColumns && !stageMode ? "columns-1 sm:columns-2 [column-gap:2rem]" : ""}`}
       >
         {displayLines.map((item, index) => {
           if (item.type === "blank") {
+            return <div key={`blank-${index}`} className={stageMode ? "h-7" : "h-5"} aria-hidden="true" />
+          }
+
+          if (item.type === "columns") return null
+
+          if (item.type === "audio_timestamp") {
             return (
-              <div
-                key={`blank-${index}`}
-                className={stageMode ? "h-7" : "h-5"}
-                aria-hidden="true"
-              />
+              <div key={`audio-timestamp-${index}`} className="my-3 flex flex-wrap items-center gap-2 break-inside-avoid-column">
+                <button
+                  type="button"
+                  disabled={!referenceAudioUrl}
+                  onClick={() => jumpToAudioTimestamp(item.seconds)}
+                  aria-label={referenceAudioUrl ? `Seek reference audio to ${formatAudioTimestamp(item.seconds)}` : `Audio timestamp ${formatAudioTimestamp(item.seconds)}. Attach a reference recording to enable seeking.`}
+                  title={referenceAudioUrl ? "Seek reference audio" : "Attach a reference recording to use this timestamp"}
+                  className={`inline-flex min-h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/40 motion-reduce:transition-none ${
+                    stageMode
+                      ? "border-white/15 bg-white/5 text-white/85 hover:bg-white/10 disabled:opacity-45"
+                      : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--brand)] hover:bg-[var(--brand-soft)] disabled:opacity-50"
+                  }`}
+                >
+                  <Play className="size-3.5" aria-hidden="true" />
+                  {formatAudioTimestamp(item.seconds)}
+                </button>
+                {!referenceAudioUrl ? <span className={stageMode ? "text-xs text-white/45" : "text-xs text-[var(--muted)]"}>Reference audio required</span> : null}
+              </div>
             )
+          }
+
+          if (item.type === "column_break") {
+            return <div key={`column-break-${index}`} className={usesTwoColumns && !stageMode ? "h-0 break-before-column" : "my-4 border-t border-dashed border-[var(--border)]"} aria-hidden="true" />
+          }
+
+          if (item.type === "new_page") {
+            return stageMode
+              ? <div key={`new-page-${index}`} className="h-8" aria-hidden="true" />
+              : <div key={`new-page-${index}`} className="my-8 break-before-page border-t border-dashed border-[var(--border)] pt-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Page break</div>
           }
 
           if (item.type === "section") {
@@ -309,16 +360,11 @@ export default function SongViewer({
               <div
                 key={`section-${index}`}
                 ref={(element) => {
-                  if (element) {
-                    sectionElementsRef.current.set(index, element)
-                  } else {
-                    sectionElementsRef.current.delete(index)
-                  }
+                  if (element) sectionElementsRef.current.set(index, element)
+                  else sectionElementsRef.current.delete(index)
                 }}
-                className={`mb-3 mt-8 first:mt-0 text-[0.68em] font-bold uppercase tracking-[0.16em] ${
-                  stageMode
-                    ? "text-white/45"
-                    : "text-[var(--brand)]"
+                className={`mb-3 mt-8 first:mt-0 text-[0.68em] font-bold uppercase tracking-[0.16em] break-inside-avoid-column [column-span:all] ${
+                  stageMode ? "text-white/45" : "text-[var(--brand)]"
                 }`}
               >
                 {item.title}
@@ -326,19 +372,34 @@ export default function SongViewer({
             )
           }
 
-          if (!item.line || item.line.type !== "content") {
-            return null
+          if (item.type === "content" && item.preformatted && item.line.type === "content") {
+            return (
+              <pre key={`preformatted-${index}`} className={`mb-3 max-w-full overflow-x-auto rounded-lg border p-3 text-left font-mono text-sm leading-6 whitespace-pre break-inside-avoid-column ${
+                stageMode ? "border-white/10 bg-white/5 text-white/90" : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]"
+              }`}>
+                {item.line.tokens.map((token) => token.value).join("")}
+              </pre>
+            )
           }
 
+          if (item.type !== "content" || item.line.type !== "content") return null
+
+          const alignmentClass = item.alignment === "center"
+            ? "justify-center text-center"
+            : item.alignment === "right"
+              ? "justify-end text-right"
+              : "justify-start text-left"
+
           return (
-            <ChordProLine
-              key={`line-${index}`}
-              line={item.line}
-              fontSize={fontSize}
-              showChords={showChords}
-              stageMode={stageMode}
-              customChordShapes={customChordShapes}
-            />
+            <div key={`line-${index}`} className={`mb-1 flex break-inside-avoid-column ${alignmentClass}`}>
+              <ChordProLine
+                line={item.line}
+                fontSize={fontSize}
+                showChords={showChords}
+                stageMode={stageMode}
+                customChordShapes={customChordShapes}
+              />
+            </div>
           )
         })}
       </div>
@@ -464,6 +525,7 @@ export default function SongViewer({
             referenceAudioUrl={referenceAudioUrl}
             showManager={false}
             settingsStorageKey={practiceSettingsStorageKey}
+              seekRequest={audioSeekRequest}
           />
         ) : null}
 
@@ -665,6 +727,7 @@ export default function SongViewer({
               referenceAudioUrl={referenceAudioUrl}
               showManager
               settingsStorageKey={practiceSettingsStorageKey}
+              seekRequest={audioSeekRequest}
               immersive
             />
           </aside>
@@ -891,6 +954,7 @@ export default function SongViewer({
           referenceAudioUrl={referenceAudioUrl}
           showManager
           settingsStorageKey={practiceSettingsStorageKey}
+              seekRequest={audioSeekRequest}
         />
       ) : null}
 

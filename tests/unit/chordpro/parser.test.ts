@@ -150,6 +150,13 @@ describe("ChordPro parser", () => {
     expect(result.valid).toBe(true)
   })
 
+  it("validates audio timestamp directives", () => {
+    expect(validateChordPro("{audio_timestamp: 00:34}").valid).toBe(true)
+    expect(validateChordPro("{audio_timestamp: 1:02:03}").valid).toBe(true)
+    expect(validateChordPro("{audio_timestamp: 1:70}").valid).toBe(false)
+    expect(validateChordPro("{audio_timestamp: nonsense}").valid).toBe(false)
+  })
+
   it("accepts lyrics without chords", () => {
     const result = validateChordPro("Amazing grace how sweet the sound")
 

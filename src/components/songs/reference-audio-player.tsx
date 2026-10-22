@@ -15,11 +15,14 @@ import {
   RotateCcw,
 } from "lucide-react"
 
+type AudioSeekRequest = { seconds: number; token: number }
+
 type ReferenceAudioPlayerProps = {
   src: string
   title: string
   dark?: boolean
   settingsStorageKey?: string | null
+  seekRequest?: AudioSeekRequest | null
 }
 
 function formatTime(seconds: number) {
@@ -34,6 +37,7 @@ export default function ReferenceAudioPlayer({
   title,
   dark = false,
   settingsStorageKey = null,
+  seekRequest = null,
 }: ReferenceAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying] = useState(false)
@@ -54,6 +58,25 @@ export default function ReferenceAudioPlayer({
       audioRef.current.playbackRate = playbackRate
     }
   }, [playbackRate])
+
+  useEffect(() => {
+    if (!seekRequest) return
+    const audio = audioRef.current
+    if (!audio) return
+
+    const seek = () => {
+      const maxTime = Number.isFinite(audio.duration) ? audio.duration : seekRequest.seconds
+      audio.currentTime = Math.max(0, Math.min(seekRequest.seconds, maxTime))
+    }
+
+    if (audio.readyState >= 1) {
+      seek()
+      return
+    }
+
+    audio.addEventListener("loadedmetadata", seek, { once: true })
+    return () => audio.removeEventListener("loadedmetadata", seek)
+  }, [seekRequest])
 
   const sectionLoopActive =
     loopStart !== null && loopEnd !== null && loopEnd > loopStart
@@ -182,6 +205,7 @@ export default function ReferenceAudioPlayer({
           setDuration(Number.isFinite(nextDuration) ? nextDuration : 0)
         }}
         onTimeUpdate={handleTimeUpdate}
+        onSeeked={(event) => setCurrentTime(event.currentTarget.currentTime)}
         onEnded={() => setPlaying(false)}
         onError={() => setError("The reference audio could not be loaded. It may have expired or been removed; refresh the page and try again.")}
       />

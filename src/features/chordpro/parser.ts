@@ -1,4 +1,5 @@
 import { isValidChordSymbol } from "./chord-symbols"
+import { parseAudioTimestamp } from "./audio-timestamps"
 import type {
   DirectiveLine,
   ParsedSong,
@@ -8,7 +9,7 @@ import type {
 
 const directivePattern = /^\{\s*([a-zA-Z0-9_]+)(?:\s*:\s*(.*?))?\s*\}$/
 const sectionDirectivePattern =
-  /^\[(start_of|end_of)_(verse|chorus|bridge|pre_chorus|intro|outro|tag|interlude)\]$/i
+  /^\[(start_of|end_of)_(verse|chorus|bridge|pre_chorus|intro|outro|tag|interlude|tab|grid)\]$/i
 const chordPattern = /\[([^\]]+)\]/g
 
 const metadataDirectives = new Set([
@@ -179,6 +180,28 @@ export function validateChordPro(source: string) {
     const closingBraces = (line.match(/\}/g) ?? []).length
     if (openingBraces !== closingBraces) {
       errors.push("Line " + (index + 1) + " has unmatched directive braces.")
+    }
+
+    const directive = parseDirective(line)
+    if (directive?.name === "audio_timestamp") {
+      if (directive.value === null || parseAudioTimestamp(directive.value) === null) {
+        errors.push("Line " + (index + 1) + " has an invalid audio timestamp. Use seconds, M:SS, or H:MM:SS.")
+      }
+      return
+    }
+
+    if (directive && (directive.name === "align" || directive.name === "text_align")) {
+      if (!["left", "center", "right"].includes((directive.value ?? "").toLowerCase())) {
+        errors.push("Line " + (index + 1) + " has an invalid alignment directive. Use left, center, or right.")
+      }
+      return
+    }
+
+    if (directive?.name === "columns") {
+      if (!["1", "2"].includes(directive.value ?? "")) {
+        errors.push("Line " + (index + 1) + " has an invalid columns directive. Use 1 or 2.")
+      }
+      return
     }
 
     if (sectionDirectivePattern.test(line.trim())) return
