@@ -898,8 +898,13 @@ export default function WorkspaceHeaderActions({
 
             <div className="min-h-0 flex-1 overflow-y-auto">
               {isLoadingNotifications && feedItems.length === 0 ? (
-                <div className="flex items-center justify-center gap-2 px-5 py-10 text-sm text-[var(--muted)]">
-                  <LoaderCircle className="size-4 animate-spin" />
+                <div
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="flex items-center justify-center gap-2 px-5 py-10 text-sm text-[var(--muted)]"
+                >
+                  <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
                   Loading notifications and activity…
                 </div>
               ) : feedItems.length === 0 ? (
