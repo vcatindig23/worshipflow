@@ -23,6 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { Session } from "@supabase/supabase-js"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
 import { getChordProMetadata, parseChordPro } from "@/features/chordpro/parser"
+import { formatAudioTimestamp } from "@/features/chordpro/audio-timestamps"
 import {
   getTranspositionBetweenKeys,
   transposeChordProSource,
@@ -67,6 +68,7 @@ type LiveStageViewProps = {
   isServiceCompleted: boolean
   userId: string
   songs: LiveStageSong[]
+  referenceAudioUrls?: Record<string, string | null>
   serviceDate: string
   serviceTime: string
   status: string
@@ -85,6 +87,7 @@ export default function LiveStageView({
   isServiceCompleted,
   userId,
   songs,
+  referenceAudioUrls = {},
   serviceDate,
   serviceTime,
   status,
@@ -111,7 +114,11 @@ export default function LiveStageView({
   const [countdownRemaining, setCountdownRemaining] = useState(60)
   const [countdownRunning, setCountdownRunning] = useState(false)
   const lyricsScrollRef = useRef<HTMLDivElement>(null)
+  const referenceAudioRef = useRef<HTMLAudioElement>(null)
+  const [audioSeekRequest, setAudioSeekRequest] = useState<{ songId: string; seconds: number; token: number } | null>(null)
+  const [audioSeekToken, setAudioSeekToken] = useState(0)
   const currentSong = songs[currentIndex] ?? null
+  const currentSongAudioUrl = currentSong ? referenceAudioUrls[currentSong.id] ?? null : null
 
   useEffect(() => {
     const updateOnlineStatus = () => setIsOnline(navigator.onLine)
@@ -133,6 +140,27 @@ export default function LiveStageView({
       document.body.style.overflow = ""
     }
   }, [])
+
+  useEffect(() => {
+    const request = audioSeekRequest
+    if (!request || request.songId !== currentSong?.id) return
+
+    const audio = referenceAudioRef.current
+    if (!audio) return
+
+    const seek = () => {
+      const maxTime = Number.isFinite(audio.duration) ? audio.duration : request.seconds
+      audio.currentTime = Math.max(0, Math.min(request.seconds, maxTime))
+    }
+
+    if (audio.readyState >= 1) {
+      seek()
+      return
+    }
+
+    audio.addEventListener("loadedmetadata", seek, { once: true })
+    return () => audio.removeEventListener("loadedmetadata", seek)
+  }, [audioSeekRequest, currentSong?.id, currentSongAudioUrl])
 
   useEffect(() => {
     let cancelled = false
@@ -605,6 +633,18 @@ export default function LiveStageView({
                     </div>
                   ) : null}
 
+                  {currentSongAudioUrl ? (
+                    <audio
+                      key={currentSong.id}
+                      ref={referenceAudioRef}
+                      src={currentSongAudioUrl}
+                      controls
+                      preload="metadata"
+                      aria-label={`Reference recording for ${currentSong.title}`}
+                      className="mb-3 w-full max-w-2xl shrink-0 self-center rounded-xl"
+                    />
+                  ) : null}
+
                   <div
                     key={currentSong.id}
                     ref={lyricsScrollRef}
@@ -615,6 +655,29 @@ export default function LiveStageView({
                     {displayLines.map((line, lineIndex) => {
                         if (line.type === "blank") {
                           return <div key={`blank-${lineIndex}`} className="h-8" aria-hidden="true" />
+                        }
+
+                        if (line.type === "audio_timestamp") {
+                          return (
+                            <div key={`audio-timestamp-${lineIndex}`} className="my-3 flex flex-wrap items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                disabled={!currentSongAudioUrl}
+                                onClick={() => {
+                                  if (!currentSongAudioUrl || !currentSong) return
+                                  const token = audioSeekToken + 1
+                                  setAudioSeekToken(token)
+                                  setAudioSeekRequest({ songId: currentSong.id, seconds: line.seconds, token })
+                                }}
+                                aria-label={currentSongAudioUrl ? `Seek reference recording to ${formatAudioTimestamp(line.seconds)}` : `Audio timestamp ${formatAudioTimestamp(line.seconds)}. Attach a reference recording to enable seeking.`}
+                                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-3 text-sm font-semibold text-white/85 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 disabled:opacity-45 motion-reduce:transition-none"
+                              >
+                                <Play className="size-4" aria-hidden="true" />
+                                {formatAudioTimestamp(line.seconds)}
+                              </button>
+                              {!currentSongAudioUrl ? <span className="text-xs text-white/45">Reference recording required</span> : null}
+                            </div>
+                          )
                         }
 
                         if (line.type === "section") {
@@ -628,18 +691,37 @@ export default function LiveStageView({
                           )
                         }
 
-                        if (!line.line || line.line.type !== "content") {
+                        if (line.type === "columns" || line.type === "column_break" || line.type === "new_page") {
                           return null
                         }
 
+                        if (line.type !== "content" || line.line.type !== "content") {
+                          return null
+                        }
+
+                        if (line.preformatted) {
+                          return (
+                            <pre key={`tab-${lineIndex}`} className="my-3 overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-left font-mono text-sm leading-7 text-white/90">
+                              {line.line.tokens.map((token) => token.value).join("")}
+                            </pre>
+                          )
+                        }
+
+                        const alignmentClass = line.alignment === "left"
+                          ? "justify-start text-left"
+                          : line.alignment === "right"
+                            ? "justify-end text-right"
+                            : "justify-center text-center"
+
                         return (
-                          <ChordProLine
-                            key={`line-${lineIndex}`}
-                            line={line.line}
-                            fontSize={fontSize}
-                            showChords={showChords}
-                            stageMode
-                          />
+                          <div key={`line-${lineIndex}`} className={`flex ${alignmentClass}`}>
+                            <ChordProLine
+                              line={line.line}
+                              fontSize={fontSize}
+                              showChords={showChords}
+                              stageMode
+                            />
+                          </div>
                         )
                     })}
                   </div>

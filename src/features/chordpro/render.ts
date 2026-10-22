@@ -7,7 +7,7 @@ type DisplayLineBase = { line?: SongLine }
 
 export type RenderedSongSection =
   | (DisplayLineBase & { type: "section"; title: string })
-  | (DisplayLineBase & { type: "content"; line: SongLine; alignment: SongAlignment; preformatted: boolean })
+  | (DisplayLineBase & { type: "content"; line: SongLine; alignment?: SongAlignment; preformatted: boolean })
   | (DisplayLineBase & { type: "blank" })
   | (DisplayLineBase & { type: "audio_timestamp"; seconds: number })
   | (DisplayLineBase & { type: "column_break" })
@@ -57,7 +57,7 @@ function isEndDirective(name: string) {
 
 export function buildSongDisplayLines(lines: SongLine[]): RenderedSongSection[] {
   const result: RenderedSongSection[] = []
-  let alignment: SongAlignment = "left"
+  let alignment: SongAlignment | undefined
   let preformatted = false
 
   for (const line of lines) {

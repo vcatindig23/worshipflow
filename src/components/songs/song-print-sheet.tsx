@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { Printer, Minus, Plus } from "lucide-react"
 import { parseChordPro } from "@/features/chordpro/parser"
+import { formatAudioTimestamp, parseAudioTimestamp } from "@/features/chordpro/audio-timestamps"
 
 type SongPrintSheetProps = {
   source: string
@@ -140,11 +141,17 @@ export default function SongPrintSheet({
           {parsed.lines.map((line, index) => {
             if (line.type === "blank") return <div key={"blank-" + index} className="h-3" aria-hidden="true" />
             if (line.type === "directive") {
-              if (/^start_of_(verse|chorus|bridge|pre_chorus|intro|outro|tag|interlude)(_\d+)?$/.test(line.name)) {
+              if (/^start_of_(verse|chorus|bridge|pre_chorus|intro|outro|tag|interlude|tab|grid)(_\d+)?$/.test(line.name)) {
+                if (line.name === "start_of_tab" || line.name === "start_of_grid") tabMode.value = true
                 const label = line.name.replace("start_of_", "").replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
                 return <h2 key={"section-" + index} className="wf-song-print-section my-3 break-after-avoid text-[0.78em] font-bold uppercase tracking-widest text-black/60">{label}</h2>
               }
-              if (line.name === "align" && line.value && ["left", "center", "right"].includes(line.value.toLowerCase())) {
+              if (line.name === "audio_timestamp" && line.value !== null) {
+                const seconds = parseAudioTimestamp(line.value)
+                if (seconds === null) return null
+                return <p key={"audio-timestamp-" + index} className="wf-song-print-cue my-2 break-inside-avoid text-[0.7em] font-semibold tracking-wide text-black/55">Recording cue: <span className="text-black">{formatAudioTimestamp(seconds)}</span></p>
+              }
+              if ((line.name === "align" || line.name === "text_align") && line.value && ["left", "center", "right"].includes(line.value.toLowerCase())) {
                 alignment.value = line.value.toLowerCase() as "left" | "center" | "right"
                 return null
               }
