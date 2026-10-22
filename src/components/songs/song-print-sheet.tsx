@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Printer, Minus, Plus } from "lucide-react"
 import { parseChordPro } from "@/features/chordpro/parser"
 
@@ -24,8 +24,52 @@ export default function SongPrintSheet({
   capo,
 }: SongPrintSheetProps) {
   const [columns, setColumns] = useState<1 | 2>(1)
-  const [fontSize, setFontSize] = useState(12)
+  const [fontSize, setFontSize] = useState(14)
   const [showChords, setShowChords] = useState(true)
+  const [template, setTemplate] = useState("personal")
+  const [defaultSaved, setDefaultSaved] = useState(false)
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("worshipflow-song-print-template")
+      if (!saved) return
+      const preferences = JSON.parse(saved) as { columns?: number; fontSize?: number; showChords?: boolean }
+      if (preferences.columns === 1 || preferences.columns === 2) setColumns(preferences.columns)
+      if (typeof preferences.fontSize === "number" && preferences.fontSize >= 9 && preferences.fontSize <= 20) setFontSize(preferences.fontSize)
+      if (typeof preferences.showChords === "boolean") setShowChords(preferences.showChords)
+      setTemplate("custom")
+    } catch {
+      // Ignore malformed or unavailable local browser preferences.
+    }
+  }, [])
+
+  function applyTemplate(value: string) {
+    setTemplate(value)
+    setDefaultSaved(false)
+    if (value === "personal") {
+      setColumns(1)
+      setFontSize(14)
+      setShowChords(true)
+    } else if (value === "rehearsal") {
+      setColumns(2)
+      setFontSize(11)
+      setShowChords(true)
+    } else if (value === "stage") {
+      setColumns(1)
+      setFontSize(20)
+      setShowChords(true)
+    }
+  }
+
+  function saveDefaultTemplate() {
+    try {
+      window.localStorage.setItem("worshipflow-song-print-template", JSON.stringify({ columns, fontSize, showChords }))
+      setTemplate("custom")
+      setDefaultSaved(true)
+    } catch {
+      setDefaultSaved(false)
+    }
+  }
   const parsed = useMemo(() => parseChordPro(source), [source])
   const alignment: { value: "left" | "center" | "right" } = { value: "left" }
   const tabMode: { value: boolean } = { value: false }
@@ -43,10 +87,19 @@ export default function SongPrintSheet({
             Print / Save PDF
           </button>
         </div>
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label htmlFor="print-template" className="mb-2 block text-xs font-semibold text-[var(--muted)]">Layout template</label>
+            <select id="print-template" value={template} onChange={(event) => applyTemplate(event.target.value)} className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm">
+              <option value="personal">Personal reading</option>
+              <option value="rehearsal">Rehearsal</option>
+              <option value="stage">Stage</option>
+              <option value="custom">Custom saved default</option>
+            </select>
+          </div>
           <div>
             <label htmlFor="print-columns" className="mb-2 block text-xs font-semibold text-[var(--muted)]">Page columns</label>
-            <select id="print-columns" value={columns} onChange={(event) => setColumns(Number(event.target.value) as 1 | 2)} className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm">
+            <select id="print-columns" value={columns} onChange={(event) => { setColumns(Number(event.target.value) as 1 | 2); setTemplate("custom"); setDefaultSaved(false) }} className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 text-sm">
               <option value={1}>Single column</option>
               <option value={2}>Two columns</option>
             </select>
@@ -54,15 +107,19 @@ export default function SongPrintSheet({
           <div>
             <label htmlFor="print-font-size" className="mb-2 block text-xs font-semibold text-[var(--muted)]">Lyrics size: {fontSize} pt</label>
             <div className="flex h-10 items-center gap-3 rounded-lg border border-[var(--border)] px-3">
-              <button type="button" aria-label="Decrease print font size" onClick={() => setFontSize((size) => Math.max(9, size - 1))} disabled={fontSize <= 9}><Minus className="size-4" /></button>
-              <input id="print-font-size" aria-label="Print font size" type="range" min={9} max={20} value={fontSize} onChange={(event) => setFontSize(Number(event.target.value))} className="w-full" />
-              <button type="button" aria-label="Increase print font size" onClick={() => setFontSize((size) => Math.min(20, size + 1))} disabled={fontSize >= 20}><Plus className="size-4" /></button>
+              <button type="button" aria-label="Decrease print font size" onClick={() => { setFontSize((size) => Math.max(9, size - 1)); setTemplate("custom"); setDefaultSaved(false) }} disabled={fontSize <= 9}><Minus className="size-4" /></button>
+              <input id="print-font-size" aria-label="Print font size" type="range" min={9} max={20} value={fontSize} onChange={(event) => { setFontSize(Number(event.target.value)); setTemplate("custom"); setDefaultSaved(false) }} className="w-full" />
+              <button type="button" aria-label="Increase print font size" onClick={() => { setFontSize((size) => Math.min(20, size + 1)); setTemplate("custom"); setDefaultSaved(false) }} disabled={fontSize >= 20}><Plus className="size-4" /></button>
             </div>
           </div>
           <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium">
-            <input type="checkbox" checked={showChords} onChange={(event) => setShowChords(event.target.checked)} className="size-4 accent-[var(--brand)]" />
+            <input type="checkbox" checked={showChords} onChange={(event) => { setShowChords(event.target.checked); setTemplate("custom"); setDefaultSaved(false) }} className="size-4 accent-[var(--brand)]" />
             Include chords
           </label>
+          <div className="flex flex-col justify-end gap-1">
+            <button type="button" onClick={saveDefaultTemplate} className="h-10 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold hover:bg-[var(--surface)]">Save current layout as default</button>
+            {defaultSaved ? <p role="status" className="text-xs text-emerald-700">Default layout saved on this device.</p> : null}
+          </div>
         </div>
       </div>
 

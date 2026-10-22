@@ -197,20 +197,19 @@ export default function LiveStageView({
   }, [setlistId, setlistName, userId, songs])
 
   useEffect(() => {
-    if (!countdownRunning) return
+    if (!countdownRunning || countdownRemaining === 0) return
 
-    const intervalId = window.setInterval(() => {
-      setCountdownRemaining((remaining) => {
-        if (remaining <= 1) {
-          setCountdownRunning(false)
-          return 0
-        }
-        return remaining - 1
-      })
+    const timeoutId = window.setTimeout(() => {
+      if (countdownRemaining <= 1) {
+        setCountdownRemaining(0)
+        setCountdownRunning(false)
+      } else {
+        setCountdownRemaining(countdownRemaining - 1)
+      }
     }, 1000)
 
-    return () => window.clearInterval(intervalId)
-  }, [countdownRunning])
+    return () => window.clearTimeout(timeoutId)
+  }, [countdownRunning, countdownRemaining])
 
   function formatCountdown(seconds: number) {
     const minutes = Math.floor(seconds / 60)
