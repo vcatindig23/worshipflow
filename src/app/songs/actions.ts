@@ -1,8 +1,12 @@
 "use server"
 
+import { hasPermission } from "@/lib/permissions"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
+import { requireWorkspaceAuthorization } from "@/lib/authorization"
+import { getSafeAuthNextPath } from "@/lib/auth-redirect"
 import { createClient } from "@/lib/supabase/server"
 
 const songIdSchema = z.object({
@@ -43,13 +47,7 @@ export async function toggleFavorite(formData: FormData) {
   revalidatePath("/songs")
   revalidatePath(`/songs/${result.data.songId}`)
 
-  const redirectTo = String(formData.get("redirectTo") || "/songs")
-
-  if (!redirectTo.startsWith("/")) {
-    redirect("/songs")
-  }
-
-  redirect(redirectTo)
+  redirect(getSafeAuthNextPath(String(formData.get("redirectTo") || "/songs")))
 }
 
 export async function recordSongOpen(songId: string) {
@@ -107,13 +105,8 @@ export async function setSongStatus(formData: FormData) {
     redirect("/onboarding")
   }
 
-  const allowedRoles = new Set([
-    "admin",
-    "worship_leader",
-    "song_editor",
-  ])
 
-  if (!allowedRoles.has(membership.role)) {
+  if (!hasPermission(membership.role, "songs:edit")) {
     redirect("/songs?error=not_authorized")
   }
 
@@ -164,14 +157,7 @@ export async function setSongTags(formData: FormData) {
     redirect(`/songs/${songIdResult.data.songId}?error=tag_too_long`)
   }
 
-  const supabase = await createClient()
-
-  const { data: claimsData } = await supabase.auth.getClaims()
-  const userId = claimsData?.claims?.sub
-
-  if (!userId) {
-    redirect("/login")
-  }
+  const { supabase } = await requireWorkspaceAuthorization("songs:edit")
 
   const { error } = await supabase.rpc("set_song_tags", {
     p_song_id: songIdResult.data.songId,

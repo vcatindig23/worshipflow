@@ -362,6 +362,7 @@ export default async function TeamSettingsPage({
             Team Management</>}
         description={<>Invite your worship team, assign roles, and manage access to your church workspace.</>}
         actions={<>
+{canManageTeam ? <Link href="/settings/team/audit" className={buttonVariants({ variant: "outline" })}>Permission history</Link> : null}
 <div className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
           <p className="text-xs font-medium text-[var(--muted)]">
             Members

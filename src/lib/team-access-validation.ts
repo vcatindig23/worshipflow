@@ -1,3 +1,4 @@
+import { hasPermission, isRole } from "@/lib/permissions"
 import { z } from "zod"
 
 export const invitationSchema = z.object({
@@ -51,19 +52,10 @@ export const joinInvitationSchema = z.object({
  * roles must never receive administrator-only permissions.
  */
 export function isAdministrator(role: unknown): boolean {
-  return role === "admin"
+  return hasPermission(role, "team:manage")
 }
 
-export const setlistEditorRoles = [
-  "admin",
-  "worship_leader",
-  "song_editor",
-] as const
-
-export const setlistLeaderRoles = [
-  "admin",
-  "worship_leader",
-] as const
+export { editorRoles as setlistEditorRoles, leaderRoles as setlistLeaderRoles } from "@/lib/permissions"
 
 /**
  * Shared allowlist check for server actions. An absent, malformed, or
@@ -73,5 +65,5 @@ export function hasAnyRole(
   role: unknown,
   allowedRoles: readonly string[]
 ): boolean {
-  return typeof role === "string" && allowedRoles.includes(role)
+  return isRole(role) && allowedRoles.includes(role)
 }

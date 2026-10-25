@@ -1,5 +1,7 @@
 "use server"
 
+import { requireWorkspaceAuthorization } from "@/lib/authorization"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
@@ -10,7 +12,6 @@ import {
   teamPositionSchema,
   uuidSchema,
 } from "@/lib/team-access-validation"
-import { createClient } from "@/lib/supabase/server"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import {
   isValidServiceDate,
@@ -36,34 +37,7 @@ function parseOptionalInteger(
 }
 
 async function getMembership() {
-  const supabase = await createClient()
-
-  const { data: claimsData } =
-    await supabase.auth.getClaims()
-
-  const userId = claimsData?.claims?.sub
-
-  if (!userId) {
-    redirect("/login")
-  }
-
-  const { data: membership, error } =
-    await supabase
-      .from("organization_members")
-      .select("organization_id, role")
-      .eq("user_id", userId)
-      .maybeSingle()
-
-  if (error || !membership) {
-    redirect("/onboarding")
-  }
-
-  return {
-    supabase,
-    userId,
-    organizationId: membership.organization_id,
-    role: membership.role,
-  }
+  return requireWorkspaceAuthorization()
 }
 
 function requireRole(

@@ -1,5 +1,7 @@
 "use server"
 
+import { leaderRoles } from "@/lib/permissions"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
@@ -11,7 +13,6 @@ import {
 } from "@/lib/assignment-swap-validation"
 
 const uuidSchema = z.string().uuid()
-const leaderRoles = ["admin", "worship_leader"]
 
 function getText(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim()

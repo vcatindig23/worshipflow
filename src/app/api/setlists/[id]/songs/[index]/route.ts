@@ -29,10 +29,10 @@ export async function GET(
   }
 
   const supabase = await createClient()
-  const { data: claimsData } = await supabase.auth.getClaims()
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims()
   const userId = claimsData?.claims?.sub
 
-  if (!userId) {
+  if (claimsError || !userId) {
     return Response.json(
       { error: "Authentication required." },
       { status: 401 }

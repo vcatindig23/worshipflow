@@ -1,12 +1,13 @@
 "use server"
 
+import { requireWorkspaceAuthorization } from "@/lib/authorization"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import {
   generateInviteCode,
   hashInviteCode,
 } from "@/lib/invitations/code"
-import { createClient } from "@/lib/supabase/server"
 import {
   invitationSchema,
   isAdministrator,
@@ -22,58 +23,7 @@ export type InvitationState = {
 }
 
 async function getCurrentMembership() {
-  const supabase = await createClient()
-
-  const { data: claimsData } =
-    await supabase.auth.getClaims()
-
-  const userId =
-    claimsData?.claims?.sub
-
-  if (!userId) {
-    redirect("/login")
-  }
-
-  const {
-    data: membership,
-    error,
-  } = await supabase
-    .from("organization_members")
-    .select("organization_id, role")
-    .eq("user_id", userId)
-    .order("created_at", {
-      ascending: true,
-    })
-    .limit(1)
-    .maybeSingle()
-
-  if (error) {
-    console.error(
-      "Failed to load current membership:",
-      {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-      }
-    )
-
-    redirect(
-      "/settings/team?error=membership_load_failed"
-    )
-  }
-
-  if (!membership) {
-    redirect("/onboarding")
-  }
-
-  return {
-    supabase,
-    userId,
-    organizationId:
-      membership.organization_id,
-    role: membership.role,
-  }
+  return requireWorkspaceAuthorization()
 }
 
 export async function createInvitation(

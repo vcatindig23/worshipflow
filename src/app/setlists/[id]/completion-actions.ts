@@ -1,11 +1,12 @@
 "use server"
 
+import { leaderRoles } from "@/lib/permissions"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 
-const leaderRoles = ["admin", "worship_leader"]
 
 function parseOptionalInteger(value: FormDataEntryValue | null) {
   const raw = String(value ?? "").trim()
@@ -74,7 +75,7 @@ export async function completeService(formData: FormData) {
     redirect(`/setlists/${setlistId}/complete?error=notes_too_long`)
   }
 
-  const { supabase } = await getServiceAccess(setlistId)
+  const { supabase, workspace } = await getServiceAccess(setlistId)
 
   const { error } = await supabase
     .from("setlists")
@@ -85,6 +86,7 @@ export async function completeService(formData: FormData) {
       after_service_notes: notes || null,
     })
     .eq("id", setlistId)
+    .eq("organization_id", workspace.organizationId)
 
   if (error) {
     redirect(`/setlists/${setlistId}/complete?error=completion_failed`)
@@ -103,7 +105,7 @@ export async function reopenService(formData: FormData) {
     redirect("/services")
   }
 
-  const { supabase } = await getServiceAccess(setlistId)
+  const { supabase, workspace } = await getServiceAccess(setlistId)
 
   const { error } = await supabase
     .from("setlists")
@@ -111,6 +113,7 @@ export async function reopenService(formData: FormData) {
       completed_at: null,
     })
     .eq("id", setlistId)
+    .eq("organization_id", workspace.organizationId)
 
   if (error) {
     redirect(`/setlists/${setlistId}?error=completion_failed`)

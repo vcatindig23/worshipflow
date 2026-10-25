@@ -1,12 +1,13 @@
 "use server"
 
+import { editorRoles } from "@/lib/permissions"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 
-const editorRoles = ["admin", "worship_leader", "song_editor"]
 const uuidSchema = z.string().uuid()
 const typeSchema = z.enum([
   "opening",

@@ -24,6 +24,7 @@ const recovery: Record<string, { href: string; label: string }> = {
 }
 
 const messages: Record<string, string> = {
+  permission_denied: "Your current workspace role does not allow this action. Ask a church administrator if you need additional access.",
   songs_load_failed: "We couldn’t load your song library. Check your connection, then try loading it again.",
   setlists_load_failed: "We couldn’t load your service plans. Check your connection, then try loading them again.",
   files_load_failed: "Shared files are temporarily unavailable. Check your connection and try again.",

@@ -1,5 +1,7 @@
 "use server"
 
+import { hasPermission } from "@/lib/permissions"
+
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
@@ -72,13 +74,8 @@ export async function updateSong(formData: FormData) {
     redirect("/onboarding")
   }
 
-  const allowedRoles = new Set([
-    "admin",
-    "worship_leader",
-    "song_editor",
-  ])
 
-  if (!allowedRoles.has(membership.role)) {
+  if (!hasPermission(membership.role, "songs:edit")) {
     redirect(`/songs/${result.data.id}?error=not_authorized`)
   }
 

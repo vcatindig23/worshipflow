@@ -1,5 +1,7 @@
 "use server"
 
+import { editorRoles } from "@/lib/permissions"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
@@ -10,7 +12,6 @@ import {
 } from "@/lib/service-scheduling"
 import { hasAnyRole, uuidSchema } from "@/lib/team-access-validation"
 
-const editorRoles = ["admin", "worship_leader", "song_editor"] as const
 
 function redirectPreparationError(setlistId: string, error: string): never {
   redirect(`/setlists/${setlistId}/preparation?error=${error}`)

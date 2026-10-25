@@ -1,5 +1,7 @@
 "use server"
 
+import { editorRoles } from "@/lib/permissions"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
@@ -11,7 +13,6 @@ import {
   isValidServiceTime,
 } from "@/lib/service-scheduling"
 
-const editorRoles = ["admin", "worship_leader", "song_editor"] as const
 const uuidSchema = z.string().uuid()
 const timelineTypeSchema = z.enum([
   "opening",

@@ -1,42 +1,19 @@
 "use server"
 
+import { requireWorkspaceAuthorization } from "@/lib/authorization"
+
+import { editorRoles } from "@/lib/permissions"
+
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
-import { createClient } from "@/lib/supabase/server"
 
-const editorRoles = [
-  "admin",
-  "worship_leader",
-  "song_editor",
-]
 
 const pathSchema = z.string().min(1).max(500)
 
 async function getMembership() {
-  const supabase = await createClient()
-  const { data: claimsData } = await supabase.auth.getClaims()
-  const userId = claimsData?.claims?.sub
-
-  if (!userId) {
-    redirect("/login")
-  }
-
-  const { data: membership, error } = await supabase
-    .from("organization_members")
-    .select("organization_id, role")
-    .eq("user_id", userId)
-    .maybeSingle()
-
-  if (error) {
-    throw new Error("Unable to verify file library access.")
-  }
-
-  if (!membership) {
-    redirect("/onboarding")
-  }
-
-  return { supabase, ...membership }
+  const context = await requireWorkspaceAuthorization("files:manage")
+  return { supabase: context.supabase, organization_id: context.organizationId, role: context.role }
 }
 
 export async function deleteWorkspaceFile(formData: FormData) {

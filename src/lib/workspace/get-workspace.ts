@@ -1,3 +1,4 @@
+import { isRole } from "@/lib/permissions"
 import { cache } from "react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
@@ -105,10 +106,10 @@ function getToday(timeZone: string) {
 export const getWorkspace = cache(async function getWorkspace(): Promise<WorkspaceData> {
   const supabase = await createClient()
 
-  const { data: claimsData } = await supabase.auth.getClaims()
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims()
   const userId = claimsData?.claims?.sub
 
-  if (!userId) {
+  if (claimsError || !userId) {
     redirect("/login")
   }
 
@@ -161,6 +162,7 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
   if (!membership) {
     redirect("/onboarding")
   }
+  if (!isRole(membership.role)) redirect("/error?code=permission_denied")
 
   const organization = Array.isArray(membership.organizations)
     ? membership.organizations[0]
