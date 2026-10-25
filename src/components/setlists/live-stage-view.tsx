@@ -131,13 +131,14 @@ export default function LiveStageView({
     }
 
     document.addEventListener("fullscreenchange", handleFullscreenChange)
+    const previousBodyOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
 
     return () => {
       window.removeEventListener("online", updateOnlineStatus)
       window.removeEventListener("offline", updateOnlineStatus)
       document.removeEventListener("fullscreenchange", handleFullscreenChange)
-      document.body.style.overflow = ""
+      document.body.style.overflow = previousBodyOverflow
     }
   }, [])
 
@@ -383,8 +384,8 @@ export default function LiveStageView({
 
   return (
     <main className="fixed inset-0 z-50 flex min-h-dvh flex-col overflow-hidden bg-[#0d120f] text-white">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-7">
-        <div className="flex min-w-0 items-center gap-3">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 px-3 py-2.5 sm:gap-4 sm:px-7 sm:py-3">
+        <div className="flex min-w-0 flex-1 basis-full items-center gap-3 sm:basis-auto sm:flex-initial">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white/70">
             <ListMusic className="size-5" />
           </div>
@@ -395,7 +396,7 @@ export default function LiveStageView({
             </h1>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div aria-label="Live stage controls" className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
           <span className="hidden text-xs text-white/50 sm:inline">
             {songs.length ? currentIndex + 1 : 0} / {songs.length}
           </span>
