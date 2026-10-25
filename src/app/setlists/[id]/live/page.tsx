@@ -134,13 +134,12 @@ export default async function LiveStagePage({
     tempo: number | null
     capo: number | null
     chordpro_source: string
-    reference_audio_path: string | null
   }[] = []
 
   if (songIds.length > 0) {
     const { data, error } = await supabase
       .from("songs")
-      .select("id, title, artist, current_key, tempo, capo, chordpro_source, reference_audio_path")
+      .select("id, title, artist, current_key, tempo, capo, chordpro_source")
       .in("id", songIds)
       .eq("organization_id", workspace.organizationId)
 
@@ -255,27 +254,6 @@ export default async function LiveStagePage({
   )
 
   const stageSongs = buildLiveStageSongs(orderedSongs, charts)
-  const referenceAudioUrls: Record<string, string> = {}
-
-  await Promise.all(charts.map(async (chart) => {
-    const path = chart.reference_audio_path
-    if (
-      !path ||
-      !path.startsWith(workspace.organizationId + "/") ||
-      path.split("/").length !== 2
-    ) {
-      return
-    }
-
-    const { data: audio, error: audioError } = await supabase.storage
-      .from("workspace-files")
-      .createSignedUrl(path, 3600)
-
-    if (!audioError && audio?.signedUrl) {
-      referenceAudioUrls[chart.id] = audio.signedUrl
-    }
-  }))
-
   return (
     <LiveStageView
       setlistId={id}
@@ -284,7 +262,6 @@ export default async function LiveStagePage({
       isServiceCompleted={Boolean(setlist.completed_at)}
       userId={workspace.userId}
       songs={stageSongs}
-      referenceAudioUrls={referenceAudioUrls}
       serviceDate={formatServiceDate(setlist.service_date)}
       serviceTime={formatServiceTime(setlist.service_time) ?? ""}
       status={formatStatus(setlist.status)}

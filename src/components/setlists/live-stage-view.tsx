@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import {
   House,
   ChevronLeft,
@@ -23,7 +24,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { Session } from "@supabase/supabase-js"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
 import { getChordProMetadata, parseChordPro } from "@/features/chordpro/parser"
-import { formatAudioTimestamp } from "@/features/chordpro/audio-timestamps"
 import {
   getTranspositionBetweenKeys,
   transposeChordProSource,
@@ -35,7 +35,8 @@ import {
 import { saveOfflineStageSnapshot } from "@/lib/offline-stage"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import ChordProLine from "@/components/songs/chordpro-line"
-import LiveStageServicePanel from "./live-stage-service-panel"
+
+const LiveStageServicePanel = dynamic(() => import("./live-stage-service-panel"))
 
 type LiveStageTimelineItem = {
   id: string
@@ -68,7 +69,6 @@ type LiveStageViewProps = {
   isServiceCompleted: boolean
   userId: string
   songs: LiveStageSong[]
-  referenceAudioUrls?: Record<string, string | null>
   serviceDate: string
   serviceTime: string
   status: string
@@ -87,7 +87,6 @@ export default function LiveStageView({
   isServiceCompleted,
   userId,
   songs,
-  referenceAudioUrls = {},
   serviceDate,
   serviceTime,
   status,
@@ -114,30 +113,7 @@ export default function LiveStageView({
   const [countdownRemaining, setCountdownRemaining] = useState(60)
   const [countdownRunning, setCountdownRunning] = useState(false)
   const lyricsScrollRef = useRef<HTMLDivElement>(null)
-  const referenceAudioRef = useRef<HTMLAudioElement>(null)
   const currentSong = songs[currentIndex] ?? null
-  const currentSongAudioUrl = currentSong ? referenceAudioUrls[currentSong.id] ?? null : null
-
-  const playAudioFromTimestamp = useCallback((seconds: number) => {
-    const audio = referenceAudioRef.current
-    if (!audio || !currentSongAudioUrl) return
-
-    const seekAndPlay = () => {
-      const maxTime = Number.isFinite(audio.duration) ? audio.duration : seconds
-      audio.currentTime = Math.max(0, Math.min(seconds, maxTime))
-      void audio.play().catch((error: unknown) => {
-        // Playback may be blocked by browser or device audio settings.
-        console.warn("Reference recording playback failed:", error)
-      })
-    }
-
-    if (audio.readyState >= 1) {
-      seekAndPlay()
-    } else {
-      audio.addEventListener("loadedmetadata", seekAndPlay, { once: true })
-      audio.load()
-    }
-  }, [currentSongAudioUrl])
 
   useEffect(() => {
     const updateOnlineStatus = () => setIsOnline(navigator.onLine)
@@ -270,25 +246,25 @@ export default function LiveStageView({
     currentSong?.key ??
     "—"
 
-  const changeSong = useCallback((offset: number) => {
-    const nextIndex = getBoundedStageIndex(
-      currentIndex,
-      offset,
-      songs.length
-    )
+  const selectSong = useCallback((index: number) => {
+    if (index === currentIndex || !songs[index]) return
+    setAutoScroll(false)
+    setCurrentIndex(index)
+    setTransposeOffset(0)
+    setCountdownRunning(false)
+    setCountdownRemaining(countdownDuration)
+    setShowServicePanel(false)
+    lyricsScrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+  }, [currentIndex, songs, countdownDuration])
 
-    if (nextIndex !== null) {
-      referenceAudioRef.current?.pause()
-      setAutoScroll(false)
-      setCurrentIndex(nextIndex)
-      setTransposeOffset(0)
-      setCountdownRunning(false)
-      setCountdownRemaining(countdownDuration)
-    }
-  }, [currentIndex, songs.length, countdownDuration])
+  const changeSong = useCallback((offset: number) => {
+    const index = getBoundedStageIndex(currentIndex, offset, songs.length)
+    if (index !== null) selectSong(index)
+  }, [currentIndex, songs.length, selectSong])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (showServicePanel || event.altKey || event.ctrlKey || event.metaKey) return
       if (event.target instanceof HTMLElement) {
         const target = event.target
         if (
@@ -310,7 +286,7 @@ export default function LiveStageView({
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [changeSong])
+  }, [changeSong, showServicePanel])
 
   function cycleScrollSpeed() {
     setScrollSpeed((value) => (value >= 3 ? 1 : value + 1))
@@ -322,26 +298,32 @@ export default function LiveStageView({
   }
 
   useEffect(() => {
-    if (!autoScroll) return
+    if (!autoScroll || showServicePanel) return
 
-    const intervalId = window.setInterval(() => {
+    let frameId = 0
+    let previousTime: number | null = null
+    let scrollPosition = lyricsScrollRef.current?.scrollTop ?? 0
+    const scroll = (time: number) => {
       const container = lyricsScrollRef.current
       if (!container) return
-
-      const atBottom =
-        container.scrollTop + container.clientHeight >=
-        container.scrollHeight - 3
-
-      if (atBottom) {
-        setAutoScroll(false)
-        return
+      if (document.hidden) {
+        previousTime = null
+      } else {
+        // Keep a fractional position for smooth movement on high refresh rate screens.
+        const elapsed = previousTime === null ? 0 : Math.min(time - previousTime, 64)
+        previousTime = time
+        scrollPosition += (elapsed / 55) * scrollSpeed
+        container.scrollTop = scrollPosition
+        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 1) {
+          setAutoScroll(false)
+          return
+        }
       }
-
-      container.scrollTop += scrollSpeed
-    }, 55)
-
-    return () => window.clearInterval(intervalId)
-  }, [autoScroll, scrollSpeed])
+      frameId = window.requestAnimationFrame(scroll)
+    }
+    frameId = window.requestAnimationFrame(scroll)
+    return () => window.cancelAnimationFrame(frameId)
+  }, [autoScroll, scrollSpeed, showServicePanel])
 
   async function toggleFullscreen() {
     setFullscreenError(null)
@@ -375,14 +357,61 @@ export default function LiveStageView({
       if (index === undefined) {
         return
       }
-      referenceAudioRef.current?.pause()
-      setAutoScroll(false)
-      setCurrentIndex(index)
-      setTransposeOffset(0)
+      selectSong(index)
       setShowServicePanel(false)
     },
-    [songIndexById]
+    [songIndexById, selectSong]
   )
+
+  const renderedLines = useMemo(() => displayLines.map((line, lineIndex) => {
+      if (line.type === "blank") {
+        return <div key={`blank-${lineIndex}`} className="h-8" aria-hidden="true" />
+      }
+
+      if (line.type === "audio_timestamp") return null
+
+      if (line.type === "section") {
+        return (
+          <p
+            key={`section-${lineIndex}`}
+            className="mb-3 mt-9 w-full text-center text-xs font-bold uppercase tracking-[0.18em] text-white/40 first:mt-0"
+          >
+            {line.title}
+          </p>
+        )
+      }
+
+      if (line.type === "columns" || line.type === "column_break" || line.type === "new_page") {
+        return null
+      }
+
+      if (line.type !== "content" || line.line.type !== "content") {
+        return null
+      }
+
+      if (line.preformatted) {
+        return (
+          <pre key={`tab-${lineIndex}`} className="my-3 overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-left font-mono text-sm leading-7 text-white/90">
+            {line.line.tokens.map((token) => token.value).join("")}
+          </pre>
+        )
+      }
+
+      // Projection mode keeps lyrics centered even when a chart's print layout
+      // contains left/right alignment directives. Preformatted tabs remain left-aligned.
+      const alignmentClass = "justify-center text-center"
+
+      return (
+        <div key={`line-${lineIndex}`} className={`flex w-full ${alignmentClass}`}>
+          <ChordProLine
+            line={line.line}
+            fontSize={fontSize}
+            showChords={showChords}
+            stageMode
+          />
+        </div>
+      )
+  }), [displayLines, fontSize, showChords])
 
   return (
     <main className="fixed inset-0 z-50 flex min-h-dvh flex-col overflow-hidden bg-[#0d120f] text-white">
@@ -407,7 +436,7 @@ export default function LiveStageView({
               <Clock className="size-4" />
               <span aria-label="Countdown remaining">{formatCountdown(countdownRemaining)}</span>
             </summary>
-            <div className="absolute right-0 top-full z-[220] mt-2 w-64 rounded-2xl border border-white/15 bg-[#17211b] p-4 shadow-2xl">
+            <div className="absolute left-0 top-full z-[220] mt-2 w-64 sm:left-auto sm:right-0 rounded-2xl border border-white/15 bg-[#17211b] p-4 shadow-2xl">
               <p className="text-sm font-semibold">Transition countdown</p>
               <p className="mt-1 text-xs leading-5 text-white/55">A local timer for rehearsal and transitions. It does not automatically advance the song.</p>
               <label htmlFor="stage-countdown-duration" className="mt-3 block text-xs font-medium text-white/70">Duration</label>
@@ -469,7 +498,7 @@ export default function LiveStageView({
               {offlineSaveError
                 ? "Offline save failed"
                 : !isOnline
-                  ? "Offline · charts saved"
+                  ? offlineSaved ? "Offline · charts saved" : "Offline · charts not saved"
                   : offlineSaved
                     ? "Saved for offline"
                     : "Saving offline copy"}
@@ -548,7 +577,7 @@ export default function LiveStageView({
                       </div>
                     </div>
 
-                    <div role="toolbar" aria-label="Song display controls" className="flex max-w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:justify-end">
+                    <div role="toolbar" aria-label="Song display controls" className="flex max-w-full flex-nowrap items-center [&>button]:shrink-0 gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:justify-end">
                       <button
                         type="button"
                         onClick={() => setAutoScroll((value) => !value)}
@@ -636,90 +665,22 @@ export default function LiveStageView({
                     </div>
                   ) : null}
 
-                  {currentSongAudioUrl ? (
-                    <audio
-                      key={currentSong.id}
-                      ref={referenceAudioRef}
-                      src={currentSongAudioUrl}
-                      preload="metadata"
-                      aria-hidden="true"
-                      tabIndex={-1}
-                      className="sr-only"
-                    />
-                  ) : null}
-
                   <div
-                    key={currentSong.id}
+                    key={currentIndex}
                     ref={lyricsScrollRef}
+                    onWheel={() => setAutoScroll(false)}
+                    onTouchStart={() => setAutoScroll(false)}
+                    onKeyDown={(event) => {
+                      if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) setAutoScroll(false)
+                    }}
                     tabIndex={0}
                     aria-label="Live lyrics and chords"
                     className="min-h-0 flex-1 w-full overflow-y-auto overscroll-contain pb-16 pr-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/20"
                   >
-                    {displayLines.map((line, lineIndex) => {
-                        if (line.type === "blank") {
-                          return <div key={`blank-${lineIndex}`} className="h-8" aria-hidden="true" />
-                        }
-
-                        if (line.type === "audio_timestamp") {
-                          return (
-                            <div key={`audio-timestamp-${lineIndex}`} className="my-3 flex flex-wrap items-center justify-center gap-2">
-                              <button
-                                type="button"
-                                disabled={!currentSongAudioUrl}
-                                onClick={() => playAudioFromTimestamp(line.seconds)}
-                                aria-label={currentSongAudioUrl ? `Play reference recording from ${formatAudioTimestamp(line.seconds)}` : `Audio timestamp ${formatAudioTimestamp(line.seconds)}. Attach a reference recording to enable playback.`}
-                                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-3 text-sm font-semibold text-white/85 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 disabled:opacity-45 motion-reduce:transition-none"
-                              >
-                                <Play className="size-4" aria-hidden="true" />
-                                {formatAudioTimestamp(line.seconds)}
-                              </button>
-                              {!currentSongAudioUrl ? <span className="text-xs text-white/45">Reference recording required</span> : null}
-                            </div>
-                          )
-                        }
-
-                        if (line.type === "section") {
-                          return (
-                            <p
-                              key={`section-${lineIndex}`}
-                              className="mb-3 mt-9 w-full text-center text-xs font-bold uppercase tracking-[0.18em] text-white/40 first:mt-0"
-                            >
-                              {line.title}
-                            </p>
-                          )
-                        }
-
-                        if (line.type === "columns" || line.type === "column_break" || line.type === "new_page") {
-                          return null
-                        }
-
-                        if (line.type !== "content" || line.line.type !== "content") {
-                          return null
-                        }
-
-                        if (line.preformatted) {
-                          return (
-                            <pre key={`tab-${lineIndex}`} className="my-3 overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-left font-mono text-sm leading-7 text-white/90">
-                              {line.line.tokens.map((token) => token.value).join("")}
-                            </pre>
-                          )
-                        }
-
-                        // Projection mode keeps lyrics centered even when a chart's print layout
-                        // contains left/right alignment directives. Preformatted tabs remain left-aligned.
-                        const alignmentClass = "justify-center text-center"
-
-                        return (
-                          <div key={`line-${lineIndex}`} className={`flex w-full ${alignmentClass}`}>
-                            <ChordProLine
-                              line={line.line}
-                              fontSize={fontSize}
-                              showChords={showChords}
-                              stageMode
-                            />
-                          </div>
-                        )
-                    })}
+                    {!currentSong.source.trim() ? (
+                      <p role="status" className="py-12 text-base text-white/55">No lyrics or chords are available for this song.</p>
+                    ) : null}
+                    {renderedLines}
                   </div>
                 </>
               ) : (
@@ -735,7 +696,7 @@ export default function LiveStageView({
               <button
                 type="button"
                 onClick={() => changeSong(-1)}
-                disabled={currentIndex === 0}
+                disabled={songs.length === 0 || currentIndex === 0}
                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-sm font-semibold text-white/75 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ChevronLeft className="size-4" />
