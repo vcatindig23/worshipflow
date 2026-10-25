@@ -171,7 +171,7 @@ export default function SongPrintSheet({
             const chordOnly = !hasLyrics && line.tokens.some((token) => token.type === "chord")
             if (chordOnly) {
               return (
-                <div key={"line-" + index} className={"wf-song-print-line wf-song-print-chord-row " + (tabMode.value ? "wf-song-print-tab " : "")} style={{ textAlign: alignment.value }}>
+                <div key={"line-" + index} className={"wf-song-print-line wf-song-print-chord-row " + (tabMode.value ? "wf-song-print-tab " : "")} style={{ textAlign: alignment.value, justifyContent: alignment.value === "center" ? "center" : alignment.value === "right" ? "flex-end" : "flex-start" }}>
                   {showChords ? line.tokens.map((token, tokenIndex) => token.type === "chord" ? (
                     <span key={"chord-" + tokenIndex} className="wf-song-print-chord-label">{token.value}</span>
                   ) : null) : null}
