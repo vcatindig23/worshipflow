@@ -685,7 +685,7 @@ export default function LiveStageView({
                           return (
                             <p
                               key={`section-${lineIndex}`}
-                              className="mb-3 mt-9 text-xs font-bold uppercase tracking-[0.18em] text-white/40 first:mt-0"
+                              className="mb-3 mt-9 w-full text-center text-xs font-bold uppercase tracking-[0.18em] text-white/40 first:mt-0"
                             >
                               {line.title}
                             </p>
@@ -708,11 +708,9 @@ export default function LiveStageView({
                           )
                         }
 
-                        const alignmentClass = line.alignment === "left"
-                          ? "justify-start text-left"
-                          : line.alignment === "right"
-                            ? "justify-end text-right"
-                            : "justify-center text-center"
+                        // Projection mode keeps lyrics centered even when a chart's print layout
+                        // contains left/right alignment directives. Preformatted tabs remain left-aligned.
+                        const alignmentClass = "justify-center text-center"
 
                         return (
                           <div key={`line-${lineIndex}`} className={`flex w-full ${alignmentClass}`}>
