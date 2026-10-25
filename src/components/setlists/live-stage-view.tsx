@@ -714,7 +714,7 @@ export default function LiveStageView({
                             : "justify-center text-center"
 
                         return (
-                          <div key={`line-${lineIndex}`} className={`flex ${alignmentClass}`}>
+                          <div key={`line-${lineIndex}`} className={`flex w-full ${alignmentClass}`}>
                             <ChordProLine
                               line={line.line}
                               fontSize={fontSize}
