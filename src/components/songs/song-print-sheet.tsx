@@ -125,7 +125,7 @@ export default function SongPrintSheet({
         </div>
       </div>
 
-      <article className="wf-song-print-sheet rounded-2xl border border-[var(--border)] bg-white p-6 text-black shadow-sm sm:p-10" style={{ fontSize: fontSize + "pt", columnCount: columns, columnGap: "2rem" }}>
+      <article className="wf-song-print-sheet rounded-2xl border border-[var(--border)] bg-white p-6 text-black shadow-sm sm:p-10" style={{ fontSize: fontSize + "pt" }}>
         <header className="wf-song-print-header mb-6 border-b border-black/15 pb-4">
           <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
           {artist ? <p className="mt-1 text-sm text-black/65">{artist}</p> : null}
@@ -137,7 +137,7 @@ export default function SongPrintSheet({
           </div>
         </header>
 
-        <div className="wf-song-print-content">
+        <div className="wf-song-print-content" style={{ columnCount: columns, columnGap: "2rem" }}>
           {parsed.lines.map((line, index) => {
             if (line.type === "blank") return <div key={"blank-" + index} className="h-3" aria-hidden="true" />
             if (line.type === "directive") {
@@ -166,6 +166,17 @@ export default function SongPrintSheet({
               if (line.name === "column_break") return <div key={"column-" + index} className="wf-song-print-column-break" />
               if (line.name === "new_page") return <div key={"page-" + index} className="wf-song-print-page-break" />
               return null
+            }
+            const hasLyrics = line.tokens.some((token) => token.type === "text" && token.value.trim() !== "")
+            const chordOnly = !hasLyrics && line.tokens.some((token) => token.type === "chord")
+            if (chordOnly) {
+              return (
+                <div key={"line-" + index} className={"wf-song-print-line wf-song-print-chord-row " + (tabMode.value ? "wf-song-print-tab " : "")} style={{ textAlign: alignment.value }}>
+                  {showChords ? line.tokens.map((token, tokenIndex) => token.type === "chord" ? (
+                    <span key={"chord-" + tokenIndex} className="wf-song-print-chord-label">{token.value}</span>
+                  ) : null) : null}
+                </div>
+              )
             }
             return (
               <div key={"line-" + index} className={"wf-song-print-line " + (tabMode.value ? "wf-song-print-tab " : "")} style={{ textAlign: alignment.value }}>
