@@ -1,3 +1,5 @@
-export default function LoadingSongs() {
- return <main className="mx-auto max-w-7xl animate-pulse space-y-7 px-6 py-8"><div className="space-y-3"><div className="h-3 w-24 rounded bg-[var(--surface)]" /><div className="h-8 w-48 rounded-lg bg-[var(--surface)]" /><div className="h-4 w-80 max-w-full rounded bg-[var(--surface)]" /></div><div className="h-12 rounded-xl border border-[var(--border)] bg-white" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{Array.from({length:6},(_,i)=><div key={i} className="space-y-4 rounded-2xl border border-[var(--border)] bg-white p-5"><div className="size-10 rounded-xl bg-[var(--surface)]" /><div className="h-4 w-3/4 rounded bg-[var(--surface)]" /><div className="h-3 w-1/2 rounded bg-[var(--surface)]" /><div className="h-20 rounded-xl bg-[var(--surface)]" /></div>)}</div><p className="text-center text-xs text-[var(--muted)]">Loading song library…</p></main>
+import WorkspaceListSkeleton from "@/components/workspace-list-skeleton"
+
+export default function Loading() {
+  return <WorkspaceListSkeleton label="song library" grid />
 }

@@ -1,3 +1,4 @@
+import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -448,7 +449,7 @@ export default async function MySchedulePage({
     )
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
+    <PageContainer>
       <section>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -457,7 +458,7 @@ export default async function MySchedulePage({
               Your Worship Team Schedule
             </span>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
+            <h1 className="wf-page-title mt-3">
               My Schedule
             </h1>
 
@@ -849,6 +850,6 @@ export default async function MySchedulePage({
         )}
       </section>
       </ScheduleViewToggle>
-    </main>
+    </PageContainer>
   )
 }

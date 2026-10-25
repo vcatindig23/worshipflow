@@ -2,6 +2,7 @@
 
 import { LoaderCircle } from "lucide-react"
 import { useFormStatus } from "react-dom"
+import { Button } from "./button"
 
 type Props = { children: React.ReactNode; pendingText?: string; className?: string; disabled?: boolean }
 
@@ -9,9 +10,9 @@ export default function FormSubmitButton({ children, pendingText = "Saving...", 
   const { pending } = useFormStatus()
   const isDisabled = pending || disabled
   return (
-    <button type="submit" disabled={isDisabled} aria-disabled={isDisabled} className={className}>
-      {pending ? <LoaderCircle className="mr-2 size-4 animate-spin" aria-hidden="true" /> : null}
+    <Button type="submit" disabled={isDisabled} aria-disabled={isDisabled} aria-busy={pending} data-no-loading-feedback className={className}>
+      {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : null}
       {pending ? pendingText : children}
-    </button>
+    </Button>
   )
 }

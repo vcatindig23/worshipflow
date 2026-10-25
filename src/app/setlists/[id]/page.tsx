@@ -1,3 +1,4 @@
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import Link from "next/link"
 import {
   Archive,
@@ -566,7 +567,7 @@ export default async function SetlistPage({
               ) : null}
             </div>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
+            <h1 className="wf-page-title mt-3">
               {setlist.name}
             </h1>
 
@@ -763,13 +764,13 @@ export default async function SetlistPage({
                   value={id}
                 />
 
-                <button
+                <ConfirmSubmitButton title="Delete this setlist?" description="The setlist and its service plan will be permanently deleted. The songs in your library will remain available." confirmLabel="Delete setlist"
                   type="submit"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--danger)]/25 bg-[var(--card)] px-4 text-sm font-semibold text-[var(--danger)] transition hover:bg-[var(--danger-soft)]"
                 >
                   <Trash2 className="size-4" />
                   Delete
-                </button>
+                </ConfirmSubmitButton>
               </form>
             ) : null}
           </div>
@@ -1033,13 +1034,13 @@ export default async function SetlistPage({
                                 value={id}
                               />
 
-                              <button
+                              <ConfirmSubmitButton title="Remove this song from the setlist?" description="The song will be removed from this service plan. It will remain in your song library." confirmLabel="Remove song"
                                 type="submit"
                                 aria-label={`Remove ${song.title}`}
-                                className="flex size-9 items-center justify-center rounded-lg border border-red-200 bg-white text-red-700 transition hover:bg-red-50"
+                                className="flex size-9 items-center justify-center rounded-lg border border-[var(--danger)]/25 bg-[var(--card)] text-[var(--danger)] transition hover:bg-[var(--danger-soft)]"
                               >
                                 <Trash2 className="size-4" />
-                              </button>
+                              </ConfirmSubmitButton>
                             </form>
                           </div>
                         ) : null}
@@ -1348,13 +1349,13 @@ export default async function SetlistPage({
                             <form action={removeSetlistTeamAssignment}>
                               <input type="hidden" name="setlistId" value={id} />
                               <input type="hidden" name="assignmentId" value={assignment.id} />
-                              <button
+                              <ConfirmSubmitButton title="Remove this assignment?" description="This team member will no longer be assigned to the service. You can assign them again later." confirmLabel="Remove assignment"
                                 type="submit"
                                 aria-label={`Remove ${teamProfileNames.get(assignment.user_id) ?? "member"} from setlist`}
-                                className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50"
+                                className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--danger)]/25 text-[var(--danger)] transition hover:bg-[var(--danger-soft)]"
                               >
                                 <Trash2 className="size-3.5" />
-                              </button>
+                              </ConfirmSubmitButton>
                             </form>
                           ) : null}
                         </div>

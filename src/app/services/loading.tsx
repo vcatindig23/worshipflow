@@ -1,3 +1,5 @@
-export default function LoadingServices() {
- return <main className="mx-auto max-w-7xl animate-pulse space-y-7 px-6 py-8"><div className="flex items-end justify-between gap-4"><div className="space-y-3"><div className="h-3 w-24 rounded bg-[var(--surface)]" /><div className="h-8 w-56 rounded-lg bg-[var(--surface)]" /><div className="h-4 w-80 max-w-full rounded bg-[var(--surface)]" /></div><div className="h-10 w-32 rounded-xl bg-[var(--surface)]" /></div><div className="grid gap-4 lg:grid-cols-3">{Array.from({length:3},(_,i)=><div key={i} className="rounded-2xl border border-[var(--border)] bg-white p-5"><div className="h-4 w-32 rounded bg-[var(--surface)]" /><div className="mt-4 h-3 w-48 rounded bg-[var(--surface)]" /><div className="mt-6 h-2 rounded-full bg-[var(--surface)]" /></div>)}</div><div className="space-y-3">{Array.from({length:4},(_,i)=><div key={i} className="h-24 rounded-2xl border border-[var(--border)] bg-white" />)}</div><p className="text-center text-xs text-[var(--muted)]">Loading service schedule…</p></main>
+import WorkspaceListSkeleton from "@/components/workspace-list-skeleton"
+
+export default function Loading() {
+  return <WorkspaceListSkeleton label="service schedule" />
 }

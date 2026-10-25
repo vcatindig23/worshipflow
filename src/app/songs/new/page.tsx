@@ -1,5 +1,8 @@
+import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
+import { ProtectedForm } from "@/components/ui/protected-form"
+import { Input, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
-import { ArrowLeft, Music2 } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { createSong } from "./actions"
 import ChordProImportEditor from "@/components/songs/chordpro-import-editor"
 import FormSubmitButton from "@/components/ui/form-submit-button"
@@ -54,7 +57,7 @@ export default async function NewSongPage({
 
           <div className="flex items-center gap-2 text-sm font-semibold">
             <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--brand)] text-white">
-              <Music2 className="size-4" />
+              <WorshipFlowLogo className="size-6" />
             </div>
             WorshipFlow
           </div>
@@ -65,7 +68,7 @@ export default async function NewSongPage({
             Song library
           </p>
 
-          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.04em]">
+          <h1 className="wf-page-title mt-2">
             Create a song
           </h1>
 
@@ -85,7 +88,7 @@ export default async function NewSongPage({
             </div>
           ) : null}
 
-          <form action={createSong} className="space-y-7">
+          <ProtectedForm action={createSong} className="space-y-7">
             <section>
               <div className="mb-4">
                 <h2 className="text-base font-semibold">
@@ -106,14 +109,14 @@ export default async function NewSongPage({
                     Song title
                   </label>
 
-                  <input
+                  <Input
                     id="title"
                     name="title"
                     type="text"
                     required
                     maxLength={200}
                     placeholder="Amazing Grace"
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
 
@@ -125,13 +128,13 @@ export default async function NewSongPage({
                     Artist / writer
                   </label>
 
-                  <input
+                  <Input
                     id="artist"
                     name="artist"
                     type="text"
                     maxLength={200}
                     placeholder="John Newton"
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
 
@@ -144,14 +147,14 @@ export default async function NewSongPage({
                       BPM
                     </label>
 
-                    <input
+                    <Input
                       id="tempo"
                       name="tempo"
                       type="number"
                       min={20}
                       max={300}
                       placeholder="72"
-                      className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                      className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)]"
                     />
                   </div>
 
@@ -163,13 +166,13 @@ export default async function NewSongPage({
                       Time
                     </label>
 
-                    <input
+                    <Input
                       id="timeSignature"
                       name="timeSignature"
                       type="text"
                       defaultValue="4/4"
                       required
-                      className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                      className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)]"
                     />
                   </div>
 
@@ -181,7 +184,7 @@ export default async function NewSongPage({
                       Capo
                     </label>
 
-                    <input
+                    <Input
                       id="capo"
                       name="capo"
                       type="number"
@@ -189,7 +192,7 @@ export default async function NewSongPage({
                       max={12}
                       defaultValue={0}
                       required
-                      className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                      className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)]"
                     />
                   </div>
                 </div>
@@ -222,13 +225,13 @@ export default async function NewSongPage({
                 Arrangement notes
               </label>
 
-              <textarea
+              <Textarea
                 id="notes"
                 name="notes"
                 rows={4}
                 maxLength={10000}
                 placeholder="Transitions, arrangement reminders, or worship-team notes..."
-                className="w-full rounded-xl border border-[var(--border)] px-3.5 py-3 text-sm leading-6 outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                className="w-full px-3.5 py-3 leading-6 focus:ring-4 focus:ring-[var(--brand-soft)]"
               />
             </section>
 
@@ -247,7 +250,7 @@ export default async function NewSongPage({
                 Save song
               </FormSubmitButton>
             </div>
-          </form>
+          </ProtectedForm>
         </div>
       </div>
     </main>

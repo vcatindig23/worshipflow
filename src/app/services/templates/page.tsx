@@ -1,3 +1,5 @@
+import { buttonVariants } from "@/components/ui/button"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -72,7 +74,7 @@ export default async function ServiceTemplatesPage({
         : ""
 
   return (
-    <main className="mx-auto max-w-6xl space-y-7 px-6 py-8">
+    <PageContainer className="max-w-6xl">
       <Link
         href="/services"
         className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -81,27 +83,21 @@ export default async function ServiceTemplatesPage({
         Back to Services
       </Link>
 
-      <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-            <Layers className="size-3.5" />
-            Service Planning
-          </span>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
-            Service Templates
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Reuse your church&apos;s usual service flow, song arrangements, and notes instead of rebuilding every plan from scratch.
-          </p>
-        </div>
-        <Link
+      <PageHeader
+        title={<>Service Templates</>}
+        eyebrow={<><Layers className="size-3.5" />
+            Service Planning</>}
+        description={<>Reuse your church&apos;s usual service flow, song arrangements, and notes instead of rebuilding every plan from scratch.</>}
+        actions={<>
+<Link
           href="/services"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+          className={buttonVariants({ variant: "outline" })}
         >
           <CalendarDays className="size-4" />
           View Services
         </Link>
-      </section>
+        </>}
+      />
 
       {notice ? (
         <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -221,6 +217,6 @@ export default async function ServiceTemplatesPage({
           You can view templates, but creating services from templates requires a worship leader or editor role.
         </p>
       ) : null}
-    </main>
+    </PageContainer>
   )
 }

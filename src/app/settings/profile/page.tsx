@@ -1,3 +1,8 @@
+import FormSubmitButton from "@/components/ui/form-submit-button"
+import { Feedback } from "@/components/ui/feedback"
+import { ProtectedForm } from "@/components/ui/protected-form"
+import { Input, Textarea } from "@/components/ui/form-controls"
+import { PageContainer } from "@/components/ui/page"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -143,7 +148,7 @@ export default async function ProfileSettingsPage({
       : null
 
   return (
-    <main className="mx-auto max-w-5xl space-y-7 px-6 py-8">
+    <PageContainer className="max-w-5xl">
       <Link
         href="/settings"
         className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -158,7 +163,7 @@ export default async function ProfileSettingsPage({
           <UserRound className="size-3.5" />
           Personal Settings
         </span>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="wf-page-title mt-3">
           Your profile
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
@@ -175,21 +180,11 @@ export default async function ProfileSettingsPage({
       </section>
 
       {getParam(params.saved) === "true" ? (
-        <div
-          role="status"
-          className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-        >
-          Your profile has been saved.
-        </div>
+        <Feedback tone="success" title="Changes saved">Your profile has been saved.</Feedback>
       ) : null}
 
       {errorMessage ? (
-        <div
-          role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {errorMessage}
-        </div>
+        <Feedback tone="error" title="Changes could not be saved">{errorMessage} Review your entries and try saving again.</Feedback>
       ) : null}
 
       {warningMessage ? (
@@ -202,7 +197,7 @@ export default async function ProfileSettingsPage({
       ) : null}
 
       <div className="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <form
+        <ProtectedForm
           action={updateProfile}
           className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
         >
@@ -242,7 +237,7 @@ export default async function ProfileSettingsPage({
               >
                 Name shown to your team
               </label>
-              <input
+              <Input
                 id="displayName"
                 name="displayName"
                 type="text"
@@ -251,7 +246,7 @@ export default async function ProfileSettingsPage({
                 maxLength={120}
                 autoComplete="name"
                 defaultValue={displayName}
-                className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                className="w-full px-3.5"
               />
               <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
                 Use the name your worship team knows you by.
@@ -265,14 +260,14 @@ export default async function ProfileSettingsPage({
               >
                 About you
               </label>
-              <textarea
+              <Textarea
                 id="bio"
                 name="bio"
                 rows={4}
                 maxLength={500}
                 defaultValue={profileBio}
                 placeholder="Share a little about yourself and your heart for worship."
-                className="w-full rounded-xl border border-[var(--border)] bg-white px-3.5 py-3 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                className="w-full px-3.5 py-3"
               />
               <p className="mt-2 text-xs text-[var(--muted)]">Up to 500 characters.</p>
             </div>
@@ -284,14 +279,14 @@ export default async function ProfileSettingsPage({
               >
                 Location
               </label>
-              <input
+              <Input
                 id="location"
                 name="location"
                 type="text"
                 maxLength={120}
                 defaultValue={profileLocation}
                 placeholder="City or region"
-                className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                className="w-full px-3.5"
               />
             </div>
 
@@ -302,7 +297,7 @@ export default async function ProfileSettingsPage({
               >
                 Website or social link
               </label>
-              <input
+              <Input
                 id="website"
                 name="website"
                 type="text"
@@ -311,7 +306,7 @@ export default async function ProfileSettingsPage({
                 autoComplete="url"
                 defaultValue={profileWebsite}
                 placeholder="yourwebsite.com"
-                className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                className="w-full px-3.5"
               />
               <p className="mt-2 text-xs text-[var(--muted)]">Only HTTP and HTTPS links are allowed.</p>
             </div>
@@ -394,14 +389,13 @@ export default async function ProfileSettingsPage({
               Email and access role are managed by your account and church
               administrator.
             </p>
-            <button
-              type="submit"
+            <FormSubmitButton pendingText="Saving changes…"
               className="h-10 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
             >
               Save profile
-            </button>
+            </FormSubmitButton>
           </div>
-        </form>
+        </ProtectedForm>
 
         <aside className="space-y-5">
           <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
@@ -480,6 +474,6 @@ export default async function ProfileSettingsPage({
           ) : null}
         </aside>
       </div>
-    </main>
+    </PageContainer>
   )
 }

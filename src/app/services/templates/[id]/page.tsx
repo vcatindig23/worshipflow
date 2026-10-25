@@ -1,3 +1,4 @@
+import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -93,7 +94,7 @@ export default async function ServiceTemplateDetailPage({
   const errorKey = typeof query.error === "string" ? query.error : ""
 
   return (
-    <main className="mx-auto max-w-4xl space-y-7 px-6 py-8">
+    <PageContainer className="max-w-4xl">
       <Link
         href="/services/templates"
         className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -113,7 +114,7 @@ export default async function ServiceTemplateDetailPage({
           <Layers className="size-3.5" />
           Service Template
         </span>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
+        <h1 className="wf-page-title mt-3">
           {template.name}
         </h1>
         {template.description ? (
@@ -255,6 +256,6 @@ export default async function ServiceTemplateDetailPage({
           <DeleteTemplateForm templateId={template.id} templateName={template.name} />
         </div>
       ) : null}
-    </main>
+    </PageContainer>
   )
 }

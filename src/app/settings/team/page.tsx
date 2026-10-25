@@ -1,3 +1,7 @@
+import { buttonVariants } from "@/components/ui/button"
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
+import { Input, Select } from "@/components/ui/form-controls"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import {
@@ -343,7 +347,7 @@ export default async function TeamSettingsPage({
   })
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-6 py-8">
+    <PageContainer className="max-w-6xl">
       <Link
         href="/settings/church"
         className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -352,23 +356,13 @@ export default async function TeamSettingsPage({
         Church Settings
       </Link>
 
-      <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-            <Users className="size-3.5" />
-            Team Management
-          </div>
-
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">
-            {organization.name}
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Invite your worship team, assign roles, and manage access to your church workspace.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
+      <PageHeader
+        title={<>{organization.name}</>}
+        eyebrow={<><Users className="size-3.5" />
+            Team Management</>}
+        description={<>Invite your worship team, assign roles, and manage access to your church workspace.</>}
+        actions={<>
+<div className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
           <p className="text-xs font-medium text-[var(--muted)]">
             Members
           </p>
@@ -377,7 +371,8 @@ export default async function TeamSettingsPage({
             {members.length}
           </p>
         </div>
-      </section>
+        </>}
+      />
 
       {errorMessage ? (
         <div
@@ -408,7 +403,7 @@ export default async function TeamSettingsPage({
       ) : null}
 
       {canManageTeam ? (
-        <section id="invite-member" className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+        <section id="invite-member" className="wf-card p-5 sm:p-6">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
               Invite a Team Member
@@ -424,7 +419,7 @@ export default async function TeamSettingsPage({
       ) : null}
 
       {canManageTeam && invitations.length > 0 ? (
-        <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+        <section className="wf-card p-5 sm:p-6">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
               Pending Invitations
@@ -454,14 +449,13 @@ export default async function TeamSettingsPage({
                       name="invitationId"
                       value={invitation.id}
                     />
-                    <button
+                    <ConfirmSubmitButton title="Revoke this invitation?" description="The invitation link will stop working. You can send a new invitation later." confirmLabel="Revoke invitation"
                       type="submit"
                       aria-label={`Revoke invitation for ${invitation.email}`}
-                      title="Revoke invitation"
-                      className="inline-flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 dark:hover:bg-red-950/50 dark:hover:text-red-400"
+                      className="inline-flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--danger-soft)] hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 dark:hover:bg-red-950/50 dark:hover:text-red-400"
                     >
                       <X aria-hidden="true" className="size-4" />
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 }
               />
@@ -470,7 +464,7 @@ export default async function TeamSettingsPage({
         </section>
       ) : null}
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+      <section className="wf-card p-5 sm:p-6">
         <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
@@ -521,35 +515,35 @@ export default async function TeamSettingsPage({
             <label className="relative min-w-0 flex-1">
               <span className="sr-only">Search members by name or worship position</span>
               <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-              <input
+              <Input
                 type="search"
                 name="q"
                 value={query}
                 maxLength={100}
                 placeholder="Search name or worship position..."
-                className="h-10 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
-              />
+                className="w-full pl-10 pr-3"
+              aria-label="Search" />
             </label>
 
             <label>
               <span className="sr-only">Filter members by workspace role</span>
-              <select
+              <Select
                 name="role"
                 value={selectedRole}
-                className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)] sm:w-44"
-              >
+                className="w-full px-3 font-medium text-[var(--foreground)] sm:w-44"
+               aria-label="Role">
                 <option value="all">All workspace roles</option>
                 <option value="admin">Administrator</option>
                 <option value="worship_leader">Worship Leader</option>
                 <option value="song_editor">Song Editor</option>
                 <option value="team_member">Team Member</option>
                 <option value="viewer">Viewer</option>
-              </select>
+              </Select>
             </label>
 
             <button
               type="submit"
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+              className={buttonVariants({ variant: "secondary" })}
             >
               <SlidersHorizontal className="size-4" />
               Filter
@@ -669,13 +663,13 @@ export default async function TeamSettingsPage({
                         }
                       />
 
-                      <select
+                      <Select
                         name="role"
                         defaultValue={
                           member.role
                         }
-                        className="h-9 rounded-lg border border-[var(--border)] bg-white px-3 text-xs font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
-                      >
+                        className="h-9 px-3 text-xs font-medium text-[var(--foreground)] sm:w-auto"
+                       aria-label="Role">
                         <option value="admin">
                           Administrator
                         </option>
@@ -691,7 +685,7 @@ export default async function TeamSettingsPage({
                         <option value="viewer">
                           Viewer
                         </option>
-                      </select>
+                      </Select>
 
                       <button
                         type="submit"
@@ -766,13 +760,13 @@ export default async function TeamSettingsPage({
                           }
                         />
 
-                        <button
+                        <ConfirmSubmitButton title="Remove this team member?" description="This person will lose access to your church workspace. You can invite them again later." confirmLabel="Remove member"
                           type="submit"
-                          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--danger)]/25 bg-[var(--card)] px-3 text-xs font-semibold text-[var(--danger)] transition hover:bg-[var(--danger-soft)]"
                         >
                           <UserMinus className="size-3.5" />
                           Remove
-                        </button>
+                        </ConfirmSubmitButton>
                         </form>
                       ) : null}
                     </div>
@@ -809,6 +803,6 @@ export default async function TeamSettingsPage({
           ) : null}
         </div>
       </section>
-    </main>
+    </PageContainer>
   )
 }

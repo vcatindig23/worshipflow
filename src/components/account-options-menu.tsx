@@ -126,7 +126,7 @@ export default function AccountOptionsMenu({
         <div
           id="account-options-panel"
           aria-label="Account options"
-          className="absolute right-0 top-[calc(100%+10px)] z-[80] w-[min(19rem,calc(100vw-1.5rem))] overflow-visible rounded-2xl border border-[var(--border)] bg-[var(--card)] p-1.5 text-[var(--foreground)] shadow-[0_24px_70px_-24px_rgba(15,23,42,0.35)] ring-1 ring-black/[0.03] animate-in fade-in slide-in-from-top-1 duration-150"
+          className="absolute right-0 top-[calc(100%+10px)] z-[80] w-[min(19rem,calc(100vw-1.5rem))] wf-menu overflow-visible"
         >
           <div className="px-3 pb-2 pt-2.5">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">

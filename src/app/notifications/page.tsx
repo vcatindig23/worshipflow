@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import { AtSign, Bell, CalendarDays, Check, MessagesSquare, ArrowLeftRight, Music2 } from "lucide-react"
 import {
@@ -55,20 +56,7 @@ export default async function NotificationsPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-4 py-8 text-[var(--foreground)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        <div className="flex flex-col gap-4 border-b border-[var(--border)] pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-[var(--brand)]">
-              {workspace.organizationName}
-            </p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-[-0.035em]">
-              Notifications
-            </h1>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Team messages, service assignments, and updates for you.
-            </p>
-          </div>
-          {unreadCount > 0 ? (
-            <form action={markAllNotificationsRead}>
+        <PageHeader className="border-b border-[var(--border)] pb-6" title="Notifications" eyebrow={workspace.organizationName} description="Team messages, service assignments, and updates for you." actions={unreadCount > 0 ? (<form action={markAllNotificationsRead}>
               <button
                 type="submit"
                 className="inline-flex h-10 items-center gap-2 self-start rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold transition hover:bg-[var(--surface)]"
@@ -76,9 +64,7 @@ export default async function NotificationsPage() {
                 <Check className="size-4" />
                 Mark all as read
               </button>
-            </form>
-          ) : null}
-        </div>
+            </form>) : null} />
 
         {notifications.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-dashed border-[var(--border)] bg-white px-6 py-14 text-center">

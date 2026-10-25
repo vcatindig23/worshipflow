@@ -1,3 +1,5 @@
+import { ProtectedForm } from "@/components/ui/protected-form"
+import { Input, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
 import { ArrowLeft, Save } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
@@ -113,7 +115,7 @@ export default async function EditSongPage({
             Song library
           </p>
 
-          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.04em]">
+          <h1 className="wf-page-title mt-2">
             Edit {song.title}
           </h1>
 
@@ -132,7 +134,7 @@ export default async function EditSongPage({
           </div>
         ) : null}
 
-        <form action={updateSong} className="mt-6 space-y-6">
+        <ProtectedForm action={updateSong} className="mt-6 space-y-6">
           <input
             type="hidden"
             name="id"
@@ -153,14 +155,14 @@ export default async function EditSongPage({
                   Song title
                 </label>
 
-                <input
+                <Input
                   id="title"
                   name="title"
                   type="text"
                   required
                   maxLength={200}
                   defaultValue={song.title}
-                  className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                  className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)]"
                 />
               </div>
 
@@ -172,13 +174,13 @@ export default async function EditSongPage({
                   Artist / writer
                 </label>
 
-                <input
+                <Input
                   id="artist"
                   name="artist"
                   type="text"
                   maxLength={200}
                   defaultValue={song.artist ?? ""}
-                  className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                  className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)]"
                 />
               </div>
 
@@ -191,14 +193,14 @@ export default async function EditSongPage({
                     BPM
                   </label>
 
-                  <input
+                  <Input
                     id="tempo"
                     name="tempo"
                     type="number"
                     min={20}
                     max={300}
                     defaultValue={song.tempo ?? ""}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                    className="w-full px-3 focus:ring-4 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
 
@@ -210,13 +212,13 @@ export default async function EditSongPage({
                     Time
                   </label>
 
-                  <input
+                  <Input
                     id="timeSignature"
                     name="timeSignature"
                     type="text"
                     required
                     defaultValue={song.time_signature}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                    className="w-full px-3 focus:ring-4 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
 
@@ -228,14 +230,14 @@ export default async function EditSongPage({
                     Capo
                   </label>
 
-                  <input
+                  <Input
                     id="capo"
                     name="capo"
                     type="number"
                     min={0}
                     max={12}
                     defaultValue={song.capo}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+                    className="w-full px-3 focus:ring-4 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
               </div>
@@ -265,14 +267,14 @@ export default async function EditSongPage({
               Arrangement notes
             </label>
 
-            <textarea
+            <Textarea
               id="notes"
               name="notes"
               rows={5}
               maxLength={10000}
               defaultValue={song.notes ?? ""}
               placeholder="Transitions, arrangement reminders, or team notes..."
-              className="w-full rounded-xl border border-[var(--border)] px-3.5 py-3 text-sm leading-6 outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+              className="w-full px-3.5 py-3 leading-6 focus:ring-4 focus:ring-[var(--brand-soft)]"
             />
           </section>
 
@@ -292,7 +294,7 @@ export default async function EditSongPage({
               Save new version
             </button>
           </div>
-        </form>
+        </ProtectedForm>
       </div>
     </main>
   )

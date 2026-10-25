@@ -1,3 +1,4 @@
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -326,7 +327,7 @@ export default async function ServicePreparationPage({
               <ClipboardCheck className="size-3.5" />
               Service preparation
             </span>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)]">
+            <h1 className="wf-page-title mt-3">
               Rehearsal &amp; preparation
             </h1>
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
@@ -485,9 +486,9 @@ export default async function ServicePreparationPage({
                   <form action={deletePreparationTask}>
                     <input type="hidden" name="setlistId" value={id} />
                     <input type="hidden" name="taskId" value={task.id} />
-                    <button type="submit" aria-label={`Delete task: ${task.title}`} className="flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700">
+                    <ConfirmSubmitButton title="Delete this preparation task?" description="This task and its completion status will be permanently removed." confirmLabel="Delete task" type="submit" aria-label={`Delete task: ${task.title}`} className="flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]">
                       <Trash2 className="size-4" />
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 ) : null}
               </li>

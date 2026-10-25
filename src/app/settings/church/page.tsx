@@ -1,3 +1,7 @@
+import FormSubmitButton from "@/components/ui/form-submit-button"
+import { Feedback } from "@/components/ui/feedback"
+import { ProtectedForm } from "@/components/ui/protected-form"
+import { Input, Select, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -114,7 +118,7 @@ export default async function ChurchSettingsPage({
             Workspace management
           </p>
 
-          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.04em]">
+          <h1 className="wf-page-title mt-2">
             Church settings
           </h1>
 
@@ -124,21 +128,11 @@ export default async function ChurchSettingsPage({
         </div>
 
         {params.saved === "true" ? (
-          <div
-            role="status"
-            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700"
-          >
-            Church settings saved successfully.
-          </div>
+          <Feedback tone="success" title="Changes saved">Church settings saved successfully.</Feedback>
         ) : null}
 
         {errorMessage ? (
-          <div
-            role="alert"
-            className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
-          >
-            {errorMessage}
-          </div>
+          <Feedback tone="error" title="Changes could not be saved">{errorMessage} Review your entries and try saving again.</Feedback>
         ) : null}
 
         {membership.role !== "admin" ? (
@@ -148,7 +142,7 @@ export default async function ChurchSettingsPage({
           </div>
         ) : null}
 
-        <form action={updateChurchSettings} className="mt-6 space-y-6">
+        <ProtectedForm action={updateChurchSettings} className="mt-6 space-y-6">
           <fieldset disabled={membership.role !== "admin"} className="space-y-6">
             <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7">
               <div className="flex items-start gap-3">
@@ -173,7 +167,7 @@ export default async function ChurchSettingsPage({
                     Church name
                   </label>
 
-                  <input
+                  <Input
                     id="name"
                     name="name"
                     type="text"
@@ -181,7 +175,7 @@ export default async function ChurchSettingsPage({
                     minLength={2}
                     maxLength={120}
                     defaultValue={organization.name}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   />
                 </div>
 
@@ -193,13 +187,13 @@ export default async function ChurchSettingsPage({
                     Description
                   </label>
 
-                  <textarea
+                  <Textarea
                     id="description"
                     name="description"
                     rows={3}
                     maxLength={1000}
                     defaultValue={organization.description ?? ""}
-                    className="w-full rounded-xl border border-[var(--border)] px-3.5 py-3 text-sm leading-6 outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 py-3 leading-6 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   />
                 </div>
 
@@ -211,12 +205,12 @@ export default async function ChurchSettingsPage({
                     Church email
                   </label>
 
-                  <input
+                  <Input
                     id="contactEmail"
                     name="contactEmail"
                     type="email"
                     defaultValue={organization.contact_email ?? ""}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   />
                 </div>
 
@@ -229,13 +223,13 @@ export default async function ChurchSettingsPage({
                     Church phone
                   </label>
 
-                  <input
+                  <Input
                     id="contactPhone"
                     name="contactPhone"
                     type="tel"
                     maxLength={50}
                     defaultValue={organization.contact_phone ?? ""}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   />
                 </div>
 
@@ -248,13 +242,13 @@ export default async function ChurchSettingsPage({
                     Address
                   </label>
 
-                  <textarea
+                  <Textarea
                     id="address"
                     name="address"
                     rows={2}
                     maxLength={500}
                     defaultValue={organization.address ?? ""}
-                    className="w-full rounded-xl border border-[var(--border)] px-3.5 py-3 text-sm leading-6 outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 py-3 leading-6 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   />
                 </div>
 
@@ -267,13 +261,13 @@ export default async function ChurchSettingsPage({
                     Website
                   </label>
 
-                  <input
+                  <Input
                     id="website"
                     name="website"
                     type="url"
                     defaultValue={organization.website ?? ""}
                     placeholder="https://example.com"
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   />
                 </div>
               </div>
@@ -302,14 +296,14 @@ export default async function ChurchSettingsPage({
                     Service name
                   </label>
 
-                  <input
+                  <Input
                     id="defaultServiceName"
                     name="defaultServiceName"
                     type="text"
                     required
                     maxLength={120}
                     defaultValue={organization.default_service_name}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   />
                 </div>
 
@@ -321,18 +315,18 @@ export default async function ChurchSettingsPage({
                     Service day
                   </label>
 
-                  <select
+                  <Select
                     id="defaultServiceDay"
                     name="defaultServiceDay"
                     defaultValue={String(organization.default_service_day)}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   >
                     {days.map((day) => (
                       <option key={day.value} value={day.value}>
                         {day.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
@@ -343,7 +337,7 @@ export default async function ChurchSettingsPage({
                     Service time
                   </label>
 
-                  <input
+                  <Input
                     id="defaultServiceTime"
                     name="defaultServiceTime"
                     type="time"
@@ -352,7 +346,7 @@ export default async function ChurchSettingsPage({
                       0,
                       5
                     )}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                   />
                 </div>
               </div>
@@ -365,34 +359,33 @@ export default async function ChurchSettingsPage({
                   Time zone
                 </label>
 
-                <select
+                <Select
                   id="timezone"
                   name="timezone"
                   defaultValue={organization.timezone}
-                  className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                  className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
                 >
                   {timezones.map((timezone) => (
                     <option key={timezone} value={timezone}>
                       {timezone}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </section>
           </fieldset>
 
           {membership.role === "admin" ? (
             <div className="flex justify-end">
-              <button
-                type="submit"
-                className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)]"
+              <FormSubmitButton pendingText="Saving changes…"
+                  className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)]"
               >
                 <Save className="size-4" />
                 Save church settings
-              </button>
+              </FormSubmitButton>
             </div>
           ) : null}
-        </form>
+        </ProtectedForm>
       </div>
     </main>
   )

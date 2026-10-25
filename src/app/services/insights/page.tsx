@@ -1,6 +1,7 @@
+import { buttonVariants } from "@/components/ui/button"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
-  ArrowLeft,
   BarChart3,
   CalendarDays,
   CheckCircle2,
@@ -376,41 +377,23 @@ export default async function ServiceInsightsPage() {
       : null
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
-      <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <Link
-            href="/services/history"
-            className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
-          >
-            <ArrowLeft className="size-4" />
-            Service History
-          </Link>
-
-          <div className="mt-5">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-              <BarChart3 className="size-3.5" />
-              Service Insights
-            </span>
-
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
-              Worship Service Insights
-            </h1>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              Use your completed services to understand attendance, service
-              length, completion habits, and song usage.
-            </p>
-          </div>
-        </div>
+    <PageContainer>
+      <PageHeader
+        title={<>Worship Service Insights</>}
+        eyebrow={<><BarChart3 className="size-3.5" />
+              Service Insights</>}
+        description={<>Use your completed services to understand attendance, service
+              length, completion habits, and song usage.</>}
+        actions={<>
 
         <Link
           href="/services"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+          className={buttonVariants({ variant: "outline" })}
         >
           Back to Services
         </Link>
-      </section>
+        </>}
+      />
 
       {completedServices.length === 0 ? (
         <section className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
@@ -724,6 +707,6 @@ export default async function ServiceInsightsPage() {
           </div>
         </>
       )}
-    </main>
+    </PageContainer>
   )
 }

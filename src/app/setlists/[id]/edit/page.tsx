@@ -1,3 +1,6 @@
+import { ProtectedForm } from "@/components/ui/protected-form"
+import { Input, Textarea } from "@/components/ui/form-controls"
+import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import { ArrowLeft, CalendarDays } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
@@ -108,7 +111,7 @@ export default async function EditSetlistPage({
   }
 
   return (
-    <main className="mx-auto max-w-3xl space-y-7 px-6 py-8">
+    <PageContainer className="max-w-3xl">
       <Link
         href={`/setlists/${id}`}
         className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -123,7 +126,7 @@ export default async function EditSetlistPage({
           Setlist Settings
         </span>
 
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="wf-page-title mt-3">
           Edit Setlist
         </h1>
 
@@ -146,7 +149,7 @@ export default async function EditSetlistPage({
         </div>
       ) : null}
 
-      <form
+      <ProtectedForm
         action={updateSetlist}
         className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
       >
@@ -165,13 +168,13 @@ export default async function EditSetlistPage({
               Setlist name
             </label>
 
-            <input
+            <Input
               id="name"
               name="name"
               required
               maxLength={200}
               defaultValue={typedSetlist.name}
-              className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="w-full px-4"
             />
           </div>
 
@@ -183,7 +186,7 @@ export default async function EditSetlistPage({
               Service date
             </label>
 
-            <input
+            <Input
               id="serviceDate"
               name="serviceDate"
               type="date"
@@ -191,7 +194,7 @@ export default async function EditSetlistPage({
                 typedSetlist.service_date ??
                 ""
               }
-              className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="w-full px-4"
             />
           </div>
 
@@ -204,14 +207,14 @@ export default async function EditSetlistPage({
                 Service start time
               </label>
 
-              <input
+              <Input
                 id="serviceTime"
                 name="serviceTime"
                 type="time"
                 defaultValue={
                   typedSetlist.service_time?.slice(0, 5) ?? ""
                 }
-                className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                className="w-full px-4"
               />
               <p className="mt-2 text-xs text-[var(--muted)]">
                 Google Calendar uses a one-hour duration.
@@ -227,7 +230,7 @@ export default async function EditSetlistPage({
               Description
             </label>
 
-            <textarea
+            <Textarea
               id="description"
               name="description"
               maxLength={2000}
@@ -236,7 +239,7 @@ export default async function EditSetlistPage({
                 typedSetlist.description ??
                 ""
               }
-              className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="w-full resize-y px-4 py-3 leading-6"
             />
           </div>
 
@@ -248,7 +251,7 @@ export default async function EditSetlistPage({
               Service Notes
             </label>
 
-            <textarea
+            <Textarea
               id="serviceNotes"
               name="serviceNotes"
               maxLength={3000}
@@ -258,7 +261,7 @@ export default async function EditSetlistPage({
                 ""
               }
               placeholder="Add preparation notes, transitions, reminders, or details for the worship team."
-              className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="w-full resize-y px-4 py-3 leading-6"
             />
 
             <p className="mt-2 text-xs text-[var(--muted)]">
@@ -274,7 +277,7 @@ export default async function EditSetlistPage({
               Service Announcements
             </label>
 
-            <textarea
+            <Textarea
               id="announcements"
               name="announcements"
               maxLength={3000}
@@ -284,7 +287,7 @@ export default async function EditSetlistPage({
                 ""
               }
               placeholder="Share important announcements, schedule changes, or reminders for this service."
-              className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="w-full resize-y px-4 py-3 leading-6"
             />
 
             <p className="mt-2 text-xs text-[var(--muted)]">
@@ -308,7 +311,7 @@ export default async function EditSetlistPage({
             </FormSubmitButton>
           </div>
         </div>
-      </form>
-    </main>
+      </ProtectedForm>
+    </PageContainer>
   )
 }

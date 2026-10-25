@@ -18,8 +18,7 @@ export default function GlobalError({
   }, [error])
 
   return (
-    <html lang="en">
-      <body>
+    <>
         <main
           id="main-content"
           className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4 py-12 text-[var(--foreground)]"
@@ -71,7 +70,6 @@ export default function GlobalError({
             ) : null}
           </section>
         </main>
-      </body>
-    </html>
+    </>
   )
 }

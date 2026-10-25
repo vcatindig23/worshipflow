@@ -1,3 +1,4 @@
+import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import {
   CalendarDays,
@@ -132,13 +133,13 @@ export default async function SearchPage({
   const hasResults = songs.length > 0 || setlists.length > 0
 
   return (
-    <main className="mx-auto max-w-5xl space-y-7 px-6 py-8">
+    <PageContainer className="max-w-5xl">
       <section>
         <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
           <Search className="size-3.5" />
           Workspace search
         </span>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
+        <h1 className="wf-page-title mt-3">
           Search songs and setlists
         </h1>
         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
@@ -281,6 +282,6 @@ export default async function SearchPage({
           ) : null}
         </div>
       )}
-    </main>
+    </PageContainer>
   )
 }

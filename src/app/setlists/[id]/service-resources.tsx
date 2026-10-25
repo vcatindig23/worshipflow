@@ -1,5 +1,6 @@
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import Link from "next/link"
-import { FileText, Link2, Trash2, UploadCloud } from "lucide-react"
+import { FileText, Link2, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { addServiceResource, removeServiceResource } from "./service-resources-actions"
@@ -181,13 +182,13 @@ export default async function ServiceResources({
                       name="resourceId"
                       value={resource.id}
                     />
-                    <button
+                    <ConfirmSubmitButton title="Remove this service resource?" description="The resource will be removed from this service plan. The shared file will remain in your workspace." confirmLabel="Remove resource"
                       type="submit"
                       aria-label={`Remove ${resource.display_name} from service`}
-                      className="flex size-9 items-center justify-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50"
+                      className="flex size-9 items-center justify-center rounded-lg border border-[var(--danger)]/25 text-[var(--danger)] transition hover:bg-[var(--danger-soft)]"
                     >
                       <Trash2 className="size-4" />
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 ) : null}
               </div>

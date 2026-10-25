@@ -1,3 +1,4 @@
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import {
   ArrowDown,
   ArrowUp,
@@ -214,13 +215,13 @@ export default async function ServiceTimeline({
                       <form action={removeTimelineItem}>
                         <input type="hidden" name="setlistId" value={setlistId} />
                         <input type="hidden" name="itemId" value={item.id} />
-                        <button
+                        <ConfirmSubmitButton title="Remove this service item?" description="This item will be removed from the service order. You can add it again later." confirmLabel="Remove item"
                           type="submit"
                           aria-label={`Remove ${item.title}`}
-                          className="flex size-8 items-center justify-center rounded-lg border border-red-200 bg-white text-red-700 transition hover:bg-red-50"
+                          className="flex size-8 items-center justify-center rounded-lg border border-[var(--danger)]/25 bg-[var(--card)] text-[var(--danger)] transition hover:bg-[var(--danger-soft)]"
                         >
                           <Trash2 className="size-3.5" />
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     </div>
                   ) : null}

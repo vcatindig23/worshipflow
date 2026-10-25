@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   CalendarClock,
@@ -219,9 +220,9 @@ export default function DashboardView({
                   {workspace.organizationName}
                 </div>
 
-                <h1 className="truncate text-lg font-semibold tracking-[-0.025em]">
+                <p className="truncate text-sm font-semibold">
                   Dashboard
-                </h1>
+                </p>
               </div>
             </div>
 
@@ -233,7 +234,7 @@ export default function DashboardView({
 
               <Link
                 href="/songs/new"
-                className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
+                className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
               >
                 <Plus className="wf-icon-motion size-4" />
                 New Song
@@ -243,23 +244,9 @@ export default function DashboardView({
 
           <main id="main-content" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mx-auto max-w-[1480px]">
-              <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div data-tour="dashboard-welcome">
-                  <p className="text-sm font-medium text-[var(--brand)]">
-                  Welcome back, {workspace.userName}
-                </p>
-
-                <h2 className="mt-1 text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
-                  {workspace.organizationName}
-                </h2>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-                  Your worship workspace is ready. Manage songs, prepare
-                  worship services, and keep your team organized.
-                  </p>
-                </div>
-                <DashboardGuidedTour userId={workspace.userId} />
-              </section>
+              <div data-tour="dashboard-welcome" className="mb-8">
+                <PageHeader title={workspace.organizationName} eyebrow={<>Welcome back, {workspace.userName}</>} description="Your worship workspace is ready. Manage songs, prepare worship services, and keep your team organized." actions={<DashboardGuidedTour userId={workspace.userId} />} />
+              </div>
 
               {!workspace.serviceTimeAvailable ? (
                 <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
@@ -280,7 +267,7 @@ export default function DashboardView({
                       <div className="text-xs font-semibold text-[var(--muted)]">Songs</div>
                       <div className="mt-2 text-2xl font-semibold tracking-[-0.03em] tabular-nums">{workspace.songCount}</div>
                     </div>
-                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)] transition duration-200 group-hover:scale-105 group-hover:rotate-3">
+                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)] transition duration-200 ">
                       <Music2 className="wf-icon-motion size-5" strokeWidth={1.9} />
                     </span>
                   </div>
@@ -312,7 +299,7 @@ export default function DashboardView({
                       <div className="text-xs font-semibold text-[var(--muted)]">Default service</div>
                       <div className="mt-2 truncate text-lg font-semibold tracking-[-0.03em]">{workspace.defaultServiceName}</div>
                     </div>
-                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 transition duration-200 group-hover:scale-105 group-hover:rotate-3">
+                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 transition duration-200 ">
                       <CalendarClock className="wf-icon-motion size-5" strokeWidth={1.9} />
                     </span>
                   </div>
@@ -343,7 +330,7 @@ export default function DashboardView({
                 <Link
                   href="/songs/new"
                   data-tour="create-song"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:shadow-md"
                 >
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                     <Plus className="size-5" />
@@ -366,7 +353,7 @@ export default function DashboardView({
                 <Link
                   href="/setlists"
                   data-tour="build-setlist"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:shadow-md"
                 >
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                     <ListMusic className="size-5" />
@@ -388,7 +375,7 @@ export default function DashboardView({
 
                 <Link
                   href="/settings"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:shadow-md"
                 >
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                     <Settings className="size-5" />

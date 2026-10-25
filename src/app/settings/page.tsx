@@ -1,3 +1,4 @@
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -40,22 +41,14 @@ export default async function SettingsPage() {
     workspace.role === "admin"
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-6 py-8">
-      <section>
-        <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-          <ShieldCheck className="size-3.5" />
-          Workspace Settings
-        </span>
-
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
-          Settings
-        </h1>
-
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-          Manage your church workspace, team members, roles, and
-          organization information.
-        </p>
-      </section>
+    <PageContainer className="max-w-6xl">
+      <PageHeader
+        title={<>Settings</>}
+        eyebrow={<><ShieldCheck className="size-3.5" />
+          Workspace Settings</>}
+        description={<>Manage your church workspace, team members, roles, and
+          organization information.</>}
+      />
 
       <section className="flex flex-col gap-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div className="flex min-w-0 items-start gap-4">
@@ -77,7 +70,7 @@ export default async function SettingsPage() {
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         <Link
           href="/settings/profile"
-          className="group rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+          className="group wf-card p-5 sm:p-6 transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
         >
           <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
             <UserRound className="size-6" />
@@ -99,7 +92,7 @@ export default async function SettingsPage() {
 
         <Link
           href="/settings/church"
-          className="group rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+          className="group wf-card p-5 sm:p-6 transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
         >
           <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
             <Church className="size-6" />
@@ -133,7 +126,7 @@ export default async function SettingsPage() {
 
         <Link
           href="/settings/team"
-          className="group rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+          className="group wf-card p-5 sm:p-6 transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
         >
           <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--brand)]">
             <Users className="size-6" />
@@ -174,7 +167,7 @@ export default async function SettingsPage() {
         </Link>
       </section>
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+      <section className="wf-card p-5 sm:p-6">
         <div className="flex items-start gap-4">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
             <Building2 className="size-5" />
@@ -218,6 +211,6 @@ export default async function SettingsPage() {
           </div>
         </section>
       ) : null}
-    </main>
+    </PageContainer>
   )
 }

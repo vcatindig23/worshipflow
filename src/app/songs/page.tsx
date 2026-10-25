@@ -1,6 +1,13 @@
+import { Pagination } from "@/components/ui/pagination"
+import { EmptyState } from "@/components/ui/empty-state"
+import { buttonVariants } from "@/components/ui/button"
+import { Input, Select } from "@/components/ui/form-controls"
+import { Card } from "@/components/ui/card"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   Archive,
+  RotateCcw,
   ArrowDownUp,
   ChevronDown,
   ChevronRight,
@@ -490,34 +497,25 @@ export default async function SongsPage({
   ].filter((description): description is string => Boolean(description))
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
-      <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <span className="inline-flex items-center rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-            Song Library
-          </span>
-
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
-            Songs
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Keep your church&apos;s worship catalog organized,
-            searchable, and ready for every service.
-          </p>
-        </div>
-
-        <Link
+    <PageContainer>
+      <PageHeader
+        title={<>Songs</>}
+        eyebrow={<>Song Library</>}
+        description={<>Keep your church&apos;s worship catalog organized,
+            searchable, and ready for every service.</>}
+        actions={canEdit ? <>
+<Link
           href="/songs/new"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+          className={buttonVariants({ variant: "default" })}
         >
           <Plus className="size-4" />
           Add Song
         </Link>
-      </section>
+        </> : null}
+      />
 
       <section aria-label="Song usage analytics" className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+        <Card className="p-5 sm:p-6">
           <div className="flex items-center gap-2">
             <BarChart3 className="size-4 text-[var(--brand)]" aria-hidden="true" />
             <h2 className="text-sm font-semibold text-[var(--foreground)]">Frequently used</h2>
@@ -538,8 +536,8 @@ export default async function SongsPage({
           ) : (
             <p className="mt-4 text-sm text-[var(--muted)]">Usage data will appear here as you open charts.</p>
           )}
-        </div>
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+        </Card>
+        <Card className="p-5 sm:p-6">
           <div className="flex items-center gap-2">
             <Clock3 className="size-4 text-[var(--brand)]" aria-hidden="true" />
             <h2 className="text-sm font-semibold text-[var(--foreground)]">Recently opened</h2>
@@ -560,7 +558,7 @@ export default async function SongsPage({
           ) : (
             <p className="mt-4 text-sm text-[var(--muted)]">Your recent songs will appear here after you view a chart.</p>
           )}
-        </div>
+        </Card>
       </section>
 
       <section className="rounded-3xl border border-[var(--border)] bg-white p-3 shadow-sm sm:p-4">
@@ -598,19 +596,19 @@ export default async function SongsPage({
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
 
-            <input
+            <Input
               name="q"
               defaultValue={query}
               placeholder="Search songs, artists, albums, or tags..."
-              className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
-            />
+              className="w-full pl-10 pr-4"
+            aria-label="Search" />
           </div>
 
-          <select
+          <Select
             name="sort"
             defaultValue={sort}
-            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
-          >
+            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
+           aria-label="Sort">
             <option value="title">Title A–Z</option>
             <option value="artist">Artist A–Z</option>
             <option value="album">Album A–Z</option>
@@ -619,13 +617,13 @@ export default async function SongsPage({
             <option value="updated">Recently Updated</option>
             <option value="tempo-asc">Slowest Tempo</option>
             <option value="tempo-desc">Fastest Tempo</option>
-          </select>
+          </Select>
 
-          <select
+          <Select
             name="status"
             defaultValue={status}
-            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
-          >
+            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
+           aria-label="Status">
             <option value="active">
               Active
             </option>
@@ -635,34 +633,34 @@ export default async function SongsPage({
             <option value="all">
               All Songs
             </option>
-          </select>
+          </Select>
 
-          <select
+          <Select
             name="key"
             defaultValue={selectedKey}
             aria-label="Filter by musical key"
-            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
+            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
           >
             <option value="">All keys</option>
             {availableKeys.map((key) => (
               <option key={key} value={key}>{key}</option>
             ))}
-          </select>
+          </Select>
 
-          <select
+          <Select
             name="tempo"
             defaultValue={tempoBucket}
             aria-label="Filter by tempo"
-            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
+            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
           >
             {Object.entries(tempoBucketLabels).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
-          </select>
+          </Select>
 
           <button
             type="submit"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--surface)] px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+            className={buttonVariants({ variant: "secondary" })}
           >
             <ArrowDownUp className="size-4" />
             Apply
@@ -792,28 +790,7 @@ export default async function SongsPage({
         </div>
 
         {filteredSongs.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
-              <Search className="size-5" />
-            </div>
-
-            <h2 className="mt-4 text-lg font-semibold text-[var(--foreground)]">
-              No songs found
-            </h2>
-
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
-              Try changing your search or filters, or add
-              your first song to the library.
-            </p>
-
-            <Link
-              href="/songs/new"
-              className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-            >
-              <Plus className="size-4" />
-              Add Song
-            </Link>
-          </div>
+          <EmptyState title={hasActiveFilters ? "No songs match your filters" : "Your song library is empty"} description={hasActiveFilters ? "Try a different search, key, or tempo, or clear your filters to see all songs." : "Add your first song to start preparing charts for your worship team."} icon={<Search className="size-5" />} actions={<> {hasActiveFilters ? <Link href={clearFiltersHref} className={buttonVariants({ variant: "outline" })}>Clear filters</Link> : null}{canEdit ? <Link href="/songs/new" className={buttonVariants()}><Plus className="size-4" aria-hidden="true" />Add song</Link> : null} </>} />
         ) : (
           <div className={view === "grid" ? "grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
             {paginatedSongs.map((song) => {
@@ -970,9 +947,7 @@ export default async function SongsPage({
                             "active" ? (
                               <Archive className="size-4" />
                             ) : (
-                              <span className="text-xs font-bold">
-                                ↺
-                              </span>
+                              <RotateCcw className="size-4" aria-hidden="true" />
                             )}
                           </button>
                         </form>
@@ -1005,15 +980,9 @@ export default async function SongsPage({
           </div>
         )}
         {totalPages > 1 ? (
-          <nav aria-label="Song pages" className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-            <p className="text-sm text-[var(--muted)]">Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filteredSongs.length)} of {filteredSongs.length} songs</p>
-            <div className="flex items-center gap-2">
-              {page > 1 ? <Link href={pageHref(page - 1)} className="inline-flex h-9 items-center rounded-lg border border-[var(--border)] px-3 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface)]">Previous</Link> : null}
-              {page < totalPages ? <Link href={pageHref(page + 1)} className="inline-flex h-9 items-center rounded-lg bg-[var(--brand)] px-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]">Next</Link> : null}
-            </div>
-          </nav>
+          <Pagination label="Song pages" summary={<>Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filteredSongs.length)} of {filteredSongs.length} songs · Page {page} of {totalPages}</>} previousHref={page > 1 ? pageHref(page - 1) : undefined} nextHref={page < totalPages ? pageHref(page + 1) : undefined} />
         ) : null}
       </section>
-    </main>
+    </PageContainer>
   )
 }

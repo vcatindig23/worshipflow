@@ -1,3 +1,4 @@
+import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle2 } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
@@ -77,7 +78,7 @@ export default async function CompleteServicePage({
   )
 
   return (
-    <main className="mx-auto max-w-3xl space-y-7 px-6 py-8">
+    <PageContainer className="max-w-3xl">
       <Link
         href={`/setlists/${id}`}
         className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -91,7 +92,7 @@ export default async function CompleteServicePage({
           <CheckCircle2 className="size-3.5" />
           After-Service Review
         </span>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="wf-page-title mt-3">
           {setlist.completed_at ? "Update Service History" : "Complete Service"}
         </h1>
         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
@@ -210,6 +211,6 @@ export default async function CompleteServicePage({
           </button>
         </form>
       ) : null}
-    </main>
+    </PageContainer>
   )
 }

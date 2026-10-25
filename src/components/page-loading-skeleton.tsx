@@ -1,3 +1,4 @@
+import { Skeleton as SharedSkeleton } from "@/components/ui/skeleton"
 type LoadingVariant =
   | "schedule"
   | "notifications"
@@ -18,7 +19,7 @@ type PageLoadingSkeletonProps = {
 
 function Skeleton({ className = "" }: { className?: string }) {
   const tone = className.includes("!bg-[#29362d]") ? "wf-skeleton-dark" : ""
-  return <div aria-hidden="true" className={`wf-skeleton rounded-lg ${tone} ${className}`} />;
+  return <SharedSkeleton className={`${tone} ${className}`} />;
 }
 
 function PageHeading({ width = "w-56" }: { width?: string }) {

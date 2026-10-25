@@ -1,3 +1,5 @@
+import { buttonVariants } from "@/components/ui/button"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -182,39 +184,30 @@ export default async function ServicesHistoryPage({
       : null
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
-      <section>
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-              <History className="size-3.5" />
-              Service History
-            </span>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
-              After-Service History
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              Review completed services, attendance, actual duration, and notes
-              for future planning.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
+    <PageContainer>
+      <PageHeader
+        title={<>After-Service History</>}
+        eyebrow={<><History className="size-3.5" />
+              Service History</>}
+        description={<>Review completed services, attendance, actual duration, and notes
+              for future planning.</>}
+        actions={<>
+<div className="flex flex-wrap gap-2">
             <Link
               href="/services/insights"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+              className={buttonVariants({ variant: "outline" })}
             >
               Service Insights
             </Link>
             <Link
               href="/services"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+              className={buttonVariants({ variant: "outline" })}
             >
               Back to Services
             </Link>
           </div>
-        </div>
-      </section>
+        </>}
+      />
 
       <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
         <form
@@ -251,7 +244,7 @@ export default async function ServicesHistoryPage({
 
           <button
             type="submit"
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+            className={buttonVariants({ variant: "default" })}
           >
             <SlidersHorizontal className="size-4" />
             Apply filters
@@ -441,13 +434,13 @@ export default async function ServicesHistoryPage({
                 <Link
                   href={historyHref(query, period, page - 1)}
                   rel="prev"
-                  className="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--border)] px-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                  className={buttonVariants({ variant: "outline" })}
                 >
                   <ArrowLeft className="size-4" />
                   Previous
                 </Link>
               ) : (
-                <span className="inline-flex h-9 items-center rounded-lg bg-[var(--surface)] px-3 text-sm text-[var(--muted)]">
+                <span className={buttonVariants({ variant: "secondary" })}>
                   First page
                 </span>
               )}
@@ -455,7 +448,7 @@ export default async function ServicesHistoryPage({
                 <Link
                   href={historyHref(query, period, page + 1)}
                   rel="next"
-                  className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--brand)] px-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                  className={buttonVariants({ variant: "default" })}
                 >
                   Next
                   <ArrowRight className="size-4" />
@@ -465,6 +458,6 @@ export default async function ServicesHistoryPage({
           </nav>
         ) : null}
       </section>
-    </main>
+    </PageContainer>
   )
 }

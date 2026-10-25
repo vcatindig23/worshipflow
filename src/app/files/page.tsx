@@ -1,3 +1,9 @@
+import { EmptyState } from "@/components/ui/empty-state"
+import { Feedback } from "@/components/ui/feedback"
+import { buttonVariants } from "@/components/ui/button"
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
+import { Input, Select } from "@/components/ui/form-controls"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   ArrowDownToLine,
@@ -183,30 +189,17 @@ export default async function FilesPage({
   const errorMessage = errors[errorKey]
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
-      <section>
-        <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-          <FolderOpen className="size-3.5" />
-          Workspace Library
-        </span>
-
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
-          Files
-        </h1>
-
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-          Share worship resources with members of {workspace.organizationName}.
-          Files are private to your church workspace.
-        </p>
-      </section>
+    <PageContainer>
+      <PageHeader
+        title={<>Files</>}
+        eyebrow={<><FolderOpen className="size-3.5" />
+          Workspace Library</>}
+        description={<>Share worship resources with members of {workspace.organizationName}.
+          Files are private to your church workspace.</>}
+      />
 
       {errorMessage ? (
-        <div
-          role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {errorMessage}
-        </div>
+        <Feedback tone="error" title="File action could not be completed">{errorMessage} Check your connection and try again.</Feedback>
       ) : null}
 
       {storageErrorMessage ? (
@@ -219,7 +212,7 @@ export default async function FilesPage({
       ) : null}
 
       {canManageFiles ? (
-        <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
+        <section className="wf-card p-5 sm:p-6">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <Upload className="size-5" />
@@ -265,27 +258,27 @@ export default async function FilesPage({
         >
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-            <input
+            <Input
               name="q"
               type="search"
               defaultValue={query}
               placeholder="Search files..."
               aria-label="Search files"
-              className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="w-full pl-10 pr-4"
             />
           </div>
 
-          <select
+          <Select
             name="type"
             defaultValue={category}
             aria-label="Filter files by type"
-            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
+            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
           >
             <option value="all">All file types</option>
             <option value="documents">Documents</option>
             <option value="images">Images</option>
             <option value="audio">Audio</option>
-          </select>
+          </Select>
 
           <button
             type="submit"
@@ -296,27 +289,9 @@ export default async function FilesPage({
         </form>
 
         {storageErrorMessage ? null : files.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
-              <FileText className="size-5" />
-            </div>
-            <h3 className="mt-4 text-base font-semibold text-[var(--foreground)]">
-              No files shared yet
-            </h3>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
-              Upload sheet music, service documents, images, or rehearsal
-              audio to make them available to your team.
-            </p>
-          </div>
+          <EmptyState title="No files shared yet" description="Upload sheet music, service documents, images, or rehearsal audio to share them with your team." icon={<FileText className="size-5" />} />
         ) : filteredFiles.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-12 text-center shadow-sm">
-            <h3 className="text-base font-semibold text-[var(--foreground)]">
-              No matching files
-            </h3>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Try another search term or file type.
-            </p>
-          </div>
+          <EmptyState title="No matching files" description="Try another search term or file type, or clear your filters." icon={<Search className="size-5" />} actions={<Link href="/files" className={buttonVariants({ variant: "outline" })}>Clear filters</Link>} />
         ) : (
           <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
             <ul className="divide-y divide-[var(--border)]">
@@ -345,7 +320,7 @@ export default async function FilesPage({
                       href={file.signedUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-white px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                      className={buttonVariants({ variant: "outline" })}
                     >
                       <ArrowDownToLine className="size-4" />
                       Download
@@ -358,13 +333,13 @@ export default async function FilesPage({
                           name="path"
                           value={file.path}
                         />
-                        <button
+                        <ConfirmSubmitButton title="Delete this file?" description="This permanently removes the shared file from your workspace. Download a copy first if you need to keep it." confirmLabel="Delete file"
                           type="submit"
                           aria-label={`Delete ${readableName(file.name)}`}
-                          className="flex size-9 items-center justify-center rounded-lg border border-red-200 bg-white text-red-700 transition hover:bg-red-50"
+                          className="flex size-9 items-center justify-center rounded-lg border border-[var(--danger)]/25 bg-[var(--card)] text-[var(--danger)] transition hover:bg-[var(--danger-soft)]"
                         >
                           <Trash2 className="size-4" />
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     ) : null}
                   </div>
@@ -374,6 +349,6 @@ export default async function FilesPage({
           </div>
         )}
       </section>
-    </main>
+    </PageContainer>
   )
 }

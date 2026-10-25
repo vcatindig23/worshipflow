@@ -16,7 +16,17 @@ type ErrorPageProps = {
   }>
 }
 
+const recovery: Record<string, { href: string; label: string }> = {
+  songs_load_failed: { href: "/songs", label: "Try loading songs again" },
+  setlists_load_failed: { href: "/setlists", label: "Try loading setlists again" },
+  global_search_failed: { href: "/search", label: "Try searching again" },
+  files_load_failed: { href: "/files", label: "Try loading files again" },
+}
+
 const messages: Record<string, string> = {
+  songs_load_failed: "We couldn’t load your song library. Check your connection, then try loading it again.",
+  setlists_load_failed: "We couldn’t load your service plans. Check your connection, then try loading them again.",
+  files_load_failed: "Shared files are temporarily unavailable. Check your connection and try again.",
   confirmation_failed:
     "The confirmation link is invalid, expired, or has already been used.",
   membership_load_failed:
@@ -29,6 +39,7 @@ export default async function ErrorPage({
   searchParams,
 }: ErrorPageProps) {
   const params = await searchParams
+  const retry = recovery[params.code ?? ""]
   const message =
     (params.code && messages[params.code]) ||
     "Something went wrong while processing your request."
@@ -63,10 +74,10 @@ export default async function ErrorPage({
 
             <div className="mt-7 flex flex-col gap-2">
               <Link
-                href="/login"
+                href={retry?.href ?? "/login"}
                 className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
               >
-                Go to sign in
+                {retry?.label ?? "Go to sign in"}
               </Link>
 
               <Link

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import { Activity, CalendarDays, Music2, Users } from "lucide-react"
 import { describeActivity, type ActivityEntry } from "@/lib/activity-log"
@@ -63,17 +64,7 @@ export default async function ActivityPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-4 py-8 text-[var(--foreground)] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        <div className="border-b border-[var(--border)] pb-6">
-          <p className="text-sm font-medium text-[var(--brand)]">
-            {workspace.organizationName}
-          </p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.035em]">
-            Activity
-          </h1>
-          <p className="mt-2 text-sm text-[var(--muted)]">
-            Recent changes across your songs, services, and team.
-          </p>
-        </div>
+        <PageHeader className="border-b border-[var(--border)] pb-6" title="Activity" eyebrow={workspace.organizationName} description="Recent changes across your songs, services, and team."  />
 
         {entries.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-dashed border-[var(--border)] bg-white px-6 py-14 text-center">

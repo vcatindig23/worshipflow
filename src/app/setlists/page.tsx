@@ -1,3 +1,8 @@
+import { Pagination } from "@/components/ui/pagination"
+import { EmptyState } from "@/components/ui/empty-state"
+import { buttonVariants } from "@/components/ui/button"
+import { Input, Select } from "@/components/ui/form-controls"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   Archive,
@@ -189,33 +194,24 @@ export default async function SetlistsPage({
   }
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
-      <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <span className="inline-flex items-center rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-            Service Planning
-          </span>
-
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
-            Setlists
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Build and organize worship sets for upcoming
-            services and events.
-          </p>
-        </div>
-
-        <Link
+    <PageContainer>
+      <PageHeader
+        title={<>Setlists</>}
+        eyebrow={<>Service Planning</>}
+        description={<>Build and organize worship sets for upcoming
+            services and events.</>}
+        actions={<>
+<Link
           href="/setlists/new"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+          className={buttonVariants({ variant: "default" })}
         >
           <Plus className="size-4" />
           New Setlist
         </Link>
-      </section>
+        </>}
+      />
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+      <section className="wf-card p-5 sm:p-6">
         <form
           action="/setlists"
           method="get"
@@ -224,19 +220,19 @@ export default async function SetlistsPage({
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
 
-            <input
+            <Input
               name="q"
               defaultValue={query}
               placeholder="Search setlists..."
-              className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
-            />
+              className="w-full pl-10 pr-4"
+            aria-label="Search" />
           </div>
 
-          <select
+          <Select
             name="status"
             defaultValue={status}
-            className="h-11 rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)]"
-          >
+            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
+           aria-label="Status">
             <option value="all">
               All statuses
             </option>
@@ -249,7 +245,7 @@ export default async function SetlistsPage({
             <option value="archived">
               Archived
             </option>
-          </select>
+          </Select>
 
           <button
             type="submit"
@@ -275,28 +271,7 @@ export default async function SetlistsPage({
         </div>
 
         {filteredSetlists.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
-              <BookOpen className="size-5" />
-            </div>
-
-            <h2 className="mt-4 text-lg font-semibold text-[var(--foreground)]">
-              No setlists found
-            </h2>
-
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
-              Create a setlist to start planning your next
-              worship service.
-            </p>
-
-            <Link
-              href="/setlists/new"
-              className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-            >
-              <Plus className="size-4" />
-              Create Setlist
-            </Link>
-          </div>
+          <EmptyState title={query || status !== "all" ? "No setlists match your filters" : "No setlists yet"} description={query || status !== "all" ? "Try another search or clear the status filter to see all service plans." : "Create a setlist to start planning your next worship service."} icon={<BookOpen className="size-5" />} actions={<> {query || status !== "all" ? <Link href="/setlists" className={buttonVariants({ variant: "outline" })}>Clear filters</Link> : null}<Link href="/setlists/new" className={buttonVariants()}><Plus className="size-4" aria-hidden="true" />Create setlist</Link> </>} />
         ) : (
           <div className="grid gap-3">
             {filteredSetlists.map(
@@ -383,15 +358,9 @@ export default async function SetlistsPage({
         )}
 
         {totalPages > 1 ? (
-          <nav aria-label="Setlist pages" className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-            <p className="text-sm text-[var(--muted)]">Page {page} of {totalPages}</p>
-            <div className="flex items-center gap-2">
-              {page > 1 ? <Link href={pageHref(page - 1)} className="inline-flex h-9 items-center rounded-lg border border-[var(--border)] px-3 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--surface)]">Previous</Link> : null}
-              {page < totalPages ? <Link href={pageHref(page + 1)} className="inline-flex h-9 items-center rounded-lg bg-[var(--brand)] px-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]">Next</Link> : null}
-            </div>
-          </nav>
+          <Pagination label="Setlist pages" summary={<>Page {page} of {totalPages} · {totalSetlists} setlists</>} previousHref={page > 1 ? pageHref(page - 1) : undefined} nextHref={page < totalPages ? pageHref(page + 1) : undefined} />
         ) : null}
       </section>
-    </main>
+    </PageContainer>
   )
 }

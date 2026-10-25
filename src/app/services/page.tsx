@@ -1,3 +1,5 @@
+import { buttonVariants } from "@/components/ui/button"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   AlertCircle,
@@ -528,28 +530,18 @@ export default async function ServicesPage({
   }
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-6 py-8">
-      <section className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-            <CalendarDays className="size-3.5" />
-            Service Planning
-          </span>
-
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-4xl">
-            Services
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            See what&apos;s coming up and open a service plan to review its
-            worship order.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
+    <PageContainer>
+      <PageHeader
+        title={<>Services</>}
+        eyebrow={<><CalendarDays className="size-3.5" />
+            Service Planning</>}
+        description={<>See what&apos;s coming up and open a service plan to review its
+            worship order.</>}
+        actions={<>
+<div className="flex flex-wrap gap-2">
           <Link
             href="/services/templates"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            className={buttonVariants({ variant: "outline" })}
           >
             <Layers className="size-4" />
             Templates
@@ -557,7 +549,7 @@ export default async function ServicesPage({
 
           <Link
             href="/services/history"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            className={buttonVariants({ variant: "outline" })}
           >
             <History className="size-4" />
             Service History
@@ -565,20 +557,21 @@ export default async function ServicesPage({
 
           <Link
             href="/services/insights"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+            className={buttonVariants({ variant: "outline" })}
           >
             <BarChart3 className="size-4" />
             Insights
           </Link>
           <Link
             href="/setlists/new"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+            className={buttonVariants({ variant: "default" })}
           >
             <Plus className="size-4" />
             Plan a Service
           </Link>
         </div>
-      </section>
+        </>}
+      />
 
       <nav
         aria-label="Service schedule"
@@ -660,7 +653,7 @@ export default async function ServicesPage({
 
             <Link
               href="/setlists/new"
-              className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+              className={buttonVariants({ variant: "default", className: "mt-5" })}
             >
               <Plus className="size-4" />
               Plan a Service
@@ -973,6 +966,6 @@ export default async function ServicesPage({
           </div>
         )}
       </section>
-    </main>
+    </PageContainer>
   )
 }
