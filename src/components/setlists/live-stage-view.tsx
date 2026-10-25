@@ -115,10 +115,29 @@ export default function LiveStageView({
   const [countdownRunning, setCountdownRunning] = useState(false)
   const lyricsScrollRef = useRef<HTMLDivElement>(null)
   const referenceAudioRef = useRef<HTMLAudioElement>(null)
-  const [audioSeekRequest, setAudioSeekRequest] = useState<{ songId: string; seconds: number; token: number } | null>(null)
-  const [audioSeekToken, setAudioSeekToken] = useState(0)
   const currentSong = songs[currentIndex] ?? null
   const currentSongAudioUrl = currentSong ? referenceAudioUrls[currentSong.id] ?? null : null
+
+  const playAudioFromTimestamp = useCallback((seconds: number) => {
+    const audio = referenceAudioRef.current
+    if (!audio || !currentSongAudioUrl) return
+
+    const seekAndPlay = () => {
+      const maxTime = Number.isFinite(audio.duration) ? audio.duration : seconds
+      audio.currentTime = Math.max(0, Math.min(seconds, maxTime))
+      void audio.play().catch((error: unknown) => {
+        // Playback may be blocked by browser or device audio settings.
+        console.warn("Reference recording playback failed:", error)
+      })
+    }
+
+    if (audio.readyState >= 1) {
+      seekAndPlay()
+    } else {
+      audio.addEventListener("loadedmetadata", seekAndPlay, { once: true })
+      audio.load()
+    }
+  }, [currentSongAudioUrl])
 
   useEffect(() => {
     const updateOnlineStatus = () => setIsOnline(navigator.onLine)
@@ -141,27 +160,6 @@ export default function LiveStageView({
       document.body.style.overflow = previousBodyOverflow
     }
   }, [])
-
-  useEffect(() => {
-    const request = audioSeekRequest
-    if (!request || request.songId !== currentSong?.id) return
-
-    const audio = referenceAudioRef.current
-    if (!audio) return
-
-    const seek = () => {
-      const maxTime = Number.isFinite(audio.duration) ? audio.duration : request.seconds
-      audio.currentTime = Math.max(0, Math.min(request.seconds, maxTime))
-    }
-
-    if (audio.readyState >= 1) {
-      seek()
-      return
-    }
-
-    audio.addEventListener("loadedmetadata", seek, { once: true })
-    return () => audio.removeEventListener("loadedmetadata", seek)
-  }, [audioSeekRequest, currentSong?.id, currentSongAudioUrl])
 
   useEffect(() => {
     let cancelled = false
@@ -280,6 +278,7 @@ export default function LiveStageView({
     )
 
     if (nextIndex !== null) {
+      referenceAudioRef.current?.pause()
       setAutoScroll(false)
       setCurrentIndex(nextIndex)
       setTransposeOffset(0)
@@ -290,12 +289,14 @@ export default function LiveStageView({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.target instanceof HTMLElement &&
-        (event.target.isContentEditable ||
-          ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName))
-      ) {
-        return
+      if (event.target instanceof HTMLElement) {
+        const target = event.target
+        if (
+          target.isContentEditable ||
+          target.closest("button, a, summary, input, textarea, select, [role='button']")
+        ) {
+          return
+        }
       }
 
       if (event.key === "ArrowRight") {
@@ -374,6 +375,7 @@ export default function LiveStageView({
       if (index === undefined) {
         return
       }
+      referenceAudioRef.current?.pause()
       setAutoScroll(false)
       setCurrentIndex(index)
       setTransposeOffset(0)
@@ -509,11 +511,11 @@ export default function LiveStageView({
         </div>
       ) : (
         <>
-          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 py-4 sm:px-10 sm:py-5">
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-2.5 sm:px-7 sm:py-4 xl:px-10">
             <div className="mx-auto flex min-h-0 w-full max-w-none flex-1 flex-col">
               {currentSong ? (
                 <>
-                  <div className="mb-4 flex shrink-0 flex-wrap items-start justify-between gap-4">
+                  <div className="mb-3 flex shrink-0 flex-col gap-3 sm:mb-4 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
                         {currentSong.section} · Song {currentIndex + 1}
@@ -546,7 +548,7 @@ export default function LiveStageView({
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div role="toolbar" aria-label="Song display controls" className="flex max-w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:justify-end">
                       <button
                         type="button"
                         onClick={() => setAutoScroll((value) => !value)}
@@ -639,10 +641,10 @@ export default function LiveStageView({
                       key={currentSong.id}
                       ref={referenceAudioRef}
                       src={currentSongAudioUrl}
-                      controls
                       preload="metadata"
-                      aria-label={`Reference recording for ${currentSong.title}`}
-                      className="mb-3 w-full max-w-2xl shrink-0 self-center rounded-xl"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                      className="sr-only"
                     />
                   ) : null}
 
@@ -664,13 +666,8 @@ export default function LiveStageView({
                               <button
                                 type="button"
                                 disabled={!currentSongAudioUrl}
-                                onClick={() => {
-                                  if (!currentSongAudioUrl || !currentSong) return
-                                  const token = audioSeekToken + 1
-                                  setAudioSeekToken(token)
-                                  setAudioSeekRequest({ songId: currentSong.id, seconds: line.seconds, token })
-                                }}
-                                aria-label={currentSongAudioUrl ? `Seek reference recording to ${formatAudioTimestamp(line.seconds)}` : `Audio timestamp ${formatAudioTimestamp(line.seconds)}. Attach a reference recording to enable seeking.`}
+                                onClick={() => playAudioFromTimestamp(line.seconds)}
+                                aria-label={currentSongAudioUrl ? `Play reference recording from ${formatAudioTimestamp(line.seconds)}` : `Audio timestamp ${formatAudioTimestamp(line.seconds)}. Attach a reference recording to enable playback.`}
                                 className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-3 text-sm font-semibold text-white/85 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 disabled:opacity-45 motion-reduce:transition-none"
                               >
                                 <Play className="size-4" aria-hidden="true" />
