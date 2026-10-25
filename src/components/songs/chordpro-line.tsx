@@ -32,7 +32,7 @@ export default function ChordProLine({
     return (
       <div
         className={`mb-3 flex flex-wrap items-baseline gap-x-6 gap-y-2 font-semibold ${
-          stageMode ? "justify-center text-sky-300" : "text-[var(--brand)]"
+          stageMode ? "w-full justify-center text-sky-300" : "text-[var(--brand)]"
         }`}
         style={{ fontSize: `${chordFontSize}px` }}
       >
@@ -53,7 +53,7 @@ export default function ChordProLine({
   return (
     <div
       className={`min-h-[1.8em] whitespace-pre-wrap font-medium leading-[1.9] ${
-        stageMode ? "relative text-center text-white" : "relative"
+        stageMode ? "relative w-full text-center text-white" : "relative"
       }`}
       style={{
         fontSize: `${fontSize}px`,
