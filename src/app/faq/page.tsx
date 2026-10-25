@@ -1,17 +1,10 @@
-import type { Metadata } from "next"
+import { publicPageMetadata, serializeJsonLd } from "@/lib/seo"
 import Link from "next/link"
 import { ArrowLeft, BookOpen, MessageCircle } from "lucide-react"
 import FaqSearchList from "@/components/faq-search-list"
 import { faqItems } from "@/lib/faq"
 
-export const metadata: Metadata = {
-  title: "Help & FAQ",
-  description:
-    "Find answers about WorshipFlow songs, chords, service planning, schedules, team communication, and workspace settings.",
-  alternates: {
-    canonical: "/faq",
-  },
-}
+export const metadata = publicPageMetadata("/faq", "Help & FAQ", "Find answers about WorshipFlow songs, chords, service planning, schedules, team communication, and workspace settings.", true)
 
 const faqStructuredData = {
   "@context": "https://schema.org",
@@ -28,11 +21,11 @@ const faqStructuredData = {
 
 export default function FaqPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-9">
+    <main id="main-content" className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-9">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(faqStructuredData).replace(/</g, "\\u003c"),
+          __html: serializeJsonLd(faqStructuredData),
         }}
       />
       <Link

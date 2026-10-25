@@ -1,17 +1,6 @@
-import type { Metadata } from "next"
+import { publicPageMetadata } from "@/lib/seo"
 
-export const metadata: Metadata = {
-  title: "Sign in",
-  description:
-    "Sign in to WorshipFlow to access your church worship team's songs, setlists, service plans, and schedule.",
-  alternates: {
-    canonical: "/login",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-}
+export const metadata = publicPageMetadata("/login", "Sign in", "Sign in to WorshipFlow to access your church worship team's songs, setlists, service plans, and schedule.", false)
 
 export default function LoginLayout({
   children,

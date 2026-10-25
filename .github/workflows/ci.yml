@@ -45,3 +45,6 @@ jobs:
 
       - name: Build production application
         run: npm run build
+
+      - name: Audit production HTTP metadata, public links, and indexing
+        run: npm run audit:seo:local

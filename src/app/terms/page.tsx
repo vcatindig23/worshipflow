@@ -1,12 +1,7 @@
-import type { Metadata } from "next"
+import { publicPageMetadata } from "@/lib/seo"
 import PublicLegalPage, { type LegalSection } from "@/components/public-legal-page"
 
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description:
-    "Review the terms for using WorshipFlow accounts, church workspaces, song content, team collaboration, and the application.",
-  alternates: { canonical: "/terms" },
-}
+export const metadata = publicPageMetadata("/terms", "Terms of Service", "Review the terms for using WorshipFlow accounts, church workspaces, song content, team collaboration, and the application.", true)
 
 const sections: LegalSection[] = [
   {

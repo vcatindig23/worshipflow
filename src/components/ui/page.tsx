@@ -8,7 +8,7 @@ export function PageContainer({
   ...props
 }: ComponentProps<"main">) {
   return (
-    <main className={cn("wf-page", className)} {...props}>
+    <main id="main-content" className={cn("wf-page", className)} {...props}>
       <WorkspaceBreadcrumbs />
       {children}
     </main>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { ProtectedForm } from "@/components/ui/protected-form"
 import { Input, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
@@ -299,3 +300,5 @@ export default async function EditSongPage({
     </main>
   )
 }
+
+export const metadata: Metadata = { title: "Edit song" }

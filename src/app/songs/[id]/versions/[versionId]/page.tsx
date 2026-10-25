@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -132,3 +133,5 @@ export default async function SongVersionPage({
     </main>
   )
 }
+
+export const metadata: Metadata = { title: "Song version comparison" }

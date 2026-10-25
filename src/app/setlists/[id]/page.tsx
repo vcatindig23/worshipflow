@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import Link from "next/link"
 import {
@@ -1675,3 +1676,5 @@ export default async function SetlistPage({
     </main>
   )
 }
+
+export const metadata: Metadata = { title: "Service plan" }

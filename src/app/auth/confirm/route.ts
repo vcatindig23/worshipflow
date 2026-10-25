@@ -1,4 +1,16 @@
+import type { EmailOtpType } from "@supabase/supabase-js"
 import { NextRequest, NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
+import { getSafeAuthNextPath } from "@/lib/auth-redirect"
+
+const emailTypes: EmailOtpType[] = [
+  "email",
+  "signup",
+  "invite",
+  "magiclink",
+  "recovery",
+  "email_change",
+]
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -6,19 +18,36 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type")
   const code = searchParams.get("code")
 
-  if (tokenHash && type) {
-    const redirectUrl = new URL("/auth/confirm", origin)
-    redirectUrl.searchParams.set("token_hash", tokenHash)
-    redirectUrl.searchParams.set("type", type)
-
-    return NextResponse.redirect(redirectUrl)
-  }
-
-  if (code) {
-    return NextResponse.redirect(
-      `${origin}/?auth_code=${encodeURIComponent(code)}`
+  if (code && !tokenHash) {
+    const callback = new URL("/auth/callback", origin)
+    callback.searchParams.set("code", code)
+    callback.searchParams.set(
+      "next",
+      getSafeAuthNextPath(searchParams.get("next"))
     )
+    return NextResponse.redirect(callback, 303)
   }
 
-  return NextResponse.redirect(`${origin}/error?code=confirmation_failed`)
+  if (
+    tokenHash &&
+    tokenHash.length <= 2048 &&
+    emailTypes.includes(type as EmailOtpType)
+  ) {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: type as EmailOtpType,
+    })
+    if (!error) {
+      const next =
+        type === "recovery"
+          ? "/reset-password"
+          : getSafeAuthNextPath(searchParams.get("next"))
+      return NextResponse.redirect(new URL(next, origin), 303)
+    }
+  }
+  return NextResponse.redirect(
+    new URL("/error?code=confirmation_failed", origin),
+    303
+  )
 }

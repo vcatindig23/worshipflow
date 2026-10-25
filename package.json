@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:workflow": "playwright test tests/e2e/service-team-workflow.spec.ts"
+    "test:e2e:workflow": "playwright test tests/e2e/service-team-workflow.spec.ts",
+    "audit:seo": "node scripts/audit-public-seo.mjs",
+    "audit:seo:local": "node scripts/run-seo-audit.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

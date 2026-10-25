@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 import { formatServiceTime } from "@/lib/service-scheduling"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
@@ -274,3 +275,6 @@ export default async function LiveStagePage({
     />
   )
 }
+
+
+export const metadata: Metadata = { title: "Live stage" }

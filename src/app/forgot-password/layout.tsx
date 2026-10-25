@@ -1,17 +1,6 @@
-import type { Metadata } from "next"
+import { publicPageMetadata } from "@/lib/seo"
 
-export const metadata: Metadata = {
-  title: "Reset your password",
-  description:
-    "Recover access to your WorshipFlow account by requesting a password reset link.",
-  alternates: {
-    canonical: "/forgot-password",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-}
+export const metadata = publicPageMetadata("/forgot-password", "Reset your password", "Recover access to your WorshipFlow account by requesting a password reset link.", false)
 
 export default function ForgotPasswordLayout({
   children,

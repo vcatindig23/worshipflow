@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle2 } from "lucide-react"
@@ -214,3 +215,6 @@ export default async function CompleteServicePage({
     </PageContainer>
   )
 }
+
+
+export const metadata: Metadata = { title: "Complete service" }

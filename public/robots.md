@@ -6,7 +6,9 @@ WorshipFlow is a workspace for church worship teams to organize songs, chord cha
 
 - The generated crawler directives are published at `/robots.txt`.
 - The XML sitemap is published at `/sitemap.xml`.
-- Login, sign-up, and password-recovery pages are public entry points.
+- The landing page, FAQ, privacy policy, and terms are indexable public content.
+- Login, sign-up, password-recovery, confirmation, error, and offline utility pages are accessible where needed but marked noindex.
+- Preview deployments are not intended for indexing.
 - Workspace pages, personal schedules, team chat, profiles, uploaded files, settings, and API routes contain private or account-specific information and should not be indexed.
 - Robots directives are crawl guidance, not access control. Private data must remain protected by server-side authentication and authorization.
 

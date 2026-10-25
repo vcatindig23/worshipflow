@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { ProtectedForm } from "@/components/ui/protected-form"
 import { Input, Textarea } from "@/components/ui/form-controls"
 import { PageContainer } from "@/components/ui/page"
@@ -315,3 +316,5 @@ export default async function EditSetlistPage({
     </PageContainer>
   )
 }
+
+export const metadata: Metadata = { title: "Edit setlist" }

@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -321,3 +322,6 @@ export default async function MemberProfilePage({
     </main>
   )
 }
+
+
+export const metadata: Metadata = { title: "Team member profile" }

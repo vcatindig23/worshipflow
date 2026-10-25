@@ -1,31 +1,16 @@
 import type { MetadataRoute } from "next"
-
-const siteUrl = "https://worshipflow-weld.vercel.app"
+import { protectedRouteRoots } from "@/lib/public-paths"
+import { canonicalUrl, isPreviewDeployment } from "@/lib/seo"
 
 export default function robots(): MetadataRoute.Robots {
+  if (isPreviewDeployment()) return { rules: { userAgent: "*", disallow: "/" } }
   return {
     rules: {
       userAgent: "*",
-      allow: ["/", "/faq", "/privacy", "/terms", "/login", "/signup", "/forgot-password"],
-      disallow: [
-        "/api/",
-        "/activity",
-        "/chat",
-        "/files",
-        "/my-schedule",
-        "/notifications",
-        "/onboarding",
-        "/profile",
-        "/search",
-        "/services",
-        "/setlists",
-        "/settings",
-        "/songs",
-        "/auth/",
-        "/check-email",
-        "/reset-password",
-      ],
+      allow: "/",
+      // Account entry/error pages remain crawlable so crawlers can see their noindex tags.
+      disallow: [...protectedRouteRoots, "/auth/", "/offline-stage.html", "/offline-stage.js"],
     },
-    sitemap: new URL("/sitemap.xml", siteUrl).toString(),
+    sitemap: canonicalUrl("/sitemap.xml"),
   }
 }

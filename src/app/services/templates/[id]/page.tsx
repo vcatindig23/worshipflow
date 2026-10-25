@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -259,3 +260,6 @@ export default async function ServiceTemplateDetailPage({
     </PageContainer>
   )
 }
+
+
+export const metadata: Metadata = { title: "Service template" }

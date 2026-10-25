@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 import SongPrintSheet from "@/components/songs/song-print-sheet"
 import { createClient } from "@/lib/supabase/server"
@@ -46,3 +47,6 @@ export default async function PrintSongPage({ params }: PrintSongPageProps) {
     />
   )
 }
+
+
+export const metadata: Metadata = { title: "Print song chart" }

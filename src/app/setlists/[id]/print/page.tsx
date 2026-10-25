@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft, CalendarDays, Clock3, FileText, MapPin, Music2, Users } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
@@ -366,3 +367,6 @@ export default async function PrintServicePlanPage({
     </main>
   )
 }
+
+
+export const metadata: Metadata = { title: "Print service plan" }

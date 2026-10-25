@@ -31,7 +31,7 @@ const highlights = [
 
 export default function LandingHero() {
   return (
-    <main className="wf-landing-page relative isolate min-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+    <main id="main-content" className="wf-landing-page relative isolate min-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
       <div className="wf-landing-mesh" aria-hidden="true" />
 
       <DrapeBackground

@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
 import {
@@ -575,3 +576,5 @@ export default async function SongPage({
     </main>
   )
 }
+
+export const metadata: Metadata = { title: "Song chart" }
