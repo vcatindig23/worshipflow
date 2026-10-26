@@ -12,6 +12,7 @@ describe("offline account sync route guard", () => {
     "/onboarding/join",
     "/auth/callback",
     "/auth/confirm",
+    "/auth/mfa",
   ])("skips Supabase account sync on %s", (pathname) => {
     expect(shouldSyncOfflineAccount(pathname)).toBe(false)
   })

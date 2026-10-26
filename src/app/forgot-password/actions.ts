@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { allowAuthAttempt } from "@/lib/auth-rate-limit"
+import { getAuthSiteUrl } from "@/lib/auth-security"
 
 const emailSchema = z.string().trim().toLowerCase().email().max(320)
 
@@ -13,11 +15,9 @@ export async function requestPasswordReset(formData: FormData) {
     redirect("/forgot-password?error=invalid_email")
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-  if (!siteUrl) {
-    console.error("Password reset is missing NEXT_PUBLIC_SITE_URL.")
-    redirect("/forgot-password?error=configuration")
-  }
+  if (!(await allowAuthAttempt("recovery", parsedEmail.data))) redirect("/forgot-password?error=rate_limited")
+  let siteUrl: string
+  try { siteUrl = getAuthSiteUrl() } catch { redirect("/forgot-password?error=configuration") }
 
   let redirectTo: string
   try {
@@ -34,18 +34,10 @@ export async function requestPasswordReset(formData: FormData) {
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.resetPasswordForEmail(
+  await supabase.auth.resetPasswordForEmail(
     parsedEmail.data,
     { redirectTo }
   )
-
-  if (error) {
-    console.error("Failed to request a password reset:", {
-      message: error.message,
-      status: error.status,
-    })
-    redirect("/forgot-password?error=send_failed")
-  }
 
   redirect("/forgot-password?sent=true")
 }

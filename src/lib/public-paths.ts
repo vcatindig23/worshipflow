@@ -12,6 +12,8 @@ export const publicPaths = [
   "/error",
   "/auth/confirm",
   "/auth/callback",
+  "/auth/mfa",
+  "/auth/verify",
   "/manifest.webmanifest",
   "/robots.txt",
   "/sitemap.xml",
@@ -55,6 +57,8 @@ export function needsSessionRefresh(pathname: string) {
     pathname === "/" ||
     pathname === "/login" ||
     pathname === "/signup" ||
+    pathname === "/auth/mfa" ||
+    pathname === "/reset-password" ||
     isProtectedPath(pathname)
   )
 }

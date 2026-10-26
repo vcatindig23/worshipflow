@@ -4,6 +4,8 @@
 
 Authentication uses Supabase `getClaims()` on the server. Authorization uses the current `organization_members` record queried by the verified user ID. The app's access role and tenant never come from form fields, URL parameters, client state, `user_metadata`, or worship-team positions. Removed memberships lose access without waiting for a JWT role claim to refresh.
 
+The proxy, RLS policies, and existing callable SECURITY DEFINER functions also check the current Auth session, confirmed email, session age, and enabled MFA. See [authentication](authentication.md) for the session lifecycle and account controls.
+
 `src/lib/permissions.ts` defines the role/permission contract. `src/lib/authorization.ts` provides a server context that rejects missing identity, ambiguous/failed membership queries, unknown roles, and insufficient permission. Resource reads and writes still need tenant/owner predicates; RLS and checked RPCs enforce the same boundary when an attacker skips the UI or server action.
 
 ## Role rules
@@ -37,7 +39,7 @@ The two authorization migrations:
 - Validate tenant-scoped reference-audio/resource paths; prevent ownership moves for setlists/templates.
 - Revoke future default public/client table/function grants; new migrations must explicitly grant the least privilege required.
 
-The app uses the publishable key and the caller's authenticated session. No service-role key or database owner credential is added to application code. SQL migrations/control-plane tooling use privileged access only for deployment/verification. Never put service credentials in `NEXT_PUBLIC_*` variables.
+Workspace reads and writes use the publishable key and the caller's authenticated session. A separate server-only admin client is limited to authentication rate limits and account deletion; those operations derive the target user from a verified session and require reauthentication where appropriate. SQL migrations/control-plane tooling use privileged access for deployment/verification. Never put service credentials in `NEXT_PUBLIC_*` variables.
 
 ## Permission audit
 

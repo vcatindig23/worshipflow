@@ -9,6 +9,7 @@ type ForgotPasswordPageProps = {
 }
 
 const errorMessages: Record<string, string> = {
+  rate_limited: "Too many attempts. Wait 15 minutes and try again.",
   invalid_email: "Enter a valid email address.",
   send_failed:
     "We could not send a reset email right now. Please wait a moment and try again.",

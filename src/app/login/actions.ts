@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { allowAuthAttempt } from "@/lib/auth-rate-limit"
 
 const loginSchema = z.object({
   email: z.string().trim().email().max(320),
@@ -26,6 +27,9 @@ export async function login(
     return { error: "Enter a valid email address and password." }
   }
 
+  if (!(await allowAuthAttempt("login", parsed.data.email))) {
+    return { error: "Sign-in is temporarily unavailable. Wait 15 minutes and try again." }
+  }
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -48,6 +52,17 @@ export async function login(
       error: "Your account could not be verified. Please try signing in again.",
     }
   }
+
+  const { data: sessionState, error: sessionError } = await supabase.rpc("get_account_session_state")
+  if (sessionError || !sessionState?.active) {
+    await supabase.auth.signOut({ scope: "local" })
+    return { error: "Your account could not be verified. Please try again." }
+  }
+  if (!sessionState.verified) {
+    await supabase.auth.signOut({ scope: "local" })
+    redirect("/check-email")
+  }
+  if (sessionState.mfaRequired) redirect("/auth/mfa")
 
   const { data: membership, error: membershipError } = await supabase
     .from("organization_members")

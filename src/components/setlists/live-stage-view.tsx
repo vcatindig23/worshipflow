@@ -21,7 +21,6 @@ import {
   WifiOff,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import type { Session } from "@supabase/supabase-js"
 import { buildSongDisplayLines } from "@/features/chordpro/render"
 import { getChordProMetadata, parseChordPro } from "@/features/chordpro/parser"
 import {
@@ -33,7 +32,7 @@ import {
   type LiveStageSong,
 } from "@/lib/live-stage"
 import { saveOfflineStageSnapshot } from "@/lib/offline-stage"
-import { createClient as createBrowserClient } from "@/lib/supabase/client"
+import { getBrowserSession } from "@/lib/supabase/client"
 import ChordProLine from "@/components/songs/chordpro-line"
 
 const LiveStageServicePanel = dynamic(() => import("./live-stage-service-panel"))
@@ -140,20 +139,9 @@ export default function LiveStageView({
   useEffect(() => {
     let cancelled = false
 
-    const supabase = createBrowserClient()
-    supabase.auth.getSession().then(
-      ({
-        data,
-        error,
-      }: {
-        data: { session: Session | null }
-        error: Error | null
-      }) => {
-        if (error) {
-          throw error
-        }
-
-        if (data.session?.user.id !== userId) {
+    getBrowserSession(true).then(
+      (session) => {
+        if (session?.user.id !== userId) {
           throw new Error(
             "Your session changed; sign in again to save offline charts."
           )

@@ -3,13 +3,16 @@
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { allowAuthAttempt } from "@/lib/auth-rate-limit"
+import { getAuthSiteUrl } from "@/lib/auth-security"
+import { supportsVerifiedSignup } from "@/lib/auth-provider"
 
 const signupSchema = z
   .object({
     fullName: z.string().trim().min(2).max(120),
-    email: z.string().trim().toLowerCase().email(),
-    password: z.string().min(8).max(72),
-    confirmPassword: z.string().min(8).max(72),
+    email: z.string().trim().toLowerCase().email().max(320),
+    password: z.string().min(12).max(72).refine(value => Buffer.byteLength(value, "utf8") <= 72),
+    confirmPassword: z.string().min(12).max(72),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -28,13 +31,11 @@ export async function signup(formData: FormData) {
     redirect("/signup?error=invalid_details")
   }
 
+  if (!(await allowAuthAttempt("signup", result.data.email))) redirect("/signup?error=rate_limited")
+  if (!(await supportsVerifiedSignup())) redirect("/signup?error=configuration_error")
   const supabase = await createClient()
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-
-  if (!siteUrl) {
-    redirect("/signup?error=configuration_error")
-  }
+  let siteUrl: string
+  try { siteUrl = getAuthSiteUrl() } catch { redirect("/signup?error=configuration_error") }
 
   const { data, error } = await supabase.auth.signUp({
     email: result.data.email,
@@ -47,13 +48,11 @@ export async function signup(formData: FormData) {
     },
   })
 
-  if (error) {
-    redirect("/signup?error=sign_up_failed")
-  }
-
   if (data.session) {
-    redirect("/")
+    await supabase.auth.signOut({ scope: "local" })
   }
-
+  // Existing and new accounts receive the same response. Provider email
+  // confirmation must remain enabled; no unverified session enters the workspace.
+  void error
   redirect("/check-email")
 }

@@ -40,6 +40,8 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 Use a Supabase publishable key for browser configuration. Keep secret and service-role keys out of `NEXT_PUBLIC_*` variables, and do not commit credentials.
 
+Set the server-only `SUPABASE_SECRET_KEY` from `.env.example` for authentication rate limits and account deletion. See the [account security notes](docs/authentication.md) for provider settings and verification.
+
 Before starting the app:
 
 1. Apply the migrations in [`supabase/migrations`](supabase/migrations) in timestamp order. For an existing database, check its migration history first.
@@ -74,6 +76,7 @@ The authenticated service workflow tests require a separate Supabase test projec
 
 - [Design system](docs/design-system.md) — shared components, styles, and interaction patterns.
 - [Authorization](docs/authorization.md) — roles, tenant isolation, database permissions, and audit logging.
+- [Authentication](docs/authentication.md) — sessions, account recovery, MFA, and deletion.
 - [Public-page SEO](docs/seo.md) — metadata, indexing rules, sitemap, and HTTP checks.
 - [Security policy](SECURITY.md) — vulnerability reporting and deployment controls.
 

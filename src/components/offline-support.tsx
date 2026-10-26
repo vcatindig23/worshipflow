@@ -2,7 +2,6 @@
 
 import { useEffect } from "react"
 import { usePathname } from "next/navigation"
-import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
 import { shouldSyncOfflineAccount } from "@/lib/offline-support-routes"
 import { captureInstallPrompt, clearInstallPrompt } from "@/lib/pwa-install"
 
@@ -34,93 +33,46 @@ export default function OfflineSupport() {
   }, [])
 
   useEffect(() => {
+    if (pathname !== "/login") return
+    try { localStorage.removeItem("worshipflow-offline-user") } catch {}
+    void import("@/lib/offline-stage").then(({ clearOfflineStageSnapshots }) => clearOfflineStageSnapshots()).catch(() => {})
+  }, [pathname])
+
+  useEffect(() => {
     if (!shouldSyncAccount) {
       return
     }
 
     let cancelled = false
-    let unsubscribe: (() => void) | null = null
-
-    void import("@/lib/supabase/client")
-      .then(({ createClient }) => {
-        if (cancelled) {
-          return
+    async function syncAccount() {
+      if (!navigator.onLine || document.visibilityState === "hidden") return
+      try {
+        const { getBrowserSession } = await import("@/lib/supabase/client")
+        const session = await getBrowserSession(true)
+        if (cancelled) return
+        const userId = session?.user.id ?? null
+        const previousUserId = localStorage.getItem("worshipflow-offline-user")
+        if (userId) localStorage.setItem("worshipflow-offline-user", userId)
+        else localStorage.removeItem("worshipflow-offline-user")
+        if (!userId || (previousUserId && previousUserId !== userId)) {
+          const { clearOfflineStageSnapshots } = await import("@/lib/offline-stage")
+          await clearOfflineStageSnapshots(userId ?? undefined)
         }
-
-        const supabase = createClient()
-
-        function syncOfflineUser(userId: string | null) {
-          try {
-            if (!userId) {
-              localStorage.removeItem("worshipflow-offline-user")
-              void import("@/lib/offline-stage")
-                .then(({ clearOfflineStageSnapshots }) => clearOfflineStageSnapshots())
-                .catch((error: unknown) => {
-                  console.error("Offline stage cleanup after sign-out failed:", error)
-                })
-              return
-            }
-
-            const previousUserId = localStorage.getItem(
-              "worshipflow-offline-user"
-            )
-            localStorage.setItem("worshipflow-offline-user", userId)
-
-            if (previousUserId && previousUserId !== userId) {
-              void import("@/lib/offline-stage")
-                .then(({ clearOfflineStageSnapshots }) => clearOfflineStageSnapshots(userId))
-                .catch((error: unknown) => {
-                  console.error(
-                    "Offline stage cleanup after account change failed:",
-                    error
-                  )
-                })
-            }
-          } catch (error) {
-            console.error("Unable to update offline account scope:", error)
-          }
-        }
-
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange(
-          (event: AuthChangeEvent, session: Session | null) => {
-            if (session?.user.id) {
-              syncOfflineUser(session.user.id)
-            } else if (event === "SIGNED_OUT" || event === "INITIAL_SESSION") {
-              syncOfflineUser(null)
-            }
-          }
-        )
-        unsubscribe = () => subscription.unsubscribe()
-
-        void supabase.auth.getSession().then(
-          ({ data, error }: { data: { session: Session | null }; error: Error | null }) => {
-            if (cancelled || error) {
-              if (error && !cancelled) {
-                console.error("Unable to verify offline storage account:", error)
-              }
-              return
-            }
-
-            syncOfflineUser(data.session?.user.id ?? null)
-          },
-          (error: unknown) => {
-            if (!cancelled) {
-              console.error("Unable to verify offline storage account:", error)
-            }
-          }
-        )
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          console.error("Unable to initialize offline account sync:", error)
-        }
-      })
-
+      } catch {
+        // Preserve saved stage charts during a network outage.
+      }
+    }
+    void syncAccount()
+    window.addEventListener("focus", syncAccount)
+    window.addEventListener("online", syncAccount)
+    document.addEventListener("visibilitychange", syncAccount)
+    const timer = window.setInterval(syncAccount, 60_000)
     return () => {
       cancelled = true
-      unsubscribe?.()
+      window.clearInterval(timer)
+      window.removeEventListener("focus", syncAccount)
+      window.removeEventListener("online", syncAccount)
+      document.removeEventListener("visibilitychange", syncAccount)
     }
   }, [shouldSyncAccount])
 

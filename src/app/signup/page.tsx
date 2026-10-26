@@ -13,11 +13,12 @@ type SignupPageProps = {
 
 const errorMessages: Record<string, string> = {
   invalid_details:
-    "Please check your name, email, and password. Passwords must match and contain at least 8 characters.",
+    "Check your name, email, and password. Passwords must match and contain at least 12 characters, up to 72 UTF-8 bytes.",
   sign_up_failed:
-    "We could not create your account. The email may already be registered.",
+    "We could not complete signup. Please try again later.",
+  rate_limited: "Too many attempts. Wait 15 minutes and try again.",
   configuration_error:
-    "The application is missing its site URL configuration.",
+    "Signup is temporarily unavailable. Please contact the project maintainer or try again later.",
 }
 
 const baseInputClassName =
@@ -131,14 +132,14 @@ export default async function SignupPage({
                 id="password"
                 name="password"
                 autoComplete="new-password"
-                minLength={8}
+                minLength={12}
                 maxLength={72}
                 required
-                placeholder="At least 8 characters"
+                placeholder="At least 12 characters"
                 className={passwordInputClassName}
               />
               <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-                Use at least 8 characters.
+                Use at least 12 characters.
               </p>
             </div>
 
@@ -153,7 +154,7 @@ export default async function SignupPage({
                 id="confirmPassword"
                 name="confirmPassword"
                 autoComplete="new-password"
-                minLength={8}
+                minLength={12}
                 maxLength={72}
                 required
                 placeholder="Enter your password again"

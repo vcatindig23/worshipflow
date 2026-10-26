@@ -10,8 +10,9 @@ declare
   uid uuid; n integer; denied boolean; checks integer := 0;
 begin
   foreach uid in array array[admin_a,editor_a,member_a,viewer_a,admin_b,outsider] loop
-    insert into auth.users(id,email,aud,role,raw_user_meta_data)
-    values(uid, 'authorization-'||uid::text||'@example.invalid','authenticated','authenticated','{"full_name":"Authorization test fixture"}'::jsonb);
+    insert into auth.users(id,email,aud,role,raw_user_meta_data,email_confirmed_at)
+    values(uid, 'authorization-'||uid::text||'@example.invalid','authenticated','authenticated','{"full_name":"Authorization test fixture"}'::jsonb,now());
+    insert into auth.sessions(id,user_id,created_at,updated_at) values(uid,uid,now(),now());
   end loop;
   insert into public.organizations(id,name,slug,created_by)
   values(org_a,'Authorization fixture A','auth-fixture-'||org_a::text,admin_a),
@@ -33,7 +34,7 @@ begin
     raise exception 'Legacy service item ownership is mutable';end if;
   checks := checks + 3;
 
-  perform set_config('request.jwt.claims',jsonb_build_object('sub',member_a,'role','authenticated','user_metadata',jsonb_build_object('role','admin'))::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',member_a,'session_id',member_a,'aal','aal1','role','authenticated','user_metadata',jsonb_build_object('role','admin'))::text,true);
   perform set_config('request.jwt.claim.sub',member_a::text,true);
   execute 'set local role authenticated';
   select count(*) into n from public.songs where id=song_a;
@@ -68,7 +69,7 @@ begin
   checks:=checks+5;
 
   -- A viewer can read shared planning, but cannot modify it.
-  perform set_config('request.jwt.claims',jsonb_build_object('sub',viewer_a,'role','authenticated')::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',viewer_a,'session_id',viewer_a,'aal','aal1','role','authenticated')::text,true);
   perform set_config('request.jwt.claim.sub',viewer_a::text,true);
   denied:=false;
   begin update public.setlists set name='Unauthorized' where id=service_a;
@@ -78,7 +79,7 @@ begin
   checks:=checks+1;
 
   -- The editor can edit planning, cannot complete services or cross the tenant boundary.
-  perform set_config('request.jwt.claims',jsonb_build_object('sub',editor_a,'role','authenticated')::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',editor_a,'session_id',editor_a,'aal','aal1','role','authenticated')::text,true);
   perform set_config('request.jwt.claim.sub',editor_a::text,true);
   update public.setlists set name='Authorized editor update' where id=service_a;
   get diagnostics n=row_count;
@@ -125,7 +126,7 @@ begin
   checks:=checks+3;
 
   -- A tenant administrator may promote a teammate, but never a member of another tenant.
-  perform set_config('request.jwt.claims',jsonb_build_object('sub',admin_a,'role','authenticated')::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',admin_a,'session_id',admin_a,'aal','aal1','role','authenticated')::text,true);
   perform set_config('request.jwt.claim.sub',admin_a::text,true);
   perform public.update_organization_member_role(org_a,member_a,'song_editor');
   select count(*) into n from public.permission_audit_log where organization_id=org_a and actor_id=admin_a and target_id=member_a
@@ -150,7 +151,7 @@ begin
   checks:=checks+6;
 
   -- A signed-in account with no membership has no tenant access.
-  perform set_config('request.jwt.claims',jsonb_build_object('sub',outsider,'role','authenticated')::text,true);
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',outsider,'session_id',outsider,'aal','aal1','role','authenticated')::text,true);
   perform set_config('request.jwt.claim.sub',outsider::text,true);
   select count(*) into n from public.songs where id in (song_a,song_b);
   if n<>0 then raise exception 'Outsider read shared songs';end if;

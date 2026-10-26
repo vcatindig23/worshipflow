@@ -1,17 +1,13 @@
 import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { isSameOriginRequest, RECOVERY_COOKIE } from "@/lib/auth-security"
+import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request.headers, request.url)) return NextResponse.json({ error: "Request could not be verified." }, { status: 403 })
   const supabase = await createClient()
-
-  const { data } = await supabase.auth.getClaims()
-
-  if (!data?.claims) {
-    return NextResponse.redirect(new URL("/login", request.url), 303)
-  }
-
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut({ scope: "global" })
 
   if (error) {
     return NextResponse.redirect(
@@ -21,6 +17,9 @@ export async function POST(request: NextRequest) {
   }
 
   revalidatePath("/", "layout")
-
-  return NextResponse.redirect(new URL("/login", request.url), 303)
+  ;(await cookies()).delete(RECOVERY_COOKIE)
+  const response = NextResponse.redirect(new URL("/login", request.url), 303)
+  response.headers.set("Cache-Control", "private, no-store")
+  response.headers.set("Clear-Site-Data", '"cache", "storage"')
+  return response
 }

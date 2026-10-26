@@ -7,6 +7,8 @@ const offlineAccountSyncExcludedRoutes = [
   "/onboarding",
   "/auth/callback",
   "/auth/confirm",
+  "/auth/mfa",
+  "/auth/verify",
 ] as const
 
 /**

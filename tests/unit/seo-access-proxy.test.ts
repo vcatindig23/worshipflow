@@ -3,6 +3,7 @@ import { NextRequest } from "next/server"
 const mocks = vi.hoisted(() => ({
   claims: vi.fn(),
   createServerClient: vi.fn(),
+  sessionState: vi.fn(),
 }))
 vi.mock("@supabase/ssr", () => ({
   createServerClient: mocks.createServerClient,
@@ -18,8 +19,10 @@ import { updateSession } from "../../src/lib/supabase/proxy"
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.claims.mockResolvedValue({ data: { claims: null } })
+  mocks.sessionState.mockResolvedValue({ data: { active: true, verified: true, mfaRequired: false }, error: null })
   mocks.createServerClient.mockReturnValue({
     auth: { getClaims: mocks.claims },
+    rpc: mocks.sessionState,
   })
 })
 const request = (path: string) =>
@@ -92,5 +95,30 @@ describe("crawler access and authorization", () => {
     })
     const response = await updateSession(request("/songs"))
     expect(response.cookies.get("test-session")?.value).toBe("refreshed")
+  })
+  it("refuses cross-site and missing-Origin mutations", async () => {
+    for (const origin of [undefined, "https://evil.example"]) {
+      const response = await updateSession(new NextRequest("https://worshipflow.example/auth/signout", { method: "POST", headers: origin ? { origin } : {} }))
+      expect(response.status).toBe(403)
+    }
+    expect(mocks.createServerClient).not.toHaveBeenCalled()
+  })
+  it("blocks revoked sessions even while their JWT is unexpired", async () => {
+    mocks.claims.mockResolvedValue({ data: { claims: { sub: "user-1" } } })
+    mocks.sessionState.mockResolvedValue({ data: { active: false, verified: true, mfaRequired: false } })
+    const response = await updateSession(request("/settings/security"))
+    expect(response.headers.get("location")).toBe("https://worshipflow.example/login")
+  })
+  it("routes password-only MFA accounts to verification and denies API access", async () => {
+    mocks.claims.mockResolvedValue({ data: { claims: { sub: "user-1" } } })
+    mocks.sessionState.mockResolvedValue({ data: { active: true, verified: true, mfaRequired: true } })
+    expect((await updateSession(request("/songs"))).headers.get("location")).toBe("https://worshipflow.example/auth/mfa")
+    expect((await updateSession(request("/api/auth/session"))).status).toBe(403)
+  })
+  it("upgrades older browser-readable cookies to HttpOnly", async () => {
+    const req = request("/songs")
+    req.cookies.set("sb-test-auth-token.0", "old-session")
+    const response = await updateSession(req)
+    expect(response.cookies.get("sb-test-auth-token.0")?.httpOnly).toBe(true)
   })
 })

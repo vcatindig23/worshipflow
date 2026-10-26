@@ -10,6 +10,7 @@ const labels: Record<string, string> = {
   services: "Services",
   files: "Files",
   settings: "Settings",
+  security: "Account security",
   team: "Team",
   profile: "Profile",
   church: "Church settings",

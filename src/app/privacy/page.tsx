@@ -41,13 +41,14 @@ const sections: LegalSection[] = [
     title: "Browser storage and offline charts",
     paragraphs: [
       "Some user-interface preferences and guided-tour progress may be saved in your browser so the experience can remember your choices. Live Stage can also save chart snapshots on the current device for offline access. The project documentation states that these snapshots are scoped to the signed-in account and that signing out clears them. Offline snapshots do not make the rest of the workspace available without an internet connection.",
-      "Authentication may use cookies or similar browser storage required to maintain a session. Clearing browser storage may sign you out or remove locally saved preferences and chart snapshots.",
+      "Sign-in sessions use HttpOnly cookies. Browser features receive a short-lived access token held in memory; refresh tokens are not stored in local storage. Clearing browser storage may sign you out or remove locally saved preferences and chart snapshots.",
     ],
   },
   {
     title: "Retention and deletion",
     paragraphs: [
       "Workspace information may remain available for as long as it is needed to support the workspace and its history. The available in-app controls determine what a member or administrator can remove. Provider backups, security records, and operational logs may follow separate retention periods set by the relevant hosting or backend configuration.",
+      "You can delete your account under Settings → Account security after confirming your current password. Deletion removes your sign-in, profile, memberships, messages, personal preferences, notifications, and uploads, including files shared with your team. Shared church songs, services, and historical activity remain with account references cleared. Past names or mentions in shared content may remain. Permission history is retained for security. The only administrator of a workspace must appoint another administrator first. File cleanup can be retried if interrupted; provider backups expire under the provider's retention policy.",
       "If you need help with an account or data request, contact the project maintainer through the available GitHub contact channels. Do not include personal information or account credentials in a public issue. A request may require enough information to identify the relevant account safely, and completion can depend on technical capabilities and applicable obligations.",
     ],
   },

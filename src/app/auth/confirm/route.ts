@@ -1,16 +1,6 @@
-import type { EmailOtpType } from "@supabase/supabase-js"
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
 import { getSafeAuthNextPath } from "@/lib/auth-redirect"
-
-const emailTypes: EmailOtpType[] = [
-  "email",
-  "signup",
-  "invite",
-  "magiclink",
-  "recovery",
-  "email_change",
-]
+import { isEmailConfirmation } from "@/lib/email-confirmation"
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -28,23 +18,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(callback, 303)
   }
 
-  if (
-    tokenHash &&
-    tokenHash.length <= 2048 &&
-    emailTypes.includes(type as EmailOtpType)
-  ) {
-    const supabase = await createClient()
-    const { error } = await supabase.auth.verifyOtp({
-      token_hash: tokenHash,
-      type: type as EmailOtpType,
-    })
-    if (!error) {
-      const next =
-        type === "recovery"
-          ? "/reset-password"
-          : getSafeAuthNextPath(searchParams.get("next"))
-      return NextResponse.redirect(new URL(next, origin), 303)
-    }
+  if (isEmailConfirmation(tokenHash, type)) {
+    // A GET must not sign a browser into an account. Require an intentional,
+    // same-origin form submission, and let email link scanners leave tokens intact.
+    const verify = new URL("/auth/verify", origin)
+    verify.searchParams.set("token_hash", tokenHash)
+    verify.searchParams.set("type", type!)
+    verify.searchParams.set("next", type === "recovery" ? "/reset-password" : getSafeAuthNextPath(searchParams.get("next")))
+    return NextResponse.redirect(verify, 303)
   }
   return NextResponse.redirect(
     new URL("/error?code=confirmation_failed", origin),

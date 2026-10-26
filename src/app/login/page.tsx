@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useActionState } from "react"
+import { Suspense, useActionState } from "react"
+import { useSearchParams } from "next/navigation"
+import { Feedback } from "@/components/ui/feedback"
 import {
   ArrowRight,
   KeyRound,
@@ -18,6 +20,14 @@ const initialState: LoginState = {
 
 const inputClassName =
   "h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-12 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
+
+function LoginFeedback() {
+  const params = useSearchParams()
+  if (params.get("account_deleted") === "1") return <Feedback tone="success" title="Your account has been deleted." />
+  if (params.get("deletion_failed") === "1") return <Feedback tone="error" title="Account deletion could not finish." >Your sessions were signed out and upload cleanup may have completed. Sign in to retry deletion or contact support.</Feedback>
+  if (params.get("expired") === "1") return <Feedback title="Your session ended. Sign in again to continue." />
+  return null
+}
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState)
@@ -47,6 +57,7 @@ export default function LoginPage() {
             </p>
           </div>
 
+          <div className="mb-5"><Suspense fallback={null}><LoginFeedback /></Suspense></div>
           {state.error ? (
             <div
               role="alert"

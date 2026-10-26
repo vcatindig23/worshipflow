@@ -1,6 +1,28 @@
 import { expect, test } from "@playwright/test"
 
 test.describe("WorshipFlow authentication", () => {
+  test("email token links require an intentional confirmation", async ({ page }) => {
+    await page.goto("/auth/confirm?token_hash=non-secret-test-fixture&type=signup&next=/songs")
+    await expect(page).toHaveURL(/\/auth\/verify\?/)
+    await expect(page.getByRole("heading", { name: "Confirm your email link" })).toBeVisible()
+    await expect(page.getByRole("button", { name: "Continue securely" })).toBeVisible()
+    await expect(page.locator('input[name="token_hash"]')).toHaveValue("non-secret-test-fixture")
+  })
+
+  test("cross-site signout and token requests are rejected", async ({ request }) => {
+    for (const path of ["/auth/signout", "/api/auth/session"]) {
+      const response = await request.post(path, { headers: { Origin: "https://foreign.example" } })
+      expect(response.status()).toBe(403)
+    }
+  })
+
+  test("security and MFA pages require sign-in", async ({ page }) => {
+    for (const path of ["/settings/security", "/auth/mfa"]) {
+      await page.goto(path)
+      await expect(page).toHaveURL(/\/login(?:\?|$)/)
+    }
+  })
+
   test("skip-to-main-content link focuses the main region across public routes", async ({ page }) => {
     for (const path of ["/", "/login", "/faq", "/privacy", "/terms"]) {
       await page.goto(path)

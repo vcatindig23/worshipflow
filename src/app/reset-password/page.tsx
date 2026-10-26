@@ -1,9 +1,11 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { ArrowRight, KeyRound } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
 import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import PasswordInput from "@/components/auth/password-input"
 import { createClient } from "@/lib/supabase/server"
+import { hasRecoverySession } from "@/lib/auth-recovery"
 import { updatePassword } from "./actions"
 
 type ResetPasswordPageProps = {
@@ -11,7 +13,9 @@ type ResetPasswordPageProps = {
 }
 
 const errorMessages: Record<string, string> = {
-  invalid_password: "Use a password between 8 and 72 characters.",
+  invalid_password: "Use at least 12 characters, up to 72 UTF-8 bytes.",
+  rate_limited: "Too many attempts. Wait 15 minutes and try again.",
+  signout_failed: "Your password changed, but session revocation could not be confirmed. Sign out and contact support.",
   password_mismatch: "The passwords do not match.",
   update_failed: "Your password could not be updated. Please try again.",
   expired: "This reset link has expired. Request a new one to continue.",
@@ -30,7 +34,12 @@ export default async function ResetPasswordPage({
   const supabase = await createClient()
   const { data: claimsData, error: claimsError } =
     await supabase.auth.getClaims()
-  const hasSession = Boolean(claimsData?.claims?.sub)
+  const hasSession = Boolean(claimsData?.claims?.sub) && await hasRecoverySession(supabase)
+  if (hasSession && !saved) {
+    const { data: state, error } = await supabase.rpc("get_account_session_state")
+    if (error || !state?.active) redirect("/forgot-password")
+    if (state.mfaRequired) redirect("/auth/mfa?next=/reset-password")
+  }
 
   if (claimsError) {
     console.error("Failed to validate password reset session:", {
@@ -54,13 +63,13 @@ export default async function ResetPasswordPage({
                   role="status"
                   className="mt-2 text-sm leading-6 text-[var(--muted)]"
                 >
-                  Your new password is ready to use the next time you sign in.
+                  Your password has changed and your sessions have been signed out. Sign in with your new password.
                 </p>
                 <Link
-                  href="/"
+                  href="/login"
                   className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
                 >
-                  Continue to WorshipFlow
+                  Sign in
                   <ArrowRight className="size-4" />
                 </Link>
               </>
@@ -70,7 +79,7 @@ export default async function ResetPasswordPage({
                   Choose a new password
                 </h1>
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                  Use at least 8 characters. You&apos;ll use this password the
+                  Use at least 12 characters. You&apos;ll use this password the
                   next time you sign in.
                 </p>
 
@@ -95,7 +104,7 @@ export default async function ResetPasswordPage({
                       id="password"
                       name="password"
                       required
-                      minLength={8}
+                      minLength={12}
                       maxLength={72}
                       autoComplete="new-password"
                       className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
@@ -112,7 +121,7 @@ export default async function ResetPasswordPage({
                       id="confirmPassword"
                       name="confirmPassword"
                       required
-                      minLength={8}
+                      minLength={12}
                       maxLength={72}
                       autoComplete="new-password"
                       className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"

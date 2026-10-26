@@ -21,9 +21,9 @@ export default function CheckEmailPage() {
               Check your email
             </h1>
             <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-              If email confirmation is enabled, open the confirmation link
-              sent to your email address. After verification, you&apos;ll continue
-              to your WorshipFlow setup.
+              If your address can be registered, you&apos;ll receive an email with a
+              confirmation link. Check your inbox and spam folder. If you already
+              have an account, return to sign in or reset your password.
             </p>
             <Link
               href="/login"

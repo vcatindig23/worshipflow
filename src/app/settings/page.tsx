@@ -68,6 +68,12 @@ export default async function SettingsPage() {
       <PwaInstallCard />
 
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <Link href="/settings/security" className="group wf-card p-5 sm:p-6 transition hover:border-[var(--brand)] hover:shadow-md">
+          <ShieldCheck className="size-6 text-[var(--brand)]" aria-hidden="true" />
+          <h2 className="mt-5 text-lg font-semibold">Account security</h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Manage your password, authenticator, active sessions, and account deletion.</p>
+          <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand)]">Manage security <ArrowRight className="size-4" aria-hidden="true" /></span>
+        </Link>
         <Link
           href="/settings/profile"
           className="group wf-card p-5 sm:p-6 transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"

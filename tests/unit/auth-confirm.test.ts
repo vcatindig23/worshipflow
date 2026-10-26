@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NextRequest } from "next/server"
 const mocks = vi.hoisted(() => ({ verifyOtp: vi.fn(), createClient: vi.fn() }))
 vi.mock("@/lib/supabase/server", () => ({ createClient: mocks.createClient }))
+vi.mock("@/lib/auth-recovery", () => ({ grantRecoverySession: vi.fn(async () => true) }))
 import { GET } from "../../src/app/auth/confirm/route"
 
 const origin = "https://worshipflow.example"
@@ -11,18 +12,18 @@ beforeEach(() => {
   mocks.verifyOtp.mockResolvedValue({ error: null })
 })
 describe("email confirmation redirects", () => {
-  it("verifies a token once and redirects away from the confirmation endpoint", async () => {
+  it("requires confirmation without consuming a token on GET", async () => {
     const response = await GET(
       new NextRequest(
         `${origin}/auth/confirm?token_hash=example&type=email&next=/songs`
       )
     )
-    expect(mocks.verifyOtp).toHaveBeenCalledExactlyOnceWith({
-      token_hash: "example",
-      type: "email",
-    })
+    expect(mocks.verifyOtp).not.toHaveBeenCalled()
     expect(response.status).toBe(303)
-    expect(response.headers.get("location")).toBe(`${origin}/songs`)
+    const location = new URL(response.headers.get("location")!)
+    expect(location.pathname).toBe("/auth/verify")
+    expect(location.searchParams.get("token_hash")).toBe("example")
+    expect(location.searchParams.get("next")).toBe("/songs")
   })
   it("sends recovery tokens to password reset", async () => {
     const response = await GET(
@@ -30,7 +31,9 @@ describe("email confirmation redirects", () => {
         `${origin}/auth/confirm?token_hash=example&type=recovery&next=/songs`
       )
     )
-    expect(response.headers.get("location")).toBe(`${origin}/reset-password`)
+    const location = new URL(response.headers.get("location")!)
+    expect(location.pathname).toBe("/auth/verify")
+    expect(location.searchParams.get("next")).toBe("/reset-password")
   })
   it("hands PKCE codes to the callback without placing credentials on the homepage", async () => {
     const response = await GET(
@@ -59,14 +62,8 @@ describe("email confirmation redirects", () => {
       expect(mocks.verifyOtp).not.toHaveBeenCalled()
     }
   )
-  it("handles expired tokens with one error redirect", async () => {
-    mocks.verifyOtp.mockResolvedValue({ error: { message: "expired" } })
-    const response = await GET(
-      new NextRequest(`${origin}/auth/confirm?token_hash=example&type=email`)
-    )
-    expect(response.status).toBe(303)
-    expect(response.headers.get("location")).toBe(
-      `${origin}/error?code=confirmation_failed`
-    )
+  it("does not attempt token verification during an email scanner request", async () => {
+    await GET(new NextRequest(`${origin}/auth/confirm?token_hash=example&type=email`))
+    expect(mocks.verifyOtp).not.toHaveBeenCalled()
   })
 })

@@ -183,11 +183,30 @@ const confirm = (await request("/auth/confirm", false)).response
 assert.equal(confirm.status, 303)
 assert.equal(new URL(confirm.headers.get("location"), base).pathname, "/error")
 assert.equal((await request("/auth/confirm")).response.status, 200)
+// Exercise authentication boundaries without credentials or outbound email.
+for (const path of ["/auth/signout", "/api/auth/session"]) {
+  for (const origin of [null, "https://foreign.example"]) {
+    const response = await fetch(new URL(path, base), {
+      method: "POST", redirect: "manual",
+      headers: origin ? { Origin: origin } : {},
+    })
+    assert.equal(response.status, 403, `${path} accepted an unverified mutation`)
+  }
+}
+const bridge = await fetch(new URL("/api/auth/session", base), {
+  method: "POST", headers: { Origin: base.origin, "X-WorshipFlow-Client": "browser" }, redirect: "manual",
+})
+assert.equal(bridge.status, 401)
+assert.equal((await fetch(new URL("/auth/signout", base), { redirect: "manual" })).status, 405)
+const consent = await request("/auth/confirm?token_hash=non-secret-audit-fixture&type=signup&next=/songs")
+assert.equal(consent.response.status, 200)
+assert.match(consent.body, /Continue securely/)
+assert.equal(consent.response.headers.get("referrer-policy"), "no-referrer")
 const image = await fetch(new URL("/opengraph-image", base))
 assert.match(image.headers.get("content-type") ?? "", /image\/png/)
 const png = Buffer.from(await image.arrayBuffer())
 assert.equal(png.readUInt32BE(16), 1200)
 assert.equal(png.readUInt32BE(20), 630)
 console.log(
-  `PASS ${checked.size} internal links, redirect chains, 404/401 statuses, private access, indexing headers, crawler assets, and 1200×630 social image`
+  `PASS ${checked.size} internal links, redirect chains, 404/401 statuses, private access, CSRF/token boundaries, email confirmation, indexing headers, crawler assets, and 1200×630 social image`
 )
