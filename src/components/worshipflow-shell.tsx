@@ -50,11 +50,6 @@ const navigation = [
     icon: UserRound,
   },
   {
-    href: "/my-availability",
-    label: "My Availability",
-    icon: CalendarDays,
-  },
-  {
     href: "/profile",
     label: "Profile",
     icon: ContactRound,
