@@ -4,7 +4,10 @@ import {
   ArrowRight,
   CalendarPlus,
   CalendarDays,
+  Clock3,
   ListMusic,
+  Plus,
+  Trash2,
 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
@@ -18,6 +21,7 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 import AssignmentConfirmation from "./assignment-confirmation"
 import ScheduleViewToggle from "./schedule-view-toggle"
 import { requestAssignmentSwap } from "./swap-actions"
+import { createAvailabilityEntry, deleteAvailabilityEntry } from "./availability-actions"
 
 type MySchedulePageProps = {
   searchParams: Promise<
@@ -63,6 +67,28 @@ type Period =
   | "upcoming"
   | "past"
   | "all"
+
+type AvailabilityEntry = {
+  id: string
+  entry_type: "blockout" | "recurring"
+  title: string | null
+  reason: string | null
+  starts_on: string | null
+  ends_on: string | null
+  weekdays: number[] | null
+  start_time: string | null
+  end_time: string | null
+  timezone: string
+}
+
+const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+function formatAvailabilityTime(value: string | null) {
+  if (!value) return ""
+  const [hour, minute] = value.split(":").map(Number)
+  const displayHour = hour % 12 || 12
+  return `${displayHour}:${String(minute).padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`
+}
 
 function getParam(
   value: string | string[] | undefined
@@ -211,6 +237,21 @@ export default async function MySchedulePage({
     await hasServiceTimeColumn(
       supabase
     )
+
+
+  // Availability is optional for older deployments until the new migration is applied.
+  // Keep My Schedule usable if that table has not been deployed yet.
+  const {
+    data: availabilityData,
+    error: availabilityLoadError,
+  } = await supabase
+    .from("member_availability")
+    .select("id, entry_type, title, reason, starts_on, ends_on, weekdays, start_time, end_time, timezone")
+    .eq("organization_id", workspace.organizationId)
+    .eq("user_id", workspace.userId)
+    .order("created_at", { ascending: false })
+
+  const availabilityEntries = (availabilityData ?? []) as AvailabilityEntry[]
 
   const {
     data: assignments,
@@ -495,6 +536,164 @@ export default async function MySchedulePage({
           {swapErrorMessages[getParam(params.swapError) ?? ""] ?? "The swap request could not be completed."}
         </div>
       ) : null}
+
+      <section
+        id="availability"
+        className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6"
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--brand)]">
+              <CalendarDays className="size-3.5" />
+              Team coordination
+            </span>
+            <h2 className="mt-1 text-lg font-semibold text-[var(--foreground)]">
+              Availability &amp; time off
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+              Add dates you cannot serve or set your usual weekly availability so leaders can plan assignments with better context.
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
+            {availabilityEntries.length} {availabilityEntries.length === 1 ? "entry" : "entries"}
+          </span>
+        </div>
+
+        {getParam(params.availabilitySaved) === "1" ? (
+          <p role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            Your availability has been updated.
+          </p>
+        ) : null}
+        {getParam(params.availabilityError) ? (
+          <p role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+            {getParam(params.availabilityError) === "invalid_entry"
+              ? "Check the dates, days, and times and try again."
+              : getParam(params.availabilityError) === "delete_failed"
+                ? "This availability entry could not be removed. Please try again."
+                : "Your availability could not be saved. Please try again."}
+          </p>
+        ) : null}
+        {availabilityLoadError ? (
+          <p role="status" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+            Availability is temporarily unavailable. Your existing service schedule is still available; ask your workspace administrator to verify that the availability migration has been applied.
+          </p>
+        ) : (
+          <>
+            <div className="mt-5 grid gap-4 xl:grid-cols-2">
+              <form action={createAvailabilityEntry} className="space-y-3 rounded-xl border border-[var(--border)] p-4">
+                <input type="hidden" name="entryType" value="blockout" />
+                <input type="hidden" name="timezone" value={workspace.organizationTimezone} />
+                <div>
+                  <h3 className="text-sm font-semibold text-[var(--foreground)]">Unavailable dates</h3>
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Use this for leave, travel, or a service you cannot attend.</p>
+                </div>
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  Title (optional)
+                  <input name="title" maxLength={120} placeholder="e.g. Family trip" className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="block text-sm font-medium text-[var(--foreground)]">
+                    Start date
+                    <input type="date" name="startsOn" required className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                  </label>
+                  <label className="block text-sm font-medium text-[var(--foreground)]">
+                    End date
+                    <input type="date" name="endsOn" required className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                  </label>
+                </div>
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  Note (optional)
+                  <textarea name="reason" maxLength={500} rows={2} placeholder="Add context for your team" className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white p-3 text-sm" />
+                </label>
+                <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-sm font-semibold text-white transition hover:opacity-90">
+                  <Plus className="size-4" />
+                  Add blockout
+                </button>
+              </form>
+
+              <form action={createAvailabilityEntry} className="space-y-3 rounded-xl border border-[var(--border)] p-4">
+                <input type="hidden" name="entryType" value="recurring" />
+                <input type="hidden" name="timezone" value={workspace.organizationTimezone} />
+                <div>
+                  <h3 className="text-sm font-semibold text-[var(--foreground)]">Weekly availability</h3>
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Choose the days and times you are usually available to serve.</p>
+                </div>
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  Title (optional)
+                  <input name="title" maxLength={120} placeholder="e.g. Weekday evenings" className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                </label>
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium text-[var(--foreground)]">Days of the week</legend>
+                  <div className="flex flex-wrap gap-2">
+                    {weekdayLabels.map((day, index) => (
+                      <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-2 text-xs text-[var(--foreground)]">
+                        <input type="checkbox" name="weekdays" value={index} />
+                        {day}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="block text-sm font-medium text-[var(--foreground)]">
+                    Available from
+                    <input type="time" name="startTime" required className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                  </label>
+                  <label className="block text-sm font-medium text-[var(--foreground)]">
+                    Available until
+                    <input type="time" name="endTime" required className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                  </label>
+                </div>
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  Note (optional)
+                  <textarea name="reason" maxLength={500} rows={2} placeholder="Add context for your team" className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white p-3 text-sm" />
+                </label>
+                <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-sm font-semibold text-white transition hover:opacity-90">
+                  <Plus className="size-4" />
+                  Add weekly availability
+                </button>
+              </form>
+            </div>
+
+            <div className="mt-5">
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">Saved entries</h3>
+              {availabilityEntries.length === 0 ? (
+                <div className="mt-3 rounded-xl border border-dashed border-[var(--border)] px-4 py-6 text-center">
+                  <Clock3 className="mx-auto size-5 text-[var(--muted)]" />
+                  <p className="mt-2 text-sm font-medium text-[var(--foreground)]">No availability entries yet</p>
+                  <p className="mt-1 text-xs text-[var(--muted)]">Your blockouts and recurring availability will appear here.</p>
+                </div>
+              ) : (
+                <div className="mt-3 grid gap-2 md:grid-cols-2">
+                  {availabilityEntries.map((entry) => (
+                    <article key={entry.id} className="flex items-start justify-between gap-3 rounded-xl border border-[var(--border)] p-3.5">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--brand)]">
+                          {entry.entry_type === "blockout" ? "Unavailable" : "Weekly availability"}
+                        </span>
+                        <h4 className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                          {entry.title || (entry.entry_type === "blockout" ? "Unavailable dates" : "Recurring availability")}
+                        </h4>
+                        <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                          {entry.entry_type === "blockout"
+                            ? `${formatDate(entry.starts_on)} – ${formatDate(entry.ends_on)}`
+                            : `${(entry.weekdays ?? []).slice().sort((a, b) => a - b).map((day) => weekdayLabels[day]).join(", ")} · ${formatAvailabilityTime(entry.start_time)}–${formatAvailabilityTime(entry.end_time)}`}
+                        </p>
+                        {entry.reason ? <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">{entry.reason}</p> : null}
+                      </div>
+                      <form action={deleteAvailabilityEntry} className="shrink-0">
+                        <input type="hidden" name="id" value={entry.id} />
+                        <button type="submit" aria-label={`Delete ${entry.title || "availability entry"}`} className="rounded-lg p-2 text-[var(--muted)] transition hover:bg-rose-50 hover:text-rose-700">
+                          <Trash2 className="size-4" />
+                        </button>
+                      </form>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </section>
 
       <nav
         aria-label="My service schedule"
