@@ -269,11 +269,17 @@ function GuitarShapeSelector({ root, intervals }: { root: number; intervals: num
 }
 
 function getPianoVoicing(root: number, intervals: number[], inversionIndex: number) {
-  const rootRelativeTones = Array.from(new Set(intervals.map((interval) => interval % 12))).sort((a, b) => a - b)
-  const rotation = inversionIndex % rootRelativeTones.length
+  const toneIntervals = new Map<number, number>()
+  intervals.forEach((interval) => {
+    const pitchClass = interval % 12
+    const existing = toneIntervals.get(pitchClass)
+    if (existing === undefined || interval < existing) toneIntervals.set(pitchClass, interval)
+  })
+  const ordered = Array.from(toneIntervals.values()).sort((a, b) => a - b)
+  const rotation = inversionIndex % ordered.length
   const rotated = [
-    ...rootRelativeTones.slice(rotation),
-    ...rootRelativeTones.slice(0, rotation).map((interval) => interval + 12),
+    ...ordered.slice(rotation),
+    ...ordered.slice(0, rotation).map((interval) => interval + 12),
   ]
   return rotated.map((interval) => {
     const pitchClass = (root + interval) % 12
