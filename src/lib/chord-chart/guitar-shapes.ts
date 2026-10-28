@@ -184,12 +184,21 @@ function shapeFromStoredPosition(
   )
 }
 
-function selectUsefulShapes(shapes: GuitarShape[], root: number) {
+function selectUsefulShapes(
+  shapes: GuitarShape[],
+  root: number,
+  intervals: number[]
+) {
+  const chordOrder = Array.from(
+    new Set(intervals.map((interval) => (root + interval) % 12))
+  )
+  const bassRank = (pitchClass: number) => {
+    const rank = chordOrder.indexOf(pitchClass)
+    return rank < 0 ? Number.MAX_SAFE_INTEGER : rank
+  }
   const sorted = [...shapes].sort((a, b) => {
-    const aRootBass = a.bassPitchClass === root ? 0 : 1
-    const bRootBass = b.bassPitchClass === root ? 0 : 1
     return (
-      aRootBass - bRootBass ||
+      bassRank(a.bassPitchClass) - bassRank(b.bassPitchClass) ||
       a.minFret - b.minFret ||
       a.span - b.span ||
       b.notes.length - a.notes.length
@@ -284,7 +293,7 @@ function generateFallbackShapes(
     visit(0, window.start, window.end)
   }
 
-  return selectUsefulShapes(candidates, root)
+  return selectUsefulShapes(candidates, root, intervals)
 }
 
 export function generateGuitarShapes(
@@ -302,7 +311,7 @@ export function generateGuitarShapes(
     .filter((shape): shape is GuitarShape => shape !== null)
 
   if (referenceShapes.length > 0) {
-    return selectUsefulShapes(referenceShapes, root)
+    return selectUsefulShapes(referenceShapes, root, intervals)
   }
 
   return generateFallbackShapes(root, intervals)
