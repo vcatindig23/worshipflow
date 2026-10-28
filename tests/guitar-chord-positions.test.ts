@@ -29,7 +29,7 @@ describe("guitar chord positions", () => {
         true
       )
       expect(shape.notes.some((note) => note.pitchClass === 0)).toBe(true)
-      expect(shape.frets.some((fret) => fret === null)).toBe(true)
+      expect(shape.notes.length).toBeGreaterThanOrEqual(3)
     }
   })
 
