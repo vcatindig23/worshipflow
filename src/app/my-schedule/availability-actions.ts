@@ -68,7 +68,7 @@ export async function createAvailabilityEntry(formData: FormData) {
     timezone: String(formData.get("timezone") ?? "Asia/Manila").trim(),
   })
 
-  if (!parsed.success) availabilityRedirect("invalid_entry")
+  if (!parsed.success) return availabilityRedirect("invalid_entry")
 
   const entry = parsed.data
   const { error } = await supabase.from("member_availability").insert({
