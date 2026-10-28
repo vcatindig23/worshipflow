@@ -16,6 +16,26 @@ describe("guitar chord positions", () => {
     expect(openCShape?.fingers).toEqual([0, 3, 2, 0, 1, 0])
   })
 
+  it("orders available shapes by chord inversion rather than fret position", () => {
+    const shapes = generateGuitarShapes(0, [0, 4, 7], "major")
+    const firstOccurrenceByBass = new Map<number, number>()
+
+    shapes.forEach((shape, index) => {
+      if (!firstOccurrenceByBass.has(shape.bassPitchClass)) {
+        firstOccurrenceByBass.set(shape.bassPitchClass, index)
+      }
+    })
+
+    const inversionRanks = Array.from(firstOccurrenceByBass.keys()).map(
+      (pitchClass) => [0, 4, 7].indexOf(pitchClass)
+    )
+
+    expect(inversionRanks[0]).toBe(0)
+    expect(inversionRanks).toEqual(
+      [...inversionRanks].sort((a, b) => a - b)
+    )
+  })
+
   it("keeps reference voicings within the selected chord tones", () => {
     const intervals = [0, 4, 7, 10]
     const expectedTones = new Set(intervals.map((interval) => interval % 12))
