@@ -9,6 +9,7 @@ import {
   ContactRound,
   ChevronRight,
   FolderOpen,
+  Guitar,
   LayoutDashboard,
   ListMusic,
   LogOut,
@@ -43,6 +44,11 @@ const navigation = [
     label: "Songs",
     href: "/songs",
     icon: Music2,
+  },
+  {
+    label: "Chord Chart",
+    href: "/chord-chart",
+    icon: Guitar,
   },
   {
     label: "Setlists",
