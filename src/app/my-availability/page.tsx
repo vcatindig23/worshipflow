@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { CalendarDays, Clock3, Plus, Trash2 } from "lucide-react"
-import { PageContainer } from "@/components/page-container"
-import { PageHeader } from "@/components/page-header"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import { requireWorkspaceAuthorization } from "@/lib/authorization"
 import { createAvailabilityEntry, deleteAvailabilityEntry } from "./actions"
 
