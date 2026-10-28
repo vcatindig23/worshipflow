@@ -28,6 +28,7 @@ export const publicPaths = [
 export const protectedRouteRoots = [
   "/activity",
   "/chat",
+  "/chord-chart",
   "/files",
   "/my-schedule",
   "/notifications",
