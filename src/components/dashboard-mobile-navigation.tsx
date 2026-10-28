@@ -9,6 +9,7 @@ import {
   CalendarDays,
   ContactRound,
   FileText,
+  Guitar,
   LayoutDashboard,
   ListMusic,
   LogOut,
@@ -32,6 +33,7 @@ type DashboardMobileNavigationProps = {
 const navigation = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/songs", label: "Songs", icon: Music2 },
+  { href: "/chord-chart", label: "Chord Chart", icon: Guitar },
   { href: "/setlists", label: "Setlists", icon: ListMusic },
   { href: "/services", label: "Services", icon: CalendarDays },
   { href: "/my-schedule", label: "My Schedule", icon: CalendarClock },
