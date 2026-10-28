@@ -27,20 +27,14 @@ create table if not exists public.member_availability (
   constraint member_availability_date_range_check
     check (
       (entry_type = 'blockout' and starts_on is not null and ends_on is not null
-        and ends_on >= starts_on and weekdays is null)
+        and ends_on >= starts_on and weekdays is null
+        and start_time is null and end_time is null)
       or
       (entry_type = 'recurring' and starts_on is null and ends_on is null
         and weekdays is not null and cardinality(weekdays) > 0
+        and weekdays <@ array[0,1,2,3,4,5,6]::smallint[]
         and start_time is not null and end_time is not null
         and start_time < end_time)
-    ),
-  constraint member_availability_weekdays_check
-    check (
-      weekdays is null or
-      (weekdays <@ array[0,1,2,3,4,5,6]::smallint[]
-        and cardinality(weekdays) = cardinality(
-          array(select distinct weekday from unnest(weekdays) as weekday)
-        ))
     )
 );
 
