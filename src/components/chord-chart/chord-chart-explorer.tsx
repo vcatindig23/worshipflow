@@ -228,7 +228,7 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
             const y = top + stringIndex * stringGap
             const fret = shape.frets[stringIndex]
             const note = shape.notes.find((item) => item.stringIndex === stringIndex)
-            const inWindow = fret !== null && fret >= startFret && fret <= endFret
+            const inWindow = fret !== null && (fret === 0 || (fret >= startFret && fret <= endFret))
             const x = fret === 0 ? left - 17 : left + (fret! - startFret + 0.5) * fretWidth
             return <g key={stringIndex}>
               <text x="18" y={y + 4} fill="#68645d" fontSize="12" fontWeight="600" textAnchor="middle">{STRING_NAMES[stringIndex]}</text>
@@ -257,7 +257,11 @@ function GuitarShapeSelector({ root, intervals }: { root: number; intervals: num
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2" aria-label="Select guitar inversion or voicing">
-        {shapes.map((item, index) => <button key={item.frets.join("-")} type="button" onClick={() => setSelectedIndex(index)} aria-pressed={safeIndex === index} className={"rounded-lg border px-3 py-2 text-xs font-semibold transition " + (safeIndex === index ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")}>{getInversionName(root, item.bassPitchClass, chordOrder)}{index > 0 && item.bassPitchClass === shapes[index - 1]?.bassPitchClass ? " · Voicing " + (index + 1) : ""}</button>)}
+        {shapes.map((item, index) => {
+          const sameBassCount = shapes.slice(0, index).filter((previous) => previous.bassPitchClass === item.bassPitchClass).length
+          const label = getInversionName(root, item.bassPitchClass, chordOrder) + (sameBassCount ? " · Voicing " + (sameBassCount + 1) : "")
+          return <button key={item.frets.join("-")} type="button" onClick={() => setSelectedIndex(index)} aria-pressed={safeIndex === index} className={"rounded-lg border px-3 py-2 text-xs font-semibold transition " + (safeIndex === index ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")}>{label}</button>
+        })}
       </div>
       <GuitarShapeDiagram shape={shape} root={root} chordOrder={chordOrder} index={safeIndex} total={shapes.length} />
     </div>
@@ -265,14 +269,19 @@ function GuitarShapeSelector({ root, intervals }: { root: number; intervals: num
 }
 
 function getPianoVoicing(root: number, intervals: number[], inversionIndex: number) {
-  const ordered = Array.from(new Set(intervals.map((interval) => interval % 12))).sort((a, b) => a - b)
-  const rootIndex = ordered.indexOf(root % 12)
-  const rootFirst = [...ordered.slice(rootIndex), ...ordered.slice(0, rootIndex)]
-  const rotation = inversionIndex % rootFirst.length
-  const rotated = [...rootFirst.slice(rotation), ...rootFirst.slice(0, rotation)]
-  let notes = rotated.map((pitchClass, index) => ({ pitchClass, midi: 48 + pitchClass + (pitchClass < root ? 12 : 0) + (index >= rotated.length - rotation && rotation > 0 ? 12 : 0) }))
-  notes = notes.map((note) => ({ ...note, midi: note.midi > 72 ? note.midi - 12 : note.midi }))
-  return notes.filter((note, index, all) => all.findIndex((candidate) => candidate.pitchClass === note.pitchClass) === index)
+  const rootRelativeTones = Array.from(new Set(intervals.map((interval) => interval % 12))).sort((a, b) => a - b)
+  const rotation = inversionIndex % rootRelativeTones.length
+  const rotated = [
+    ...rootRelativeTones.slice(rotation),
+    ...rootRelativeTones.slice(0, rotation).map((interval) => interval + 12),
+  ]
+  return rotated.map((interval) => {
+    const pitchClass = (root + interval) % 12
+    let midi = 48 + root + interval
+    while (midi > 72) midi -= 12
+    while (midi < 48) midi += 12
+    return { pitchClass, midi }
+  }).filter((note, index, all) => all.findIndex((candidate) => candidate.midi === note.midi) === index)
 }
 
 function PianoKeyboard({ root, intervals, inversionIndex }: { root: number; intervals: number[]; inversionIndex: number }) {
