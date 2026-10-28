@@ -35,6 +35,11 @@ const navigation = [
     icon: Music2,
   },
   {
+    href: "/chord-chart",
+    label: "Chord Chart",
+    icon: Music2,
+  },
+  {
     href: "/setlists",
     label: "Setlists",
     icon: BookOpen,
