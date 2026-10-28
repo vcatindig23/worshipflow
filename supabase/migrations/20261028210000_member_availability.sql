@@ -78,7 +78,17 @@ create policy "Members can view organization availability"
 on public.member_availability
 for select
 to authenticated
-using ((select private.is_org_member(organization_id)));
+using (
+  (user_id = (select auth.uid())
+    and (select private.is_org_member(organization_id)))
+  or exists (
+    select 1
+    from public.organization_members om
+    where om.organization_id = member_availability.organization_id
+      and om.user_id = (select auth.uid())
+      and om.role in ('admin', 'worship_leader', 'song_editor')
+  )
+);
 
 drop policy if exists "Members manage their own availability"
   on public.member_availability;
