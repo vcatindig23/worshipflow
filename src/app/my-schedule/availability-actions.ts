@@ -18,11 +18,11 @@ const entrySchema = z.object({
   entryType: z.enum(["blockout", "recurring"]),
   title: z.string().trim().max(120).optional(),
   reason: z.string().trim().max(500).optional(),
-  startsOn: z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/).optional(),
-  endsOn: z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/).optional(),
+  startsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  endsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   weekdays: z.array(z.coerce.number().int().min(0).max(6)).optional(),
-  startTime: z.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).optional(),
-  endTime: z.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).optional(),
+  startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
+  endTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
   timezone: validTimezone,
 }).superRefine((entry, ctx) => {
   if (entry.entryType === "blockout") {
