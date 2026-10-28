@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { AudioLines, Guitar, Piano, Volume2 } from "lucide-react"
-import { generateGuitarShapes, GUITAR_STRING_NAMES, GUITAR_STRING_OPEN_MIDI, type GuitarShape } from "@/lib/chord-chart/guitar-shapes"
+import { generateGuitarShapes, GUITAR_STRING_NAMES, type GuitarShape } from "@/lib/chord-chart/guitar-shapes"
 
 type Instrument = "guitar" | "piano"
 type ChordType = { id: string; label: string; suffix: string; group: string; intervals: number[] }
