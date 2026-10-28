@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { AudioLines, Guitar, Piano, Volume2 } from "lucide-react"
+import { generateGuitarShapes, GUITAR_STRING_NAMES, GUITAR_STRING_OPEN_MIDI, type GuitarShape } from "@/lib/chord-chart/guitar-shapes"
 
 type Instrument = "guitar" | "piano"
 type ChordType = { id: string; label: string; suffix: string; group: string; intervals: number[] }
@@ -112,12 +113,6 @@ function playChordSample(root: number, intervals: number[], instrument: Instrume
   window.setTimeout(() => void context.close(), 2200)
 }
 
-type GuitarNote = { stringIndex: number; fret: number; midi: number; pitchClass: number }
-type GuitarShape = { frets: (number | null)[]; notes: GuitarNote[]; bassPitchClass: number; minFret: number; span: number }
-
-const STRING_MIDI = [64, 59, 55, 50, 45, 40]
-const STRING_NAMES = ["E", "B", "G", "D", "A", "E"]
-
 function getChordOrder(root: number, intervals: number[]) {
   return Array.from(new Set(intervals.map((interval) => (root + interval) % 12)))
 }
@@ -129,79 +124,26 @@ function getInversionName(root: number, bassPitchClass: number, chordOrder: numb
   return (suffixes[index] ?? (index + "th")) + " inversion"
 }
 
-function generateGuitarShapes(root: number, intervals: number[]): GuitarShape[] {
-  const chordOrder = getChordOrder(root, intervals)
-  const chordPitchClasses = new Set(chordOrder)
-  const shapes: GuitarShape[] = []
-  const seen = new Set<string>()
-  const frets: (number | null)[] = Array(6).fill(null)
-
-  function visit(stringIndex: number) {
-    if (stringIndex === 6) {
-      const notes: GuitarNote[] = []
-      frets.forEach((fret, index) => {
-        if (fret === null) return
-        const midi = STRING_MIDI[index] + fret
-        notes.push({ stringIndex: index, fret, midi, pitchClass: midi % 12 })
-      })
-      if (notes.length < 3) return
-      const uniqueTones = new Set(notes.map((note) => note.pitchClass))
-      if (!uniqueTones.has(root)) return
-      const requiredThirdOrSuspension = chordOrder.find((tone) => tone === (root + 3) % 12 || tone === (root + 4) % 12 || tone === (root + 2) % 12 || tone === (root + 5) % 12)
-      if (requiredThirdOrSuspension !== undefined && !uniqueTones.has(requiredThirdOrSuspension)) return
-      const playedFrets = notes.map((note) => note.fret).filter((fret) => fret > 0)
-      const minFret = playedFrets.length ? Math.min(...playedFrets) : 0
-      const maxFret = playedFrets.length ? Math.max(...playedFrets) : 0
-      if (maxFret - minFret > 4) return
-      const key = frets.map((fret) => fret === null ? "x" : fret).join("-")
-      if (seen.has(key)) return
-      seen.add(key)
-      const bass = notes.reduce((lowest, note) => note.midi < lowest.midi ? note : lowest, notes[0])
-      shapes.push({ frets: [...frets], notes, bassPitchClass: bass.pitchClass, minFret, span: maxFret - minFret })
-      return
-    }
-
-    frets[stringIndex] = null
-    visit(stringIndex + 1)
-    for (let fret = 0; fret <= 15; fret++) {
-      const pitchClass = (STRING_MIDI[stringIndex] + fret) % 12
-      if (!chordPitchClasses.has(pitchClass)) continue
-      frets[stringIndex] = fret
-      visit(stringIndex + 1)
-    }
-    frets[stringIndex] = null
-  }
-
-  visit(0)
-  shapes.sort((a, b) => a.span - b.span || a.notes.length - b.notes.length || a.minFret - b.minFret)
-  const selected: GuitarShape[] = []
-  const usedBass = new Set<number>()
-  for (const shape of shapes) {
-    if (usedBass.has(shape.bassPitchClass)) continue
-    selected.push(shape)
-    usedBass.add(shape.bassPitchClass)
-    if (selected.length === 5) break
-  }
-  if (selected.length < 5) {
-    for (const shape of shapes) {
-      if (selected.some((item) => item.frets.join(",") === shape.frets.join(","))) continue
-      selected.push(shape)
-      if (selected.length === 5) break
-    }
-  }
-  return selected
-}
-
 function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: GuitarShape; root: number; chordOrder: number[]; index: number; total: number }) {
-  const left = 56
-  const fretWidth = 46
-  const top = 48
-  const stringGap = 31
-  const bottom = top + stringGap * 5
+  const left = 68
+  const stringGap = 43
+  const gridTop = 58
+  const fretGap = 34
+  const fretRows = 5
+  const gridBottom = gridTop + fretGap * fretRows
+  const right = left + stringGap * 5
+  const width = right + 34
+  const height = 278
   const startFret = shape.minFret > 0 ? shape.minFret : 1
-  const endFret = startFret + 4
-  const width = left + fretWidth * 5 + 20
-  const height = 242
+  const fretCode = shape.frets.map((fret) => fret === null ? "x" : String(fret))
+  const fingering = shape.frets.some((fret) => fret !== null && fret >= 10)
+    ? fretCode.join("-")
+    : fretCode.join("")
+  const stringNotes = shape.frets.map((fret, stringIndex) => {
+    if (fret === null) return "×"
+    const note = shape.notes.find((item) => item.stringIndex === stringIndex)
+    return note ? NOTE_NAMES[note.pitchClass] : "—"
+  })
   const playedNotes = shape.notes.map((note) => NOTE_NAMES[note.pitchClass]).join(" · ")
   const inversion = getInversionName(root, shape.bassPitchClass, chordOrder)
 
@@ -210,43 +152,180 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-[var(--foreground)]">{inversion}</p>
-          <p className="mt-1 text-xs text-[var(--muted)]">{total ? "Shape " + (index + 1) + " of " + total : "No shape found"} · Bass: {NOTE_NAMES[shape.bassPitchClass]}</p>
+          <p className="mt-1 text-xs text-[var(--muted)]">
+            Shape {index + 1} of {total} · Bass: {NOTE_NAMES[shape.bassPitchClass]}
+          </p>
         </div>
-        <span className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 font-mono text-xs text-[var(--foreground)]">
-          {shape.frets.slice().reverse().map((fret) => fret === null ? "×" : fret === 0 ? "0" : fret).join("  ")}
+        <span className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 font-mono text-xs text-[var(--foreground)]" aria-label={"String frets from low E to high E: " + fingering}>
+          {fingering}
         </span>
       </div>
       <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[#fbfaf7] p-3">
-        <svg role="img" aria-label={"Guitar chord shape " + (index + 1) + ": " + inversion + ". Frets shown for six strings."} viewBox={"0 0 " + width + " " + height} className="block w-full min-w-[300px] max-w-[430px]">
-          <rect x={left} y={top - 10} width={fretWidth * 5} height={stringGap * 5 + 20} rx="3" fill="#e8d7b5" />
-          {Array.from({ length: 6 }, (_, fretIndex) => {
-            const fret = startFret - 1 + fretIndex
-            const x = left + fretIndex * fretWidth
-            return <g key={fret}><line x1={x} y1={top - 10} x2={x} y2={bottom + 10} stroke={fret === 0 ? "#6d6252" : "#b6a58b"} strokeWidth={fret === 0 ? 3 : 1.2} />{fretIndex < 5 ? <text x={x + fretWidth / 2} y="18" fill="#68645d" fontSize="11" textAnchor="middle">{fret + 1}</text> : null}</g>
+        <svg
+          role="img"
+          aria-label={"Guitar chord diagram, low E string on the left and high E on the right. " + inversion + ". String frets low to high: " + fingering}
+          viewBox={"0 0 " + width + " " + height}
+          className="mx-auto block w-full min-w-[300px] max-w-[390px]"
+        >
+          <rect x={left - 11} y={gridTop - 1} width={right - left + 22} height={gridBottom - gridTop + 2} rx="2" fill="#efe3cb" />
+          {Array.from({ length: fretRows + 1 }, (_, row) => {
+            const y = gridTop + row * fretGap
+            return (
+              <line
+                key={"fret-" + row}
+                x1={left - 10}
+                y1={y}
+                x2={right + 10}
+                y2={y}
+                stroke={row === 0 && startFret === 1 ? "#6d6252" : "#b7a78d"}
+                strokeWidth={row === 0 && startFret === 1 ? 5 : 1.4}
+              />
+            )
           })}
-          {STRING_MIDI.map((openMidi, stringIndex) => {
-            const y = top + stringIndex * stringGap
+          {Array.from({ length: fretRows }, (_, row) => (
+            <text
+              key={"fret-number-" + row}
+              x="29"
+              y={gridTop + (row + 0.5) * fretGap + 4}
+              fill="#777064"
+              fontSize="10"
+              textAnchor="middle"
+            >
+              {startFret + row}
+            </text>
+          ))}
+          {startFret > 1 ? (
+            <text x="28" y={gridTop - 10} fill="#68645d" fontSize="10" fontWeight="700" textAnchor="middle">
+              {startFret}fr
+            </text>
+          ) : null}
+          {GUITAR_STRING_NAMES.map((name, stringIndex) => {
+            const x = left + stringIndex * stringGap
             const fret = shape.frets[stringIndex]
             const note = shape.notes.find((item) => item.stringIndex === stringIndex)
-            const inWindow = fret !== null && (fret === 0 || (fret >= startFret && fret <= endFret))
-            const x = fret === 0 ? left - 17 : left + (fret! - startFret + 0.5) * fretWidth
-            return <g key={stringIndex}>
-              <text x="18" y={y + 4} fill="#68645d" fontSize="12" fontWeight="600" textAnchor="middle">{STRING_NAMES[stringIndex]}</text>
-              <line x1={left} y1={y} x2={left + fretWidth * 5} y2={y} stroke="#7d7567" strokeWidth={2.3 - stringIndex * 0.2} />
-              {fret === null ? <text x={left - 17} y={y + 4} fill="#9b493e" fontSize="14" fontWeight="700" textAnchor="middle">×</text> : fret === 0 ? <circle cx={left - 17} cy={y} r="5" fill="none" stroke="#817667" strokeWidth="1.5" /> : null}
-              {note && inWindow ? <g><circle cx={x} cy={y} r="11" fill={note.pitchClass === root ? "var(--brand)" : "var(--brand-soft)"} stroke={note.pitchClass === root ? "var(--brand)" : "#cad7ca"} /><text x={x} y={y + 3.3} fill={note.pitchClass === root ? "#ffffff" : "#26352c"} fontSize="8.5" fontWeight="700" textAnchor="middle">{NOTE_NAMES[note.pitchClass]}</text></g> : null}
-            </g>
+            const stringThickness = [3, 2.65, 2.3, 1.95, 1.6, 1.3][stringIndex]
+
+            return (
+              <g key={"string-" + stringIndex}>
+                <text x={x} y="14" fill="#514d45" fontSize="11" fontWeight="700" textAnchor="middle">
+                  {name}
+                </text>
+                <line
+                  x1={x}
+                  y1={gridTop}
+                  x2={x}
+                  y2={gridBottom}
+                  stroke="#8d8373"
+                  strokeWidth={stringThickness}
+                />
+                {fret === null ? (
+                  <text x={x} y="43" fill="#a14c42" fontSize="17" fontWeight="700" textAnchor="middle">
+                    ×
+                  </text>
+                ) : fret === 0 ? (
+                  <text
+                    x={x}
+                    y="43"
+                    fill={note?.pitchClass === root ? "var(--brand)" : "#5d7263"}
+                    fontSize="16"
+                    fontWeight="700"
+                    textAnchor="middle"
+                  >
+                    O
+                  </text>
+                ) : null}
+              </g>
+            )
           })}
-          {shape.minFret > 1 ? <text x={left - 1} y={height - 10} fill="#68645d" fontSize="11">Fret {startFret}</text> : null}
+          {shape.barres.map((barreFret) => {
+            const stringIndexes = shape.frets
+              .map((fret, stringIndex) =>
+                fret === barreFret && (shape.fingers[stringIndex] ?? 0) > 0
+                  ? stringIndex
+                  : -1
+              )
+              .filter((stringIndex) => stringIndex >= 0)
+            if (stringIndexes.length < 2) return null
+            const first = Math.min(...stringIndexes)
+            const last = Math.max(...stringIndexes)
+            const y = gridTop + (barreFret - startFret + 0.5) * fretGap
+            if (y < gridTop || y > gridBottom) return null
+            return (
+              <line
+                key={"barre-" + barreFret}
+                x1={left + first * stringGap}
+                y1={y}
+                x2={left + last * stringGap}
+                y2={y}
+                stroke="#a8bba9"
+                strokeWidth="13"
+                strokeLinecap="round"
+              />
+            )
+          })}
+          {shape.notes.map((note) => {
+            if (note.fret === 0) return null
+            const x = left + note.stringIndex * stringGap
+            const y = gridTop + (note.fret - startFret + 0.5) * fretGap
+            if (y < gridTop || y > gridBottom) return null
+            const isRoot = note.pitchClass === root
+            const fingerLabel = shape.reference && note.finger > 0
+              ? String(note.finger)
+              : NOTE_NAMES[note.pitchClass]
+            return (
+              <g key={"note-" + note.stringIndex}>
+                <circle
+                  cx={x}
+                  cy={y}
+                  r="12.5"
+                  fill={isRoot ? "var(--brand)" : "var(--brand-soft)"}
+                  stroke={isRoot ? "var(--brand)" : "#b9cbbd"}
+                  strokeWidth="1"
+                />
+                <text
+                  x={x}
+                  y={y + 3.5}
+                  fill={isRoot ? "#ffffff" : "#26352c"}
+                  fontSize={fingerLabel.length > 1 ? "8" : "10"}
+                  fontWeight="700"
+                  textAnchor="middle"
+                >
+                  {fingerLabel}
+                </text>
+              </g>
+            )
+          })}
+          {stringNotes.map((note, stringIndex) => (
+            <text
+              key={"note-name-" + stringIndex}
+              x={left + stringIndex * stringGap}
+              y={gridBottom + 20}
+              fill={note === "×" ? "#a14c42" : note === NOTE_NAMES[root] ? "var(--brand)" : "#514d45"}
+              fontSize="10"
+              fontWeight="700"
+              textAnchor="middle"
+            >
+              {note}
+            </text>
+          ))}
         </svg>
       </div>
-      <p className="text-xs leading-5 text-[var(--muted)]">Notes in this shape: {playedNotes}. Only the selected playable voicing is highlighted.</p>
+      <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
+        <span className="font-medium text-[var(--foreground)]">String notes (low E → high e):</span>
+        <span>{stringNotes.join(" · ")}</span>
+      </div>
+      <p className="text-xs leading-5 text-[var(--muted)]">
+        {shape.reference
+          ? "Reference fingering shown. Numbers inside the dots are fingers: 1 index, 2 middle, 3 ring, 4 pinky."
+          : "Calculated voicing shown with the note names inside each dot. Fret positions match the selected chord tones; this shape has no database-suggested finger assignment."}
+        {" "}Notes in this shape: {playedNotes}.
+      </p>
     </div>
   )
 }
 
-function GuitarShapeSelector({ root, intervals }: { root: number; intervals: number[] }) {
-  const shapes = useMemo(() => generateGuitarShapes(root, intervals), [root, intervals])
+function GuitarShapeSelector({ root, intervals, chordTypeId }: { root: number; intervals: number[]; chordTypeId: string }) {
+  const shapes = useMemo(() => generateGuitarShapes(root, intervals, chordTypeId), [root, intervals, chordTypeId])
   const chordOrder = getChordOrder(root, intervals)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const safeIndex = Math.min(selectedIndex, Math.max(0, shapes.length - 1))
@@ -422,7 +501,7 @@ export default function ChordChartExplorer() {
           <div><h2 className="text-lg font-semibold text-[var(--foreground)]">{instrument === "guitar" ? "Guitar shape" : "Piano inversion"}</h2><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{instrument === "guitar" ? "One playable fingering at a time, on the fretboard through fret 15." : "One inversion at a time, on a compact C3–C5 keyboard."}</p></div>
           <ChordToneLegend />
         </div>
-        {instrument === "guitar" ? <GuitarShapeSelector key={chordSymbol} root={root} intervals={quality.intervals} /> : <div className="space-y-4"><div className="flex flex-wrap gap-2" aria-label="Select piano inversion">{Array.from({ length: pianoVoicingCount }, (_, index) => <button key={index} type="button" onClick={() => setInversionIndex(index)} aria-pressed={inversionIndex === index} className={"rounded-lg border px-3 py-2 text-xs font-semibold transition " + (inversionIndex === index ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")}>{index === 0 ? "Root position" : index + (index === 1 ? "st" : index === 2 ? "nd" : index === 3 ? "rd" : "th") + " inversion"}</button>)}</div><PianoKeyboard root={root} intervals={quality.intervals} inversionIndex={inversionIndex} /></div>}
+        {instrument === "guitar" ? <GuitarShapeSelector key={chordSymbol} root={root} intervals={quality.intervals} chordTypeId={quality.id} /> : <div className="space-y-4"><div className="flex flex-wrap gap-2" aria-label="Select piano inversion">{Array.from({ length: pianoVoicingCount }, (_, index) => <button key={index} type="button" onClick={() => setInversionIndex(index)} aria-pressed={inversionIndex === index} className={"rounded-lg border px-3 py-2 text-xs font-semibold transition " + (inversionIndex === index ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")}>{index === 0 ? "Root position" : index + (index === 1 ? "st" : index === 2 ? "nd" : index === 3 ? "rd" : "th") + " inversion"}</button>)}</div><PianoKeyboard root={root} intervals={quality.intervals} inversionIndex={inversionIndex} /></div>}
       </section>
     </div>
   )
