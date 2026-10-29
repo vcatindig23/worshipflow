@@ -6,13 +6,8 @@ import {
   CheckCircle2,
   CircleAlert,
   Clock3,
-  ContactRound,
   ChevronRight,
-  FolderOpen,
-  Guitar,
-  LayoutDashboard,
   ListMusic,
-  LogOut,
   Music2,
   Plus,
   Settings,
@@ -21,66 +16,12 @@ import {
 } from "lucide-react"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
-import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
-import ProfileAvatar from "@/components/profile-avatar"
-import WorkspaceHeaderActions from "@/components/workspace-header-actions"
-import DashboardMobileNavigation from "@/components/dashboard-mobile-navigation"
-import DashboardDesktopNavigation from "@/components/dashboard-desktop-navigation"
 import DashboardGuidedTour from "@/components/dashboard-guided-tour"
-import AccountOptionsMenu from "@/components/account-options-menu"
-import ThemeToggleButton from "@/components/theme-toggle-button"
+import WorshipFlowShell from "@/components/worshipflow-shell"
 
 type DashboardViewProps = {
   workspace: WorkspaceData
 }
-
-const navigation = [
-  {
-    label: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Songs",
-    href: "/songs",
-    icon: Music2,
-  },
-  {
-    label: "Chord Chart",
-    href: "/chord-chart",
-    icon: Guitar,
-  },
-  {
-    label: "Setlists",
-    href: "/setlists",
-    icon: ListMusic,
-  },
-  {
-    label: "Services",
-    href: "/services",
-    icon: CalendarDays,
-  },
-  {
-    label: "My Schedule",
-    href: "/my-schedule",
-    icon: CalendarClock,
-  },
-  {
-    label: "Profile",
-    href: "/profile",
-    icon: ContactRound,
-  },
-  {
-    label: "Team",
-    href: "/settings/team",
-    icon: UsersRound,
-  },
-  {
-    label: "Files",
-    href: "/files",
-    icon: FolderOpen,
-  },
-]
 
 function roleLabel(role: string) {
   return role
@@ -139,116 +80,16 @@ export default function DashboardView({
   )
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-[264px] shrink-0 flex-col bg-[var(--sidebar)] text-white lg:flex">
-          <div className="flex h-[78px] items-center gap-3 border-b border-white/8 px-5">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-white text-[var(--sidebar)]">
-              <WorshipFlowLogo className="size-7" />
-            </div>
-
-            <div className="min-w-0">
-              <div className="text-[15px] font-semibold tracking-[-0.02em]">
-                WorshipFlow
-              </div>
-
-              <div className="mt-0.5 text-[11px] text-[var(--sidebar-muted)]">
-                Worship workspace
-              </div>
-            </div>
-          </div>
-
-          <DashboardDesktopNavigation
-            items={navigation.map((item) => {
-              const Icon = item.icon
-              return {
-                label: item.label,
-                href: item.href,
-                icon: <Icon aria-hidden="true" className="wf-icon-motion size-[18px]" strokeWidth={1.9} />,
-              }
-            })}
-          />
-
-          <div className="border-t border-white/8 p-3">
-            <ThemeToggleButton className="mb-2" />
-            <div className="rounded-xl bg-white/5 p-3">
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/profile"
-                  aria-label={`View profile for ${workspace.userName}`}
-                  title="View profile"
-                  className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 transition hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
-                >
-                  <ProfileAvatar
-                    name={workspace.userName}
-                    imageUrl={workspace.userAvatarUrl}
-                    sizeClassName="size-9"
-                    className="text-xs"
-                  />
-
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium transition group-hover:text-white">
-                      {workspace.userName}
-                    </div>
-
-                    <div className="truncate text-xs text-[var(--sidebar-muted)]">
-                      {roleLabel(workspace.role)}
-                    </div>
-                  </div>
-                </Link>
-
-                <form action="/auth/signout" method="post">
-                  <button
-                    type="submit"
-                    aria-label="Sign out"
-                    title="Sign out"
-                    className="group rounded-lg p-1.5 text-[var(--sidebar-muted)] transition hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                  >
-                    <LogOut className="wf-icon-motion size-4" />
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-30 flex h-[78px] items-center border-b border-[var(--border)] bg-white/92 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <DashboardMobileNavigation
-                userName={workspace.userName}
-                role={workspace.role}
-                userAvatarUrl={workspace.userAvatarUrl}
-              />
-
-              <div className="min-w-0">
-                <div className="truncate text-xs font-medium text-[var(--muted)]">
-                  {workspace.organizationName}
-                </div>
-
-                <p className="truncate text-sm font-semibold">
-                  Dashboard
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:block">
-                <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
-              </div>
-              <WorkspaceHeaderActions unreadChatCount={workspace.unreadChatNotificationCount} />
-
-              <Link
-                href="/songs/new"
-                className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
-              >
-                <Plus className="wf-icon-motion size-4" />
-                New Song
-              </Link>
-            </div>
-          </header>
-
-          <main id="main-content" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <WorshipFlowShell
+      workspace={{
+        userName: workspace.userName,
+        userAvatarUrl: workspace.userAvatarUrl,
+        role: workspace.role,
+        organizationName: workspace.organizationName,
+        unreadChatNotificationCount: workspace.unreadChatNotificationCount,
+      }}
+    >
+<main id="main-content" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mx-auto max-w-[1480px]">
               <div data-tour="dashboard-welcome" className="mb-8">
                 <PageHeader title={workspace.organizationName} eyebrow={<>Welcome back, {workspace.userName}</>} description="Your worship workspace is ready. Manage songs, prepare worship services, and keep your team organized." actions={<DashboardGuidedTour userId={workspace.userId} />} />
@@ -868,8 +709,6 @@ export default function DashboardView({
 
             </div>
           </main>
-        </div>
-      </div>
-    </div>
+    </WorshipFlowShell>
   )
 }
