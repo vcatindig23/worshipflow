@@ -22,6 +22,7 @@ export default function ChordProLine({
     (token) => token.type === "text" && token.value.trim() !== ""
   )
   const chordOnly = hasChords && !hasLyrics
+  const chordCount = line.tokens.filter((token) => token.type === "chord").length
   const chordFontSize = Math.max(13, Math.round(fontSize * 0.74))
 
   // Keep a useful font-size preference as the baseline, while allowing projection
@@ -54,9 +55,9 @@ export default function ChordProLine({
 
     return (
       <div
-        className={`mb-4 flex w-full flex-wrap items-baseline justify-center gap-x-8 gap-y-3 font-semibold sm:mb-5 sm:gap-x-10 lg:mb-6 ${
-          stageMode ? "text-sky-300" : "text-[var(--brand)]"
-        }`}
+        className={`mb-4 flex w-full flex-wrap items-baseline justify-center gap-x-4 gap-y-3 font-semibold sm:mb-5 sm:gap-x-6 lg:mb-6 lg:gap-x-8 ${
+          stageMode && chordCount > 1 ? "md:justify-evenly lg:justify-between" : ""
+        } ${stageMode ? "text-sky-300" : "text-[var(--brand)]"}`}
         style={{
           fontSize: stageMode ? stageChordFontSize : `${chordFontSize}px`,
         }}
@@ -78,7 +79,7 @@ export default function ChordProLine({
   return (
     <div
       className={`min-h-[1.8em] w-full whitespace-pre-wrap font-medium leading-[1.9] ${
-        stageMode ? "relative text-center text-white" : "relative"
+        stageMode ? "relative text-justify [text-align-last:justify] text-white" : "relative"
       }`}
       style={{
         fontSize: stageMode ? stageLyricsFontSize : `${fontSize}px`,
