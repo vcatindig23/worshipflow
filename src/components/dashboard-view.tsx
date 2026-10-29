@@ -15,6 +15,7 @@ import {
   UsersRound,
 } from "lucide-react"
 import { getTeamPositionLabel } from "@/lib/team-positions"
+import ProfileAvatar from "@/components/profile-avatar"
 import type { WorkspaceData } from "@/lib/workspace/get-workspace"
 import DashboardGuidedTour from "@/components/dashboard-guided-tour"
 import WorshipFlowShell from "@/components/worshipflow-shell"
