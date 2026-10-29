@@ -305,7 +305,7 @@ export default function SongViewer({
       tabIndex={0}
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
-          ? "flex-1 overflow-auto bg-[#0d120f] px-2 py-4 text-white sm:px-6 sm:py-6 md:px-10 lg:px-12 xl:px-16"
+          ? "flex-1 overflow-auto bg-[#0d120f] px-2 py-4 text-white sm:px-3 sm:py-6 md:px-4 lg:px-6 xl:px-8 2xl:px-10"
           : practiceOpen
             ? "min-h-0 flex-1 overflow-auto bg-[var(--card)] px-4 py-5 sm:px-8 sm:py-8"
             : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"

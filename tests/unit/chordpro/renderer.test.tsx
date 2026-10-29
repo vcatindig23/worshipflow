@@ -42,6 +42,7 @@ describe("ChordPro line rendering", () => {
     )
 
     expect(markup).toContain("w-full whitespace-pre-wrap")
+    expect(markup).toContain("text-justify [text-align-last:justify]")
     expect(markup).toContain("font-size:clamp(32px, 3.08vw, 70px)")
     expect(markup).toContain("padding-top:clamp(40px, 3.96vw, 79px)")
     expect(markup).toContain("font-size:clamp(23px, 2.29vw, 49px)")
@@ -82,7 +83,8 @@ describe("ChordPro line rendering", () => {
       })
     )
 
-    expect(markup).toContain("gap-x-8")
+    expect(markup).toContain("gap-x-4")
+    expect(markup).toContain("md:justify-evenly lg:justify-between")
     expect(markup).toContain(">D/F#</button>")
     expect(markup).toContain(">Bm</button>")
     expect(markup).toContain(">A</button>")
