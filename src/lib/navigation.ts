@@ -11,7 +11,8 @@ export function isActiveNavigationPath(pathname: string, href: string) {
   // Team has its own navigation item; avoid marking both Team and Settings active.
   if (
     targetPath === "/settings" &&
-    currentPath.startsWith("/settings/team")
+    (currentPath === "/settings/team" ||
+      currentPath.startsWith("/settings/team/"))
   ) {
     return false
   }
