@@ -4,25 +4,15 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import {
-  CalendarClock,
-  CalendarDays,
-  ContactRound,
-  FileText,
-  Guitar,
-  LayoutDashboard,
-  ListMusic,
-  LogOut,
-  Menu,
-  Music2,
-  Settings2,
-  UsersRound,
-  X,
-} from "lucide-react"
+import { LogOut, Menu, X } from "lucide-react"
 import ProfileAvatar from "@/components/profile-avatar"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ThemeToggleButton from "@/components/theme-toggle-button"
 import { isActiveNavigationPath } from "@/lib/navigation"
+import {
+  workspaceNavigationItems,
+  workspaceSettingsNavigationItem,
+} from "@/lib/workspace-navigation"
 
 type DashboardMobileNavigationProps = {
   userName: string
@@ -30,17 +20,7 @@ type DashboardMobileNavigationProps = {
   userAvatarUrl: string | null
 }
 
-const navigation = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/songs", label: "Songs", icon: Music2 },
-  { href: "/chord-chart", label: "Chord Chart", icon: Guitar },
-  { href: "/setlists", label: "Setlists", icon: ListMusic },
-  { href: "/services", label: "Services", icon: CalendarDays },
-  { href: "/my-schedule", label: "My Schedule", icon: CalendarClock },
-  { href: "/profile", label: "Profile", icon: ContactRound },
-  { href: "/settings/team", label: "Team", icon: UsersRound },
-  { href: "/files", label: "Files", icon: FileText },
-]
+const navigation = workspaceNavigationItems
 
 function formatRole(role: string) {
   return role
@@ -55,6 +35,11 @@ export default function DashboardMobileNavigation({
   userAvatarUrl,
 }: DashboardMobileNavigationProps) {
   const pathname = usePathname()
+  const normalizedPathname = pathname.replace(/\/+$/, "") || "/"
+  const settingsIsActive = isActiveNavigationPath(
+    normalizedPathname,
+    workspaceSettingsNavigationItem.href
+  )
   const [openForPathname, setOpenForPathname] = useState<string | null>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -200,7 +185,8 @@ export default function DashboardMobileNavigation({
                 Workspace
               </p>
               {navigation.map((item) => {
-                const active = isActiveNavigationPath(pathname, item.href)
+                const active = isActiveNavigationPath(normalizedPathname, item.href)
+                const exact = normalizedPathname === item.href
                 const Icon = item.icon
 
                 return (
@@ -208,7 +194,7 @@ export default function DashboardMobileNavigation({
                     key={item.href}
                     href={item.href}
                     onClick={() => closeNavigation(false)}
-                    aria-current={active ? "page" : undefined}
+                    aria-current={active ? (exact ? "page" : "location") : undefined}
                     className={`group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
                       active
                         ? "bg-white/10 text-white"
@@ -242,25 +228,42 @@ export default function DashboardMobileNavigation({
               <p className="px-3 pb-2 pt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--sidebar-muted)]">
                 Manage
               </p>
-              <Link
-                href="/settings"
-                onClick={() => closeNavigation(false)}
-                aria-current={
-                  pathname === "/settings" || pathname.startsWith("/settings/")
-                    ? "page"
-                    : undefined
-                }
-                className="group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--sidebar-muted)] transition duration-200 hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              >
-                <span className="flex size-8 items-center justify-center rounded-lg transition group-hover:bg-white/10">
-                  <Settings2
-                    aria-hidden="true"
-                    className="wf-icon-motion size-[18px]"
-                    strokeWidth={1.9}
-                  />
-                </span>
-                Settings
-              </Link>
+              {(() => {
+                const SettingsIcon = workspaceSettingsNavigationItem.icon
+                return (
+                  <Link
+                    href={workspaceSettingsNavigationItem.href}
+                    onClick={() => closeNavigation(false)}
+                    aria-current={
+                      settingsIsActive
+                        ? normalizedPathname === workspaceSettingsNavigationItem.href
+                          ? "page"
+                          : "location"
+                        : undefined
+                    }
+                    className={`group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
+                      settingsIsActive
+                        ? "bg-white/10 text-white"
+                        : "text-[var(--sidebar-muted)] hover:text-white"
+                    }`}
+                  >
+                    {settingsIsActive ? (
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-[#b5d4bd]"
+                      />
+                    ) : null}
+                    <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg transition duration-200 ${
+                      settingsIsActive
+                        ? "bg-[var(--brand)] text-white"
+                        : "text-[var(--sidebar-muted)] group-hover:bg-white/10 group-hover:text-white"
+                    }`}>
+                      <SettingsIcon aria-hidden="true" className="wf-icon-motion size-[18px]" strokeWidth={1.9} />
+                    </span>
+                    <span>{workspaceSettingsNavigationItem.label}</span>
+                  </Link>
+                )
+              })()}
             </nav>
 
             <div className="shrink-0 border-t border-white/10 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
