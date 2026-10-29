@@ -528,7 +528,7 @@ export default function LiveStageView({
         </div>
       ) : (
         <>
-          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-2 py-2 sm:px-3 sm:py-3 md:px-4 lg:px-5 xl:px-6 2xl:px-8 md:py-4">
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3 md:px-8 lg:px-12 xl:px-16 2xl:px-20 md:py-4">
             <div className="mx-auto flex min-h-0 w-full max-w-none flex-1 flex-col">
               {currentSong ? (
                 <>
