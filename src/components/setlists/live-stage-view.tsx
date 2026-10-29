@@ -97,7 +97,7 @@ export default function LiveStageView({
   resources,
 }: LiveStageViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [fontSize, setFontSize] = useState(36)
+  const [fontSize, setFontSize] = useState(44)
   const [showChords, setShowChords] = useState(true)
   const [transposeOffset, setTransposeOffset] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -353,7 +353,7 @@ export default function LiveStageView({
 
   const renderedLines = useMemo(() => displayLines.map((line, lineIndex) => {
       if (line.type === "blank") {
-        return <div key={`blank-${lineIndex}`} className="h-8" aria-hidden="true" />
+        return <div key={`blank-${lineIndex}`} className="h-8 sm:h-10 lg:h-12" aria-hidden="true" />
       }
 
       if (line.type === "audio_timestamp") return null
@@ -362,7 +362,7 @@ export default function LiveStageView({
         return (
           <p
             key={`section-${lineIndex}`}
-            className="mb-3 mt-9 w-full text-center text-xs font-bold uppercase tracking-[0.18em] text-white/40 first:mt-0"
+            className="mb-4 mt-10 w-full text-center text-xs font-bold uppercase tracking-[0.18em] text-white/50 first:mt-0 sm:mb-5 sm:mt-12 sm:text-sm lg:text-base"
           >
             {line.title}
           </p>
@@ -379,7 +379,7 @@ export default function LiveStageView({
 
       if (line.preformatted) {
         return (
-          <pre key={`tab-${lineIndex}`} className="my-3 overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-left font-mono text-sm leading-7 text-white/90">
+          <pre key={`tab-${lineIndex}`} className="my-4 max-w-full overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-left font-mono text-sm leading-7 text-white/90 sm:my-5 sm:p-6 sm:text-base sm:leading-8 lg:text-lg">
             {line.line.tokens.map((token) => token.value).join("")}
           </pre>
         )
@@ -528,7 +528,7 @@ export default function LiveStageView({
         </div>
       ) : (
         <>
-          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-2.5 sm:px-7 sm:py-4 xl:px-10">
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3 md:px-8 lg:px-12 xl:px-16 2xl:px-20 md:py-4">
             <div className="mx-auto flex min-h-0 w-full max-w-none flex-1 flex-col">
               {currentSong ? (
                 <>
@@ -537,7 +537,7 @@ export default function LiveStageView({
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
                         {currentSong.section} · Song {currentIndex + 1}
                       </p>
-                      <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-5xl">
+                      <h2 className="mt-1.5 text-2xl font-bold tracking-tight sm:mt-2 sm:text-3xl md:text-4xl">
                         {currentSong.title}
                       </h2>
                       {currentSong.artist ? (
@@ -545,7 +545,7 @@ export default function LiveStageView({
                           {currentSong.artist}
                         </p>
                       ) : null}
-                      <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/60">
+                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-white/60 sm:mt-3 sm:text-xs">
                         <span className="rounded-full bg-white/10 px-3 py-1.5">
                           Key {displayedKey}
                           {totalTranspose !== 0
@@ -627,8 +627,8 @@ export default function LiveStageView({
                       </button>
                       <button
                         type="button"
-                        onClick={() => setFontSize((size) => Math.max(22, size - 2))}
-                        disabled={fontSize <= 22}
+                        onClick={() => setFontSize((size) => Math.max(26, size - 2))}
+                        disabled={fontSize <= 26}
                         aria-label="Decrease lyrics size"
                         className="inline-flex size-10 items-center justify-center rounded-xl border border-white/15 text-white/70 disabled:opacity-30"
                       >
@@ -636,8 +636,8 @@ export default function LiveStageView({
                       </button>
                       <button
                         type="button"
-                        onClick={() => setFontSize((size) => Math.min(56, size + 2))}
-                        disabled={fontSize >= 56}
+                        onClick={() => setFontSize((size) => Math.min(72, size + 2))}
+                        disabled={fontSize >= 72}
                         aria-label="Increase lyrics size"
                         className="inline-flex size-10 items-center justify-center rounded-xl border border-white/15 text-white/70 disabled:opacity-30"
                       >
@@ -663,7 +663,7 @@ export default function LiveStageView({
                     }}
                     tabIndex={0}
                     aria-label="Live lyrics and chords"
-                    className="min-h-0 flex-1 w-full overflow-y-auto overscroll-contain pb-16 pr-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/20"
+                    className="min-h-0 flex-1 w-full overflow-y-auto overscroll-contain px-1 pb-16 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/20 sm:px-3"
                   >
                     {!currentSong.source.trim() ? (
                       <p role="status" className="py-12 text-base text-white/55">No lyrics or chords are available for this song.</p>
