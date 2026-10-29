@@ -11,6 +11,10 @@ describe("navigation active-path matching", () => {
     { pathname: "/songs-public", href: "/songs", active: false },
     { pathname: "/settings/team", href: "/settings/team", active: true },
     { pathname: "/settings/team/invitations", href: "/settings/team", active: true },
+    { pathname: "/settings/team", href: "/settings", active: false },
+    { pathname: "/settings/team/audit", href: "/settings", active: false },
+    { pathname: "/settings", href: "/settings", active: true },
+    { pathname: "/settings/church", href: "/settings", active: true },
     { pathname: "/settings/church", href: "/settings/team", active: false },
     { pathname: "/songs/", href: "/songs", active: true },
   ])("matches $pathname against $href as $active", ({ pathname, href, active }) => {
