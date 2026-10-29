@@ -31,6 +31,23 @@ describe("ChordPro line rendering", () => {
     )
   })
 
+  it("uses responsive projection sizing for stage-mode lyrics and chords", () => {
+    const markup = renderToStaticMarkup(
+      createElement(ChordProLine, {
+        line,
+        fontSize: 44,
+        showChords: true,
+        stageMode: true,
+      })
+    )
+
+    expect(markup).toContain("w-full whitespace-pre-wrap")
+    expect(markup).toContain("font-size:clamp(32px, 3.08vw, 70px)")
+    expect(markup).toContain("padding-top:clamp(40px, 3.96vw, 79px)")
+    expect(markup).toContain("font-size:clamp(23px, 2.29vw, 49px)")
+    expect(markup).toContain("bottom:clamp(24px, 2.86vw, 46px)")
+  })
+
   it("removes chord anchors and chord-row spacing when chords are hidden", () => {
     const markup = renderToStaticMarkup(
       createElement(ChordProLine, {
@@ -65,7 +82,7 @@ describe("ChordPro line rendering", () => {
       })
     )
 
-    expect(markup).toContain("gap-x-6")
+    expect(markup).toContain("gap-x-8")
     expect(markup).toContain(">D/F#</button>")
     expect(markup).toContain(">Bm</button>")
     expect(markup).toContain(">A</button>")
