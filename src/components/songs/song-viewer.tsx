@@ -364,8 +364,10 @@ export default function SongViewer({
                   if (element) sectionElementsRef.current.set(index, element)
                   else sectionElementsRef.current.delete(index)
                 }}
-                className={`mb-3 mt-8 first:mt-0 text-[0.68em] font-bold uppercase tracking-[0.16em] break-inside-avoid-column [column-span:all] ${
-                  stageMode ? "text-white/50 text-xs sm:text-sm lg:text-base" : "text-[var(--brand)]"
+                className={`mb-3 mt-8 first:mt-0 font-bold uppercase tracking-[0.16em] break-inside-avoid-column [column-span:all] ${
+                  stageMode
+                    ? "mb-4 mt-10 text-xs text-white/50 sm:mb-5 sm:mt-12 sm:text-sm lg:text-base"
+                    : "text-[0.68em] text-[var(--brand)]"
                 }`}
               >
                 {item.title}
@@ -438,6 +440,7 @@ export default function SongViewer({
                 type="button"
                 onClick={() => setPracticeOpen((value) => !value)}
                 aria-expanded={practiceOpen}
+                aria-label={practiceOpen ? "Close practice tools" : "Open practice tools"}
                 className={"inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border px-2.5 text-xs font-semibold transition sm:px-3 " + (practiceOpen ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white")}
               >
                 <Gauge className="size-3.5" />
