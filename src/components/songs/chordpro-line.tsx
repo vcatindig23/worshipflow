@@ -24,6 +24,29 @@ export default function ChordProLine({
   const chordOnly = hasChords && !hasLyrics
   const chordFontSize = Math.max(13, Math.round(fontSize * 0.74))
 
+  // Keep a useful font-size preference as the baseline, while allowing projection
+  // layouts to scale naturally with the available width. Mobile stays readable,
+  // but does not shrink the lyrics to force an entire song onto one screen.
+  const stageLyricsFontSize = `clamp(${Math.round(fontSize * 0.72)}px, ${(
+    fontSize * 0.07
+  ).toFixed(2)}vw, ${Math.round(fontSize * 1.6)}px)`
+  const stageChordFontSize = `clamp(${Math.max(
+    18,
+    Math.round(fontSize * 0.52)
+  )}px, ${(fontSize * 0.052).toFixed(2)}vw, ${Math.round(
+    fontSize * 1.12
+  )}px)`
+  const stageChordPadding = `clamp(${Math.round(
+    fontSize * 0.9
+  )}px, ${(fontSize * 0.09).toFixed(2)}vw, ${Math.round(
+    fontSize * 1.8
+  )}px)`
+  const stageChordOffset = `clamp(${Math.round(
+    fontSize * 0.55
+  )}px, ${(fontSize * 0.065).toFixed(2)}vw, ${Math.round(
+    fontSize * 1.05
+  )}px)`
+
   if (chordOnly) {
     if (!showChords) {
       return null
@@ -31,10 +54,12 @@ export default function ChordProLine({
 
     return (
       <div
-        className={`mb-3 flex flex-wrap items-baseline gap-x-6 gap-y-2 font-semibold ${
-          stageMode ? "w-full justify-center text-sky-300" : "text-[var(--brand)]"
+        className={`mb-4 flex w-full flex-wrap items-baseline justify-center gap-x-8 gap-y-3 font-semibold sm:mb-5 sm:gap-x-10 lg:mb-6 ${
+          stageMode ? "text-sky-300" : "text-[var(--brand)]"
         }`}
-        style={{ fontSize: `${chordFontSize}px` }}
+        style={{
+          fontSize: stageMode ? stageChordFontSize : `${chordFontSize}px`,
+        }}
       >
         {line.tokens.map((token, tokenIndex) =>
           token.type === "chord" ? (
@@ -52,12 +77,16 @@ export default function ChordProLine({
 
   return (
     <div
-      className={`min-h-[1.8em] whitespace-pre-wrap font-medium leading-[1.9] ${
-        stageMode ? "relative w-full text-center text-white" : "relative"
+      className={`min-h-[1.8em] w-full whitespace-pre-wrap font-medium leading-[1.9] ${
+        stageMode ? "relative text-center text-white" : "relative"
       }`}
       style={{
-        fontSize: `${fontSize}px`,
-        paddingTop: showChords ? `${fontSize * 1.42}px` : undefined,
+        fontSize: stageMode ? stageLyricsFontSize : `${fontSize}px`,
+        paddingTop: showChords
+          ? stageMode
+            ? stageChordPadding
+            : `${fontSize * 1.42}px`
+          : undefined,
       }}
     >
       {line.tokens.map((token, tokenIndex) => {
@@ -79,8 +108,10 @@ export default function ChordProLine({
                 stageMode ? "text-sky-300" : "text-[var(--brand)]"
               }`}
               style={{
-                bottom: `${fontSize * 0.82}px`,
-                fontSize: `${chordFontSize}px`,
+                bottom: stageMode ? stageChordOffset : `${fontSize * 0.82}px`,
+                fontSize: stageMode
+                  ? stageChordFontSize
+                  : `${chordFontSize}px`,
               }}
             >
               <ChordDiagramTooltip

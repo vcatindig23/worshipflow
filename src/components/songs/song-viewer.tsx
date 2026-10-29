@@ -146,6 +146,7 @@ export default function SongViewer({
   const [capo, setCapo] = useSongPracticePreference(practiceSettingsStorageKey, "capo", 0)
   const [scrollSpeed, setScrollSpeed] = useSongPracticePreference(practiceSettingsStorageKey, "scrollSpeed", 2)
   const [stageMode, setStageMode] = useState(false)
+  const [stageFontSize, setStageFontSize] = useState(44)
   const [autoScroll, setAutoScroll] = useState(false)
   const [practiceOpen, setPracticeOpen] = useState(false)
   const [mobilePracticeTab, setMobilePracticeTab] = useState<"chart" | "tools">("chart")
@@ -304,7 +305,7 @@ export default function SongViewer({
       tabIndex={0}
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
-          ? "flex-1 overflow-auto bg-[#0d120f] px-6 py-8 text-white sm:px-10 sm:py-10"
+          ? "flex-1 overflow-auto bg-[#0d120f] px-2 py-4 text-white sm:px-6 sm:py-6 md:px-10 lg:px-12 xl:px-16"
           : practiceOpen
             ? "min-h-0 flex-1 overflow-auto bg-[var(--card)] px-4 py-5 sm:px-8 sm:py-8"
             : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
@@ -312,12 +313,12 @@ export default function SongViewer({
     >
       <div
         className={`mx-auto w-full max-w-none ${
-          stageMode ? "mx-auto max-w-[1500px] pb-14 text-center" : practiceOpen ? "mx-auto max-w-5xl pb-14" : "pb-8"
+          stageMode ? "mx-auto max-w-none pb-14 text-center" : practiceOpen ? "mx-auto max-w-5xl pb-14" : "pb-8"
         } ${usesTwoColumns && !stageMode ? "columns-1 sm:columns-2 [column-gap:2rem]" : ""}`}
       >
         {displayLines.map((item, index) => {
           if (item.type === "blank") {
-            return <div key={`blank-${index}`} className={stageMode ? "h-7" : "h-5"} aria-hidden="true" />
+            return <div key={`blank-${index}`} className={stageMode ? "h-8 sm:h-10 lg:h-12" : "h-5"} aria-hidden="true" />
           }
 
           if (item.type === "columns") return null
@@ -351,7 +352,7 @@ export default function SongViewer({
 
           if (item.type === "new_page") {
             return stageMode
-              ? <div key={`new-page-${index}`} className="h-8" aria-hidden="true" />
+              ? <div key={`new-page-${index}`} className="h-8 sm:h-10 lg:h-12" aria-hidden="true" />
               : <div key={`new-page-${index}`} className="my-8 break-before-page border-t border-dashed border-[var(--border)] pt-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Page break</div>
           }
 
@@ -363,8 +364,10 @@ export default function SongViewer({
                   if (element) sectionElementsRef.current.set(index, element)
                   else sectionElementsRef.current.delete(index)
                 }}
-                className={`mb-3 mt-8 first:mt-0 text-[0.68em] font-bold uppercase tracking-[0.16em] break-inside-avoid-column [column-span:all] ${
-                  stageMode ? "text-white/45" : "text-[var(--brand)]"
+                className={`mb-3 mt-8 first:mt-0 font-bold uppercase tracking-[0.16em] break-inside-avoid-column [column-span:all] ${
+                  stageMode
+                    ? "mb-4 mt-10 text-xs text-white/50 sm:mb-5 sm:mt-12 sm:text-sm lg:text-base"
+                    : "text-[0.68em] text-[var(--brand)]"
                 }`}
               >
                 {item.title}
@@ -375,7 +378,7 @@ export default function SongViewer({
           if (item.type === "content" && item.preformatted && item.line.type === "content") {
             return (
               <pre key={`preformatted-${index}`} className={`mb-3 max-w-full overflow-x-auto rounded-lg border p-3 text-left font-mono text-sm leading-6 whitespace-pre break-inside-avoid-column ${
-                stageMode ? "border-white/10 bg-white/5 text-white/90" : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]"
+                stageMode ? "border-white/10 bg-white/5 text-white/90 text-base sm:text-lg lg:text-xl leading-7 sm:leading-8 p-4 sm:p-6 lg:p-8" : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]"
               }`}>
                 {item.line.tokens.map((token) => token.value).join("")}
               </pre>
@@ -384,17 +387,19 @@ export default function SongViewer({
 
           if (item.type !== "content" || item.line.type !== "content") return null
 
-          const alignmentClass = item.alignment === "center"
+          const alignmentClass = stageMode
             ? "justify-center text-center"
-            : item.alignment === "right"
-              ? "justify-end text-right"
-              : "justify-start text-left"
+            : item.alignment === "center"
+              ? "justify-center text-center"
+              : item.alignment === "right"
+                ? "justify-end text-right"
+                : "justify-start text-left"
 
           return (
             <div key={`line-${index}`} className={`mb-1 flex break-inside-avoid-column ${alignmentClass}`}>
               <ChordProLine
                 line={item.line}
-                fontSize={fontSize}
+                fontSize={stageMode ? stageFontSize : fontSize}
                 showChords={showChords}
                 stageMode={stageMode}
                 customChordShapes={customChordShapes}
@@ -409,108 +414,111 @@ export default function SongViewer({
   if (stageMode) {
     return (
       <div className="fixed inset-0 z-[100] flex h-dvh flex-col overflow-hidden bg-[#0d120f] text-white">
-        <header className="z-10 flex shrink-0 items-start justify-between gap-3 border-b border-white/10 bg-[#0d120f] px-3 py-3 sm:gap-5 sm:px-8 sm:py-5">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
-              Stage Mode
-            </p>
-            <h2 className="mt-1 truncate text-xl font-semibold tracking-tight sm:text-3xl">
-              {title}
-            </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/55 sm:gap-3 sm:text-sm">
-              <span>Key {displayedKey}</span>
-              <span aria-hidden="true">•</span>
-              <span>
-                Transpose {transposeAmount >= 0 ? "+" : ""}
-                {transposeAmount}
-              </span>
-              <span aria-hidden="true">•</span>
-              <span>Capo {capo}</span>
+        <header className="z-10 flex shrink-0 flex-col gap-3 border-b border-white/10 bg-[#0d120f] px-3 py-3 sm:px-6 sm:py-4">
+          <div className="flex min-w-0 items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45 sm:text-xs">
+                Stage Mode
+              </p>
+              <h2 className="mt-1 truncate text-lg font-semibold tracking-tight sm:text-2xl md:text-3xl">
+                {title}
+              </h2>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-white/55 sm:mt-2 sm:gap-x-3 sm:text-sm">
+                <span>Key {displayedKey}</span>
+                <span aria-hidden="true">•</span>
+                <span>
+                  Transpose {transposeAmount >= 0 ? "+" : ""}
+                  {transposeAmount}
+                </span>
+                <span aria-hidden="true">•</span>
+                <span>Capo {capo}</span>
+              </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
-                onClick={() => setAutoScroll((value) => !value)}
-                aria-pressed={autoScroll}
-                className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
-                  autoScroll
-                    ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200"
-                    : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {autoScroll ? (
-                  <Pause className="size-3.5" />
-                ) : (
-                  <Play className="size-3.5" />
-                )}
-                {autoScroll ? "Pause scroll" : "Auto-scroll"}
-              </button>
-              <button
-                type="button"
-                onClick={cycleScrollSpeed}
-                aria-label={`Change auto-scroll speed, currently speed ${scrollSpeed}`}
-                className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+                onClick={() => setPracticeOpen((value) => !value)}
+                aria-expanded={practiceOpen}
+                aria-label={practiceOpen ? "Close practice tools" : "Open practice tools"}
+                className={"inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border px-2.5 text-xs font-semibold transition sm:px-3 " + (practiceOpen ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white")}
               >
                 <Gauge className="size-3.5" />
-                Speed {scrollSpeed}×
+                <span className="hidden sm:inline">Practice</span>
               </button>
               <button
                 type="button"
-                onClick={resetChartPosition}
-                className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+                onClick={() => {
+                  setAutoScroll(false)
+                  setPracticeOpen(false)
+                  setStageMode(false)
+                }}
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white sm:size-10"
+                aria-label="Exit Stage Mode"
               >
-                <RotateCcw className="size-3.5" />
-                Back to top
-              </button>
-              <button
-                type="button"
-                onClick={() => setFontSize((value) => Math.max(14, value - 2))}
-                disabled={fontSize <= 14}
-                aria-label="Decrease lyrics size"
-                className="inline-flex size-9 items-center justify-center rounded-lg border border-white/15 text-white/70 transition hover:bg-white/10 disabled:opacity-30"
-              >
-                <Minus className="size-4" />
-              </button>
-              <span
-                aria-label={`Lyrics font size ${fontSize} pixels`}
-                className="inline-flex h-9 min-w-12 items-center justify-center rounded-lg border border-white/10 px-2 text-xs tabular-nums text-white/65"
-              >
-                {fontSize}px
-              </span>
-              <button
-                type="button"
-                onClick={() => setFontSize((value) => Math.min(40, value + 2))}
-                disabled={fontSize >= 40}
-                aria-label="Increase lyrics size"
-                className="inline-flex size-9 items-center justify-center rounded-lg border border-white/15 text-white/70 transition hover:bg-white/10 disabled:opacity-30"
-              >
-                <Plus className="size-4" />
+                <X className="size-5" />
               </button>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setAutoScroll(false)
-              setPracticeOpen(false)
-              setStageMode(false)
-            }}
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
-            aria-label="Exit Stage Mode"
-          >
-            <X className="size-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setPracticeOpen((value) => !value)}
-            aria-expanded={practiceOpen}
-            className={"inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition " + (practiceOpen ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white")}
-          >
-            <Gauge className="size-3.5" />
-            Practice
-          </button>
+          <div role="toolbar" aria-label="Stage display controls" className="flex min-w-0 flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setAutoScroll((value) => !value)}
+              aria-pressed={autoScroll}
+              aria-label={autoScroll ? "Pause auto-scroll" : "Start auto-scroll"}
+              className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-2.5 text-xs font-semibold transition sm:px-3 ${
+                autoScroll
+                  ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200"
+                  : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              {autoScroll ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+              <span className="hidden sm:inline">{autoScroll ? "Pause scroll" : "Auto-scroll"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={cycleScrollSpeed}
+              aria-label={`Change auto-scroll speed, currently speed ${scrollSpeed}`}
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+            >
+              <Gauge className="size-3.5" />
+              {scrollSpeed}×
+            </button>
+            <button
+              type="button"
+              onClick={resetChartPosition}
+              aria-label="Return to top of stage lyrics"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 text-xs font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
+            >
+              <RotateCcw className="size-3.5" />
+              <span className="hidden sm:inline">Top</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setStageFontSize((value) => Math.max(26, value - 2))}
+              disabled={stageFontSize <= 26}
+              aria-label="Decrease lyrics size"
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/15 text-white/70 transition hover:bg-white/10 disabled:opacity-30"
+            >
+              <Minus className="size-4" />
+            </button>
+            <span
+              aria-label={`Lyrics font size preference ${stageFontSize} pixels`}
+              className="inline-flex h-9 min-w-12 shrink-0 items-center justify-center rounded-lg border border-white/10 px-2 text-xs tabular-nums text-white/65"
+            >
+              {stageFontSize}px
+            </span>
+            <button
+              type="button"
+              onClick={() => setStageFontSize((value) => Math.min(72, value + 2))}
+              disabled={stageFontSize >= 72}
+              aria-label="Increase lyrics size"
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/15 text-white/70 transition hover:bg-white/10 disabled:opacity-30"
+            >
+              <Plus className="size-4" />
+            </button>
+          </div>
         </header>
 
         {practiceOpen ? (
