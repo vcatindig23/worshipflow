@@ -12,7 +12,14 @@ import ThemeToggleButton from "@/components/theme-toggle-button"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 import { isActiveNavigationPath } from "@/lib/navigation"
 import { workspaceNavigationItems } from "@/lib/workspace-navigation"
-import type { WorkspaceShellData } from "@/lib/workspace/get-workspace-shell"
+
+type WorkspaceShellData = {
+  userName: string
+  userAvatarUrl: string | null
+  role: string
+  organizationName: string
+  unreadChatNotificationCount: number
+}
 
 type WorshipFlowShellProps = {
   children: React.ReactNode
