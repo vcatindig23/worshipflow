@@ -11,6 +11,22 @@ const buttonSource = readFileSync(
   join(process.cwd(), "src/components/ui/button.tsx"),
   "utf8"
 )
+const activityPage = readFileSync(
+  join(process.cwd(), "src/app/activity/page.tsx"),
+  "utf8"
+)
+const notificationsPage = readFileSync(
+  join(process.cwd(), "src/app/notifications/page.tsx"),
+  "utf8"
+)
+const searchPage = readFileSync(
+  join(process.cwd(), "src/app/search/page.tsx"),
+  "utf8"
+)
+const serviceHistoryPage = readFileSync(
+  join(process.cwd(), "src/app/services/history/page.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -41,4 +57,34 @@ describe("semantic theme foundations", () => {
     expect(buttonSource).toMatch(/bg-\[var\(--danger-action\)\]/)
     expect(buttonSource).toMatch(/hover:bg-\[var\(--danger-action-hover\)\]/)
   })
+  it("provides theme-aware semantic warning and status styles", () => {
+    expect(designSystem).toMatch(/--warning:\s*#8a5200/)
+    expect(designSystem).toMatch(/--warning:\s*#f0c477/)
+    expect(designSystem).toMatch(/\.wf-status-warning[\s\S]*?background:\s*var\(--warning-soft\)/)
+    expect(designSystem).toMatch(/\.wf-status-success[\s\S]*?color:\s*var\(--success\)/)
+  })
+
+  it("uses shared page, card, form, and status foundations on workspace screens", () => {
+    expect(activityPage).toMatch(/<PageContainer/)
+    expect(activityPage).toMatch(/wf-card/)
+    expect(activityPage).not.toMatch(/bg-white/)
+
+    expect(notificationsPage).toMatch(/<PageContainer/)
+    expect(notificationsPage).toMatch(/buttonVariants/)
+    expect(notificationsPage).toMatch(/wf-card/)
+    expect(notificationsPage).not.toMatch(/bg-white/)
+
+    expect(searchPage).toMatch(/<Input/)
+    expect(searchPage).toMatch(/buttonVariants/)
+    expect(searchPage).toMatch(/wf-card/)
+    expect(searchPage).toMatch(/wf-status-warning/)
+    expect(searchPage).not.toMatch(/bg-white/)
+
+    expect(serviceHistoryPage).toMatch(/<Input/)
+    expect(serviceHistoryPage).toMatch(/<Select/)
+    expect(serviceHistoryPage).toMatch(/wf-card/)
+    expect(serviceHistoryPage).toMatch(/wf-status-success/)
+    expect(serviceHistoryPage).not.toMatch(/bg-white/)
+  })
+
 })

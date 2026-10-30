@@ -1,4 +1,5 @@
 import { buttonVariants } from "@/components/ui/button"
+import { Input, Select } from "@/components/ui/form-controls"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -209,7 +210,7 @@ export default async function ServicesHistoryPage({
         </>}
       />
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+      <section className="wf-card p-5">
         <form
           action="/services/history"
           method="get"
@@ -219,27 +220,27 @@ export default async function ServicesHistoryPage({
           <label className="relative min-w-0 flex-1">
             <span className="sr-only">Search completed services</span>
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-            <input
+            <Input
               type="search"
               name="q"
               value={query}
               maxLength={100}
               placeholder="Search service names, descriptions, or after-service notes..."
-              className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="h-11 pl-10 pr-4"
             />
           </label>
 
           <label>
             <span className="sr-only">Filter history by completion date</span>
-            <select
+            <Select
               name="period"
               defaultValue={period}
-              className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3.5 text-sm font-medium text-[var(--foreground)] outline-none focus:border-[var(--brand)] sm:w-44"
+              className="h-11 px-3.5 sm:w-44"
             >
               <option value="all">All time</option>
               <option value="90days">Past 90 days</option>
               <option value="12months">Past 12 months</option>
-            </select>
+            </Select>
           </label>
 
           <button
@@ -262,7 +263,7 @@ export default async function ServicesHistoryPage({
       </section>
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+        <div className="wf-card p-5">
           <div className="flex items-center gap-2 text-[var(--brand)]">
             <CheckCircle2 className="size-4" />
             <p className="text-xs font-semibold uppercase tracking-wide">
@@ -274,7 +275,7 @@ export default async function ServicesHistoryPage({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+        <div className="wf-card p-5">
           <div className="flex items-center gap-2 text-[var(--brand)]">
             <Users className="size-4" />
             <p className="text-xs font-semibold uppercase tracking-wide">
@@ -288,7 +289,7 @@ export default async function ServicesHistoryPage({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+        <div className="wf-card p-5">
           <div className="flex items-center gap-2 text-[var(--brand)]">
             <Clock3 className="size-4" />
             <p className="text-xs font-semibold uppercase tracking-wide">
@@ -320,7 +321,7 @@ export default async function ServicesHistoryPage({
         </div>
 
         {services.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
+          <div className="wf-card border-dashed px-6 py-16 text-center">
             <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <History className="size-5" />
             </div>
@@ -357,7 +358,7 @@ export default async function ServicesHistoryPage({
               <Link
                 key={service.id}
                 href={`/setlists/${service.id}`}
-                className="group rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="wf-card group p-5 transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
@@ -365,7 +366,7 @@ export default async function ServicesHistoryPage({
                       <h2 className="text-base font-semibold text-[var(--foreground)] group-hover:text-[var(--brand)]">
                         {service.name}
                       </h2>
-                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-800">
+                      <span className="wf-status wf-status-success">
                         Completed
                       </span>
                     </div>
@@ -424,7 +425,7 @@ export default async function ServicesHistoryPage({
         {totalPages > 1 ? (
           <nav
             aria-label="Service history pagination"
-            className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3"
+            className="mt-5 wf-card flex items-center justify-between gap-3 px-4 py-3"
           >
             <p className="text-xs text-[var(--muted)]">
               Page {page} of {totalPages}

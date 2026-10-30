@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/ui/page"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import { Activity, CalendarDays, Music2, Users } from "lucide-react"
 import { describeActivity, type ActivityEntry } from "@/lib/activity-log"
@@ -62,12 +62,16 @@ export default async function ActivityPage() {
   const entries = (data ?? []) as ActivityRow[]
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-8 text-[var(--foreground)] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-4xl">
-        <PageHeader className="border-b border-[var(--border)] pb-6" title="Activity" eyebrow={workspace.organizationName} description="Recent changes across your songs, services, and team."  />
+    <PageContainer className="max-w-4xl">
+        <PageHeader
+          className="border-b border-[var(--border)] pb-6"
+          title="Activity"
+          eyebrow={workspace.organizationName}
+          description="Recent changes across your songs, services, and team."
+        />
 
         {entries.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-[var(--border)] bg-white px-6 py-14 text-center">
+          <div className="wf-card border-dashed px-6 py-14 text-center">
             <Activity className="mx-auto size-8 text-[var(--muted)]" />
             <h2 className="mt-4 text-base font-semibold">
               No activity yet
@@ -83,7 +87,7 @@ export default async function ActivityPage() {
             </Link>
           </div>
         ) : (
-          <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-white">
+          <div className="wf-card overflow-hidden">
             <ol className="divide-y divide-[var(--border)]">
               {entries.map((entry) => {
                 const href = activityHref(entry)
@@ -131,7 +135,6 @@ export default async function ActivityPage() {
             </ol>
           </div>
         )}
-      </div>
-    </main>
+    </PageContainer>
   )
 }
