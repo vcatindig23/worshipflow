@@ -77,6 +77,10 @@ button, input, select, textarea {
     color: #111 !important;
   }
 
+  .wf-workspace-content {
+    padding-left: 0 !important;
+  }
+
   .app-sidebar,
   .app-header,
   .home-button,
