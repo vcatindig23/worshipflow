@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Suspense, useActionState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Feedback } from "@/components/ui/feedback"
+import { Input } from "@/components/ui/form-controls"
 import {
   ArrowRight,
   KeyRound,
@@ -17,9 +18,6 @@ import { login, type LoginState } from "./actions"
 const initialState: LoginState = {
   error: "",
 }
-
-const inputClassName =
-  "h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-12 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
 
 function LoginFeedback() {
   const params = useSearchParams()
@@ -59,11 +57,10 @@ export default function LoginPage() {
 
           <div className="mb-5"><Suspense fallback={null}><LoginFeedback /></Suspense></div>
           {state.error ? (
-            <div
-              role="alert"
-              className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
-            >
-              {state.error}
+            <div className="mb-5">
+              <Feedback tone="error" title="Sign-in failed">
+                {state.error}
+              </Feedback>
             </div>
           ) : null}
 
@@ -80,7 +77,7 @@ export default function LoginPage() {
                   aria-hidden="true"
                   className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
                 />
-                <input
+                <Input
                   id="email"
                   name="email"
                   type="email"
@@ -88,7 +85,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   maxLength={320}
                   placeholder="you@example.com"
-                  className={inputClassName}
+                  className="h-12 pl-10 pr-12"
                 />
               </div>
             </div>
@@ -121,7 +118,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   maxLength={200}
                   placeholder="Enter your password"
-                  className={inputClassName}
+                  className="wf-input h-12 pl-10 pr-12"
                 />
               </div>
             </div>
