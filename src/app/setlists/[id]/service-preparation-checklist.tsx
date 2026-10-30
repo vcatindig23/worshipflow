@@ -45,8 +45,8 @@ function ChecklistRow({
         className={
           "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl " +
           (item.complete
-            ? "bg-emerald-100 text-emerald-700"
-            : "bg-[var(--surface)] text-[var(--muted)]")
+            ? "wf-icon-tile wf-icon-tile-success"
+            : "wf-icon-tile")
         }
       >
         {item.complete ? (
@@ -264,7 +264,7 @@ export default function ServicePreparationChecklist({
         <div
           className={
             "h-full rounded-full transition-all " +
-            (isReady ? "bg-emerald-500" : completionPercent >= 50 ? "bg-amber-500" : "bg-rose-500")
+            (isReady ? "bg-[var(--success)]" : completionPercent >= 50 ? "bg-[var(--warning)]" : "bg-[var(--danger)]")
           }
           style={{ width: `${completionPercent}%` }}
         />
@@ -272,16 +272,16 @@ export default function ServicePreparationChecklist({
 
       {isCompleted ? (
         <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-[var(--muted)]">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-700" />
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[var(--success)]" />
           This service is marked complete. The checklist reflects the preparation details currently saved in the plan.
         </p>
       ) : !isReady ? (
         <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-[var(--muted)]">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-600" />
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-[var(--warning)]" />
           Resolve the remaining essentials before service time. The additional preparation items below are recommended, but optional.
         </p>
       ) : (
-        <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-emerald-700">
+        <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-[var(--success)]">
           <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
           Schedule, song order, team assignments, and confirmations are all in place.
         </p>
