@@ -474,9 +474,11 @@ describe("semantic theme foundations", () => {
     expect(forgotPasswordPage).toMatch(/<Feedback tone="success"/)
     expect(forgotPasswordPage).toMatch(/<Feedback tone="error"/)
     expect(forgotPasswordPage).toMatch(/<Input/)
+    expect(forgotPasswordPage).toMatch(/wf-card rounded-3xl/)
     expect(forgotPasswordPage).not.toMatch(/bg-red-50|bg-emerald-50|border-red-200|text-red-700|text-emerald-800/)
 
     expect(resetPasswordPage).toMatch(/<Feedback tone="error"/)
+    expect(resetPasswordPage).toMatch(/<Feedback tone="warning"/)
     expect(resetPasswordPage).toMatch(/wf-card/)
     expect(resetPasswordPage).toMatch(/wf-input h-12 px-4 pr-12/)
     expect(resetPasswordPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
