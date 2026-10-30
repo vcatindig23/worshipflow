@@ -328,7 +328,7 @@
     background: var(--wf-readiness-color);
   }
   .wf-readiness-supporting {
-    color: var(--wf-readiness-color);
+    color: var(--success);
   }
   .wf-readiness-missing {
     color: var(--danger);
