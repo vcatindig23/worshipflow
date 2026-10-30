@@ -1,4 +1,5 @@
-import { PageHeader } from "@/components/ui/page"
+import { buttonVariants } from "@/components/ui/button"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import { AtSign, Bell, CalendarDays, Check, MessagesSquare, ArrowLeftRight, Music2 } from "lucide-react"
 import {
@@ -54,20 +55,29 @@ export default async function NotificationsPage() {
   ).length
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-8 text-[var(--foreground)] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-4xl">
-        <PageHeader className="border-b border-[var(--border)] pb-6" title="Notifications" eyebrow={workspace.organizationName} description="Team messages, service assignments, and updates for you." actions={unreadCount > 0 ? (<form action={markAllNotificationsRead}>
-              <button
-                type="submit"
-                className="inline-flex h-10 items-center gap-2 self-start rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold transition hover:bg-[var(--surface)]"
-              >
-                <Check className="size-4" />
-                Mark all as read
-              </button>
-            </form>) : null} />
+    <PageContainer className="max-w-4xl">
+        <PageHeader
+          className="border-b border-[var(--border)] pb-6"
+          title="Notifications"
+          eyebrow={workspace.organizationName}
+          description="Team messages, service assignments, and updates for you."
+          actions={
+            unreadCount > 0 ? (
+              <form action={markAllNotificationsRead}>
+                <button
+                  type="submit"
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  <Check className="size-4" />
+                  Mark all as read
+                </button>
+              </form>
+            ) : null
+          }
+        />
 
         {notifications.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-[var(--border)] bg-white px-6 py-14 text-center">
+          <div className="wf-card border-dashed px-6 py-14 text-center">
             <Bell className="mx-auto size-8 text-[var(--muted)]" />
             <h2 className="mt-4 text-base font-semibold">
               You&apos;re all caught up
@@ -77,7 +87,7 @@ export default async function NotificationsPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-white">
+          <div className="wf-card overflow-hidden">
             <ul className="divide-y divide-[var(--border)]">
               {notifications.map((notification) => (
                 <li
@@ -165,7 +175,6 @@ export default async function NotificationsPage() {
             </ul>
           </div>
         )}
-      </div>
-    </main>
+    </PageContainer>
   )
 }
