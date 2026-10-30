@@ -956,7 +956,7 @@ export default async function SongsPage({
                       <Link
                         href={`/songs/${song.id}`}
                         aria-label={`Open ${song.title}`}
-                        className="flex size-9 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                        className="flex size-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
                       >
                         <ChevronRight className="size-4" />
                       </Link>
