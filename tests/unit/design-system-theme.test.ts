@@ -107,6 +107,50 @@ const teamChatClient = readFileSync(
   join(process.cwd(), "src/app/chat/team-chat-client.tsx"),
   "utf8"
 )
+const newSetlistPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/new/page.tsx"),
+  "utf8"
+)
+const editSetlistPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/edit/page.tsx"),
+  "utf8"
+)
+const completeSetlistPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/complete/page.tsx"),
+  "utf8"
+)
+const setlistDetailPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/page.tsx"),
+  "utf8"
+)
+const setlistPreparationPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/preparation/page.tsx"),
+  "utf8"
+)
+const swapRequestsPanel = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/swap-requests-panel.tsx"),
+  "utf8"
+)
+const servicePreparationChecklist = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/service-preparation-checklist.tsx"),
+  "utf8"
+)
+const serviceTemplateDetailPage = readFileSync(
+  join(process.cwd(), "src/app/services/templates/[id]/page.tsx"),
+  "utf8"
+)
+const songDetailPage = readFileSync(
+  join(process.cwd(), "src/app/songs/[id]/page.tsx"),
+  "utf8"
+)
+const songReviewPanel = readFileSync(
+  join(process.cwd(), "src/components/songs/song-review-panel.tsx"),
+  "utf8"
+)
+const songVersionComparison = readFileSync(
+  join(process.cwd(), "src/components/songs/song-version-comparison.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -306,6 +350,69 @@ describe("semantic theme foundations", () => {
     expect(teamChatClient).toMatch(/bg-\[var\(--warning\)\]/)
     expect(teamChatClient).toMatch(/text-\[var\(--danger\)\]/)
     expect(teamChatClient).not.toMatch(/bg-emerald-500|bg-amber-500|text-red-700|hover:bg-red-50|hover:text-red-700/)
+  })
+
+
+  it("uses shared feedback and semantic statuses in setlist workflows", () => {
+    for (const page of [newSetlistPage, editSetlistPage]) {
+      expect(page).toMatch(/<Feedback tone="error"/)
+      expect(page).toMatch(/<Feedback tone="warning"/)
+      expect(page).toMatch(/wf-card/)
+      expect(page).not.toMatch(/bg-red-50|bg-amber-50|text-red-700|text-amber-950/)
+    }
+
+    expect(completeSetlistPage).toMatch(/<Feedback tone="error"/)
+    expect(completeSetlistPage).toMatch(/<Feedback tone="success"/)
+    expect(completeSetlistPage).toMatch(/wf-card/)
+    expect(completeSetlistPage).not.toMatch(/bg-red-50|bg-emerald-50|text-red-700|text-emerald-800/)
+
+    expect(setlistDetailPage).toMatch(/<Feedback tone="error"/)
+    expect(setlistDetailPage).toMatch(/<Feedback tone="warning"/)
+    expect(setlistDetailPage).toMatch(/wf-status-success/)
+    expect(setlistDetailPage).toMatch(/wf-status-warning/)
+    expect(setlistDetailPage).toMatch(/wf-status-danger/)
+    expect(setlistDetailPage).not.toMatch(/bg-red-50|bg-amber-50|bg-emerald-100|bg-rose-50|text-amber-800|text-emerald-700/)
+  })
+
+  it("uses shared feedback and semantic colors in preparation and swap workflows", () => {
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="error"/)
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="success"/)
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="warning"/)
+    expect(setlistPreparationPage).toMatch(/wf-status-warning/)
+    expect(setlistPreparationPage).toMatch(/var\(--warning-soft\)/)
+    expect(setlistPreparationPage).not.toMatch(/bg-red-50|bg-amber-50|bg-emerald-100|text-amber-900/)
+
+    expect(swapRequestsPanel).toMatch(/<Feedback tone="error"/)
+    expect(swapRequestsPanel).toMatch(/<Feedback tone="success"/)
+    expect(swapRequestsPanel).toMatch(/wf-status-success/)
+    expect(swapRequestsPanel).toMatch(/wf-status-danger/)
+    expect(swapRequestsPanel).toMatch(/wf-status-info/)
+    expect(swapRequestsPanel).not.toMatch(/border-rose-200|text-rose-700|hover:bg-rose-50|text-blue-800/)
+
+    expect(servicePreparationChecklist).toMatch(/wf-icon-tile-success/)
+    expect(servicePreparationChecklist).toMatch(/bg-\[var\(--success\)\]/)
+    expect(servicePreparationChecklist).toMatch(/bg-\[var\(--warning\)\]/)
+    expect(servicePreparationChecklist).toMatch(/bg-\[var\(--danger\)\]/)
+    expect(servicePreparationChecklist).not.toMatch(/bg-emerald-100|bg-emerald-500|bg-amber-500|bg-rose-500/)
+  })
+
+  it("uses shared semantic states in service-template and song collaboration views", () => {
+    expect(serviceTemplateDetailPage).toMatch(/<Feedback tone="error"/)
+    expect(serviceTemplateDetailPage).toMatch(/<Feedback tone="warning"/)
+    expect(serviceTemplateDetailPage).not.toMatch(/bg-red-50|bg-amber-50|text-amber-900/)
+
+    expect(songDetailPage).toMatch(/wf-status-warning/)
+    expect(songDetailPage).toMatch(/var\(--warning-soft\)/)
+    expect(songDetailPage).not.toMatch(/bg-amber-100|bg-amber-50|text-amber-800/)
+
+    expect(songReviewPanel).toMatch(/wf-status-info/)
+    expect(songReviewPanel).toMatch(/wf-status-warning/)
+    expect(songReviewPanel).toMatch(/wf-status-success/)
+    expect(songReviewPanel).toMatch(/messageIsError \? "alert" : "status"/)
+    expect(songReviewPanel).not.toMatch(/bg-sky-50|bg-amber-50|bg-emerald-50|text-sky-800|text-amber-800|text-emerald-800/)
+
+    expect(songVersionComparison).toMatch(/var\(--warning-soft\)/)
+    expect(songVersionComparison).not.toMatch(/bg-amber-50/)
   })
 
 })
