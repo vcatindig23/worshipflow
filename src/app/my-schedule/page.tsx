@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/server"
 import {
   formatServiceTime,
   getCalendarDateRange,
+  isValidServiceDate,
 } from "@/lib/service-scheduling"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getTeamPositionLabel } from "@/lib/team-positions"
@@ -229,6 +230,14 @@ export default async function MySchedulePage({
   const today = getToday(
     workspace.organizationTimezone
   )
+  const requestedCalendarDate = getParam(params.date)
+  const initialSelectedDate =
+    requestedCalendarDate && isValidServiceDate(requestedCalendarDate)
+      ? requestedCalendarDate
+      : today
+  const initialView = getParam(params.view) === "calendar"
+    ? "calendar"
+    : "list"
 
   const supabase =
     await createClient()
@@ -737,6 +746,13 @@ export default async function MySchedulePage({
           service_time: setlist.service_time,
           status: setlist.status,
         }))}
+        availabilityEntries={availabilityEntries}
+        today={today}
+        initialSelectedDate={initialSelectedDate}
+        initialView={initialView}
+        timeZone={workspace.organizationTimezone}
+        period={period}
+        availabilityAvailable={!availabilityLoadError}
       >
       <section>
         <p className="mb-4 text-sm font-semibold text-[var(--foreground)]">
