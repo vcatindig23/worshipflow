@@ -303,7 +303,6 @@ export default function AssignmentConfirmation({
             {error}
           </p>
         ) : null}
-      </div>
     </div>
   )
 }
