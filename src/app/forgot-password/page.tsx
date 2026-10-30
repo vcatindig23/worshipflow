@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { ArrowLeft, KeyRound, Mail } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
+import { Feedback } from "@/components/ui/feedback"
+import { Input } from "@/components/ui/form-controls"
 import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import { requestPasswordReset } from "./actions"
 
@@ -44,21 +46,18 @@ export default async function ForgotPasswordPage({
             </p>
 
             {sent ? (
-              <div
-                role="status"
-                className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800"
-              >
-                If an account exists for that email, a password reset link is
-                on its way. Check your inbox and spam folder.
+              <div className="mt-6">
+                <Feedback tone="success" title="Check your inbox">
+                  If an account exists for that email, a password reset link is on its way. Check your inbox and spam folder.
+                </Feedback>
               </div>
             ) : (
               <>
                 {errorMessage ? (
-                  <div
-                    role="alert"
-                    className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
-                  >
-                    {errorMessage}
+                  <div className="mt-6">
+                    <Feedback tone="error" title="Reset link could not be sent">
+                      {errorMessage}
+                    </Feedback>
                   </div>
                 ) : null}
 
@@ -75,7 +74,7 @@ export default async function ForgotPasswordPage({
                     </label>
                     <div className="relative">
                       <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-                      <input
+                      <Input
                         id="email"
                         name="email"
                         type="email"
@@ -83,7 +82,7 @@ export default async function ForgotPasswordPage({
                         maxLength={320}
                         autoComplete="email"
                         placeholder="you@example.com"
-                        className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                        className="h-12 pl-10 pr-4"
                       />
                     </div>
                   </div>
