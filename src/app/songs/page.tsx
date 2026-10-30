@@ -561,7 +561,7 @@ export default async function SongsPage({
         </Card>
       </section>
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-3 shadow-sm sm:p-4">
+      <section className="wf-card p-3 shadow-sm sm:p-4">
         <details className="group">
           <summary className="flex cursor-pointer list-none items-center gap-3 rounded-2xl px-2 py-2 outline-none transition hover:bg-[var(--surface)] focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 [&::-webkit-details-marker]:hidden">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
@@ -762,7 +762,7 @@ export default async function SongsPage({
                 Clear filters
               </Link>
             ) : null}
-            <div role="group" aria-label="Song layout" className="inline-flex items-center rounded-xl border border-[var(--border)] bg-white p-1 shadow-sm">
+            <div role="group" aria-label="Song layout" className="wf-card inline-flex items-center p-1 shadow-sm">
               <Link
                 href={buildHref(params, { view: undefined })}
                 aria-label="List view"
@@ -803,7 +803,7 @@ export default async function SongsPage({
               return (
                 <div
                   key={song.id}
-                  className={`group rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/25 hover:shadow-md focus-within:border-[var(--brand)]/25 ${
+                  className={`wf-card wf-card-interactive group p-4 ${
                     view === "grid" ? "flex h-full flex-col p-5" : ""
                   }`}
                 >
@@ -830,7 +830,7 @@ export default async function SongsPage({
                             </h2>
 
                             {song.status === "archived" ? (
-                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                              <span className="wf-status wf-status-warning">
                                 Archived
                               </span>
                             ) : null}
@@ -901,8 +901,8 @@ export default async function SongsPage({
                           }
                           className={`flex size-9 items-center justify-center rounded-xl border transition ${
                             preference?.is_favorite
-                              ? "border-amber-200 bg-amber-50 text-amber-600"
-                              : "border-[var(--border)] bg-white text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                              ? "border-[var(--warning)] bg-[var(--warning-soft)] text-[var(--warning)]"
+                              : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
                           }`}
                         >
                           <Star
@@ -941,7 +941,7 @@ export default async function SongsPage({
                                 ? `Archive ${song.title}`
                                 : `Restore ${song.title}`
                             }
-                            className="flex size-9 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                            className="flex size-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
                           >
                             {song.status ===
                             "active" ? (
