@@ -256,7 +256,7 @@ export default async function SearchPage({
                   <li key={setlist.id}>
                     <Link
                       href={`/setlists/${setlist.id}`}
-                      className="flex h-full items-start gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)] hover:shadow-sm"
+                      className="wf-card flex h-full items-start gap-3 p-4 transition hover:border-[var(--brand)] hover:shadow-sm"
                     >
                       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                         {setlist.service_date ? (
