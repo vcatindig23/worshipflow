@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { ProtectedForm } from "@/components/ui/protected-form"
+import { Feedback } from "@/components/ui/feedback"
 import { Input, Textarea } from "@/components/ui/form-controls"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
@@ -136,23 +137,21 @@ export default async function EditSetlistPage({
         </p>
       </div>
 
-      {errorKey &&
-      errorMessages[errorKey] ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      {errorKey && errorMessages[errorKey] ? (
+        <Feedback tone="error" title="Setlist could not be updated">
           {errorMessages[errorKey]}
-        </div>
+        </Feedback>
       ) : null}
 
       {!workspace.serviceTimeAvailable ? (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-          Service start times will be available after the Supabase migration
-          is applied.
-        </div>
+        <Feedback tone="warning" title="Service start times unavailable">
+          Service start times will be available after the Supabase migration is applied.
+        </Feedback>
       ) : null}
 
       <ProtectedForm
         action={updateSetlist}
-        className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
+        className="wf-card p-6 sm:p-7"
       >
         <input
           type="hidden"
@@ -299,7 +298,7 @@ export default async function EditSetlistPage({
           <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end">
             <Link
               href={`/setlists/${id}`}
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
             >
               Cancel
             </Link>

@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
+import { Feedback } from "@/components/ui/feedback"
+import { Input, Select, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
 import {
   Archive,
@@ -251,11 +253,11 @@ function statusLabel(
 }
 
 function availabilityBadgeClass(status: MemberAvailabilityStatus) {
-  if (status === "unavailable") return "bg-rose-50 text-rose-700"
-  if (status === "outside_weekly_hours") return "bg-amber-50 text-amber-800"
-  if (status === "within_weekly_hours") return "bg-emerald-50 text-emerald-700"
-  if (status === "needs_schedule") return "bg-[var(--surface)] text-[var(--muted)]"
-  return "bg-[var(--surface)] text-[var(--muted)]"
+  if (status === "unavailable") return "wf-status wf-status-danger"
+  if (status === "outside_weekly_hours") return "wf-status wf-status-warning"
+  if (status === "within_weekly_hours") return "wf-status wf-status-success"
+  if (status === "needs_schedule") return "wf-status wf-status-neutral"
+  return "wf-status wf-status-neutral"
 }
 
 const availabilityPriority: Record<MemberAvailabilityStatus, number> = {
@@ -581,7 +583,7 @@ export default async function SetlistPage({
       : ""
 
   return (
-    <main className="setlist-print-layout mx-auto max-w-7xl space-y-7 px-6 py-8">
+    <main className="wf-page setlist-print-layout max-w-7xl space-y-7 px-6 py-8">
       <Link
         href="/setlists"
         className="setlist-print-hide inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -591,23 +593,19 @@ export default async function SetlistPage({
       </Link>
 
       {errorMessage ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <Feedback tone="error" title="Setlist action could not be completed">
           {errorMessage}
-        </div>
+        </Feedback>
       ) : null}
 
       {!teamDataAvailable ? (
-        <div
-          role="status"
-          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800"
-        >
-          Worship-team assignments are unavailable until the member-position
-          and setlist-assignment database migrations have been applied. Your
-          setlist and songs remain available.
-        </div>
+        <Feedback tone="warning" title="Worship-team assignments unavailable">
+          Member-position and setlist-assignment database migrations are required.
+          Your setlist and songs remain available.
+        </Feedback>
       ) : null}
 
-      <section className="setlist-print-header rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm md:p-7">
+      <section className="setlist-print-header wf-card rounded-3xl p-6 shadow-sm md:p-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -617,14 +615,12 @@ export default async function SetlistPage({
               </span>
 
               <span
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  setlist.status ===
-                  "published"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : setlist.status ===
-                        "archived"
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-[var(--surface)] text-[var(--muted)]"
+                className={`wf-status ${
+                  setlist.status === "published"
+                    ? "wf-status-success"
+                    : setlist.status === "archived"
+                      ? "wf-status-warning"
+                      : "wf-status-neutral"
                 }`}
               >
                 {statusLabel(
@@ -633,7 +629,7 @@ export default async function SetlistPage({
               </span>
 
               {setlist.completed_at ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+                <span className="wf-status wf-status-success">
                   <CheckCircle2 className="size-3.5" />
                   Completed
                 </span>
@@ -676,7 +672,7 @@ export default async function SetlistPage({
                 href={`/setlists/${id}/complete`}
                 className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition ${
                   setlist.completed_at
-                    ? "border border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-[var(--surface)]"
+                    ? "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--surface)]"
                     : "bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]"
                 }`}
               >
@@ -704,7 +700,7 @@ export default async function SetlistPage({
             {canEdit ? (
               <form action={saveServiceAsTemplate} className="flex items-center gap-2">
                 <input type="hidden" name="setlistId" value={id} />
-                <input
+                <Input
                   type="text"
                   name="templateName"
                   required
@@ -712,11 +708,11 @@ export default async function SetlistPage({
                   defaultValue={setlist.name}
                   aria-label="Service template name"
                   placeholder="Template name"
-                  className="h-10 w-36 rounded-xl border border-[var(--border)] bg-white px-3 text-xs outline-none transition focus:border-[var(--brand)] sm:w-44"
+                  className="h-10 w-36 px-3 text-xs sm:w-44"
                 />
                 <button
                   type="submit"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
                 >
                   <Copy className="size-4" />
                   <span className="hidden sm:inline">Save template</span>
@@ -727,7 +723,7 @@ export default async function SetlistPage({
 
             <Link
               href={`/setlists/${id}/preparation`}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
             >
               <ClipboardCheck className="size-4" />
               Rehearsal &amp; prep
@@ -738,7 +734,7 @@ export default async function SetlistPage({
                 <input type="hidden" name="setlistId" value={id} />
                 <button
                   type="submit"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
                 >
                   <Copy className="size-4" />
                   Duplicate
@@ -748,7 +744,7 @@ export default async function SetlistPage({
 
             <Link
               href={`/setlists/${id}/print`}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
             >
               <FileDown className="size-4" />
               Service plan PDF
@@ -759,7 +755,7 @@ export default async function SetlistPage({
             {canEdit ? (
               <Link
                 href={`/setlists/${id}/edit`}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
               >
                 <Edit className="size-4" />
                 Edit
@@ -870,7 +866,7 @@ export default async function SetlistPage({
           className="scroll-mt-6 grid gap-4 md:grid-cols-2"
         >
           {setlist.announcements ? (
-            <article className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <article className="wf-card p-5">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">
                 Service Announcements
               </h2>
@@ -882,7 +878,7 @@ export default async function SetlistPage({
           ) : null}
 
           {setlist.service_notes ? (
-            <article className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <article className="wf-card p-5">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">
                 Service Notes
               </h2>
@@ -916,7 +912,7 @@ export default async function SetlistPage({
           </div>
 
           {setlistSongs.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-14 text-center shadow-sm">
+            <div className="wf-card border-dashed px-6 py-14 text-center">
               <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
                 <Music2 className="size-5" />
               </div>
@@ -958,7 +954,7 @@ export default async function SetlistPage({
                 return (
                   <article
                     key={setlistSong.id}
-                    className="setlist-song-card rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm"
+                    className="setlist-song-card wf-card p-5"
                   >
                     <div className="flex flex-col gap-5">
                       <div className="flex items-start gap-4">
@@ -974,7 +970,7 @@ export default async function SetlistPage({
 
                             {song.status ===
                             "archived" ? (
-                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                              <span className="wf-status wf-status-warning">
                                 Song archived
                               </span>
                             ) : null}
@@ -1043,7 +1039,7 @@ export default async function SetlistPage({
                                   index === 0
                                 }
                                 aria-label={`Move ${song.title} up`}
-                                className="flex size-9 items-center justify-center rounded-lg border border-[var(--border)] bg-white text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-30"
+                                className="flex size-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-30"
                               >
                                 <ArrowUp className="size-4" />
                               </button>
@@ -1082,7 +1078,7 @@ export default async function SetlistPage({
                                     1
                                 }
                                 aria-label={`Move ${song.title} down`}
-                                className="flex size-9 items-center justify-center rounded-lg border border-[var(--border)] bg-white text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-30"
+                                className="flex size-9 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-30"
                               >
                                 <ArrowDown className="size-4" />
                               </button>
@@ -1148,14 +1144,14 @@ export default async function SetlistPage({
                               Section
                             </label>
 
-                            <input
+                            <Input
                               id={`section-${setlistSong.id}`}
                               name="section"
                               defaultValue={
                                 setlistSong.section
                               }
                               maxLength={80}
-                              className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                              className="h-10 px-3"
                             />
                           </div>
 
@@ -1167,7 +1163,7 @@ export default async function SetlistPage({
                               Key Override
                             </label>
 
-                            <input
+                            <Input
                               id={`key-${setlistSong.id}`}
                               name="keyOverride"
                               defaultValue={
@@ -1179,7 +1175,7 @@ export default async function SetlistPage({
                                 song.current_key ??
                                 "Original"
                               }
-                              className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                              className="h-10 px-3"
                             />
                           </div>
 
@@ -1191,7 +1187,7 @@ export default async function SetlistPage({
                               Capo
                             </label>
 
-                            <input
+                            <Input
                               id={`capo-${setlistSong.id}`}
                               name="capoOverride"
                               type="number"
@@ -1208,7 +1204,7 @@ export default async function SetlistPage({
                                     )
                                   : "None"
                               }
-                              className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                              className="h-10 px-3"
                             />
                           </div>
 
@@ -1220,7 +1216,7 @@ export default async function SetlistPage({
                               BPM
                             </label>
 
-                            <input
+                            <Input
                               id={`tempo-${setlistSong.id}`}
                               name="tempoOverride"
                               type="number"
@@ -1237,7 +1233,7 @@ export default async function SetlistPage({
                                     )
                                   : "Original"
                               }
-                              className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                              className="h-10 px-3"
                             />
                           </div>
 
@@ -1249,7 +1245,7 @@ export default async function SetlistPage({
                               Arrangement Notes
                             </label>
 
-                            <textarea
+                            <Textarea
                               id={`notes-${setlistSong.id}`}
                               name="notes"
                               maxLength={2000}
@@ -1259,7 +1255,7 @@ export default async function SetlistPage({
                                 ""
                               }
                               placeholder="Intro, transition, repeat chorus, spoken prayer, etc."
-                              className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-sm leading-6 outline-none focus:border-[var(--brand)]"
+                              className="min-h-24 resize-y px-3 py-2.5"
                             />
                           </div>
 
@@ -1330,7 +1326,7 @@ export default async function SetlistPage({
         <aside className="setlist-print-sidebar space-y-5">
           <ServiceResources setlistId={id} canEdit={canEdit} />
 
-          <section id="worship-team" className="scroll-mt-6 rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <section id="worship-team" className="scroll-mt-6 wf-card p-5">
             <div className="flex items-center gap-2">
               <Users className="size-4 text-[var(--brand)]" />
               <h2 className="font-semibold text-[var(--foreground)]">
@@ -1342,35 +1338,37 @@ export default async function SetlistPage({
               Assign members to the positions set for them on the Team page. Saved time off and weekly hours help you review availability before assigning.
             </p>
             {canEdit && profileIds.length > 0 && !availabilityChecksAvailable ? (
-              <p role="status" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900">
-                Availability checks are unavailable. Verify that the member-availability migration is applied; assignments can still be managed.
-              </p>
+              <div className="mt-3">
+                <Feedback tone="warning" title="Availability checks unavailable">
+                  Verify that the member-availability migration is applied. Assignments can still be managed.
+                </Feedback>
+              </div>
             ) : null}
 
             {teamAssignments.length > 0 ? (
               <>
                 <div className="mt-4 grid grid-cols-3 gap-2">
-                  <div className="rounded-xl bg-emerald-50 px-3 py-2.5">
-                    <p className="text-lg font-bold text-emerald-700">
+                  <div className="rounded-xl bg-[var(--success-soft)] px-3 py-2.5">
+                    <p className="text-lg font-bold text-[var(--success)]">
                       {confirmedAssignments}
                     </p>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--success)]">
                       Confirmed
                     </p>
                   </div>
-                  <div className="rounded-xl bg-amber-50 px-3 py-2.5">
-                    <p className="text-lg font-bold text-amber-700">
+                  <div className="rounded-xl bg-[var(--warning-soft)] px-3 py-2.5">
+                    <p className="text-lg font-bold text-[var(--warning)]">
                       {pendingAssignments}
                     </p>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--warning)]">
                       Pending
                     </p>
                   </div>
-                  <div className="rounded-xl bg-rose-50 px-3 py-2.5">
-                    <p className="text-lg font-bold text-rose-700">
+                  <div className="rounded-xl bg-[var(--danger-soft)] px-3 py-2.5">
+                    <p className="text-lg font-bold text-[var(--danger)]">
                       {declinedAssignments}
                     </p>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-rose-700">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--danger)]">
                       Declined
                     </p>
                   </div>
@@ -1408,7 +1406,7 @@ export default async function SetlistPage({
                             {availabilityChecksAvailable && assignment.availability ? (
                               <span
                                 aria-label={`Availability: ${assignment.availability.label}`}
-                                className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${availabilityBadgeClass(assignment.availability.status)}`}
+                                className={`mt-1 ${availabilityBadgeClass(assignment.availability.status)}`}
                               >
                                 {assignment.availability.label}
                               </span>
@@ -1417,12 +1415,12 @@ export default async function SetlistPage({
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           <span
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                            className={`wf-status ${
                               assignment.confirmation_status === "confirmed"
-                                ? "bg-emerald-50 text-emerald-700"
+                                ? "wf-status-success"
                                 : assignment.confirmation_status === "declined"
-                                  ? "bg-rose-50 text-rose-700"
-                                  : "bg-amber-50 text-amber-700"
+                                  ? "wf-status-danger"
+                                  : "wf-status-warning"
                             }`}
                           >
                             {assignment.confirmation_status === "confirmed"
@@ -1477,12 +1475,12 @@ export default async function SetlistPage({
                   >
                     Member and position
                   </label>
-                  <select
+                  <Select
                     id="assignmentKey"
                     name="assignmentKey"
                     required
                     defaultValue=""
-                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                    className="h-11 px-3"
                   >
                     <option value="" disabled>
                       Select a team member
@@ -1492,7 +1490,7 @@ export default async function SetlistPage({
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   <button
                     type="submit"
                     className="h-10 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
@@ -1513,7 +1511,7 @@ export default async function SetlistPage({
           </section>
 
           {canEdit ? (
-            <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <section className="rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm">
               <div>
                 <div className="flex items-center gap-2">
                   <Music2 className="size-4 text-[var(--brand)]" />
@@ -1552,11 +1550,11 @@ export default async function SetlistPage({
                       Song
                     </label>
 
-                    <select
+                    <Select
                       id="songId"
                       name="songId"
                       required
-                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                      className="h-11 px-3"
                     >
                       <option value="">
                         Select a song
@@ -1575,7 +1573,7 @@ export default async function SetlistPage({
                           </option>
                         )
                       )}
-                    </select>
+                    </Select>
                   </div>
 
                   <div>
@@ -1586,12 +1584,12 @@ export default async function SetlistPage({
                       Section
                     </label>
 
-                    <input
+                    <Input
                       id="section"
                       name="section"
                       defaultValue="Worship"
                       maxLength={80}
-                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                      className="h-11 px-3"
                     />
                   </div>
 
@@ -1604,12 +1602,12 @@ export default async function SetlistPage({
                         Key
                       </label>
 
-                      <input
+                      <Input
                         id="keyOverride"
                         name="keyOverride"
                         maxLength={20}
                         placeholder="Song key"
-                        className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                        className="h-11 px-3"
                       />
                     </div>
 
@@ -1621,14 +1619,14 @@ export default async function SetlistPage({
                         Capo
                       </label>
 
-                      <input
+                      <Input
                         id="capoOverride"
                         name="capoOverride"
                         type="number"
                         min={0}
                         max={12}
                         placeholder="Optional"
-                        className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                        className="h-11 px-3"
                       />
                     </div>
                   </div>
@@ -1641,14 +1639,14 @@ export default async function SetlistPage({
                       BPM
                     </label>
 
-                    <input
+                    <Input
                       id="tempoOverride"
                       name="tempoOverride"
                       type="number"
                       min={20}
                       max={300}
                       placeholder="Optional"
-                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                      className="h-11 px-3"
                     />
                   </div>
 
@@ -1660,13 +1658,13 @@ export default async function SetlistPage({
                       Notes
                     </label>
 
-                    <textarea
+                    <Textarea
                       id="notes"
                       name="notes"
                       maxLength={2000}
                       rows={3}
                       placeholder="Optional arrangement notes"
-                      className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-sm leading-6 outline-none focus:border-[var(--brand)]"
+                      className="min-h-24 resize-y px-3 py-2.5"
                     />
                   </div>
 
@@ -1681,7 +1679,7 @@ export default async function SetlistPage({
             </section>
           ) : null}
 
-          <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <section className="rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm">
             <h2 className="font-semibold text-[var(--foreground)]">
               Setlist Summary
             </h2>
@@ -1736,7 +1734,7 @@ export default async function SetlistPage({
 
           <Link
             href="/songs"
-            className="flex items-center justify-between rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm transition hover:bg-[var(--surface)]"
+            className="flex items-center justify-between rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm transition hover:bg-[var(--surface)]"
           >
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">

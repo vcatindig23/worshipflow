@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { Feedback } from "@/components/ui/feedback"
+import { Input, Textarea } from "@/components/ui/form-controls"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle2 } from "lucide-react"
@@ -103,25 +105,20 @@ export default async function CompleteServicePage({
       </div>
 
       {errorKey && errors[errorKey] ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <Feedback tone="error" title="Service history could not be saved">
           {errors[errorKey]}
-        </div>
+        </Feedback>
       ) : null}
 
       {completedAt ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
-            Completed
-          </p>
-          <p className="mt-1 text-sm text-emerald-800">
-            {completedAt}
-          </p>
-        </div>
+        <Feedback tone="success" title="Service already completed">
+          {completedAt}
+        </Feedback>
       ) : null}
 
       <form
         action={completeService}
-        className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
+        className="wf-card p-6 sm:p-7"
       >
         <input type="hidden" name="setlistId" value={setlist.id} />
 
@@ -133,7 +130,7 @@ export default async function CompleteServicePage({
             >
               Attendance
             </label>
-            <input
+            <Input
               id="attendanceCount"
               name="attendanceCount"
               type="number"
@@ -143,7 +140,7 @@ export default async function CompleteServicePage({
               inputMode="numeric"
               defaultValue={setlist.attendance_count ?? ""}
               placeholder="Optional"
-              className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="h-12 px-4"
             />
             <p className="mt-2 text-xs text-[var(--muted)]">
               Record the approximate number of people who attended.
@@ -157,7 +154,7 @@ export default async function CompleteServicePage({
             >
               Actual service duration
             </label>
-            <input
+            <Input
               id="actualDurationMinutes"
               name="actualDurationMinutes"
               type="number"
@@ -167,7 +164,7 @@ export default async function CompleteServicePage({
               inputMode="numeric"
               defaultValue={setlist.actual_duration_minutes ?? ""}
               placeholder="Optional, in minutes"
-              className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="h-12 px-4"
             />
           </div>
 
@@ -178,14 +175,14 @@ export default async function CompleteServicePage({
             >
               After-service notes
             </label>
-            <textarea
+            <Textarea
               id="afterServiceNotes"
               name="afterServiceNotes"
               maxLength={3000}
               rows={8}
               defaultValue={setlist.after_service_notes ?? ""}
               placeholder="What went well? What should the team improve or follow up on next time?"
-              className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+              className="min-h-40 resize-y px-4 py-3 leading-6"
             />
           </div>
 
