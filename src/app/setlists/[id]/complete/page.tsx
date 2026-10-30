@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Feedback } from "@/components/ui/feedback"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle2 } from "lucide-react"
@@ -103,25 +104,20 @@ export default async function CompleteServicePage({
       </div>
 
       {errorKey && errors[errorKey] ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <Feedback tone="error" title="Could not complete service">
           {errors[errorKey]}
-        </div>
+        </Feedback>
       ) : null}
 
       {completedAt ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
-            Completed
-          </p>
-          <p className="mt-1 text-sm text-emerald-800">
-            {completedAt}
-          </p>
-        </div>
+        <Feedback tone="success" title="Service completed">
+          {completedAt}
+        </Feedback>
       ) : null}
 
       <form
         action={completeService}
-        className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
+        className="wf-card p-6 sm:p-7"
       >
         <input type="hidden" name="setlistId" value={setlist.id} />
 
