@@ -115,6 +115,28 @@ async function expectResponsiveLayout(
         "main a[href], main button, main input:not([type='hidden']), main select, main textarea, .app-header a[href], .app-header button"
       )
     ).filter(visible)
+    const clippedControls = interactive.flatMap((element) => {
+      const rect = element.getBoundingClientRect()
+      let parent = element.parentElement
+      while (parent && parent !== document.body) {
+        const style = window.getComputedStyle(parent)
+        const parentRect = parent.getBoundingClientRect()
+        const clipsX = ["hidden", "clip"].includes(style.overflowX)
+        const clipsY = ["hidden", "clip"].includes(style.overflowY)
+        if (
+          (clipsX && (rect.left < parentRect.left - 1 || rect.right > parentRect.right + 1)) ||
+          (clipsY && (rect.top < parentRect.top - 1 || rect.bottom > parentRect.bottom + 1))
+        ) {
+          const label =
+            element.getAttribute("aria-label") ||
+            element.textContent?.trim().slice(0, 60) ||
+            element.tagName.toLowerCase()
+          return [label]
+        }
+        parent = parent.parentElement
+      }
+      return []
+    })
     const outOfViewportControls = interactive
       .filter((element) => !insideHorizontalScroller(element))
       .flatMap((element) => {
@@ -194,6 +216,7 @@ async function expectResponsiveLayout(
         document.documentElement.scrollWidth,
         document.body.scrollWidth
       ),
+      clippedControls,
       outOfViewportControls,
       fixedBounds,
       fixedOverlaps,
@@ -204,6 +227,10 @@ async function expectResponsiveLayout(
     diagnostics.documentWidth,
     `${context} (${phase}): document must not scroll horizontally`
   ).toBeLessThanOrEqual(diagnostics.viewportWidth + 1)
+  expect(
+    diagnostics.clippedControls,
+    `${context} (${phase}): visible controls must not be clipped by a parent surface`
+  ).toEqual([])
   expect(
     diagnostics.outOfViewportControls,
     `${context} (${phase}): visible controls must fit the viewport`
@@ -506,6 +533,25 @@ test.describe("isolated multi-member service workflow", () => {
           await expect(mobileDrawer).toBeHidden()
         } else {
           await expect(leader.locator(".app-sidebar")).toBeVisible()
+        }
+
+        if (viewport.width >= 640) {
+          const optionsTrigger = leader.getByRole("button", {
+            name: "Options",
+            exact: true,
+          })
+          await expect(optionsTrigger, `${context}: account options trigger`).toBeVisible()
+          await optionsTrigger.click()
+          const optionsPanel = leader.locator("#account-options-panel")
+          await expect(optionsPanel).toBeVisible()
+          await expectPanelInsideViewport(
+            leader,
+            "#account-options-panel",
+            `${context} account options menu`
+          )
+          await leader.keyboard.press("Escape")
+          await expect(optionsPanel).toBeHidden()
+          await expect(optionsTrigger).toBeFocused()
         }
 
         const searchTrigger = leader.locator(
