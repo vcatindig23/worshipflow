@@ -49,7 +49,7 @@ const entrySchema = z.object({
 })
 
 function parseCalendarReturnDate(value: string) {
-  const parsed = z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/).safeParse(value)
+  const parsed = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).safeParse(value)
   if (!parsed.success) return undefined
 
   const date = new Date(`${parsed.data}T00:00:00.000Z`)
