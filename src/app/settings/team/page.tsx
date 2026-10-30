@@ -1,4 +1,5 @@
 import { buttonVariants } from "@/components/ui/button"
+import { Feedback } from "@/components/ui/feedback"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import { Input, Select } from "@/components/ui/form-controls"
 import { PageContainer, PageHeader } from "@/components/ui/page"
@@ -363,7 +364,7 @@ export default async function TeamSettingsPage({
         description={<>Invite your worship team, assign roles, and manage access to your church workspace.</>}
         actions={<>
 {canManageTeam ? <Link href="/settings/team/audit" className={buttonVariants({ variant: "outline" })}>Permission history</Link> : null}
-<div className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
+<div className="wf-card px-5 py-4 shadow-sm">
           <p className="text-xs font-medium text-[var(--muted)]">
             Members
           </p>
@@ -376,31 +377,21 @@ export default async function TeamSettingsPage({
       />
 
       {errorMessage ? (
-        <div
-          role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
+        <Feedback tone="error" title="Team update failed">
           {errorMessage}
-        </div>
+        </Feedback>
       ) : null}
 
       {membersResult.error ? (
-        <div
-          role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          The church members could not be loaded. Please refresh the page and try again.
-        </div>
+        <Feedback tone="error" title="Members could not be loaded">
+          Please refresh the page and try again.
+        </Feedback>
       ) : null}
 
       {teamPositionsUnavailable ? (
-        <div
-          role="status"
-          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-        >
-          Members are loaded, but worship-team positions are unavailable until
-          the team-position database migration is applied.
-        </div>
+        <Feedback tone="warning" title="Worship-team positions unavailable">
+          Members are loaded, but positions remain unavailable until the team-position database migration is applied.
+        </Feedback>
       ) : null}
 
       {canManageTeam ? (
@@ -453,7 +444,7 @@ export default async function TeamSettingsPage({
                     <ConfirmSubmitButton title="Revoke this invitation?" description="The invitation link will stop working. You can send a new invitation later." confirmLabel="Revoke invitation"
                       type="submit"
                       aria-label={`Revoke invitation for ${invitation.email}`}
-                      className="inline-flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--danger-soft)] hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 dark:hover:bg-red-950/50 dark:hover:text-red-400"
+                      className="inline-flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)]/30"
                     >
                       <X aria-hidden="true" className="size-4" />
                     </ConfirmSubmitButton>
@@ -484,7 +475,7 @@ export default async function TeamSettingsPage({
           </div>
 
           <details className="group w-full xl:max-w-[440px]">
-            <summary className="flex cursor-pointer list-none items-center gap-3 rounded-xl border border-[var(--border)] bg-white px-3.5 py-3 outline-none transition hover:border-[var(--brand)]/30 hover:bg-[var(--surface)] focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3.5 py-3 outline-none transition hover:border-[var(--brand)]/30 hover:bg-[var(--surface)] focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 [&::-webkit-details-marker]:hidden">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
                 <Search className="size-4" />
               </span>
@@ -690,7 +681,7 @@ export default async function TeamSettingsPage({
 
                       <button
                         type="submit"
-                        className="h-9 rounded-lg border border-[var(--border)] bg-white px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                        className={buttonVariants({ variant: "outline", className: "h-9 min-h-9 px-3 py-1.5 text-xs" })}
                       >
                         Save
                       </button>
