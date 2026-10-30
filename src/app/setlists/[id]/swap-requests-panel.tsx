@@ -250,7 +250,7 @@ export default async function SetlistSwapRequestsPanel({
                           aria-label="Leader resolution note"
                           className="h-10 min-w-0 flex-1 rounded-xl border border-[var(--border)] px-3 text-sm outline-none focus:border-[var(--brand)]"
                         />
-                        <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 px-4 text-xs font-semibold text-rose-700 transition hover:bg-rose-50">
+                        <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--danger)]/30 px-4 text-xs font-semibold text-[var(--danger)] transition hover:bg-[var(--danger-soft)]">
                           <X className="size-3.5" /> Decline request
                         </button>
                       </form>
