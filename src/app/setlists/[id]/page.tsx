@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { buttonVariants } from "@/components/ui/button"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import { Feedback } from "@/components/ui/feedback"
 import Link from "next/link"
