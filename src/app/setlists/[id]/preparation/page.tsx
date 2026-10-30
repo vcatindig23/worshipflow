@@ -547,9 +547,9 @@ export default async function ServicePreparationPage({
         </div>
 
         {!conflictsAvailable ? (
-          <p role="status" className="wf-feedback wf-feedback-warning mt-4 text-sm leading-6">
-            Conflict checking is temporarily unavailable because the assignment schedule could not be loaded.
-          </p>
+          <Feedback tone="warning" title="Conflict checking unavailable">
+            The assignment schedule could not be loaded, so overlapping commitments cannot be checked right now.
+          </Feedback>
         ) : conflicts.length > 0 ? (
           <ul className="mt-5 space-y-3">
             {conflicts.map((conflict) => (
