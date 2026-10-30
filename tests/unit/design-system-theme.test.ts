@@ -364,7 +364,7 @@ describe("semantic theme foundations", () => {
     expect(setlistPreparationPage).toMatch(/wf-status-neutral/)
     expect(setlistPreparationPage).toMatch(/wf-status-warning/)
     expect(setlistPreparationPage).toMatch(/wf-status-success/)
-    expect(setlistPreparationPage).toMatch(/var\\(--success-soft\\)/)
+    expect(setlistPreparationPage).toMatch(/var\(--success-soft\)/)
     expect(setlistPreparationPage).not.toMatch(/bg-white|bg-emerald-100|bg-amber-100|bg-amber-50|text-emerald-700|text-amber-800|border-amber-200/)
   })
 
