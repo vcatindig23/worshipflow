@@ -5,6 +5,7 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
+import { Feedback } from "@/components/ui/feedback"
 import FormSubmitButton from "@/components/ui/form-submit-button"
 import {
   resolveAssignmentSwapRequest,
@@ -119,21 +120,21 @@ export default async function SetlistSwapRequestsPanel({
           </p>
         </div>
         {canManage ? (
-          <span className="shrink-0 rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--muted)]">
+          <span className="wf-status wf-status-neutral shrink-0">
             {requests.filter((request) => request.status === "pending" || request.status === "substitute_accepted").length} open
           </span>
         ) : null}
       </div>
 
       {errorKey && errorMessages[errorKey] ? (
-        <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+        <Feedback tone="error" title="Swap request update failed">
           {errorMessages[errorKey]}
-        </p>
+        </Feedback>
       ) : null}
       {notice === "1" ? (
-        <p role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-800">
+        <Feedback tone="success" title="Swap request updated">
           The swap request was updated.
-        </p>
+        </Feedback>
       ) : null}
 
       {requests.length === 0 ? (
@@ -160,14 +161,14 @@ export default async function SetlistSwapRequestsPanel({
                       <h3 className="text-sm font-semibold text-[var(--foreground)]">
                         {displayName(request.requester_user_id)} → {displayName(request.substitute_user_id)}
                       </h3>
-                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                      <span className={`wf-status ${
                         request.status === "approved"
-                          ? "bg-emerald-100 text-emerald-800"
+                          ? "wf-status-success"
                           : request.status === "declined" || request.status === "cancelled"
-                            ? "bg-rose-100 text-rose-800"
+                            ? "wf-status-danger"
                             : request.status === "substitute_accepted"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-amber-100 text-amber-800"
+                              ? "wf-status-info"
+                              : "wf-status-warning"
                       }`}>
                         {statusLabels[request.status]}
                       </span>
