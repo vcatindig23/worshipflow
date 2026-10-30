@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { isActiveNavigationPath } from "@/lib/navigation"
+import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 import {
   workspaceNavigationItems,
   workspaceSettingsNavigationItem,
@@ -51,8 +52,7 @@ describe("immersive workspace route handling", () => {
     "/setlists/service-123/live/",
     "/songs/song-123/print",
     "/songs/song-123/print/",
-  ])("bypasses the shared shell for %s", async (pathname) => {
-    const { isImmersiveWorkspaceRoute } = await import("@/lib/workspace-layout")
+  ])("bypasses the shared shell for %s", (pathname) => {
     expect(isImmersiveWorkspaceRoute(pathname)).toBe(true)
   })
 
@@ -63,8 +63,7 @@ describe("immersive workspace route handling", () => {
     "/songs",
     "/songs/song-123",
     "/songs/song-123/edit",
-  ])("keeps standard workspace chrome on %s", async (pathname) => {
-    const { isImmersiveWorkspaceRoute } = await import("@/lib/workspace-layout")
+  ])("keeps standard workspace chrome on %s", (pathname) => {
     expect(isImmersiveWorkspaceRoute(pathname)).toBe(false)
   })
 })
