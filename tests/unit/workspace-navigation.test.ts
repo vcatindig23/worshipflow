@@ -43,3 +43,28 @@ describe("shared workspace navigation", () => {
     expect(isActiveNavigationPath("/files", "/profile")).toBe(false)
   })
 })
+
+
+describe("immersive workspace route handling", () => {
+  it.each([
+    "/setlists/3ff5d636-afc4-4323-8b3c-8de6789520e6/live",
+    "/setlists/service-123/live/",
+    "/songs/song-123/print",
+    "/songs/song-123/print/",
+  ])("bypasses the shared shell for %s", async (pathname) => {
+    const { isImmersiveWorkspaceRoute } = await import("@/lib/workspace-layout")
+    expect(isImmersiveWorkspaceRoute(pathname)).toBe(true)
+  })
+
+  it.each([
+    "/setlists",
+    "/setlists/service-123",
+    "/setlists/service-123/edit",
+    "/songs",
+    "/songs/song-123",
+    "/songs/song-123/edit",
+  ])("keeps standard workspace chrome on %s", async (pathname) => {
+    const { isImmersiveWorkspaceRoute } = await import("@/lib/workspace-layout")
+    expect(isImmersiveWorkspaceRoute(pathname)).toBe(false)
+  })
+})
