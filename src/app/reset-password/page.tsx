@@ -139,10 +139,11 @@ export default async function ResetPasswordPage({
                 <h1 className="text-2xl font-semibold tracking-[-0.035em] text-[var(--foreground)]">
                   Reset link expired
                 </h1>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                  {errorMessage ??
-                    "Open the latest password reset email to choose a new password."}
-                </p>
+                <div className="mt-4">
+                  <Feedback tone="warning" title="This reset link can no longer be used">
+                    {errorMessage ?? "Open the latest password reset email to choose a new password."}
+                  </Feedback>
+                </div>
                 <Link
                   href="/forgot-password"
                   className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
