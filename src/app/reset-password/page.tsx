@@ -124,7 +124,7 @@ export default async function ResetPasswordPage({
                       minLength={12}
                       maxLength={72}
                       autoComplete="new-password"
-                      className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                      className="wf-input h-12 px-4 pr-12"
                     />
                   </div>
                   <AuthSubmitButton
