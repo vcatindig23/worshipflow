@@ -1,4 +1,5 @@
 import { buttonVariants } from "@/components/ui/button"
+import { Feedback } from "@/components/ui/feedback"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -396,7 +397,7 @@ export default async function ServiceInsightsPage() {
       />
 
       {completedServices.length === 0 ? (
-        <section className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
+        <section className="wf-card border-dashed px-6 py-16 text-center">
           <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
             <BarChart3 className="size-5" />
           </div>
@@ -417,7 +418,7 @@ export default async function ServiceInsightsPage() {
       ) : (
         <>
           <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <div className="wf-card p-5">
               <div className="flex items-center gap-2 text-[var(--brand)]">
                 <CheckCircle2 className="size-4" />
                 <p className="text-xs font-semibold uppercase tracking-wide">
@@ -432,7 +433,7 @@ export default async function ServiceInsightsPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <div className="wf-card p-5">
               <div className="flex items-center gap-2 text-[var(--brand)]">
                 <Users className="size-4" />
                 <p className="text-xs font-semibold uppercase tracking-wide">
@@ -454,7 +455,7 @@ export default async function ServiceInsightsPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <div className="wf-card p-5">
               <div className="flex items-center gap-2 text-[var(--brand)]">
                 <Clock3 className="size-4" />
                 <p className="text-xs font-semibold uppercase tracking-wide">
@@ -471,7 +472,7 @@ export default async function ServiceInsightsPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm">
+            <div className="wf-card p-5">
               <div className="flex items-center gap-2 text-[var(--brand)]">
                 <TrendingUp className="size-4" />
                 <p className="text-xs font-semibold uppercase tracking-wide">
@@ -497,7 +498,7 @@ export default async function ServiceInsightsPage() {
           </p>
 
           <section className="grid gap-5 lg:grid-cols-[1.3fr_0.7fr]">
-            <div className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+            <div className="wf-card p-6">
               <div>
                 <div className="flex items-center gap-2">
                   <Users className="size-4 text-[var(--brand)]" />
@@ -553,18 +554,15 @@ export default async function ServiceInsightsPage() {
               )}
 
               {highestAttendance !== null ? (
-                <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
-                    Highest recorded attendance
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-emerald-800">
+                <div className="mt-6">
+                  <Feedback tone="success" title="Highest recorded attendance">
                     {highestAttendance.toLocaleString("en-PH")} people
-                  </p>
+                  </Feedback>
                 </div>
               ) : null}
             </div>
 
-            <div className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+            <div className="wf-card p-6">
               <div className="flex items-center gap-2">
                 <CalendarDays className="size-4 text-[var(--brand)]" />
                 <h2 className="font-semibold text-[var(--foreground)]">
@@ -614,7 +612,7 @@ export default async function ServiceInsightsPage() {
           </section>
 
           <section className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+            <div className="wf-card p-6">
               <div className="flex items-center gap-2">
                 <Music2 className="size-4 text-[var(--brand)]" />
                 <h2 className="font-semibold text-[var(--foreground)]">
@@ -645,7 +643,7 @@ export default async function ServiceInsightsPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+            <div className="wf-card p-6">
               <div className="flex items-center gap-2">
                 <Music2 className="size-4 text-[var(--brand)]" />
                 <h2 className="font-semibold text-[var(--foreground)]">
@@ -693,7 +691,7 @@ export default async function ServiceInsightsPage() {
             </div>
           </section>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
+          <div className="wf-card flex flex-wrap items-center justify-between gap-3 px-5 py-4">
             <div className="text-sm text-[var(--muted)]">
               Insights are calculated from your recorded service history and
               update automatically as services are completed.
