@@ -7,11 +7,11 @@ import {
   useState,
   useTransition,
 } from "react"
+import { Feedback } from "@/components/ui/feedback"
 import Link from "next/link"
 import type { FormEvent, ReactNode } from "react"
 import { Fragment } from "react"
 import {
-  AlertCircle,
   Check,
   Download,
   FileText,
@@ -33,7 +33,6 @@ import {
   Wifi,
   X,
   WifiOff,
-  UsersRound,
 } from "lucide-react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import {
@@ -215,7 +214,7 @@ function highlightSearchTerm(body: string, query: string): ReactNode {
     parts.push(
       <mark
         key={matchIndex}
-        className="rounded bg-amber-200 px-0.5 text-amber-950 dark:bg-amber-500/40 dark:text-amber-50"
+        className="rounded bg-[var(--warning-soft)] px-0.5 text-[var(--warning)]"
       >
         {body.slice(matchIndex, matchIndex + normalizedQuery.length)}
       </mark>
@@ -1180,7 +1179,7 @@ export default function TeamChatClient({
     : "Start the team conversation"
 
   return (
-    <section className="overflow-hidden rounded-[28px] border border-[var(--border)] bg-white shadow-[0_24px_64px_-44px_rgba(21,35,27,0.45)]">
+    <section className="wf-card overflow-hidden !rounded-[28px] p-0 shadow-[0_24px_64px_-44px_rgba(21,35,27,0.45)]">
       <div className="flex min-h-0 flex-col md:h-[min(78vh,860px)] md:min-h-[620px] md:flex-row">
         <aside className="flex max-h-[190px] shrink-0 flex-col overflow-hidden border-b border-[var(--border)] bg-[#fbfcfd] md:max-h-none md:w-[286px] md:border-b-0 md:border-r">
           <div className="px-4 pb-4 pt-5 sm:px-5">
@@ -1200,14 +1199,14 @@ export default function TeamChatClient({
             <div aria-current="page" className="flex items-center gap-3 rounded-2xl border border-[var(--brand)]/10 bg-[var(--brand-soft)] p-3 shadow-sm">
               <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--brand)] text-white">
                 <MessagesSquare className="size-5" />
-                <span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border-2 border-[var(--brand-soft)] bg-white text-[8px] font-bold text-[var(--brand)]">
+                <span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border-2 border-[var(--brand-soft)] bg-[var(--card)] text-[8px] font-bold text-[var(--brand)]">
                   {members.length > 9 ? "9+" : members.length}
                 </span>
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex items-center justify-between gap-2">
                   <span className="truncate text-sm font-semibold text-[var(--foreground)]">Worship team</span>
-                  <span className={`size-2 shrink-0 rounded-full ${connectionState === "live" ? "bg-emerald-500" : "bg-amber-500"}`} aria-label={connectionLabel} />
+                  <span className={`size-2 shrink-0 rounded-full ${connectionState === "live" ? "bg-[var(--success)]" : "bg-[var(--warning)]"}`} aria-label={connectionLabel} />
                 </span>
                 <span className="mt-1 block truncate text-xs leading-5 text-[var(--muted)]">{latestMessagePreview}</span>
                 <span className="mt-0.5 block text-[10px] text-[var(--muted)]">{members.length} members · Shared chat</span>
@@ -1222,8 +1221,8 @@ export default function TeamChatClient({
             </div>
             <ul className="mt-3 space-y-1">
               {members.map((member) => (
-                <li key={member.id} className="flex min-w-0 items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-white">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[10px] font-bold text-[var(--brand)] shadow-sm">
+                <li key={member.id} className="flex min-w-0 items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-[var(--card)]">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[10px] font-bold text-[var(--brand)] shadow-sm">
                     {initials(member.displayName)}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -1242,8 +1241,8 @@ export default function TeamChatClient({
           </div>
         </aside>
 
-        <main className="flex min-h-[560px] min-w-0 flex-1 flex-col bg-white md:min-h-0">
-      <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <main className="flex min-h-[560px] min-w-0 flex-1 flex-col bg-[var(--card)] md:min-h-0">
+      <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-[var(--card)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex min-w-0 items-center gap-3.5">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--brand)]/10 bg-[var(--brand-soft)] text-[var(--brand)] shadow-sm">
             <MessagesSquare className="size-5" />
@@ -1259,12 +1258,12 @@ export default function TeamChatClient({
         </div>
 
         <span
-          className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-[11px] font-semibold text-[var(--muted)] shadow-sm"
+          className={`wf-status ${connectionState === "live" ? "wf-status-success" : "wf-status-warning"}`}
           role="status"
           aria-live="polite"
         >
           {connectionState === "live" ? (
-            <Wifi className="size-3.5 text-emerald-600" />
+            <Wifi className="size-3.5 text-[var(--success)]" />
           ) : (
             <WifiOff className="size-3.5" />
           )}
@@ -1272,7 +1271,7 @@ export default function TeamChatClient({
         </span>
       </div>
 
-      <div className="border-b border-[var(--border)] bg-white px-4 py-3 sm:px-6">
+      <div className="border-b border-[var(--border)] bg-[var(--card)] px-4 py-3 sm:px-6">
         <form
           onSubmit={handleSearchSubmit}
           className="flex flex-col gap-2 sm:flex-row sm:items-center"
@@ -1324,7 +1323,7 @@ export default function TeamChatClient({
           </div>
         </form>
         {searchError ? (
-          <p role="alert" className="mt-2 text-xs text-red-700">
+          <p role="alert" className="mt-2 text-xs text-[var(--danger)]">
             {searchError}
           </p>
         ) : (
@@ -1344,7 +1343,7 @@ export default function TeamChatClient({
             <h3 className="text-xs font-semibold text-[var(--foreground)]">
               Pinned for the team
             </h3>
-            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
+            <span className="rounded-full bg-[var(--card)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
               {pinnedMessages.length}
             </span>
           </div>
@@ -1352,7 +1351,7 @@ export default function TeamChatClient({
             {pinnedMessages.map((message) => (
               <li
                 key={message.id}
-                className="flex items-start gap-3 rounded-xl border border-[var(--border)] bg-white px-3 py-2"
+                className="flex items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2"
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-semibold text-[var(--muted)]">
@@ -1375,7 +1374,7 @@ export default function TeamChatClient({
                     onClick={() => handleTogglePinned(message)}
                     disabled={isPinningMessage}
                     aria-label={`Unpin message from ${message.authorName}`}
-                    className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-[10px] font-semibold text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                    className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-[10px] font-semibold text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] disabled:opacity-50"
                   >
                     <PinOff className="size-3" />
                     Unpin
@@ -1401,7 +1400,7 @@ export default function TeamChatClient({
               type="button"
               onClick={handleLoadEarlierMessages}
               disabled={isLoadingOlder}
-              className="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-3.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3.5 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isLoadingOlder ? (
                 <LoaderCircle className="size-3.5 animate-spin" />
@@ -1411,7 +1410,7 @@ export default function TeamChatClient({
               {isLoadingOlder ? "Loading earlier messages…" : "Load earlier messages"}
             </button>
             {historyError ? (
-              <p role="alert" className="text-center text-xs text-red-700">
+              <p role="alert" className="text-center text-xs text-[var(--danger)]">
                 {historyError}
               </p>
             ) : null}
@@ -1419,7 +1418,7 @@ export default function TeamChatClient({
         ) : null}
 
         {activeSearch ? (
-          <div className="mb-5 rounded-xl border border-[var(--border)] bg-white px-3.5 py-3">
+          <div className="mb-5 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3.5 py-3">
             <p role="status" aria-live="polite" className="text-xs font-medium text-[var(--muted)]">
               {isSearching
                 ? `Searching for “${activeSearch}”…`
@@ -1451,7 +1450,7 @@ export default function TeamChatClient({
 
         {!activeSearch && messages.length === 0 ? (
           <div className="flex min-h-[320px] flex-col items-center justify-center px-5 text-center sm:min-h-[400px]">
-            <div className="flex size-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-white text-[var(--brand)] shadow-sm">
+            <div className="flex size-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[var(--brand)] shadow-sm">
               <MessageCircle className="size-6" />
             </div>
             <h3 className="mt-4 text-base font-semibold text-[var(--foreground)]">
@@ -1483,7 +1482,7 @@ export default function TeamChatClient({
                       aria-label={formatMessageDate(message.created_at, chatTimeZone)}
                       className="flex justify-center py-1"
                     >
-                      <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-[10px] font-semibold text-[var(--muted)] shadow-sm">
+                      <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-[10px] font-semibold text-[var(--muted)] shadow-sm">
                         {formatMessageDate(message.created_at, chatTimeZone)}
                       </span>
                     </li>
@@ -1497,7 +1496,7 @@ export default function TeamChatClient({
                       <Link
                         href={message.user_id === currentUserId ? "/profile" : "/profile/" + message.user_id}
                         aria-label={"View " + displayName + "'s profile"}
-                        className="mt-5 flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[10px] font-bold text-[var(--brand)] transition hover:ring-2 hover:ring-[var(--brand)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
+                        className="mt-5 flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[10px] font-bold text-[var(--brand)] transition hover:ring-2 hover:ring-[var(--brand)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
                       >
                         {isOwnMessage ? initials(members.find((member) => member.id === currentUserId)?.displayName ?? "You") : initials(message.authorName)}
                       </Link>
@@ -1518,7 +1517,7 @@ export default function TeamChatClient({
                         </div>
                         {message.reply_to_body ? (
                           <div
-                            className={`mb-1.5 max-w-full rounded-xl border-l-2 px-3 py-2 text-left text-[11px] ${isOwnMessage ? "border-white/60 bg-white/10 text-white/90" : "border-[var(--brand)]/50 bg-white text-[var(--muted)]"}`}
+                            className={`mb-1.5 max-w-full rounded-xl border-l-2 px-3 py-2 text-left text-[11px] ${isOwnMessage ? "border-white/60 bg-white/10 text-white/90" : "border-[var(--brand)]/50 bg-[var(--card)] text-[var(--muted)]"}`}
                           >
                             <p className="font-semibold">
                               Replying to{" "}
@@ -1532,7 +1531,7 @@ export default function TeamChatClient({
                           </div>
                         ) : null}
                         {editingMessageId === message.id ? (
-                          <div className="w-full min-w-[240px] rounded-2xl border border-[var(--brand)] bg-white p-3 shadow-sm">
+                          <div className="w-full min-w-[240px] rounded-2xl border border-[var(--brand)] bg-[var(--card)] p-3 shadow-sm">
                             <label htmlFor={`edit-team-chat-${message.id}`} className="sr-only">
                               Edit message
                             </label>
@@ -1618,7 +1617,7 @@ export default function TeamChatClient({
                                 onClick={() => handleTogglePinned(message)}
                                 disabled={isPinningMessage || isSavingEdit || isDeletingMessage}
                                 aria-label={`${message.pinned_at ? "Unpin" : "Pin"} message from ${displayName}`}
-                                className={`inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium transition disabled:opacity-50 ${message.pinned_at ? "text-[var(--brand)] hover:bg-white" : "text-[var(--muted)] hover:bg-white hover:text-[var(--foreground)]"}`}
+                                className={`inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium transition disabled:opacity-50 ${message.pinned_at ? "text-[var(--brand)] hover:bg-[var(--card)]" : "text-[var(--muted)] hover:bg-[var(--card)] hover:text-[var(--foreground)]"}`}
                               >
                                 {message.pinned_at ? (
                                   <PinOff className="size-3" />
@@ -1632,7 +1631,7 @@ export default function TeamChatClient({
                               type="button"
                               onClick={() => void handleCopyMessage(message)}
                               aria-label={copiedMessageId === message.id ? "Message copied" : "Copy message text"}
-                              className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)]"
+                              className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-[var(--card)] hover:text-[var(--foreground)]"
                             >
                               {copiedMessageId === message.id ? (
                                 <Check className="size-3" />
@@ -1646,7 +1645,7 @@ export default function TeamChatClient({
                               onClick={() => handleStartReply(message)}
                               disabled={isSavingEdit || isDeletingMessage}
                               aria-label={`Reply to ${displayName}'s message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
-                              className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)] disabled:opacity-50"
+                              className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-[var(--card)] hover:text-[var(--foreground)] disabled:opacity-50"
                             >
                               <Reply className="size-3" />
                               Reply
@@ -1658,7 +1657,7 @@ export default function TeamChatClient({
                                   onClick={() => handleStartEdit(message)}
                                   disabled={isSavingEdit || isDeletingMessage}
                                   aria-label={`Edit your message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
-                                  className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)] disabled:opacity-50"
+                                  className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-[var(--card)] hover:text-[var(--foreground)] disabled:opacity-50"
                                 >
                                   <Pencil className="size-3" />
                                   Edit
@@ -1668,7 +1667,7 @@ export default function TeamChatClient({
                                   onClick={() => handleDeleteMessage(message.id)}
                                   disabled={isSavingEdit || isDeletingMessage}
                                   aria-label={`Delete your message sent at ${formatMessageTime(message.created_at, chatTimeZone)}`}
-                                  className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                                  className="inline-flex h-7 items-center gap-1 rounded-md px-1.5 font-medium text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] disabled:opacity-50"
                                 >
                                   {isDeletingMessage ? (
                                     <LoaderCircle className="size-3 animate-spin" />
@@ -1708,12 +1707,10 @@ export default function TeamChatClient({
 
       <div className="border-t border-[var(--border)] bg-gradient-to-r from-white to-[var(--surface)]/35 px-3 py-3 sm:px-6 sm:py-4">
         {error ? (
-          <div
-            role="alert"
-            className="mb-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-xs leading-5 text-red-700"
-          >
-            <AlertCircle className="mt-0.5 size-4 shrink-0" />
-            <p>{error}</p>
+          <div className="mb-3">
+            <Feedback tone="error" title="Chat action failed">
+              {error}
+            </Feedback>
           </div>
         ) : null}
 
@@ -1725,7 +1722,7 @@ export default function TeamChatClient({
             </div>
             <div className="flex flex-wrap gap-2">
               {selectedFiles.map((file, index) => (
-                <span key={`${file.name}-${file.size}-${index}`} className="inline-flex max-w-full items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-2.5 py-2 text-xs">
+                <span key={`${file.name}-${file.size}-${index}`} className="inline-flex max-w-full items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-2.5 py-2 text-xs">
                   {file.type.startsWith("image/") ? <ImageIcon className="size-4 shrink-0 text-[var(--brand)]" /> : <FileText className="size-4 shrink-0 text-[var(--brand)]" />}
                   <span className="max-w-48 truncate">{file.name}</span>
                   <span className="shrink-0 text-[var(--muted)]">{formatFileSize(file.size)}</span>
@@ -1751,7 +1748,7 @@ export default function TeamChatClient({
               type="button"
               onClick={handleClearReply}
               aria-label="Cancel reply"
-              className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-white hover:text-[var(--foreground)]"
+              className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--card)] hover:text-[var(--foreground)]"
             >
               <X className="size-3.5" />
             </button>
@@ -1807,7 +1804,7 @@ export default function TeamChatClient({
                 id="team-chat-mention-options"
                 role="listbox"
                 aria-label="Mention a team member"
-                className="absolute bottom-full z-20 mb-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-[var(--border)] bg-white p-2 shadow-xl"
+                className="absolute bottom-full z-20 mb-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-xl"
               >
                 <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
                   Mention a teammate
@@ -1895,7 +1892,7 @@ export default function TeamChatClient({
               rows={2}
               placeholder="Message your worship team…"
               disabled={isPending}
-              className="max-h-40 min-h-[48px] w-full resize-y rounded-[24px] border border-transparent bg-[#f0f2f5] px-4 py-3 text-sm leading-5 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)]/25 focus:bg-white focus:ring-2 focus:ring-[var(--brand)]/10 disabled:opacity-60"
+              className="max-h-40 min-h-[48px] w-full resize-y rounded-[24px] border border-transparent bg-[#f0f2f5] px-4 py-3 text-sm leading-5 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)]/25 focus:bg-[var(--card)] focus:ring-2 focus:ring-[var(--brand)]/10 disabled:opacity-60"
             />
           </div>
           <button

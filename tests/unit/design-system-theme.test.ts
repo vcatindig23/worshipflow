@@ -87,6 +87,26 @@ const serviceInsightsPage = readFileSync(
   join(process.cwd(), "src/app/services/insights/page.tsx"),
   "utf8"
 )
+const mySchedulePage = readFileSync(
+  join(process.cwd(), "src/app/my-schedule/page.tsx"),
+  "utf8"
+)
+const assignmentConfirmation = readFileSync(
+  join(process.cwd(), "src/app/my-schedule/assignment-confirmation.tsx"),
+  "utf8"
+)
+const scheduleViewToggle = readFileSync(
+  join(process.cwd(), "src/app/my-schedule/schedule-view-toggle.tsx"),
+  "utf8"
+)
+const chatPage = readFileSync(
+  join(process.cwd(), "src/app/chat/page.tsx"),
+  "utf8"
+)
+const teamChatClient = readFileSync(
+  join(process.cwd(), "src/app/chat/team-chat-client.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -248,6 +268,44 @@ describe("semantic theme foundations", () => {
     expect(serviceInsightsPage).toMatch(/wf-card/)
     expect(serviceInsightsPage).toMatch(/<Feedback tone="success"/)
     expect(serviceInsightsPage).not.toMatch(/bg-white|bg-emerald-50|text-emerald-800/)
+  })
+
+  it("uses semantic availability and assignment states in My Schedule", () => {
+    expect(mySchedulePage).toMatch(/<Feedback tone="success"/)
+    expect(mySchedulePage).toMatch(/<Feedback tone="error"/)
+    expect(mySchedulePage).toMatch(/<Feedback tone="warning"/)
+    expect(mySchedulePage).toMatch(/<Input/)
+    expect(mySchedulePage).toMatch(/<Textarea/)
+    expect(mySchedulePage).toMatch(/wf-card/)
+    expect(mySchedulePage).toMatch(/wf-status/)
+    expect(mySchedulePage).not.toMatch(/bg-white|bg-emerald-50|bg-rose-50|bg-amber-50|text-rose-700/)
+
+    expect(assignmentConfirmation).toMatch(/wf-feedback-success/)
+    expect(assignmentConfirmation).toMatch(/wf-feedback-error/)
+    expect(assignmentConfirmation).toMatch(/wf-feedback-warning/)
+    expect(assignmentConfirmation).toMatch(/var\(--danger-action\)/)
+    expect(assignmentConfirmation).not.toMatch(/bg-emerald-50|bg-rose-50|bg-amber-50|text-rose-700|text-amber-800/)
+
+    expect(scheduleViewToggle).toMatch(/<Feedback tone="warning"/)
+    expect(scheduleViewToggle).toMatch(/<Input/)
+    expect(scheduleViewToggle).toMatch(/<Textarea/)
+    expect(scheduleViewToggle).toMatch(/bg-\[var\(--success\)\]/)
+    expect(scheduleViewToggle).toMatch(/bg-\[var\(--danger\)\]/)
+    expect(scheduleViewToggle).toMatch(/wf-card/)
+    expect(scheduleViewToggle).not.toMatch(/bg-white|bg-emerald-50|bg-rose-50|bg-amber-50|text-rose-700|text-emerald-700/)
+  })
+
+  it("uses semantic setup, connection, and error states in Team Chat", () => {
+    expect(chatPage).toMatch(/<Feedback tone="warning"/)
+    expect(chatPage).not.toMatch(/bg-amber-50|text-amber-950|text-amber-900/)
+
+    expect(teamChatClient).toMatch(/<Feedback tone="error"/)
+    expect(teamChatClient).toMatch(/wf-status-success/)
+    expect(teamChatClient).toMatch(/wf-status-warning/)
+    expect(teamChatClient).toMatch(/bg-\[var\(--success\)\]/)
+    expect(teamChatClient).toMatch(/bg-\[var\(--warning\)\]/)
+    expect(teamChatClient).toMatch(/text-\[var\(--danger\)\]/)
+    expect(teamChatClient).not.toMatch(/bg-emerald-500|bg-amber-500|text-red-700|hover:bg-red-50|hover:text-red-700/)
   })
 
 })
