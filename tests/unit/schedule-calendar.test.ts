@@ -47,9 +47,10 @@ describe("schedule calendar helpers", () => {
   it("builds six weeks when the month spans six calendar rows", () => {
     const cells = getCalendarMonthCells(2026, 7)
     expect(cells).toHaveLength(42)
-    expect(cells[0]).toBe("2026-07-27")
-    expect(cells[4]).toBe("2026-07-31")
+    expect(cells.slice(0, 5)).toEqual([null, null, null, null, null])
     expect(cells[5]).toBe("2026-08-01")
+    expect(cells[35]).toBe("2026-08-31")
+    expect(cells.slice(36)).toEqual([null, null, null, null, null, null])
   })
 
   it("marks every date in a blockout range, including both endpoints", () => {
