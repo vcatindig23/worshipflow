@@ -885,13 +885,13 @@ export default function WorkspaceHeaderActions({
             </div>
 
             {notificationError ? (
-              <p role="alert" className="border-b border-red-100 bg-red-50 px-4 py-3 text-xs text-red-700">
+              <p role="alert" className="border-b border-[var(--danger)]/20 bg-[var(--danger-soft)] px-4 py-3 text-xs text-[var(--danger)]">
                 {notificationError}
               </p>
             ) : null}
 
             {activityError ? (
-              <p role="status" className="border-b border-amber-100 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+              <p role="status" className="border-b border-[var(--warning)]/20 bg-[var(--warning-soft)] px-4 py-2.5 text-xs text-[var(--warning)]">
                 {activityError}
               </p>
             ) : null}
