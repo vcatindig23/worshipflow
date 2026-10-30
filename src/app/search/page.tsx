@@ -1,3 +1,5 @@
+import { buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/form-controls"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -150,24 +152,24 @@ export default async function SearchPage({
       <form
         action="/search"
         role="search"
-        className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm sm:flex-row"
+        className="wf-card flex flex-col gap-3 p-4 shadow-sm sm:flex-row"
       >
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">Search songs and setlists</span>
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-          <input
+          <Input
             name="q"
             type="search"
             defaultValue={query}
             maxLength={100}
             autoComplete="off"
             placeholder="Song title, artist, setlist, or service..."
-            className="h-12 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+            className="h-12 pl-10 pr-4"
           />
         </label>
         <button
           type="submit"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+          className={buttonVariants({ size: "lg", className: "h-12 px-5" })}
         >
           <Search className="size-4" />
           Search
@@ -175,7 +177,7 @@ export default async function SearchPage({
       </form>
 
       {!query ? (
-        <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center">
+        <div className="wf-card border-dashed px-6 py-16 text-center">
           <Search className="mx-auto size-8 text-[var(--muted)]" />
           <p className="mt-4 text-sm text-[var(--muted)]">
             Enter a song title, artist, setlist, or service name to search.
@@ -211,7 +213,7 @@ export default async function SearchPage({
                   <li key={song.id}>
                     <Link
                       href={`/songs/${song.id}`}
-                      className="flex h-full items-start gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)] hover:shadow-sm"
+                      className="wf-card flex h-full items-start gap-3 p-4 transition hover:border-[var(--brand)] hover:shadow-sm"
                     >
                       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                         <Music2 className="size-5" />
@@ -224,7 +226,7 @@ export default async function SearchPage({
                           {song.artist || song.album || "Artist not set"}
                         </span>
                         {song.status === "archived" ? (
-                          <span className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                          <span className="wf-status wf-status-warning">
                             Archived
                           </span>
                         ) : null}
