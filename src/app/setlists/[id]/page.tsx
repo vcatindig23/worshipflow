@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import { Feedback } from "@/components/ui/feedback"
+import { Input, Select, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
 import {
   Archive,
@@ -1143,14 +1144,14 @@ export default async function SetlistPage({
                               Section
                             </label>
 
-                            <input
+                            <Input
                               id={`section-${setlistSong.id}`}
                               name="section"
                               defaultValue={
                                 setlistSong.section
                               }
                               maxLength={80}
-                              className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                              className="h-10 px-3"
                             />
                           </div>
 
@@ -1162,7 +1163,7 @@ export default async function SetlistPage({
                               Key Override
                             </label>
 
-                            <input
+                            <Input
                               id={`key-${setlistSong.id}`}
                               name="keyOverride"
                               defaultValue={
@@ -1174,7 +1175,7 @@ export default async function SetlistPage({
                                 song.current_key ??
                                 "Original"
                               }
-                              className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                              className="h-10 px-3"
                             />
                           </div>
 
@@ -1186,7 +1187,7 @@ export default async function SetlistPage({
                               Capo
                             </label>
 
-                            <input
+                            <Input
                               id={`capo-${setlistSong.id}`}
                               name="capoOverride"
                               type="number"
@@ -1203,7 +1204,7 @@ export default async function SetlistPage({
                                     )
                                   : "None"
                               }
-                              className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                              className="h-10 px-3"
                             />
                           </div>
 
@@ -1215,7 +1216,7 @@ export default async function SetlistPage({
                               BPM
                             </label>
 
-                            <input
+                            <Input
                               id={`tempo-${setlistSong.id}`}
                               name="tempoOverride"
                               type="number"
@@ -1232,7 +1233,7 @@ export default async function SetlistPage({
                                     )
                                   : "Original"
                               }
-                              className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                              className="h-10 px-3"
                             />
                           </div>
 
@@ -1474,12 +1475,12 @@ export default async function SetlistPage({
                   >
                     Member and position
                   </label>
-                  <select
+                  <Select
                     id="assignmentKey"
                     name="assignmentKey"
                     required
                     defaultValue=""
-                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                    className="h-11 px-3"
                   >
                     <option value="" disabled>
                       Select a team member
@@ -1489,7 +1490,7 @@ export default async function SetlistPage({
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   <button
                     type="submit"
                     className="h-10 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
@@ -1549,11 +1550,11 @@ export default async function SetlistPage({
                       Song
                     </label>
 
-                    <select
+                    <Select
                       id="songId"
                       name="songId"
                       required
-                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                      className="h-11 px-3"
                     >
                       <option value="">
                         Select a song
@@ -1572,7 +1573,7 @@ export default async function SetlistPage({
                           </option>
                         )
                       )}
-                    </select>
+                    </Select>
                   </div>
 
                   <div>
