@@ -39,8 +39,9 @@ describe("schedule calendar helpers", () => {
       null, null, null, null, null, null,
     ])
     expect(cells[6]).toBe("2026-11-01")
-    expect(cells).toHaveLength(35)
-    expect(cells.at(-1)).toBe("2026-11-29")
+    expect(cells).toHaveLength(42)
+    expect(cells[35]).toBe("2026-11-30")
+    expect(cells.slice(36)).toEqual([null, null, null, null, null, null])
   })
 
   it("builds six weeks when the month spans six calendar rows", () => {
