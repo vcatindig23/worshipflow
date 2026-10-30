@@ -1,9 +1,7 @@
-import { isRole } from "@/lib/permissions"
 import { cache } from "react"
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
+import { getWorkspaceIdentity } from "./get-workspace-identity"
 
 type TeamAssignmentRow = {
   setlist_id: string
@@ -104,73 +102,27 @@ function getToday(timeZone: string) {
 }
 
 export const getWorkspace = cache(async function getWorkspace(): Promise<WorkspaceData> {
-  const supabase = await createClient()
-
-  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims()
-  const userId = claimsData?.claims?.sub
-
-  if (claimsError || !userId) {
-    redirect("/login")
-  }
-
-  const [profileResult, membershipResult] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("display_name, avatar_url")
-      .eq("id", userId)
-      .maybeSingle(),
-
-    supabase
-      .from("organization_members")
-      .select(`
-        organization_id,
-        role,
-        organizations (
-          id,
-          name,
-          description,
-          contact_email,
-          contact_phone,
-          address,
-          website,
-          timezone,
-          default_service_name,
-          default_service_day,
-          default_service_time,
-          onboarding_completed_at
-        )
-      `)
-      .eq("user_id", userId)
-      .limit(1)
-      .maybeSingle(),
-  ])
-
-  if (profileResult.error) {
-    throw new Error("Unable to load your profile.")
-  }
-
-  const userAvatarUrls = await getProfileAvatarUrlMap(supabase, [
-    profileResult.data?.avatar_url ?? null,
-  ])
-
-  if (membershipResult.error) {
-    throw new Error("Unable to load your church membership.")
-  }
-
-  const membership = membershipResult.data
-
-  if (!membership) {
-    redirect("/onboarding")
-  }
-  if (!isRole(membership.role)) redirect("/error?code=permission_denied")
-
-  const organization = Array.isArray(membership.organizations)
-    ? membership.organizations[0]
-    : membership.organizations
-
-  if (!organization) {
-    throw new Error("Unable to load your church workspace.")
-  }
+  const identity = await getWorkspaceIdentity()
+  const {
+    supabase,
+    userId,
+    userName,
+    userAvatarUrl,
+    userEmail,
+    organizationId,
+    organizationName,
+    organizationDescription,
+    organizationEmail,
+    organizationPhone,
+    organizationAddress,
+    organizationWebsite,
+    organizationTimezone,
+    defaultServiceName,
+    defaultServiceDay,
+    defaultServiceTime,
+    role,
+    unreadChatNotificationCount,
+  } = identity
 
   const serviceTimeAvailable = await hasServiceTimeColumn(supabase)
 
@@ -181,26 +133,25 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
     upcomingSetlistsResult,
     memberAssignmentsResult,
     unreadNotificationsResult,
-    unreadChatNotificationsResult,
   ] =
     await Promise.all([
       supabase
         .from("songs")
         .select("id", { count: "exact", head: true })
-        .eq("organization_id", membership.organization_id)
+        .eq("organization_id", organizationId)
         .eq("status", "active"),
 
       supabase
         .from("organization_members")
         .select("user_id", { count: "exact", head: true })
-        .eq("organization_id", membership.organization_id),
+        .eq("organization_id", organizationId),
 
       supabase
         .from("songs")
         .select(
           "id, title, artist, current_key, tempo, updated_at"
         )
-        .eq("organization_id", membership.organization_id)
+        .eq("organization_id", organizationId)
         .eq("status", "active")
         .order("updated_at", { ascending: false })
         .limit(5),
@@ -208,8 +159,8 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
       supabase
         .from("setlists")
         .select("*")
-        .eq("organization_id", membership.organization_id)
-        .gte("service_date", getToday(organization.timezone))
+        .eq("organization_id", organizationId)
+        .gte("service_date", getToday(organizationTimezone))
         .neq("status", "archived")
         .order("service_date", { ascending: true })
         .limit(3),
@@ -225,13 +176,6 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
         .eq("user_id", userId)
         .is("read_at", null),
 
-      supabase
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .eq("organization_id", membership.organization_id)
-        .in("type", ["team_chat_message", "team_chat_mention"])
-        .is("read_at", null),
     ])
 
   if (songCountResult.error) {
@@ -258,10 +202,6 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
     throw new Error("Unable to count your unread notifications.")
   }
 
-  if (unreadChatNotificationsResult.error) {
-    throw new Error("Unable to count unread team chat notifications.")
-  }
-
   const memberAssignments = (memberAssignmentsResult.data ??
     []) as MemberAssignmentRow[]
   const memberSetlistIds = Array.from(
@@ -274,9 +214,9 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
       await supabase
         .from("setlists")
         .select("*")
-        .eq("organization_id", membership.organization_id)
+        .eq("organization_id", organizationId)
         .in("id", memberSetlistIds)
-        .gte("service_date", getToday(organization.timezone))
+        .gte("service_date", getToday(organizationTimezone))
         .neq("status", "archived")
         .order("service_date", { ascending: true })
         .limit(3)
@@ -384,29 +324,26 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
 
   return {
     userId,
-    userName: profileResult.data?.display_name ?? "Worship Member",
-    userAvatarUrl:
-      userAvatarUrls.get(profileResult.data?.avatar_url ?? "") ?? null,
-    userEmail:
-      claimsData.claims.email ??
-      "",
-    organizationId: membership.organization_id,
-    organizationName: organization.name,
-    organizationDescription: organization.description,
-    organizationEmail: organization.contact_email,
-    organizationPhone: organization.contact_phone,
-    organizationAddress: organization.address,
-    organizationWebsite: organization.website,
-    organizationTimezone: organization.timezone,
-    defaultServiceName: organization.default_service_name,
-    defaultServiceDay: organization.default_service_day,
-    defaultServiceTime: organization.default_service_time,
+    userName,
+    userAvatarUrl,
+    userEmail,
+    organizationId,
+    organizationName,
+    organizationDescription,
+    organizationEmail,
+    organizationPhone,
+    organizationAddress,
+    organizationWebsite,
+    organizationTimezone,
+    defaultServiceName,
+    defaultServiceDay,
+    defaultServiceTime,
     serviceTimeAvailable,
-    role: membership.role,
+    role,
     songCount: songCountResult.count ?? 0,
     memberCount: memberCountResult.count ?? 0,
     unreadNotificationCount: unreadNotificationsResult.count ?? 0,
-    unreadChatNotificationCount: unreadChatNotificationsResult.count ?? 0,
+    unreadChatNotificationCount,
     recentSongs: recentSongsResult.data ?? [],
     upcomingSetlists: upcomingSetlists.map((setlist) => {
       const assignments = assignmentsBySetlist.get(setlist.id) ?? []
