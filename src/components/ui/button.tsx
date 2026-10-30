@@ -3,12 +3,12 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 export const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--wf-radius-control)] text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--wf-radius-control)] text-sm font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]/25 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default: "bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]",
-        destructive: "bg-red-600 text-white hover:bg-red-700",
+        destructive: "bg-[var(--danger-action)] text-[var(--danger-foreground)] hover:bg-[var(--danger-action-hover)]",
         outline: "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--surface)]",
         secondary: "bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--brand-soft)]",
         ghost: "text-[var(--foreground)] hover:bg-[var(--surface)]",
