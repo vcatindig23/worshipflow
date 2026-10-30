@@ -119,18 +119,6 @@ const setlistCompletePage = readFileSync(
   join(process.cwd(), "src/app/setlists/[id]/complete/page.tsx"),
   "utf8"
 )
-const setlistDetailPage = readFileSync(
-  join(process.cwd(), "src/app/setlists/[id]/page.tsx"),
-  "utf8"
-)
-const setlistEditPage = readFileSync(
-  join(process.cwd(), "src/app/setlists/[id]/edit/page.tsx"),
-  "utf8"
-)
-const setlistCompletePage = readFileSync(
-  join(process.cwd(), "src/app/setlists/[id]/complete/page.tsx"),
-  "utf8"
-)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
