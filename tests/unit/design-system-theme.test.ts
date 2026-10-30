@@ -119,6 +119,18 @@ const setlistCompletePage = readFileSync(
   join(process.cwd(), "src/app/setlists/[id]/complete/page.tsx"),
   "utf8"
 )
+const setlistDetailPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/page.tsx"),
+  "utf8"
+)
+const setlistEditPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/edit/page.tsx"),
+  "utf8"
+)
+const setlistCompletePage = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/complete/page.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -333,6 +345,36 @@ describe("semantic theme foundations", () => {
   })
 
   it("uses shared feedback and form foundations in setlist edit and completion", () => {
+    expect(setlistEditPage).toMatch(/<Feedback tone="error"/)
+    expect(setlistEditPage).toMatch(/<Feedback tone="warning"/)
+    expect(setlistEditPage).toMatch(/<Input/)
+    expect(setlistEditPage).toMatch(/<Textarea/)
+    expect(setlistEditPage).toMatch(/wf-card/)
+    expect(setlistEditPage).not.toMatch(/bg-white|bg-red-50|bg-amber-50|text-red-700|text-amber-950/)
+
+    expect(setlistCompletePage).toMatch(/<Feedback tone="error"/)
+    expect(setlistCompletePage).toMatch(/<Feedback tone="success"/)
+    expect(setlistCompletePage).toMatch(/<Input/)
+    expect(setlistCompletePage).toMatch(/<Textarea/)
+    expect(setlistCompletePage).toMatch(/wf-card/)
+    expect(setlistCompletePage).not.toMatch(/bg-white|bg-red-50|bg-emerald-50|text-red-700|text-emerald-800/)
+  })
+
+  it("uses semantic surfaces, statuses, and shared controls on Setlist Detail", () => {
+    expect(setlistDetailPage).toMatch(/wf-page setlist-print-layout/)
+    expect(setlistDetailPage).toMatch(/<Feedback tone="error"/)
+    expect(setlistDetailPage).toMatch(/<Feedback tone="warning"/)
+    expect(setlistDetailPage).toMatch(/<Input/)
+    expect(setlistDetailPage).toMatch(/<Select/)
+    expect(setlistDetailPage).toMatch(/<Textarea/)
+    expect(setlistDetailPage).toMatch(/wf-status-success/)
+    expect(setlistDetailPage).toMatch(/wf-status-warning/)
+    expect(setlistDetailPage).toMatch(/wf-status-danger/)
+    expect(setlistDetailPage).not.toMatch(/(?<!print:)bg-white/)
+    expect(setlistDetailPage).not.toMatch(/bg-emerald-100|bg-amber-100|bg-rose-50|text-emerald-800|text-amber-800|text-rose-700/)
+  })
+
+  it("uses shared feedback, cards, and forms on Setlist Edit and Complete", () => {
     expect(setlistEditPage).toMatch(/<Feedback tone="error"/)
     expect(setlistEditPage).toMatch(/<Feedback tone="warning"/)
     expect(setlistEditPage).toMatch(/<Input/)
