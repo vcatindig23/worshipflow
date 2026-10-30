@@ -111,7 +111,7 @@ export default async function SignupPage({
                   required
                   maxLength={320}
                   placeholder="you@example.com"
-                  className={iconInputClassName}
+                  className="h-12 pl-10 pr-4"
                 />
               </div>
             </div>
@@ -153,7 +153,7 @@ export default async function SignupPage({
                 maxLength={72}
                 required
                 placeholder="Enter your password again"
-                className={passwordInputClassName}
+                className="wf-input h-12 pl-3.5 pr-12"
               />
             </div>
 
