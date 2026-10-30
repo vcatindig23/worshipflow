@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button"
 import Link from "next/link"
 import {
   Activity,
@@ -243,13 +244,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
     { value: "activity", label: "Activity" },
     { value: "about", label: "About" },
   ]
-  const editLinkClass =
-    "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-  const cardClass = "rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6"
+  const editLinkClass = buttonVariants({
+    variant: "outline",
+    className: "h-10 min-h-10 px-4",
+  })
+  const cardClass = "wf-card p-5 sm:p-6"
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
-      <section className="overflow-hidden rounded-[28px] border border-[var(--border)] bg-white shadow-sm">
+    <main className="wf-page max-w-6xl space-y-6">
+      <section className="wf-card overflow-hidden !rounded-[28px] p-0 shadow-sm">
         <div className="relative h-36 overflow-hidden bg-gradient-to-br from-[#101f31] via-[#294d69] to-[#527f9a] sm:h-48">
           <div className="absolute -right-10 -top-24 size-72 rounded-full border border-white/10" />
           <div className="absolute right-16 -top-16 size-60 rounded-full border border-white/10" />
@@ -267,7 +270,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               name={displayName}
               imageUrl={workspace.userAvatarUrl}
               sizeClassName="size-24 sm:size-32"
-              className="-mt-12 text-2xl ring-4 ring-white sm:-mt-14"
+              className="-mt-12 text-2xl ring-4 ring-[var(--card)] sm:-mt-14"
             />
             <div className="min-w-0 flex-1 pt-1 sm:pt-4 sm:pb-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -293,7 +296,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               <Link href="/settings/profile" className={editLinkClass}>
                 <PencilLine className="size-4" /> Edit profile
               </Link>
-              <Link href="/my-schedule" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]">
+              <Link href="/my-schedule" className={buttonVariants({ className: "h-10 min-h-10 px-4" })}>
                 <CalendarDays className="size-4" /> My schedule
               </Link>
             </div>

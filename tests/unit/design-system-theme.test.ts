@@ -43,6 +43,34 @@ const dashboardView = readFileSync(
   join(process.cwd(), "src/components/dashboard-view.tsx"),
   "utf8"
 )
+const feedbackSource = readFileSync(
+  join(process.cwd(), "src/components/ui/feedback.tsx"),
+  "utf8"
+)
+const teamInvitation = readFileSync(
+  join(process.cwd(), "src/components/ui/team-invitation.tsx"),
+  "utf8"
+)
+const profilePage = readFileSync(
+  join(process.cwd(), "src/app/profile/page.tsx"),
+  "utf8"
+)
+const settingsPage = readFileSync(
+  join(process.cwd(), "src/app/settings/page.tsx"),
+  "utf8"
+)
+const teamPage = readFileSync(
+  join(process.cwd(), "src/app/settings/team/page.tsx"),
+  "utf8"
+)
+const profileSettingsPage = readFileSync(
+  join(process.cwd(), "src/app/settings/profile/page.tsx"),
+  "utf8"
+)
+const churchSettingsPage = readFileSync(
+  join(process.cwd(), "src/app/settings/church/page.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -142,6 +170,41 @@ describe("semantic theme foundations", () => {
     expect(dashboardView).toMatch(/wf-status-warning/)
     expect(dashboardView).not.toMatch(/bg-emerald-50|bg-amber-50|bg-rose-50|text-emerald-800|text-amber-800|text-rose-800/)
     expect(dashboardView).not.toMatch(/bg-white/)
+  })
+
+  it("supports semantic warning feedback and neutral invitation status", () => {
+    expect(feedbackSource).toContain('tone?: "success" | "error" | "info" | "warning"')
+    expect(feedbackSource).toContain('className={`wf-feedback wf-feedback-${tone}`}')
+    expect(teamInvitation).toMatch(/wf-status wf-status-neutral/)
+  })
+
+  it("uses shared semantic styling across profile and settings views", () => {
+    expect(profilePage).toMatch(/wf-page max-w-6xl/)
+    expect(profilePage).toMatch(/wf-card p-5 sm:p-6/)
+    expect(profilePage).toMatch(/buttonVariants/)
+    expect(profilePage).not.toContain('bg-white"')
+    expect(profilePage).not.toContain("bg-white ")
+
+    expect(settingsPage).toMatch(/wf-feedback wf-feedback-warning/)
+    expect(settingsPage).toMatch(/wf-card/)
+    expect(settingsPage).not.toMatch(/bg-amber-50|text-amber-950|text-amber-800/)
+
+    expect(teamPage).toMatch(/<Feedback tone="error"/)
+    expect(teamPage).toMatch(/<Feedback tone="warning"/)
+    expect(teamPage).toMatch(/wf-card/)
+    expect(teamPage).toMatch(/buttonVariants/)
+    expect(teamPage).not.toMatch(/bg-white|bg-red-50|bg-amber-50|text-red-700|text-amber-800/)
+
+    expect(profileSettingsPage).toMatch(/wf-card/)
+    expect(profileSettingsPage).toMatch(/wf-status-success/)
+    expect(profileSettingsPage).toMatch(/wf-status-warning/)
+    expect(profileSettingsPage).toMatch(/<Feedback tone="warning"/)
+    expect(profileSettingsPage).not.toMatch(/bg-white|bg-amber-50|text-emerald-700|text-amber-700/)
+
+    expect(churchSettingsPage).toMatch(/<PageContainer className="max-w-4xl">/)
+    expect(churchSettingsPage).toMatch(/<Feedback tone="warning"/)
+    expect(churchSettingsPage).toMatch(/wf-card p-5 sm:p-7/)
+    expect(churchSettingsPage).not.toMatch(/bg-white|bg-amber-50|text-amber-800/)
   })
 
 })

@@ -200,20 +200,16 @@ export default async function SettingsPage() {
       </section>
 
       {!isAdmin ? (
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 size-5 shrink-0 text-amber-700" />
-
-            <div>
-              <p className="font-semibold text-amber-950">
-                Administrator access required for team management
-              </p>
-
-              <p className="mt-1 text-sm leading-6 text-amber-800">
-                You can view your role here, but only an administrator
-                can invite members or change their roles.
-              </p>
-            </div>
+        <section className="wf-feedback wf-feedback-warning">
+          <ShieldCheck className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="font-semibold">
+              Administrator access required for team management
+            </p>
+            <p className="mt-1 text-sm leading-6">
+              You can view your role here, but only an administrator
+              can invite members or change their roles.
+            </p>
           </div>
         </section>
       ) : null}

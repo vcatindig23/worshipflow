@@ -1,4 +1,5 @@
 import FormSubmitButton from "@/components/ui/form-submit-button"
+import { PageContainer } from "@/components/ui/page"
 import { Feedback } from "@/components/ui/feedback"
 import { ProtectedForm } from "@/components/ui/protected-form"
 import { Input, Select, Textarea } from "@/components/ui/form-controls"
@@ -99,8 +100,7 @@ export default async function ChurchSettingsPage({
   const errorMessage = params.error ? errors[params.error] : null
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <PageContainer className="max-w-4xl">
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/"
@@ -136,15 +136,15 @@ export default async function ChurchSettingsPage({
         ) : null}
 
         {membership.role !== "admin" ? (
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-800">
+          <Feedback tone="warning" title="Administrator access required">
             You can view this information, but only the church administrator
             can change it.
-          </div>
+          </Feedback>
         ) : null}
 
         <ProtectedForm action={updateChurchSettings} className="mt-6 space-y-6">
           <fieldset disabled={membership.role !== "admin"} className="space-y-6">
-            <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7">
+            <section className="wf-card p-5 sm:p-7">
               <div className="flex items-start gap-3">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                   <Building2 className="size-5" />
@@ -175,7 +175,7 @@ export default async function ChurchSettingsPage({
                     minLength={2}
                     maxLength={120}
                     defaultValue={organization.name}
-                    className="w-full px-3.5 focus:ring-4 focus:ring-[var(--brand-soft)] disabled:bg-[var(--surface)]"
+                    className="w-full px-3.5 disabled:bg-[var(--surface)]"
                   />
                 </div>
 
@@ -273,7 +273,7 @@ export default async function ChurchSettingsPage({
               </div>
             </section>
 
-            <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7">
+            <section className="wf-card p-5 sm:p-7">
               <div className="flex items-start gap-3">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                   <CalendarClock className="size-5" />
@@ -386,7 +386,6 @@ export default async function ChurchSettingsPage({
             </div>
           ) : null}
         </ProtectedForm>
-      </div>
-    </main>
+    </PageContainer>
   )
 }
