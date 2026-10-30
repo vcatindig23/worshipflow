@@ -121,16 +121,19 @@ describe("semantic theme foundations", () => {
     expect(servicesPage).toMatch(/wf-status-warning/)
     expect(servicesPage).toMatch(/wf-card-interactive/)
     expect(servicesPage).not.toMatch(/getReadinessClasses|readinessClasses/)
+    expect(servicesPage).not.toMatch(/bg-white/)
     expect(servicesPage).not.toMatch(/bg-emerald-100|bg-amber-100|bg-rose-50|text-rose-700/)
 
     expect(setlistsPage).toMatch(/wf-card-interactive/)
     expect(setlistsPage).toMatch(/wf-status-success/)
     expect(setlistsPage).toMatch(/wf-status-warning/)
     expect(setlistsPage).toMatch(/wf-status-neutral/)
+    expect(setlistsPage).not.toMatch(/bg-white|bg-emerald-100|bg-amber-100/)
 
     expect(songsPage).toMatch(/wf-card wf-card-interactive/)
     expect(songsPage).toMatch(/wf-status-warning/)
     expect(songsPage).toMatch(/var\(--warning-soft\)/)
+    expect(songsPage).not.toMatch(/bg-white|bg-amber-100|text-amber-800/)
 
     expect(dashboardView).toMatch(/wf-card wf-card-interactive/)
     expect(dashboardView).toMatch(/wf-feedback-warning/)
@@ -138,6 +141,7 @@ describe("semantic theme foundations", () => {
     expect(dashboardView).toMatch(/wf-status-success/)
     expect(dashboardView).toMatch(/wf-status-warning/)
     expect(dashboardView).not.toMatch(/bg-emerald-50|bg-amber-50|bg-rose-50|text-emerald-800|text-amber-800|text-rose-800/)
+    expect(dashboardView).not.toMatch(/bg-white/)
   })
 
 })
