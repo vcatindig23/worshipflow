@@ -1,3 +1,4 @@
+import { Feedback } from "@/components/ui/feedback"
 import { ProtectedForm } from "@/components/ui/protected-form"
 import { Input, Textarea } from "@/components/ui/form-controls"
 import { PageContainer } from "@/components/ui/page"
@@ -84,21 +85,20 @@ export default async function NewSetlistPage({
       </div>
 
       {error && errorMessages[error] ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <Feedback tone="error" title="Could not create setlist">
           {errorMessages[error]}
-        </div>
+        </Feedback>
       ) : null}
 
       {!workspace.serviceTimeAvailable ? (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-          Service start times will be available after the Supabase migration
-          is applied.
-        </div>
+        <Feedback tone="warning" title="Service start times unavailable">
+          Service start times will be available after the Supabase migration is applied.
+        </Feedback>
       ) : null}
 
       <ProtectedForm
         action={createSetlist}
-        className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
+        className="wf-card p-6 sm:p-7"
       >
         <div className="space-y-5">
           <div>
