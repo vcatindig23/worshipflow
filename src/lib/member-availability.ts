@@ -144,6 +144,11 @@ function getInstantForZonedDateTime(dateValue: string, timeValue: string, timezo
     if (correction === 0) break
   }
 
+  const resolved = getZonedParts(guess, timezone)
+  if (!resolved || resolved.date !== dateValue || resolved.minutes !== minutes) {
+    return null
+  }
+
   return guess
 }
 
