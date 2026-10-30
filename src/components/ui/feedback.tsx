@@ -7,13 +7,13 @@ export function Feedback({
   children,
   actions,
 }: {
-  tone?: "success" | "error" | "info"
+  tone?: "success" | "error" | "info" | "warning"
   title: string
   children?: ReactNode
   actions?: ReactNode
 }) {
   const Icon =
-    tone === "success" ? CheckCircle2 : tone === "error" ? CircleAlert : Info
+    tone === "success" ? CheckCircle2 : tone === "error" || tone === "warning" ? CircleAlert : Info
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
