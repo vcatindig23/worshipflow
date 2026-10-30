@@ -30,7 +30,6 @@ async function signIn(page: Page, email: string, password: string) {
   await page.locator("#password").fill(password)
   await page.getByRole("button", { name: "Sign in", exact: true }).click()
   await expect(page).not.toHaveURL(/\/login$/)
-          ).not.toHaveURL(/\/login(?:\?|$)|\/onboarding(?:\?|$)/)
 }
 
 function futureServiceDate(daysAhead = 7) {
