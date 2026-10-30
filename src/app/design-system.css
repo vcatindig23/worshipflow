@@ -1,3 +1,60 @@
+/* Semantic theme tokens: keep application colors here, not in route-level styles. */
+:root {
+  color-scheme: light;
+  --background: #f5f7f5;
+  --surface: #f0f4f0;
+  --card: #ffffff;
+  --foreground: #17201b;
+  --muted: #5f6c63;
+  --border: #e2e7e2;
+  --brand: #365c45;
+  --brand-dark: #294735;
+  --brand-soft: #e6efe8;
+  --brand-ink: #294735;
+  --sidebar: #15231b;
+  --sidebar-muted: #9ca9a1;
+  --focus-ring: #365c45;
+  --scrollbar-thumb: #c8d0c9;
+  --scrollbar-thumb-hover: #aeb8b0;
+  --danger: #b42332;
+  --danger-soft: #fff1f2;
+  --danger-action: #b42332;
+  --danger-action-hover: #91202c;
+  --danger-foreground: #ffffff;
+  --success: #23613b;
+  --success-soft: #edf7ef;
+  --info: #315b80;
+  --info-soft: #eff5fb;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #101713;
+  --surface: #18221c;
+  --card: #17211b;
+  --foreground: #e8eee9;
+  --muted: #b3c0b7;
+  --border: #34443a;
+  --brand: #365c45;
+  --brand-dark: #294735;
+  --brand-soft: #20382a;
+  --brand-ink: #b8e1c2;
+  --sidebar: #0a100c;
+  --sidebar-muted: #a1afa5;
+  --focus-ring: #a5d6b3;
+  --scrollbar-thumb: #435349;
+  --scrollbar-thumb-hover: #5a6b60;
+  --danger: #ffb4bb;
+  --danger-soft: #3a2027;
+  --danger-action: #8f303c;
+  --danger-action-hover: #a83c49;
+  --danger-foreground: #ffffff;
+  --success: #aadbb8;
+  --success-soft: #1e3327;
+  --info: #b5d6f2;
+  --info-soft: #1e2d3b;
+}
+
 /* WorshipFlow foundations: 4px rhythm, forest palette, theme-aware surfaces. */
 :root {
   --brand-ink: #294735;
@@ -117,8 +174,8 @@
     opacity: 1;
   }
   .wf-input:focus-visible {
-    border-color: var(--brand-ink);
-    outline: 2px solid var(--brand-ink);
+    border-color: var(--focus-ring);
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
   .wf-input:disabled {
@@ -210,3 +267,83 @@
     }
   }
 }
+
+/*
+ * Theme-aware compatibility mappings for neutral Tailwind utilities used by
+ * existing screens. New components should use the semantic variables directly:
+ * card/surface backgrounds, foreground/muted text, border, brand ink, and focus ring.
+ * These mappings are theme-independent; the variables above provide the theme.
+ */
+@layer utilities {
+  [class~="bg-white"] {
+    background-color: var(--card);
+  }
+
+  [class~="bg-slate-50"],
+  [class~="bg-slate-100"],
+  [class~="bg-slate-200"],
+  [class~="bg-gray-50"],
+  [class~="bg-gray-100"],
+  [class~="bg-gray-200"],
+  [class~="bg-zinc-50"],
+  [class~="bg-zinc-100"],
+  [class~="bg-zinc-200"] {
+    background-color: var(--surface);
+  }
+
+  [class~="text-slate-950"],
+  [class~="text-slate-900"],
+  [class~="text-slate-800"],
+  [class~="text-gray-950"],
+  [class~="text-gray-900"],
+  [class~="text-gray-800"],
+  [class~="text-zinc-950"],
+  [class~="text-zinc-900"],
+  [class~="text-zinc-800"] {
+    color: var(--foreground);
+  }
+
+  [class~="text-slate-700"],
+  [class~="text-slate-600"],
+  [class~="text-slate-500"],
+  [class~="text-gray-700"],
+  [class~="text-gray-600"],
+  [class~="text-gray-500"],
+  [class~="text-zinc-700"],
+  [class~="text-zinc-600"],
+  [class~="text-zinc-500"] {
+    color: var(--muted);
+  }
+
+  [class~="border-slate-100"],
+  [class~="border-slate-200"],
+  [class~="border-gray-100"],
+  [class~="border-gray-200"],
+  [class~="border-zinc-100"],
+  [class~="border-zinc-200"],
+  [class~="divide-slate-200"] > :not(:last-child),
+  [class~="divide-gray-200"] > :not(:last-child),
+  [class~="divide-zinc-200"] > :not(:last-child) {
+    border-color: var(--border);
+  }
+
+  [class~="border-slate-400"],
+  [class~="border-gray-400"],
+  [class~="border-zinc-400"] {
+    border-color: var(--border-strong, var(--border));
+  }
+
+  [class~="text-[var(--brand)]"],
+  [class~="text-[var(--brand-dark)]"] {
+    color: var(--brand-ink);
+  }
+
+  [class*="focus-visible:ring-[var(--brand)]"]:focus-visible {
+    --tw-ring-color: var(--focus-ring);
+  }
+
+  [class*="focus-visible:outline-[var(--brand)]"]:focus-visible {
+    outline-color: var(--focus-ring);
+  }
+}
+\n
