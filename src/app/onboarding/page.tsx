@@ -13,6 +13,8 @@ import {
 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { Feedback } from "@/components/ui/feedback"
+import { Input, Select, Textarea } from "@/components/ui/form-controls"
 import { createChurch } from "./actions"
 
 type OnboardingPageProps = {
@@ -183,14 +185,16 @@ export default async function OnboardingPage({
         </div>
 
         {errorMessages[error] ? (
-          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
-            {errorMessages[error]}
+          <div className="mt-6">
+            <Feedback tone="error" title="Church workspace could not be created">
+              {errorMessages[error]}
+            </Feedback>
           </div>
         ) : null}
 
         <form
           action={createChurch}
-          className="mt-7 rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
+          className="mt-7 wf-card p-6 sm:p-7"
         >
           <div className="space-y-6">
             <section>
@@ -207,13 +211,13 @@ export default async function OnboardingPage({
                     Church name
                   </label>
 
-                  <input
+                  <Input
                     id="name"
                     name="name"
                     required
                     maxLength={200}
                     placeholder="Grace Community Church"
-                    className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    className="h-12 px-4"
                   />
                 </div>
 
@@ -225,13 +229,13 @@ export default async function OnboardingPage({
                     Description
                   </label>
 
-                  <textarea
+                  <Textarea
                     id="description"
                     name="description"
                     maxLength={2000}
                     rows={4}
                     placeholder="A short description of your church."
-                    className="w-full resize-y rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    className="min-h-32 resize-y px-4 py-3"
                   />
                 </div>
               </div>
@@ -254,13 +258,13 @@ export default async function OnboardingPage({
                   <div className="relative">
                     <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
 
-                    <input
+                    <Input
                       id="contactEmail"
                       name="contactEmail"
                       type="email"
                       maxLength={320}
                       placeholder="church@example.com"
-                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                      className="h-11 pl-10 pr-4"
                     />
                   </div>
                 </div>
@@ -276,7 +280,7 @@ export default async function OnboardingPage({
                   <div className="relative">
                     <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
 
-                    <input
+                    <Input
                       id="contactPhone"
                       name="contactPhone"
                       maxLength={50}
@@ -297,13 +301,13 @@ export default async function OnboardingPage({
                   <div className="relative">
                     <MapPin className="pointer-events-none absolute left-3.5 top-3.5 size-4 text-[var(--muted)]" />
 
-                    <textarea
+                    <Textarea
                       id="address"
                       name="address"
                       maxLength={500}
                       rows={3}
                       placeholder="Church address"
-                      className="w-full resize-y rounded-xl border border-[var(--border)] bg-white py-3 pl-10 pr-4 text-sm leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                      className="min-h-24 resize-y py-3 pl-10 pr-4"
                     />
                   </div>
                 </div>
@@ -319,7 +323,7 @@ export default async function OnboardingPage({
                   <div className="relative">
                     <Globe2 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
 
-                    <input
+                    <Input
                       id="website"
                       name="website"
                       type="url"
@@ -346,13 +350,13 @@ export default async function OnboardingPage({
                     Service name
                   </label>
 
-                  <input
+                  <Input
                     id="defaultServiceName"
                     name="defaultServiceName"
                     required
                     maxLength={200}
                     defaultValue="Sunday Worship"
-                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    className="h-11 px-4"
                   />
                 </div>
 
@@ -364,11 +368,11 @@ export default async function OnboardingPage({
                     Service day
                   </label>
 
-                  <select
+                  <Select
                     id="defaultServiceDay"
                     name="defaultServiceDay"
                     defaultValue="0"
-                    className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none focus:border-[var(--brand)]"
+                    className="h-11 px-4"
                   >
                     <option value="0">
                       Sunday
@@ -391,7 +395,7 @@ export default async function OnboardingPage({
                     <option value="6">
                       Saturday
                     </option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
@@ -405,13 +409,13 @@ export default async function OnboardingPage({
                   <div className="relative">
                     <Clock3 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
 
-                    <input
+                    <Input
                       id="defaultServiceTime"
                       name="defaultServiceTime"
                       type="time"
                       required
                       defaultValue="09:00"
-                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-white pl-10 pr-4 text-sm outline-none focus:border-[var(--brand)]"
+                      className="h-11 pl-10 pr-4"
                     />
                   </div>
                 </div>
@@ -424,7 +428,7 @@ export default async function OnboardingPage({
                     Timezone
                   </label>
 
-                  <select
+                  <Select
                     id="timezone"
                     name="timezone"
                     defaultValue="Asia/Manila"
@@ -445,7 +449,7 @@ export default async function OnboardingPage({
                     <option value="UTC">
                       UTC
                     </option>
-                  </select>
+                  </Select>
                 </div>
               </div>
             </section>
