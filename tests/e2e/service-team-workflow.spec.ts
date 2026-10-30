@@ -42,6 +42,204 @@ function futureServiceDate(daysAhead = 7) {
   return `${year}-${month}-${day}`
 }
 
+
+const responsiveViewports = [
+  { name: "compact phone", width: 320, height: 740 },
+  { name: "small phone", width: 360, height: 800 },
+  { name: "standard phone", width: 390, height: 844 },
+  { name: "tablet portrait", width: 768, height: 1024 },
+  { name: "tablet landscape", width: 1024, height: 768 },
+  { name: "standard laptop", width: 1366, height: 768 },
+  { name: "wide projection", width: 1920, height: 1080 },
+] as const
+
+const authenticatedWorkspaceRoutes = [
+  "/",
+  "/songs",
+  "/songs/new",
+  "/chord-chart",
+  "/setlists",
+  "/setlists/new",
+  "/services",
+  "/services/history",
+  "/services/insights",
+  "/services/templates",
+  "/my-schedule",
+  "/settings/team",
+  "/settings/team/audit",
+  "/files",
+  "/profile",
+  "/settings",
+  "/settings/church",
+  "/settings/profile",
+  "/settings/security",
+  "/chat",
+  "/activity",
+  "/notifications",
+  "/search",
+] as const
+
+async function expectResponsiveLayout(
+  page: Page,
+  context: string,
+  phase: "top" | "bottom"
+) {
+  const diagnostics = await page.evaluate(() => {
+    const viewportWidth = document.documentElement.clientWidth
+    const visible = (element: HTMLElement) => {
+      const style = window.getComputedStyle(element)
+      const rect = element.getBoundingClientRect()
+      return (
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        Number(style.opacity || "1") > 0.01 &&
+        rect.width > 0 &&
+        rect.height > 0
+      )
+    }
+    const insideHorizontalScroller = (element: HTMLElement) => {
+      let parent = element.parentElement
+      while (parent && parent !== document.body) {
+        const style = window.getComputedStyle(parent)
+        if (
+          (style.overflowX === "auto" || style.overflowX === "scroll") &&
+          parent.scrollWidth > parent.clientWidth + 1
+        ) {
+          return true
+        }
+        parent = parent.parentElement
+      }
+      return false
+    }
+    const interactive = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        "main a[href], main button, main input:not([type='hidden']), main select, main textarea, .app-header a[href], .app-header button"
+      )
+    ).filter(visible)
+    const outOfViewportControls = interactive
+      .filter((element) => !insideHorizontalScroller(element))
+      .flatMap((element) => {
+        const rect = element.getBoundingClientRect()
+        if (rect.left >= -1 && rect.right <= viewportWidth + 1) return []
+        const label =
+          element.getAttribute("aria-label") ||
+          element.textContent?.trim().replace(/\\s+/g, " ").slice(0, 70) ||
+          element.tagName.toLowerCase()
+        return [
+          {
+            label,
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+          },
+        ]
+      })
+
+    const fixedControls = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        "body button, body a[href], body [role='button']"
+      )
+    ).filter((element) => {
+      return visible(element) && window.getComputedStyle(element).position === "fixed"
+    })
+    const mainControls = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        "main a[href], main button, main input:not([type='hidden']), main select, main textarea"
+      )
+    ).filter(visible)
+    const fixedBounds = fixedControls.flatMap((element) => {
+      const rect = element.getBoundingClientRect()
+      if (
+        rect.left >= -1 &&
+        rect.top >= -1 &&
+        rect.right <= viewportWidth + 1 &&
+        rect.bottom <= window.innerHeight + 1
+      ) {
+        return []
+      }
+      return [
+        element.getAttribute("aria-label") ||
+          element.textContent?.trim().replace(/\\s+/g, " ").slice(0, 50) ||
+          element.tagName.toLowerCase(),
+      ]
+    })
+    const fixedOverlaps = fixedControls.flatMap((fixed) => {
+      const fixedRect = fixed.getBoundingClientRect()
+      return mainControls.flatMap((control) => {
+        if (fixed === control || fixed.contains(control)) return []
+        if (insideHorizontalScroller(control)) return []
+        const controlRect = control.getBoundingClientRect()
+        const overlaps =
+          fixedRect.left < controlRect.right &&
+          fixedRect.right > controlRect.left &&
+          fixedRect.top < controlRect.bottom &&
+          fixedRect.bottom > controlRect.top
+        if (!overlaps) return []
+        const label =
+          fixed.getAttribute("aria-label") ||
+          fixed.textContent?.trim().replace(/\\s+/g, " ").slice(0, 45) ||
+          fixed.tagName.toLowerCase()
+        const controlLabel =
+          control.getAttribute("aria-label") ||
+          control.textContent?.trim().replace(/\\s+/g, " ").slice(0, 45) ||
+          control.tagName.toLowerCase()
+        return [`${label} overlaps ${controlLabel}`]
+      })
+    })
+
+    return {
+      viewportWidth,
+      documentWidth: Math.max(
+        document.documentElement.scrollWidth,
+        document.body.scrollWidth
+      ),
+      outOfViewportControls,
+      fixedBounds,
+      fixedOverlaps,
+    }
+  })
+
+  expect(
+    diagnostics.documentWidth,
+    `${context} (${phase}): document must not scroll horizontally`
+  ).toBeLessThanOrEqual(diagnostics.viewportWidth + 1)
+  expect(
+    diagnostics.outOfViewportControls,
+    `${context} (${phase}): visible controls must fit the viewport`
+  ).toEqual([])
+  expect(
+    diagnostics.fixedBounds,
+    `${context} (${phase}): fixed controls must remain inside the viewport`
+  ).toEqual([])
+  if (phase === "bottom") {
+    expect(
+      diagnostics.fixedOverlaps,
+      `${context}: fixed controls must not cover page actions or form controls`
+    ).toEqual([])
+  }
+}
+
+async function expectPanelInsideViewport(
+  page: Page,
+  selector: string,
+  context: string
+) {
+  const bounds = await page.locator(selector).boundingBox()
+  expect(bounds, `${context}: panel should have a measurable box`).not.toBeNull()
+  if (!bounds) return
+
+  const viewport = page.viewportSize()
+  expect(bounds.x, `${context}: panel must not be clipped on the left`).toBeGreaterThanOrEqual(-1)
+  expect(
+    bounds.x + bounds.width,
+    `${context}: panel must not be clipped on the right`
+  ).toBeLessThanOrEqual((viewport?.width ?? 0) + 1)
+  expect(bounds.y, `${context}: panel must not be clipped at the top`).toBeGreaterThanOrEqual(-1)
+  expect(
+    bounds.y + bounds.height,
+    `${context}: panel must not be clipped at the bottom`
+  ).toBeLessThanOrEqual((viewport?.height ?? 0) + 1)
+}
+
 test.describe("isolated multi-member service workflow", () => {
   test("leader creates a service, a member confirms and requests a swap, substitute accepts, and leader approves", async ({
     browser,
@@ -220,6 +418,123 @@ test.describe("isolated multi-member service workflow", () => {
       await expect(leader.getByRole("heading", { name: "Live stage", exact: true })).toBeVisible()
       await expect(leader.getByRole("heading", { name: "No songs in this service" })).toBeVisible()
       await expect(leader.getByRole("link", { name: "Go to home dashboard" })).toBeVisible()
+
+
+      // Exercise every authenticated workspace destination at real device widths.
+      // The temporary service created above supplies stable data for all service-detail views.
+      const responsiveRoutes = [
+        ...authenticatedWorkspaceRoutes,
+        `/setlists/${createdSetlistId}`,
+        `/setlists/${createdSetlistId}/edit`,
+        `/setlists/${createdSetlistId}/preparation`,
+        `/setlists/${createdSetlistId}/complete`,
+        `/setlists/${createdSetlistId}/live`,
+        `/setlists/${createdSetlistId}/print`,
+      ]
+
+      // Include a real song-detail page when the isolated QA workspace has a song fixture.
+      await leader.goto("/songs")
+      const existingSongHref = await leader.locator('a[href^="/songs/"]').evaluateAll((links) =>
+        links
+          .map((link) => link.getAttribute("href"))
+          .find((href) => Boolean(href && /^\\/songs\\/[0-9a-f-]+$/i.test(href)))
+      )
+      if (existingSongHref) responsiveRoutes.push(existingSongHref)
+
+      // Include a team-member profile detail when another member is present in the workspace.
+      await leader.goto("/settings/team")
+      const memberProfileHref = await leader.locator('a[href^="/profile/"]').evaluateAll((links) =>
+        links
+          .map((link) => link.getAttribute("href"))
+          .find((href) => Boolean(href && /^\\/profile\\/[0-9a-f-]+$/i.test(href)))
+      )
+      if (memberProfileHref) responsiveRoutes.push(memberProfileHref)
+
+      for (const viewport of responsiveViewports) {
+        await leader.setViewportSize({
+          width: viewport.width,
+          height: viewport.height,
+        })
+
+        for (const route of responsiveRoutes) {
+          const response = await leader.goto(route, { waitUntil: "domcontentloaded" })
+          expect(
+            response?.status(),
+            `${viewport.name} (${viewport.width}px): ${route} should load successfully`
+          ).toBe(200)
+          await expect(
+            leader,
+            `${viewport.name} (${viewport.width}px): ${route} must remain authenticated`
+          ).not.toHaveURL(/\\/login(?:\\?|$)|\\/onboarding(?:\\?|$)/)
+          await expect(leader.locator("body")).toBeVisible()
+
+          const routeContext = `${viewport.name} ${viewport.width}x${viewport.height} ${route}`
+          await expectResponsiveLayout(leader, routeContext, "top")
+
+          await leader.evaluate(() => {
+            window.scrollTo(0, document.documentElement.scrollHeight)
+          })
+          await leader.evaluate(
+            () => new Promise<void>((resolve) =>
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+            )
+          )
+          await expectResponsiveLayout(leader, routeContext, "bottom")
+        }
+
+        // Check mobile/tablet navigation and the two header popovers at each breakpoint.
+        await leader.goto("/")
+        const context = `${viewport.name} ${viewport.width}x${viewport.height}`
+
+        if (viewport.width < 1024) {
+          const mobileNavTrigger = leader.locator(
+            'button[aria-controls="mobile-workspace-navigation"]'
+          )
+          await expect(mobileNavTrigger, `${context}: mobile navigation trigger`).toBeVisible()
+          await mobileNavTrigger.click()
+          const mobileDrawer = leader.locator("#mobile-workspace-navigation")
+          await expect(mobileDrawer).toBeVisible()
+          await expectPanelInsideViewport(
+            leader,
+            "#mobile-workspace-navigation",
+            `${context} mobile navigation drawer`
+          )
+          await leader.keyboard.press("Escape")
+          await expect(mobileDrawer).toBeHidden()
+        } else {
+          await expect(leader.locator(".app-sidebar")).toBeVisible()
+        }
+
+        const searchTrigger = leader.locator(
+          'button[aria-controls="workspace-global-search"]'
+        )
+        await expect(searchTrigger, `${context}: global search trigger`).toBeVisible()
+        await searchTrigger.click()
+        const searchDialog = leader.locator("#workspace-global-search")
+        await expect(searchDialog).toBeVisible()
+        await expectPanelInsideViewport(
+          leader,
+          "#workspace-global-search",
+          `${context} global search dialog`
+        )
+        await leader.keyboard.press("Escape")
+        await expect(searchDialog).toBeHidden()
+
+        const notificationTrigger = leader.locator(
+          'button[aria-controls="workspace-notifications-panel"]'
+        )
+        await expect(notificationTrigger, `${context}: notifications trigger`).toBeVisible()
+        await notificationTrigger.click()
+        const notificationPanel = leader.locator("#workspace-notifications-panel")
+        await expect(notificationPanel).toBeVisible()
+        await expectPanelInsideViewport(
+          leader,
+          "#workspace-notifications-panel",
+          `${context} notifications panel`
+        )
+        await leader.keyboard.press("Escape")
+        await expect(notificationPanel).toBeHidden()
+      }
     } finally {
       if (createdSetlistId) {
         try {
