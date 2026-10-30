@@ -227,52 +227,6 @@ function getReadinessLabel(
   return "Incomplete"
 }
 
-function getReadinessClasses(
-  status: ReadinessStatus
-) {
-  if (status === "ready") {
-    return {
-      container:
-        "border-emerald-200 bg-emerald-50",
-      icon:
-        "bg-emerald-100 text-emerald-700",
-      text:
-        "text-emerald-800",
-      muted:
-        "text-emerald-700",
-      progress:
-        "bg-emerald-500",
-    }
-  }
-
-  if (status === "attention") {
-    return {
-      container:
-        "border-amber-200 bg-amber-50",
-      icon:
-        "bg-amber-100 text-amber-700",
-      text:
-        "text-amber-800",
-      muted:
-        "text-amber-700",
-      progress:
-        "bg-amber-500",
-    }
-  }
-
-  return {
-    container:
-      "border-rose-200 bg-rose-50",
-    icon:
-      "bg-rose-100 text-rose-700",
-    text:
-      "text-rose-800",
-    muted:
-      "text-rose-700",
-    progress:
-      "bg-rose-500",
-  }
-}
 
 const periods: {
   value: Period
@@ -593,7 +547,7 @@ export default async function ServicesPage({
             className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
               period === item.value
                 ? "bg-[var(--brand)] text-white"
-                : "border border-[var(--border)] bg-white text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
             }`}
           >
             {item.label}
@@ -630,7 +584,7 @@ export default async function ServicesPage({
         </div>
 
         {setlists.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
+          <div className="wf-card border-dashed px-6 py-16 text-center">
             <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <CalendarDays className="size-5" />
             </div>
@@ -680,16 +634,11 @@ export default async function ServicesPage({
                     assignments
                   )
 
-                const readinessClasses =
-                  getReadinessClasses(
-                    readiness.status
-                  )
-
                 return (
                   <Link
                     key={setlist.id}
                     href={`/setlists/${setlist.id}`}
-                    className="group rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    className="wf-card wf-card-interactive group p-5"
                   >
                     <div className="flex flex-col gap-5">
                       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -705,14 +654,12 @@ export default async function ServicesPage({
                               </h2>
 
                               <span
-                                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                                  setlist.status ===
-                                  "published"
-                                    ? "bg-emerald-100 text-emerald-800"
-                                    : setlist.status ===
-                                        "archived"
-                                      ? "bg-amber-100 text-amber-800"
-                                      : "bg-[var(--surface)] text-[var(--muted)]"
+                                className={`wf-status ${
+                                  setlist.status === "published"
+                                    ? "wf-status-success"
+                                    : setlist.status === "archived"
+                                      ? "wf-status-warning"
+                                      : "wf-status-neutral"
                                 }`}
                               >
                                 {statusLabel(
@@ -721,7 +668,7 @@ export default async function ServicesPage({
                               </span>
 
                               {setlist.completed_at ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-800">
+                                <span className="wf-status wf-status-success">
                                   <CheckCircle2 className="size-3" />
                                   Completed
                                 </span>
@@ -822,12 +769,12 @@ export default async function ServicesPage({
                         </div>
 
                         <div
-                          className={`rounded-xl border px-3.5 py-3 ${readinessClasses.container}`}
+                          className="wf-readiness-panel rounded-xl px-3.5 py-3" data-state={readiness.status}
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex min-w-0 items-center gap-2.5">
                               <div
-                                className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${readinessClasses.icon}`}
+                                className="wf-readiness-icon flex size-8 shrink-0 items-center justify-center rounded-lg"
                               >
                                 {readiness.status ===
                                 "ready" ? (
@@ -842,13 +789,13 @@ export default async function ServicesPage({
 
                               <div className="min-w-0">
                                 <p
-                                  className={`text-xs font-semibold ${readinessClasses.text}`}
+                                  className="wf-readiness-title text-xs font-semibold"
                                 >
                                   Service readiness
                                 </p>
 
                                 <p
-                                  className={`mt-0.5 text-[11px] ${readinessClasses.muted}`}
+                                  className="wf-readiness-detail mt-0.5 text-[11px]"
                                 >
                                   {getReadinessLabel(
                                     readiness
@@ -858,15 +805,15 @@ export default async function ServicesPage({
                             </div>
 
                             <span
-                              className={`text-sm font-bold ${readinessClasses.text}`}
+                              className="wf-readiness-title text-sm font-bold"
                             >
                               {readiness.percentage}%
                             </span>
                           </div>
 
-                          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/80">
+                          <div className="wf-readiness-progress-track mt-3 h-1.5 overflow-hidden rounded-full">
                             <div
-                              className={`h-full rounded-full transition-all ${readinessClasses.progress}`}
+                              className="wf-readiness-progress-fill h-full rounded-full transition-all"
                               style={{
                                 width: `${readiness.percentage}%`,
                               }}
@@ -877,8 +824,8 @@ export default async function ServicesPage({
                             <span
                               className={
                                 readiness.hasSchedule
-                                  ? readinessClasses.muted
-                                  : "text-rose-700"
+                                  ? "wf-readiness-supporting"
+                                  : "wf-readiness-missing"
                               }
                             >
                               {readiness.hasSchedule
@@ -889,8 +836,8 @@ export default async function ServicesPage({
                             <span
                               className={
                                 readiness.hasSongs
-                                  ? readinessClasses.muted
-                                  : "text-rose-700"
+                                  ? "wf-readiness-supporting"
+                                  : "wf-readiness-missing"
                               }
                             >
                               {readiness.hasSongs
@@ -905,8 +852,8 @@ export default async function ServicesPage({
                             <span
                               className={
                                 readiness.hasTeam
-                                  ? readinessClasses.muted
-                                  : "text-rose-700"
+                                  ? "wf-readiness-supporting"
+                                  : "wf-readiness-missing"
                               }
                             >
                               {readiness.hasTeam
@@ -924,8 +871,8 @@ export default async function ServicesPage({
                                 className={
                                   readiness.confirmedAssignments ===
                                   readiness.totalAssignments
-                                    ? readinessClasses.muted
-                                    : "text-amber-700"
+                                    ? "wf-readiness-supporting"
+                                    : "wf-readiness-pending"
                                 }
                               >
                                 {readiness.confirmedAssignments}/
@@ -937,7 +884,7 @@ export default async function ServicesPage({
 
                           {readiness.declinedAssignments >
                           0 ? (
-                            <p className="mt-2 text-[10px] font-medium text-rose-700">
+                            <p className="wf-readiness-missing mt-2 text-[10px] font-medium">
                               {readiness.declinedAssignments}{" "}
                               {readiness.declinedAssignments ===
                               1
@@ -947,7 +894,7 @@ export default async function ServicesPage({
                             </p>
                           ) : readiness.pendingAssignments >
                             0 ? (
-                            <p className="mt-2 text-[10px] font-medium text-amber-700">
+                            <p className="wf-readiness-pending mt-2 text-[10px] font-medium">
                               {readiness.pendingAssignments}{" "}
                               {readiness.pendingAssignments ===
                               1

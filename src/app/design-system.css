@@ -224,6 +224,27 @@
     color: var(--info);
     background: var(--info-soft);
   }
+  .wf-feedback-warning {
+    color: var(--warning);
+    background: var(--warning-soft);
+  }
+  .wf-icon-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 0.75rem;
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+  }
+  .wf-icon-tile-info {
+    background: var(--info-soft);
+    color: var(--info);
+  }
+  .wf-icon-tile-warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
   .wf-status {
     display: inline-flex;
     align-items: center;
@@ -255,6 +276,65 @@
     border-color: color-mix(in srgb, var(--info) 24%, transparent);
     background: var(--info-soft);
     color: var(--info);
+  }
+  .wf-status-neutral {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--muted);
+  }
+  .wf-card-interactive {
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+  .wf-card-interactive:hover {
+    border-color: color-mix(in srgb, var(--brand) 34%, var(--border));
+    box-shadow: 0 12px 30px -24px color-mix(in srgb, var(--brand) 54%, transparent);
+  }
+  .wf-readiness-panel {
+    --wf-readiness-color: var(--info);
+    --wf-readiness-surface: var(--info-soft);
+    border: 1px solid color-mix(in srgb, var(--wf-readiness-color) 28%, var(--border));
+    background: color-mix(in srgb, var(--wf-readiness-surface) 72%, var(--card));
+    color: var(--wf-readiness-color);
+  }
+  .wf-readiness-panel[data-state="ready"] {
+    --wf-readiness-color: var(--success);
+    --wf-readiness-surface: var(--success-soft);
+  }
+  .wf-readiness-panel[data-state="attention"] {
+    --wf-readiness-color: var(--warning);
+    --wf-readiness-surface: var(--warning-soft);
+  }
+  .wf-readiness-panel[data-state="incomplete"] {
+    --wf-readiness-color: var(--danger);
+    --wf-readiness-surface: var(--danger-soft);
+  }
+  .wf-readiness-icon {
+    background: var(--wf-readiness-surface);
+    color: var(--wf-readiness-color);
+  }
+  .wf-readiness-title {
+    color: var(--wf-readiness-color);
+  }
+  .wf-readiness-detail {
+    color: color-mix(in srgb, var(--wf-readiness-color) 82%, var(--foreground));
+  }
+  .wf-readiness-progress-track {
+    background: color-mix(in srgb, var(--wf-readiness-color) 12%, var(--card));
+  }
+  .wf-readiness-progress-fill {
+    background: var(--wf-readiness-color);
+  }
+  .wf-readiness-supporting {
+    color: var(--success);
+  }
+  .wf-readiness-missing {
+    color: var(--danger);
+  }
+  .wf-readiness-pending {
+    color: var(--warning);
   }
   @media (min-width: 640px) {
     .wf-page {

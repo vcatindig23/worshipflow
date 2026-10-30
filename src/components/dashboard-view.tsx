@@ -97,25 +97,25 @@ export default function DashboardView({
               </div>
 
               {!workspace.serviceTimeAvailable ? (
-                <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-                  Service start times are temporarily unavailable. Apply
-                  {" "}
-                  <code className="font-semibold">
-                    20261007100419_add_setlist_service_time.sql
-                  </code>
-                  {" "}
-                  to the Supabase database to enable them.
+                <div className="wf-feedback wf-feedback-warning mb-6">
+                  <p>
+                    Service start times are temporarily unavailable. Apply{" "}
+                    <code className="font-semibold">
+                      20261007100419_add_setlist_service_time.sql
+                    </code>{" "}
+                    to the Supabase database to enable them.
+                  </p>
                 </div>
               ) : null}
 
               <section aria-label="Workspace overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div data-tour="workspace-overview" className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+                <div data-tour="workspace-overview" className="wf-card wf-card-interactive group p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-[var(--muted)]">Songs</div>
                       <div className="mt-2 text-2xl font-semibold tracking-[-0.03em] tabular-nums">{workspace.songCount}</div>
                     </div>
-                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)] transition duration-200 ">
+                    <span aria-hidden="true" className="wf-icon-tile size-11 transition duration-200">
                       <Music2 className="wf-icon-motion size-5" strokeWidth={1.9} />
                     </span>
                   </div>
@@ -125,29 +125,29 @@ export default function DashboardView({
                   </div>
                 </div>
 
-                <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+                <div className="wf-card wf-card-interactive group p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-[var(--muted)]">Team members</div>
                       <div className="mt-2 text-2xl font-semibold tracking-[-0.03em] tabular-nums">{workspace.memberCount}</div>
                     </div>
-                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700 transition duration-200 group-hover:scale-105 group-hover:-rotate-3">
+                    <span aria-hidden="true" className="wf-icon-tile wf-icon-tile-info size-11 transition duration-200 group-hover:scale-105 group-hover:-rotate-3">
                       <UsersRound className="wf-icon-motion size-5" strokeWidth={1.9} />
                     </span>
                   </div>
                   <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted)]">
-                    <span className="size-1.5 rounded-full bg-sky-600" />
+                    <span className="size-1.5 rounded-full bg-[var(--info)]" />
                     Members in this workspace
                   </div>
                 </div>
 
-                <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+                <div className="wf-card wf-card-interactive group p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-[var(--muted)]">Default service</div>
                       <div className="mt-2 truncate text-lg font-semibold tracking-[-0.03em]">{workspace.defaultServiceName}</div>
                     </div>
-                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 transition duration-200 ">
+                    <span aria-hidden="true" className="wf-icon-tile wf-icon-tile-warning size-11 transition duration-200">
                       <CalendarClock className="wf-icon-motion size-5" strokeWidth={1.9} />
                     </span>
                   </div>
@@ -157,18 +157,18 @@ export default function DashboardView({
                   </div>
                 </div>
 
-                <div className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition duration-200 hover:border-[var(--brand)]/25 hover:shadow-[0_16px_36px_-28px_rgba(41,71,53,0.5)]">
+                <div className="wf-card wf-card-interactive group p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-[var(--muted)]">Your role</div>
                       <div className="mt-2 truncate text-lg font-semibold tracking-[-0.03em]">{roleLabel(workspace.role)}</div>
                     </div>
-                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700 transition duration-200 group-hover:scale-105 group-hover:-rotate-3">
+                    <span aria-hidden="true" className="wf-icon-tile size-11 transition duration-200 group-hover:scale-105 group-hover:-rotate-3">
                       <ShieldCheck className="wf-icon-motion size-5" strokeWidth={1.9} />
                     </span>
                   </div>
                   <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted)]">
-                    <span className="size-1.5 rounded-full bg-violet-600" />
+                    <span className="size-1.5 rounded-full bg-[var(--brand)]" />
                     Workspace access level
                   </div>
                 </div>
@@ -178,7 +178,7 @@ export default function DashboardView({
                 <Link
                   href="/songs/new"
                   data-tour="create-song"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:shadow-md"
+                  className="wf-card wf-card-interactive group p-5"
                 >
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                     <Plus className="size-5" />
@@ -201,7 +201,7 @@ export default function DashboardView({
                 <Link
                   href="/setlists"
                   data-tour="build-setlist"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:shadow-md"
+                  className="wf-card wf-card-interactive group p-5"
                 >
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                     <ListMusic className="size-5" />
@@ -223,7 +223,7 @@ export default function DashboardView({
 
                 <Link
                   href="/settings"
-                  className="group rounded-2xl border border-[var(--border)] bg-white p-5 transition hover:shadow-md"
+                  className="wf-card wf-card-interactive group p-5"
                 >
                   <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                     <Settings className="size-5" />
@@ -264,7 +264,7 @@ export default function DashboardView({
                   <Link
                     href="/services"
                     data-tour="team-priorities"
-                    className="group rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)]/30 hover:shadow-sm"
+                    className="wf-card wf-card-interactive group p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -286,7 +286,7 @@ export default function DashboardView({
 
                   <Link
                     href="/services"
-                    className="group rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)]/30 hover:shadow-sm"
+                    className="wf-card wf-card-interactive group p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -308,7 +308,7 @@ export default function DashboardView({
 
                   <Link
                     href="/my-schedule"
-                    className="group rounded-2xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--brand)]/30 hover:shadow-sm"
+                    className="wf-card wf-card-interactive group p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -326,7 +326,7 @@ export default function DashboardView({
                 </div>
               </section>
 
-              <section className="mt-6 rounded-2xl border border-[var(--border)] bg-white">
+              <section className="mt-6 wf-card overflow-hidden">
                 <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4 sm:px-6">
                   <div>
                     <h3 className="text-base font-semibold">
@@ -370,7 +370,7 @@ export default function DashboardView({
                       <Link
                         key={setlist.id}
                         href={`/setlists/${setlist.id}`}
-                        className="flex items-start gap-3 bg-white px-5 py-4 transition hover:bg-[var(--surface)] sm:px-6"
+                        className="flex items-start gap-3 bg-[var(--card)] px-5 py-4 transition hover:bg-[var(--surface)] sm:px-6"
                       >
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                           <CalendarDays className="size-[18px]" />
@@ -391,12 +391,12 @@ export default function DashboardView({
                               : ""}
                           </p>
                           <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                            <span className={"rounded-full px-2.5 py-1 text-[10px] font-semibold " + (
+                            <span className={"wf-status " + (
                               setlist.readiness.status === "ready"
-                                ? "bg-emerald-50 text-emerald-800"
+                                ? "wf-status-success"
                                 : setlist.readiness.status === "needs_attention"
-                                  ? "bg-amber-50 text-amber-800"
-                                  : "bg-rose-50 text-rose-800"
+                                  ? "wf-status-warning"
+                                  : "wf-status-danger"
                             )}>
                               {setlist.readiness.status === "ready"
                                 ? "Ready"
@@ -422,10 +422,10 @@ export default function DashboardView({
                             <div
                               className={"h-full rounded-full transition-all " + (
                                 setlist.readiness.status === "ready"
-                                  ? "bg-emerald-500"
+                                  ? "bg-[var(--success)]"
                                   : setlist.readiness.status === "needs_attention"
-                                    ? "bg-amber-500"
-                                    : "bg-rose-500"
+                                    ? "bg-[var(--warning)]"
+                                    : "bg-[var(--danger)]"
                               )}
                               style={{ width: String(setlist.readiness.percentage) + "%" }}
                             />
@@ -469,10 +469,10 @@ export default function DashboardView({
                                     aria-hidden="true"
                                     className={"size-1.5 shrink-0 rounded-full " + (
                                       assignment.confirmationStatus === "confirmed"
-                                        ? "bg-emerald-500"
+                                        ? "bg-[var(--success)]"
                                         : assignment.confirmationStatus === "declined"
-                                          ? "bg-rose-500"
-                                          : "bg-amber-500"
+                                          ? "bg-[var(--danger)]"
+                                          : "bg-[var(--warning)]"
                                     )}
                                   />
                                   <ProfileAvatar
@@ -499,7 +499,7 @@ export default function DashboardView({
                 )}
               </section>
 
-              <section className="mt-6 rounded-2xl border border-[var(--border)] bg-white">
+              <section className="mt-6 wf-card overflow-hidden">
                 <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4 sm:px-6">
                   <div>
                     <h3 className="text-base font-semibold">
@@ -562,7 +562,7 @@ export default function DashboardView({
               </section>
 
               <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.8fr)]">
-                <div className="rounded-2xl border border-[var(--border)] bg-white">
+                <div className="wf-card overflow-hidden">
                   <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4 sm:px-6">
                     <div>
                       <h3 className="text-base font-semibold">
@@ -637,7 +637,7 @@ export default function DashboardView({
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-[var(--border)] bg-white">
+                <div className="wf-card overflow-hidden">
                   <div className="border-b border-[var(--border)] px-5 py-4">
                     <h3 className="text-base font-semibold">
                       Church workspace
@@ -698,7 +698,7 @@ export default function DashboardView({
 
                     <Link
                       href="/settings"
-                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white text-sm font-semibold transition hover:bg-[var(--surface)]"
+                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm font-semibold transition hover:bg-[var(--surface)]"
                     >
                       <Settings className="size-4" />
                       Manage church settings

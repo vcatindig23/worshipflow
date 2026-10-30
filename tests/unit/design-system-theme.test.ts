@@ -27,6 +27,22 @@ const serviceHistoryPage = readFileSync(
   join(process.cwd(), "src/app/services/history/page.tsx"),
   "utf8"
 )
+const servicesPage = readFileSync(
+  join(process.cwd(), "src/app/services/page.tsx"),
+  "utf8"
+)
+const setlistsPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/page.tsx"),
+  "utf8"
+)
+const songsPage = readFileSync(
+  join(process.cwd(), "src/app/songs/page.tsx"),
+  "utf8"
+)
+const dashboardView = readFileSync(
+  join(process.cwd(), "src/components/dashboard-view.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -85,6 +101,47 @@ describe("semantic theme foundations", () => {
     expect(serviceHistoryPage).toMatch(/wf-card/)
     expect(serviceHistoryPage).toMatch(/wf-status-success/)
     expect(serviceHistoryPage).not.toMatch(/bg-white/)
+  })
+
+  it("provides shared readiness panels and icon tile variants", () => {
+    expect(designSystem).toMatch(/\.wf-readiness-panel\[data-state="ready"\]/)
+    expect(designSystem).toMatch(/\.wf-readiness-panel\[data-state="attention"\]/)
+    expect(designSystem).toMatch(/\.wf-readiness-panel\[data-state="incomplete"\]/)
+    expect(designSystem).toMatch(/\.wf-icon-tile-info/)
+    expect(designSystem).toMatch(/\.wf-icon-tile-warning/)
+    expect(designSystem).toMatch(/\.wf-feedback-warning/)
+    expect(designSystem).toMatch(/\.wf-status-neutral/)
+    expect(designSystem).toMatch(/\.wf-readiness-supporting[\s\S]*?color:\s*var\(--success\)/)
+  })
+
+  it("uses semantic cards and status colors in the main workspace views", () => {
+    expect(servicesPage).toMatch(/wf-readiness-panel/)
+    expect(servicesPage).toMatch(/data-state={readiness.status}/)
+    expect(servicesPage).toMatch(/wf-status-success/)
+    expect(servicesPage).toMatch(/wf-status-warning/)
+    expect(servicesPage).toMatch(/wf-card-interactive/)
+    expect(servicesPage).not.toMatch(/getReadinessClasses|readinessClasses/)
+    expect(servicesPage).not.toMatch(/bg-white/)
+    expect(servicesPage).not.toMatch(/bg-emerald-100|bg-amber-100|bg-rose-50|text-rose-700/)
+
+    expect(setlistsPage).toMatch(/wf-card-interactive/)
+    expect(setlistsPage).toMatch(/wf-status-success/)
+    expect(setlistsPage).toMatch(/wf-status-warning/)
+    expect(setlistsPage).toMatch(/wf-status-neutral/)
+    expect(setlistsPage).not.toMatch(/bg-white|bg-emerald-100|bg-amber-100/)
+
+    expect(songsPage).toMatch(/wf-card wf-card-interactive/)
+    expect(songsPage).toMatch(/wf-status-warning/)
+    expect(songsPage).toMatch(/var\(--warning-soft\)/)
+    expect(songsPage).not.toMatch(/bg-white|bg-amber-100|text-amber-800/)
+
+    expect(dashboardView).toMatch(/wf-card wf-card-interactive/)
+    expect(dashboardView).toMatch(/wf-feedback-warning/)
+    expect(dashboardView).toMatch(/wf-icon-tile-info/)
+    expect(dashboardView).toMatch(/wf-status-success/)
+    expect(dashboardView).toMatch(/wf-status-warning/)
+    expect(dashboardView).not.toMatch(/bg-emerald-50|bg-amber-50|bg-rose-50|text-emerald-800|text-amber-800|text-rose-800/)
+    expect(dashboardView).not.toMatch(/bg-white/)
   })
 
 })
