@@ -58,10 +58,10 @@ describe("semantic theme foundations", () => {
     expect(buttonSource).toMatch(/hover:bg-\[var\(--danger-action-hover\)\]/)
   })
   it("provides theme-aware semantic warning and status styles", () => {
-    expect(designSystem).toMatch(/--warning:\\s*#8a5200/)
-    expect(designSystem).toMatch(/--warning:\\s*#f0c477/)
-    expect(designSystem).toMatch(/\\.wf-status-warning[\\s\\S]*?background:\\s*var\\(--warning-soft\\)/)
-    expect(designSystem).toMatch(/\\.wf-status-success[\\s\\S]*?color:\\s*var\\(--success\\)/)
+    expect(designSystem).toMatch(/--warning:\s*#8a5200/)
+    expect(designSystem).toMatch(/--warning:\s*#f0c477/)
+    expect(designSystem).toMatch(/\.wf-status-warning[\s\S]*?background:\s*var\(--warning-soft\)/)
+    expect(designSystem).toMatch(/\.wf-status-success[\s\S]*?color:\s*var\(--success\)/)
   })
 
   it("uses shared page, card, form, and status foundations on workspace screens", () => {
