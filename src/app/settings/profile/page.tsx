@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button"
 import FormSubmitButton from "@/components/ui/form-submit-button"
 import { Feedback } from "@/components/ui/feedback"
 import { ProtectedForm } from "@/components/ui/protected-form"
@@ -172,7 +173,7 @@ export default async function ProfileSettingsPage({
         </div>
         <Link
           href="/profile"
-          className="inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+          className={buttonVariants({ variant: "outline", className: "h-10 min-h-10 px-4" })}
         >
           <UserRound className="size-4" />
           View profile
@@ -188,18 +189,15 @@ export default async function ProfileSettingsPage({
       ) : null}
 
       {warningMessage ? (
-        <div
-          role="status"
-          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-        >
+        <Feedback tone="warning" title="Photo cleanup incomplete">
           {warningMessage}
-        </div>
+        </Feedback>
       ) : null}
 
       <div className="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <ProtectedForm
           action={updateProfile}
-          className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-7"
+          className="wf-card p-6 sm:p-7"
         >
           {organizationId ? (
             <input type="hidden" name="organizationId" value={organizationId} />
@@ -325,7 +323,7 @@ export default async function ProfileSettingsPage({
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 aria-describedby="avatarHelp"
-                className="block w-full cursor-pointer rounded-xl border border-[var(--border)] bg-white text-sm text-[var(--muted)] file:mr-4 file:cursor-pointer file:border-0 file:bg-[var(--surface)] file:px-4 file:py-3 file:text-sm file:font-medium file:text-[var(--foreground)] hover:file:bg-[var(--brand-soft)]"
+                className="block w-full cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--muted)] file:mr-4 file:cursor-pointer file:border-0 file:bg-[var(--surface)] file:px-4 file:py-3 file:text-sm file:font-medium file:text-[var(--foreground)] hover:file:bg-[var(--brand-soft)]"
               />
               <p
                 id="avatarHelp"
@@ -398,7 +396,7 @@ export default async function ProfileSettingsPage({
         </ProtectedForm>
 
         <aside className="space-y-5">
-          <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm">
+          <section className="wf-card p-6">
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                 <ShieldCheck className="size-5" />
