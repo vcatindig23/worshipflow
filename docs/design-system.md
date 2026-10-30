@@ -4,11 +4,13 @@ Keep the forest-green identity and use the shared components before introducing 
 
 ## Foundations
 
-`src/app/design-system.css` defines the 4px spacing rhythm, control/card radii, card shadow, responsive page layout, typography, feedback colors, and theme-aware dialog/menu surfaces. `globals.css` owns existing app-wide colors, theme preferences, print layouts, and reduced-motion rules.
+`src/app/design-system.css` is the source of truth for light/dark theme tokens, the 4px spacing rhythm, control/card radii, card shadow, responsive page layout, typography, feedback colors, and theme-aware dialog/menu surfaces. `globals.css` owns resets, focus-visible behavior, print layouts, scrollbars, and reduced-motion rules; it does not contain theme-specific utility overrides.
 
 - Background / recessed surface / raised card: `--background`, `--surface`, `--card`.
 - Text / supporting text / borders: `--foreground`, `--muted`, `--border`.
 - Primary action fill / hover: `--brand`, `--brand-dark`; readable accent text: `--brand-ink`.
+- Keyboard focus: `--focus-ring`; destructive actions: `--danger-action`, `--danger-action-hover`, `--danger-foreground`.
+- Light and dark values for every theme token live together at the top of `design-system.css`. Do not add route-specific dark-mode color overrides to `globals.css`.
 - Feedback: `--success`, `--danger`, `--info`, each with a `-soft` background.
 - Use one page h1, h2 for sections, then h3 for subsections. Keep descriptions at 14px with generous line height.
 - Use 16px page gutters on phones, 24px on larger screens; section spacing is 24px / 32px.
@@ -31,7 +33,7 @@ Keep the forest-green identity and use the shared components before introducing 
 | `ConfirmSubmitButton`, `ConfirmationDialog` | Native modal focus containment, Escape/cancel, description, explicit confirmation before submitting |
 | `ProtectedForm` | Warn about unsaved edits on link navigation and page unload; never persist field values |
 
-Use semantic elements when a wrapper is already a section/article/link; `wf-card` provides the same card surface without extra markup. Keep existing layout-specific stage and print styles separate.
+Use semantic elements when a wrapper is already a section/article/link; `wf-card` provides the same card surface without extra markup. Use `bg-[var(--card)]`, `bg-[var(--surface)]`, `text-[var(--foreground)]`, `text-[var(--muted)]`, `border-[var(--border)]`, and the focus token for new UI. A small compatibility layer maps the existing neutral `bg-white`, slate/gray text, border, and focus utility classes to those variables so older screens remain theme-consistent while being migrated. Do not use raw neutral color utilities for new surfaces. Keep existing layout-specific stage and print styles separate.
 
 ## Interaction rules
 
