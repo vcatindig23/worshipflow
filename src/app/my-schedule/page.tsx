@@ -726,7 +726,7 @@ export default async function MySchedulePage({
                 period ===
                 item.value
                   ? "bg-[var(--brand)] text-white"
-                  : "border border-[var(--border)] bg-white text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                  : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
               }`}
             >
               {item.label}
@@ -928,14 +928,12 @@ export default async function MySchedulePage({
                                 key={
                                   assignment.id
                                 }
-                                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                                  assignment.confirmation_status ===
-                                  "confirmed"
-                                    ? "bg-emerald-50 text-emerald-700"
-                                    : assignment.confirmation_status ===
-                                        "declined"
-                                      ? "bg-rose-50 text-rose-700"
-                                      : "bg-amber-50 text-amber-700"
+                                className={`wf-status ${
+                                  assignment.confirmation_status === "confirmed"
+                                    ? "wf-status-success"
+                                    : assignment.confirmation_status === "declined"
+                                      ? "wf-status-danger"
+                                      : "wf-status-warning"
                                 }`}
                               >
                                 {getTeamPositionLabel(
@@ -982,15 +980,15 @@ export default async function MySchedulePage({
                                         : "Your proposed substitute accepted. Waiting for worship-leader approval."}
                                     </p>
                                   ) : previousRequest?.status === "declined" ? (
-                                    <p className="mt-1 text-xs text-rose-700">Your last swap request was declined.</p>
+                                    <p className="mt-1 text-xs text-[var(--danger)]">Your last swap request was declined.</p>
                                   ) : null}
                                 </div>
                                 {!requestIsOpen && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
                                   <details className="shrink-0">
-                                    <summary className="cursor-pointer list-none rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
+                                    <summary className="cursor-pointer list-none rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
                                       Request a swap
                                     </summary>
-                                    <form action={requestAssignmentSwap} className="mt-3 w-full space-y-3 rounded-xl border border-[var(--border)] bg-white p-3 sm:min-w-[300px]">
+                                    <form action={requestAssignmentSwap} className="wf-card mt-3 w-full space-y-3 p-3 sm:min-w-[300px]">
                                       <input type="hidden" name="assignmentId" value={assignment.id} />
                                       <div>
                                         <label htmlFor={`swap-substitute-${assignment.id}`} className="mb-1.5 block text-xs font-medium text-[var(--foreground)]">Eligible substitute</label>
@@ -999,7 +997,7 @@ export default async function MySchedulePage({
                                           name="substituteUserId"
                                           required
                                           defaultValue=""
-                                          className="h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]"
+                                          className="wf-input h-10"
                                         >
                                           <option value="" disabled>Select a teammate</option>
                                           {candidates.map((member) => (
@@ -1017,7 +1015,7 @@ export default async function MySchedulePage({
                                           maxLength={500}
                                           rows={2}
                                           placeholder="Share why you need a substitute."
-                                          className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm outline-none focus:border-[var(--brand)]"
+                                          className="wf-input min-h-[72px] py-2"
                                         />
                                       </div>
                                       <button type="submit" className="inline-flex h-9 w-full items-center justify-center rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
