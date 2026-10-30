@@ -1,4 +1,5 @@
 import { buttonVariants } from "@/components/ui/button"
+import { Input, Select } from "@/components/ui/form-controls"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -239,7 +240,7 @@ export default async function ServicesHistoryPage({
               <option value="all">All time</option>
               <option value="90days">Past 90 days</option>
               <option value="12months">Past 12 months</option>
-            </select>
+            </Select>
           </label>
 
           <button
