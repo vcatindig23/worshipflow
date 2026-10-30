@@ -26,6 +26,8 @@
   --success-soft: #edf7ef;
   --info: #315b80;
   --info-soft: #eff5fb;
+  --warning: #8a5200;
+  --warning-soft: #fff4dc;
 }
 
 :root[data-theme="dark"] {
@@ -55,6 +57,8 @@
   --success-soft: #1e3327;
   --info: #b5d6f2;
   --info-soft: #1e2d3b;
+  --warning: #f0c477;
+  --warning-soft: #3a2d1a;
 }
 
 /* WorshipFlow foundations: 4px rhythm, forest palette, theme-aware surfaces. */
@@ -219,6 +223,38 @@
   .wf-feedback-info {
     color: var(--info);
     background: var(--info-soft);
+  }
+  .wf-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  .wf-status-success {
+    border-color: color-mix(in srgb, var(--success) 24%, transparent);
+    background: var(--success-soft);
+    color: var(--success);
+  }
+  .wf-status-warning {
+    border-color: color-mix(in srgb, var(--warning) 24%, transparent);
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
+  .wf-status-danger {
+    border-color: color-mix(in srgb, var(--danger) 24%, transparent);
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+  .wf-status-info {
+    border-color: color-mix(in srgb, var(--info) 24%, transparent);
+    background: var(--info-soft);
+    color: var(--info);
   }
   @media (min-width: 640px) {
     .wf-page {
