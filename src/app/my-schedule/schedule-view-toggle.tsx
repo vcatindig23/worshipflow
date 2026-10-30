@@ -272,7 +272,7 @@ export default function ScheduleViewToggle({
                   return (
                     <div
                       key={date}
-                      className={`min-h-24 border-b border-r border-[var(--border)] p-1 transition-colors sm:min-h-28 sm:p-2 ${isSelected ? "bg-[var(--brand-soft)]/60" : isToday ? "bg-[var(--surface)]" : "bg-[var(--card)]"`}
+                      className={`min-h-24 border-b border-r border-[var(--border)] p-1 transition-colors sm:min-h-28 sm:p-2 ${isSelected ? "bg-[var(--brand-soft)]/60" : isToday ? "bg-[var(--surface)]" : "bg-[var(--card)]"}`}
                     >
                       <div className="mb-1 flex items-center justify-between gap-1">
                         <button
