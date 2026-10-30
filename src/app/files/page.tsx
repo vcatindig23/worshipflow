@@ -203,12 +203,9 @@ export default async function FilesPage({
       ) : null}
 
       {storageErrorMessage ? (
-        <div
-          role="alert"
-          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-        >
+        <Feedback tone="warning" title="Shared file library unavailable">
           {storageErrorMessage}
-        </div>
+        </Feedback>
       ) : null}
 
       {canManageFiles ? (
@@ -232,10 +229,10 @@ export default async function FilesPage({
           />
         </section>
       ) : (
-        <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <Feedback tone="info" title="Read-only file access">
           You can download shared files. Ask a worship leader or editor
           to upload or remove resources.
-        </p>
+        </Feedback>
       )}
 
       <section>
@@ -254,7 +251,7 @@ export default async function FilesPage({
         <form
           action="/files"
           method="get"
-          className="mb-4 flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 sm:flex-row"
+          className="wf-card mb-4 flex flex-col gap-3 p-4 shadow-sm sm:flex-row"
         >
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
@@ -282,7 +279,7 @@ export default async function FilesPage({
 
           <button
             type="submit"
-            className="h-11 rounded-xl bg-[var(--surface)] px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+            className={buttonVariants({ variant: "secondary", className: "h-11 px-5" })}
           >
             Apply
           </button>
@@ -293,7 +290,7 @@ export default async function FilesPage({
         ) : filteredFiles.length === 0 ? (
           <EmptyState title="No matching files" description="Try another search term or file type, or clear your filters." icon={<Search className="size-5" />} actions={<Link href="/files" className={buttonVariants({ variant: "outline" })}>Clear filters</Link>} />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
+          <div className="wf-card overflow-hidden">
             <ul className="divide-y divide-[var(--border)]">
               {filesWithLinks.map((file) => (
                 <li
