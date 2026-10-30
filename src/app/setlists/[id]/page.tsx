@@ -700,7 +700,7 @@ export default async function SetlistPage({
             {canEdit ? (
               <form action={saveServiceAsTemplate} className="flex items-center gap-2">
                 <input type="hidden" name="setlistId" value={id} />
-                <input
+                <Input
                   type="text"
                   name="templateName"
                   required
@@ -708,7 +708,7 @@ export default async function SetlistPage({
                   defaultValue={setlist.name}
                   aria-label="Service template name"
                   placeholder="Template name"
-                  className="h-10 w-36 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-xs outline-none transition focus:border-[var(--brand)] sm:w-44"
+                  className="h-10 w-36 px-3 text-xs sm:w-44"
                 />
                 <button
                   type="submit"
@@ -1245,7 +1245,7 @@ export default async function SetlistPage({
                               Arrangement Notes
                             </label>
 
-                            <textarea
+                            <Textarea
                               id={`notes-${setlistSong.id}`}
                               name="notes"
                               maxLength={2000}
@@ -1255,7 +1255,7 @@ export default async function SetlistPage({
                                 ""
                               }
                               placeholder="Intro, transition, repeat chorus, spoken prayer, etc."
-                              className="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2.5 text-sm leading-6 outline-none focus:border-[var(--brand)]"
+                              className="min-h-24 resize-y px-3 py-2.5"
                             />
                           </div>
 
@@ -1584,12 +1584,12 @@ export default async function SetlistPage({
                       Section
                     </label>
 
-                    <input
+                    <Input
                       id="section"
                       name="section"
                       defaultValue="Worship"
                       maxLength={80}
-                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                      className="h-11 px-3"
                     />
                   </div>
 
@@ -1602,12 +1602,12 @@ export default async function SetlistPage({
                         Key
                       </label>
 
-                      <input
+                      <Input
                         id="keyOverride"
                         name="keyOverride"
                         maxLength={20}
                         placeholder="Song key"
-                        className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                        className="h-11 px-3"
                       />
                     </div>
 
@@ -1619,14 +1619,14 @@ export default async function SetlistPage({
                         Capo
                       </label>
 
-                      <input
+                      <Input
                         id="capoOverride"
                         name="capoOverride"
                         type="number"
                         min={0}
                         max={12}
                         placeholder="Optional"
-                        className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                        className="h-11 px-3"
                       />
                     </div>
                   </div>
@@ -1639,14 +1639,14 @@ export default async function SetlistPage({
                       BPM
                     </label>
 
-                    <input
+                    <Input
                       id="tempoOverride"
                       name="tempoOverride"
                       type="number"
                       min={20}
                       max={300}
                       placeholder="Optional"
-                      className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--brand)]"
+                      className="h-11 px-3"
                     />
                   </div>
 
@@ -1658,13 +1658,13 @@ export default async function SetlistPage({
                       Notes
                     </label>
 
-                    <textarea
+                    <Textarea
                       id="notes"
                       name="notes"
                       maxLength={2000}
                       rows={3}
                       placeholder="Optional arrangement notes"
-                      className="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2.5 text-sm leading-6 outline-none focus:border-[var(--brand)]"
+                      className="min-h-24 resize-y px-3 py-2.5"
                     />
                   </div>
 
