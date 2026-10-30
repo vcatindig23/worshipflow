@@ -98,13 +98,13 @@ export default function DashboardView({
 
               {!workspace.serviceTimeAvailable ? (
                 <div className="wf-feedback wf-feedback-warning mb-6">
-                  Service start times are temporarily unavailable. Apply
-                  {" "}
-                  <code className="font-semibold">
-                    20261007100419_add_setlist_service_time.sql
-                  </code>
-                  {" "}
-                  to the Supabase database to enable them.
+                  <p>
+                    Service start times are temporarily unavailable. Apply{" "}
+                    <code className="font-semibold">
+                      20261007100419_add_setlist_service_time.sql
+                    </code>{" "}
+                    to the Supabase database to enable them.
+                  </p>
                 </div>
               ) : null}
 
@@ -115,7 +115,7 @@ export default function DashboardView({
                       <div className="text-xs font-semibold text-[var(--muted)]">Songs</div>
                       <div className="mt-2 text-2xl font-semibold tracking-[-0.03em] tabular-nums">{workspace.songCount}</div>
                     </div>
-                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)] transition duration-200 ">
+                    <span aria-hidden="true" className="wf-icon-tile size-11 transition duration-200">
                       <Music2 className="wf-icon-motion size-5" strokeWidth={1.9} />
                     </span>
                   </div>
