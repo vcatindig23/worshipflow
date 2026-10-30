@@ -216,7 +216,7 @@ export default async function SetlistSwapRequestsPanel({
                     <form action={respondToAssignmentSwapRequest}>
                       <input type="hidden" name="requestId" value={request.id} />
                       <input type="hidden" name="decision" value="decline" />
-                      <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 px-4 text-xs font-semibold text-rose-700 transition hover:bg-rose-50">
+                      <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--danger)]/30 px-4 text-xs font-semibold text-[var(--danger)] transition hover:bg-[var(--danger-soft)]">
                         <X className="size-3.5" /> Decline
                       </button>
                     </form>
@@ -228,7 +228,7 @@ export default async function SetlistSwapRequestsPanel({
                     {request.status === "pending" ? (
                       <p className="text-xs leading-5 text-[var(--muted)]">The proposed substitute has not accepted yet. You can decline this request, but approval is only available after acceptance.</p>
                     ) : (
-                      <p className="text-xs leading-5 text-blue-800">The substitute accepted. Approving will move the assignment to them and reset their confirmation to pending.</p>
+                      <p className="text-xs leading-5 text-[var(--info)]">The substitute accepted. Approving will move the assignment to them and reset their confirmation to pending.</p>
                     )}
                     <div className="flex flex-col gap-3 sm:flex-row">
                       {request.status === "substitute_accepted" ? (
@@ -250,7 +250,7 @@ export default async function SetlistSwapRequestsPanel({
                           aria-label="Leader resolution note"
                           className="h-10 min-w-0 flex-1 rounded-xl border border-[var(--border)] px-3 text-sm outline-none focus:border-[var(--brand)]"
                         />
-                        <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 px-4 text-xs font-semibold text-rose-700 transition hover:bg-rose-50">
+                        <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--danger)]/30 px-4 text-xs font-semibold text-[var(--danger)] transition hover:bg-[var(--danger-soft)]">
                           <X className="size-3.5" /> Decline request
                         </button>
                       </form>
