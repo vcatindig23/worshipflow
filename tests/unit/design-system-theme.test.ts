@@ -182,7 +182,8 @@ describe("semantic theme foundations", () => {
     expect(profilePage).toMatch(/wf-page max-w-6xl/)
     expect(profilePage).toMatch(/wf-card p-5 sm:p-6/)
     expect(profilePage).toMatch(/buttonVariants/)
-    expect(profilePage).not.toMatch(/bg-white(?!\\/)/
+    expect(profilePage).not.toContain('bg-white"')
+    expect(profilePage).not.toContain("bg-white ")
 
     expect(settingsPage).toMatch(/wf-feedback wf-feedback-warning/)
     expect(settingsPage).toMatch(/wf-card/)
