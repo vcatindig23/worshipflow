@@ -245,6 +245,14 @@
     background: var(--warning-soft);
     color: var(--warning);
   }
+  .wf-icon-tile-success {
+    background: var(--success-soft);
+    color: var(--success);
+  }
+  .wf-icon-tile-danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
   .wf-status {
     display: inline-flex;
     align-items: center;
