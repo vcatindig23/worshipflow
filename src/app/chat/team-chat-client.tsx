@@ -12,7 +12,6 @@ import Link from "next/link"
 import type { FormEvent, ReactNode } from "react"
 import { Fragment } from "react"
 import {
-  AlertCircle,
   Check,
   Download,
   FileText,
@@ -1709,12 +1708,10 @@ export default function TeamChatClient({
 
       <div className="border-t border-[var(--border)] bg-gradient-to-r from-white to-[var(--surface)]/35 px-3 py-3 sm:px-6 sm:py-4">
         {error ? (
-          <div
-            role="alert"
-            className="mb-3 flex items-start gap-2 rounded-xl border border-[var(--danger)]/25 bg-[var(--danger-soft)] px-3.5 py-3 text-xs leading-5 text-[var(--danger)]"
-          >
-            <AlertCircle className="mt-0.5 size-4 shrink-0" />
-            <p>{error}</p>
+          <div className="mb-3">
+            <Feedback tone="error" title="Chat action failed">
+              {error}
+            </Feedback>
           </div>
         ) : null}
 
