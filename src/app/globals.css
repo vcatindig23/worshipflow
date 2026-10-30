@@ -1,19 +1,6 @@
 @import "tailwindcss";
 @import "./design-system.css";
 
-:root {
-  --background: #f5f7f5;
-  --surface: #f0f4f0;
-  --foreground: #17201b;
-  --muted: #5f6c63;
-  --border: #e2e7e2;
-  --brand: #365c45;
-  --brand-dark: #294735;
-  --brand-soft: #e6efe8;
-  --sidebar: #15231b;
-  --sidebar-muted: #9ca9a1;
-}
-
 * {
   box-sizing: border-box;
 }
@@ -58,11 +45,11 @@ button, input, select, textarea {
 
 ::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: #c8d0c9;
+  background: var(--scrollbar-thumb);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #aeb8b0;
+  background: var(--scrollbar-thumb-hover);
 }
 
 @media print {
@@ -127,13 +114,6 @@ button, input, select, textarea {
 
 html {
   scroll-behavior: smooth;
-}
-
-a:focus-visible,
-button:focus-visible,
-[role="button"]:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 3px;
 }
 
 .wf-icon-motion {
@@ -221,7 +201,7 @@ iframe {
 }
 
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--brand);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
 }
 
@@ -233,26 +213,6 @@ iframe {
 
 
 /* Shared interaction polish and persistent light/dark theme tokens. */
-:root {
-  color-scheme: light;
-  --card: #ffffff;
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --background: #101713;
-  --surface: #18221c;
-  --foreground: #e8eee9;
-  --muted: #a0ada4;
-  --border: #2d3b32;
-  --brand: #365c45;
-  --brand-dark: #294735;
-  --brand-soft: #20382a;
-  --sidebar: #0a100c;
-  --sidebar-muted: #a1afa5;
-  --card: #17211b;
-}
-
 :where(button, a, [role="button"], summary) {
   transition-property: color, background-color, border-color, box-shadow, opacity, transform;
   transition-duration: 160ms;
@@ -307,98 +267,6 @@ iframe {
   .wf-back-to-top {
     display: none !important;
   }
-}
-
-
-:root[data-theme="dark"] .bg-white {
-  background-color: var(--card) !important;
-}
-
-:root[data-theme="dark"] .text-slate-900,
-:root[data-theme="dark"] .text-gray-900,
-:root[data-theme="dark"] .text-zinc-900 {
-  color: var(--foreground) !important;
-}
-
-:root[data-theme="dark"] .text-slate-700,
-:root[data-theme="dark"] .text-slate-600,
-:root[data-theme="dark"] .text-gray-700,
-:root[data-theme="dark"] .text-gray-600 {
-  color: var(--muted) !important;
-}
-
-:root[data-theme="dark"] .border-slate-100,
-:root[data-theme="dark"] .border-slate-200,
-:root[data-theme="dark"] .border-gray-100,
-:root[data-theme="dark"] .border-gray-200 {
-  border-color: var(--border) !important;
-}
-
-
-/* Stronger contrast and surface consistency for dark mode across legacy utility classes. */
-:root[data-theme="dark"] {
-  --brand-soft: #20382a;
-  --card: #17211b;
-  --surface: #18221c;
-  --border: #34443a;
-  --muted: #b3c0b7;
-}
-
-:root[data-theme="dark"] body,
-:root[data-theme="dark"] main,
-:root[data-theme="dark"] section,
-:root[data-theme="dark"] article,
-:root[data-theme="dark"] aside {
-  color: var(--foreground);
-}
-
-:root[data-theme="dark"] [class~="bg-white"],
-:root[data-theme="dark"] [class*="bg-white/"],
-:root[data-theme="dark"] [class~="bg-slate-50"],
-:root[data-theme="dark"] [class~="bg-gray-50"],
-:root[data-theme="dark"] [class~="bg-zinc-50"] {
-  background-color: var(--card) !important;
-}
-
-:root[data-theme="dark"] [class*="text-[var(--brand)]"] {
-  color: #a5d6b3 !important;
-}
-
-:root[data-theme="dark"] [class*="text-[var(--brand-dark)]"] {
-  color: #b8e1c2 !important;
-}
-
-:root[data-theme="dark"] [class*="text-slate-950"],
-:root[data-theme="dark"] [class*="text-slate-900"],
-:root[data-theme="dark"] [class*="text-slate-800"],
-:root[data-theme="dark"] [class*="text-gray-950"],
-:root[data-theme="dark"] [class*="text-gray-900"],
-:root[data-theme="dark"] [class*="text-gray-800"],
-:root[data-theme="dark"] [class*="text-zinc-900"] {
-  color: var(--foreground) !important;
-}
-
-:root[data-theme="dark"] [class*="text-slate-700"],
-:root[data-theme="dark"] [class*="text-slate-600"],
-:root[data-theme="dark"] [class*="text-gray-700"],
-:root[data-theme="dark"] [class*="text-gray-600"],
-:root[data-theme="dark"] [class*="text-zinc-700"],
-:root[data-theme="dark"] [class*="text-zinc-600"] {
-  color: #c0ccc4 !important;
-}
-
-:root[data-theme="dark"] [class*="border-slate-"],
-:root[data-theme="dark"] [class*="border-gray-"],
-:root[data-theme="dark"] [class*="border-zinc-"] {
-  border-color: var(--border) !important;
-}
-
-:root[data-theme="dark"] .home-button {
-  background: var(--card);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wf-loading-pulse { animation: none; }
 }
 
 
