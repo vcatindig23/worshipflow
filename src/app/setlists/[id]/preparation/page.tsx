@@ -472,7 +472,7 @@ export default async function ServicePreparationPage({
                     <input type="hidden" name="setlistId" value={id} />
                     <input type="hidden" name="taskId" value={task.id} />
                     <input type="hidden" name="completed" value={String(!task.is_completed)} />
-                    <button type="submit" aria-label={task.is_completed ? `Reopen task: ${task.title}` : `Complete task: ${task.title}`} className={`flex size-8 items-center justify-center rounded-xl transition ${task.is_completed ? "bg-emerald-100 text-emerald-700" : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]"}`}>
+                    <button type="submit" aria-label={task.is_completed ? `Reopen task: ${task.title}` : `Complete task: ${task.title}`} className={`flex size-8 items-center justify-center rounded-xl transition ${task.is_completed ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]"}`}>
                       {task.is_completed ? <CheckCircle2 className="size-4" /> : <Circle className="size-4" />}
                     </button>
                   </form>
