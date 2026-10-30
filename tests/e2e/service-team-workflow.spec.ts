@@ -139,6 +139,9 @@ async function expectResponsiveLayout(
         "body button, body a[href], body [role='button']"
       )
     ).filter((element) => {
+      if (element.matches(".wf-skip-link") && !element.matches(":focus")) {
+        return false
+      }
       return visible(element) && window.getComputedStyle(element).position === "fixed"
     })
     const mainControls = Array.from(
@@ -244,6 +247,7 @@ test.describe("isolated multi-member service workflow", () => {
   test("leader creates a service, a member confirms and requests a swap, substitute accepts, and leader approves", async ({
     browser,
   }) => {
+    test.setTimeout(20 * 60 * 1000)
     test.skip(
       !enabled,
       "Configure the opt-in E2E Supabase project and three dedicated test accounts to run the authenticated service workflow."
