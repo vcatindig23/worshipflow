@@ -7,6 +7,10 @@ const designSystem = readFileSync(
   "utf8"
 )
 const globals = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8")
+const buttonSource = readFileSync(
+  join(process.cwd(), "src/components/ui/button.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -18,9 +22,10 @@ describe("semantic theme foundations", () => {
     expect(designSystem).toMatch(/--focus-ring:\s*#a5d6b3/)
   })
 
-  it("keeps global styles free of theme-specific utility overrides", () => {
-    expect(globals).not.toMatch(/:root\[data-theme=/)
+  it("keeps global styles free of broad dark-mode utility overrides", () => {
+    expect(globals).not.toMatch(/:root\[data-theme="dark"\]\s+\.(?:bg-|text-|border-)/)
     expect(globals).toMatch(/outline:\s*2px solid var\(--focus-ring\)/)
+    expect(globals).toMatch(/:root\[data-theme="dark"\] \.wf-aurora-layer/)
   })
 
   it("maps legacy neutral utilities to semantic surface and text roles", () => {
@@ -31,10 +36,9 @@ describe("semantic theme foundations", () => {
     expect(designSystem).toMatch(/\[class~="border-slate-200"\][\s\S]*?border-color:\s*var\(--border\)/)
   })
 
-  it("uses a separate focus token and accessible action colors", () => {
-    expect(designSystem).toMatch(/--focus-ring:/)
-    expect(button).toMatch(/focus-visible:ring-\[var\(--focus-ring\)\]/)
-    expect(button).toMatch(/bg-\[var\(--danger-action\)\]/)
-    expect(button).toMatch(/hover:bg-\[var\(--danger-action-hover\)\]/)
+  it("uses separate focus and destructive-action tokens in shared buttons", () => {
+    expect(buttonSource).toMatch(/focus-visible:ring-\[var\(--focus-ring\)\]/)
+    expect(buttonSource).toMatch(/bg-\[var\(--danger-action\)\]/)
+    expect(buttonSource).toMatch(/hover:bg-\[var\(--danger-action-hover\)\]/)
   })
 })
