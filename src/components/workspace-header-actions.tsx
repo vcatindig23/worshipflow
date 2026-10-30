@@ -1114,7 +1114,7 @@ export default function WorkspaceHeaderActions({
                                             <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">{song.artist || song.album || "Artist not set"}</span>
                                           </span>
                                           {song.status === "archived" ? (
-                                            <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-800">Archived</span>
+                                            <span className="wf-status wf-status-warning">Archived</span>
                                           ) : null}
                                         </Link>
                                       </li>
