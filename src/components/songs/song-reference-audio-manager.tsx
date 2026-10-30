@@ -2,8 +2,9 @@
 
 import { useRef, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
-import { CheckCircle2, FileAudio, LoaderCircle, Trash2, UploadCloud } from "lucide-react"
+import { FileAudio, LoaderCircle, Trash2, UploadCloud } from "lucide-react"
 import ParticleButton, { type ParticleButtonStatus } from "@/components/kokonutui/particle-button"
+import { Feedback } from "@/components/ui/feedback"
 import { createClient } from "@/lib/supabase/client"
 import {
   removeSongReferenceAudio,
@@ -199,7 +200,7 @@ export default function SongReferenceAudioManager({
                 type="button"
                 onClick={handleRemove}
                 disabled={isBusy}
-                className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-[var(--danger)]/30 bg-[var(--card)] px-3 text-xs font-semibold text-[var(--danger)] transition hover:bg-[var(--danger-soft)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {removing ? <LoaderCircle className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
                 Unlink audio
@@ -243,12 +244,15 @@ export default function SongReferenceAudioManager({
       </p>
 
       {success ? (
-        <p role="status" className="mt-3 flex items-start gap-2 text-xs text-emerald-700">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
-          {success}
-        </p>
+        <div className="mt-3">
+          <Feedback tone="success" title={success} />
+        </div>
       ) : null}
-      {error ? <p role="alert" className="mt-3 text-xs text-red-700">{error}</p> : null}
+      {error ? (
+        <div className="mt-3">
+          <Feedback tone="error" title={error} />
+        </div>
+      ) : null}
     </section>
   )
 }

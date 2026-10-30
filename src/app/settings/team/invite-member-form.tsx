@@ -2,6 +2,7 @@
 
 import { useActionState } from "react"
 import ParticleButton, { type ParticleButtonStatus } from "@/components/kokonutui/particle-button"
+import { Feedback } from "@/components/ui/feedback"
 import {
   Check,
   Clipboard,
@@ -116,34 +117,31 @@ export default function InviteMemberForm() {
       </div>
 
       {state.error ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
+        <Feedback tone="error" title="Invitation could not be created">
           {state.error}
-        </div>
+        </Feedback>
       ) : null}
 
       {state.success && state.code ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+        <div role="status" className="rounded-2xl border border-[var(--success)]/30 bg-[var(--success-soft)] p-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--success-soft)] text-[var(--success)]">
               <Check className="size-5" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-emerald-950">
+              <p className="font-semibold text-[var(--success)]">
                 Invitation created
               </p>
 
-              <p className="mt-1 text-sm leading-6 text-emerald-800">
+              <p className="mt-1 text-sm leading-6 text-[var(--success)]">
                 Give this code to the invited member. It expires in
                 7 days.
               </p>
             </div>
 
             <div className="flex w-full gap-2 sm:w-auto">
-              <code className="flex min-w-0 flex-1 items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-base font-bold tracking-[0.2em] text-[var(--foreground)] sm:min-w-[210px]">
+              <code className="flex min-w-0 flex-1 items-center justify-center rounded-xl border border-[var(--success)]/30 bg-[var(--card)] px-4 py-2.5 text-base font-bold tracking-[0.2em] text-[var(--foreground)] sm:min-w-[210px]">
                 {state.code}
               </code>
 
@@ -156,7 +154,7 @@ export default function InviteMemberForm() {
                 errorLabel="Copy failed"
                 variant="outline"
                 size="lg"
-                className="h-11 min-w-11 shrink-0 rounded-xl border border-emerald-200 bg-white px-3 text-sm font-semibold text-emerald-800 shadow-none transition hover:bg-emerald-100 sm:min-w-[96px]"
+                className="h-11 min-w-11 shrink-0 rounded-xl border border-[var(--success)]/30 bg-[var(--card)] px-3 text-sm font-semibold text-[var(--success)] shadow-none transition hover:bg-[var(--success-soft)] sm:min-w-[96px]"
               >
                 <Clipboard className="size-4" />
                 <span className="hidden sm:inline">Copy</span>

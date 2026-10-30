@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { FileUp } from "lucide-react"
+import { Feedback } from "@/components/ui/feedback"
 import { getChordProMetadata, validateChordPro } from "@/features/chordpro/parser"
 import {
   MAX_CHORDPRO_FILE_BYTES,
@@ -134,14 +135,18 @@ export default function ChordProImportEditor({
         />
       </div>
       {error ? (
-        <p role="alert" className="mb-3 text-sm text-red-700">
-          {error}
-        </p>
+        <div className="mb-3">
+          <Feedback tone="error" title="Import failed">
+            {error}
+          </Feedback>
+        </div>
       ) : null}
       {message ? (
-        <p role="status" className="mb-3 text-sm text-emerald-700">
-          {message}
-        </p>
+        <div className="mb-3">
+          <Feedback tone="success" title="Import complete">
+            {message}
+          </Feedback>
+        </div>
       ) : null}
       <textarea
         ref={formSource}
@@ -158,20 +163,20 @@ export default function ChordProImportEditor({
         aria-describedby="chordpro-validation"
         className={className}
       />
-      <div id="chordpro-validation" className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-3 text-xs leading-5">
+      <div id="chordpro-validation" role={validation.valid ? "status" : "alert"} aria-live={validation.valid ? "polite" : "assertive"} aria-atomic="true" className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-3 text-xs leading-5">
         {validation.valid ? (
-          <p className="font-medium text-emerald-700" role="status">ChordPro syntax looks valid.</p>
+          <p className="font-medium text-[var(--success)]">ChordPro syntax looks valid.</p>
         ) : (
           <div>
-            <p className="font-semibold text-red-700">
+            <p className="font-semibold text-[var(--danger)]">
               {validation.errors.length} syntax issue{validation.errors.length === 1 ? "" : "s"} found
             </p>
-            <ul className="mt-1 list-disc space-y-1 pl-5 text-red-700" role="status" aria-live="polite">
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-[var(--danger)]">
               {validation.errors.slice(0, 8).map((validationError) => (
                 <li key={validationError}>{validationError}</li>
               ))}
             </ul>
-            {validation.errors.length > 8 ? <p className="mt-1 text-red-700">And {validation.errors.length - 8} more issue(s).</p> : null}
+            {validation.errors.length > 8 ? <p className="mt-1 text-[var(--danger)]">And {validation.errors.length - 8} more issue(s).</p> : null}
           </div>
         )}
       </div>
