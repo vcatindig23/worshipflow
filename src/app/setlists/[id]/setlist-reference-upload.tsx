@@ -3,6 +3,8 @@
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LoaderCircle, UploadCloud } from "lucide-react"
+import { Feedback } from "@/components/ui/feedback"
+import { Input } from "@/components/ui/form-controls"
 import { createClient } from "@/lib/supabase/client"
 import { addServiceResource } from "./service-resources-actions"
 
@@ -91,12 +93,16 @@ export default function SetlistReferenceUpload({ setlistId, organizationId }: { 
         Add a service guide, PDF chart, presentation, image, or rehearsal audio directly to this setlist. It will also be saved in your workspace library.
       </p>
       <input ref={inputRef} type="file" required disabled={uploading} accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.mp3,.m4a,.wav" className="block w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--brand-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--brand)]" />
-      <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} disabled={uploading} maxLength={120} placeholder="Display name (optional)" aria-label="Reference file display name" className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)] disabled:opacity-60" />
+      <Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} disabled={uploading} maxLength={120} placeholder="Display name (optional)" aria-label="Reference file display name" className="h-10 px-3" />
       <button type="submit" disabled={uploading} className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60">
         {uploading ? <><LoaderCircle className="mr-2 size-4 animate-spin" />Uploading and attaching…</> : "Upload and attach"}
       </button>
       <p className="text-xs text-[var(--muted)]">Maximum 25 MB. PDF, Office documents, images, and supported audio files.</p>
-      {error ? <p role="alert" className="text-sm text-red-700">{error}</p> : null}
+      {error ? (
+        <Feedback tone="error" title="Reference upload failed">
+          {error}
+        </Feedback>
+      ) : null}
     </form>
   )
 }
