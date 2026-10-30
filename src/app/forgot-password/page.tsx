@@ -32,7 +32,7 @@ export default async function ForgotPasswordPage({
 
   return (
     <AuthLayout>
-          <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
+          <section className="wf-card rounded-3xl p-6 sm:p-8">
             <div className="mb-7 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <KeyRound className="size-5" />
             </div>
