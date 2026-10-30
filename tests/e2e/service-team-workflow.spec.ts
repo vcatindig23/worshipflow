@@ -30,7 +30,7 @@ async function signIn(page: Page, email: string, password: string) {
   await page.locator("#password").fill(password)
   await page.getByRole("button", { name: "Sign in", exact: true }).click()
   await expect(page).not.toHaveURL(/\/login$/)
-  await expect(page).not.toHaveURL(/\/onboarding$/)
+          ).not.toHaveURL(/\/login(?:\?|$)|\/onboarding(?:\?|$)/)
 }
 
 function futureServiceDate(daysAhead = 7) {
@@ -123,7 +123,7 @@ async function expectResponsiveLayout(
         if (rect.left >= -1 && rect.right <= viewportWidth + 1) return []
         const label =
           element.getAttribute("aria-label") ||
-          element.textContent?.trim().replace(/\\s+/g, " ").slice(0, 70) ||
+          element.textContent?.trim().slice(0, 70) ||
           element.tagName.toLowerCase()
         return [
           {
@@ -158,7 +158,7 @@ async function expectResponsiveLayout(
       }
       return [
         element.getAttribute("aria-label") ||
-          element.textContent?.trim().replace(/\\s+/g, " ").slice(0, 50) ||
+          element.textContent?.trim().slice(0, 50) ||
           element.tagName.toLowerCase(),
       ]
     })
@@ -176,11 +176,11 @@ async function expectResponsiveLayout(
         if (!overlaps) return []
         const label =
           fixed.getAttribute("aria-label") ||
-          fixed.textContent?.trim().replace(/\\s+/g, " ").slice(0, 45) ||
+          fixed.textContent?.trim().slice(0, 45) ||
           fixed.tagName.toLowerCase()
         const controlLabel =
           control.getAttribute("aria-label") ||
-          control.textContent?.trim().replace(/\\s+/g, " ").slice(0, 45) ||
+          control.textContent?.trim().slice(0, 45) ||
           control.tagName.toLowerCase()
         return [`${label} overlaps ${controlLabel}`]
       })
@@ -437,7 +437,7 @@ test.describe("isolated multi-member service workflow", () => {
       const existingSongHref = await leader.locator('a[href^="/songs/"]').evaluateAll((links) =>
         links
           .map((link) => link.getAttribute("href"))
-          .find((href) => Boolean(href && /^\\/songs\\/[0-9a-f-]+$/i.test(href)))
+          .find((href) => Boolean(href && href.startsWith("/songs/") && href !== "/songs/new" && href.split("/").length === 3))
       )
       if (existingSongHref) responsiveRoutes.push(existingSongHref)
 
@@ -446,7 +446,7 @@ test.describe("isolated multi-member service workflow", () => {
       const memberProfileHref = await leader.locator('a[href^="/profile/"]').evaluateAll((links) =>
         links
           .map((link) => link.getAttribute("href"))
-          .find((href) => Boolean(href && /^\\/profile\\/[0-9a-f-]+$/i.test(href)))
+          .find((href) => Boolean(href && href.startsWith("/profile/") && href.split("/").length === 3))
       )
       if (memberProfileHref) responsiveRoutes.push(memberProfileHref)
 
@@ -465,7 +465,7 @@ test.describe("isolated multi-member service workflow", () => {
           await expect(
             leader,
             `${viewport.name} (${viewport.width}px): ${route} must remain authenticated`
-          ).not.toHaveURL(/\\/login(?:\\?|$)|\\/onboarding(?:\\?|$)/)
+          ).not.toHaveURL(/\/login(?:\?|$)|\/onboarding(?:\?|$)/)
           await expect(leader.locator("body")).toBeVisible()
 
           const routeContext = `${viewport.name} ${viewport.width}x${viewport.height} ${route}`
