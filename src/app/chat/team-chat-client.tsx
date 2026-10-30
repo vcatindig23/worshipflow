@@ -33,7 +33,6 @@ import {
   Wifi,
   X,
   WifiOff,
-  UsersRound,
 } from "lucide-react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import {
