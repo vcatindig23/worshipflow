@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
+import { buttonVariants } from "@/components/ui/button"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
+import { Feedback } from "@/components/ui/feedback"
 import Link from "next/link"
 import {
   Archive,
@@ -251,11 +253,11 @@ function statusLabel(
 }
 
 function availabilityBadgeClass(status: MemberAvailabilityStatus) {
-  if (status === "unavailable") return "bg-rose-50 text-rose-700"
-  if (status === "outside_weekly_hours") return "bg-amber-50 text-amber-800"
-  if (status === "within_weekly_hours") return "bg-emerald-50 text-emerald-700"
-  if (status === "needs_schedule") return "bg-[var(--surface)] text-[var(--muted)]"
-  return "bg-[var(--surface)] text-[var(--muted)]"
+  if (status === "unavailable") return "wf-status-danger"
+  if (status === "outside_weekly_hours") return "wf-status-warning"
+  if (status === "within_weekly_hours") return "wf-status-success"
+  if (status === "needs_schedule") return "wf-status-info"
+  return "wf-status-neutral"
 }
 
 const availabilityPriority: Record<MemberAvailabilityStatus, number> = {
@@ -591,20 +593,15 @@ export default async function SetlistPage({
       </Link>
 
       {errorMessage ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <Feedback tone="error" title="Could not update service plan">
           {errorMessage}
-        </div>
+        </Feedback>
       ) : null}
 
       {!teamDataAvailable ? (
-        <div
-          role="status"
-          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800"
-        >
-          Worship-team assignments are unavailable until the member-position
-          and setlist-assignment database migrations have been applied. Your
-          setlist and songs remain available.
-        </div>
+        <Feedback tone="warning" title="Worship-team assignments unavailable">
+          Apply the member-position and setlist-assignment database migrations to enable team assignments. Your setlist and songs remain available.
+        </Feedback>
       ) : null}
 
       <section className="setlist-print-header rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm md:p-7">
@@ -617,14 +614,12 @@ export default async function SetlistPage({
               </span>
 
               <span
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  setlist.status ===
-                  "published"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : setlist.status ===
-                        "archived"
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-[var(--surface)] text-[var(--muted)]"
+                className={`wf-status ${
+                  setlist.status === "published"
+                    ? "wf-status-success"
+                    : setlist.status === "archived"
+                      ? "wf-status-warning"
+                      : "wf-status-neutral"
                 }`}
               >
                 {statusLabel(
@@ -633,7 +628,7 @@ export default async function SetlistPage({
               </span>
 
               {setlist.completed_at ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+                <span className="wf-status wf-status-success">
                   <CheckCircle2 className="size-3.5" />
                   Completed
                 </span>
@@ -974,7 +969,7 @@ export default async function SetlistPage({
 
                             {song.status ===
                             "archived" ? (
-                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                              <span className="wf-status wf-status-warning">
                                 Song archived
                               </span>
                             ) : null}
@@ -1342,35 +1337,37 @@ export default async function SetlistPage({
               Assign members to the positions set for them on the Team page. Saved time off and weekly hours help you review availability before assigning.
             </p>
             {canEdit && profileIds.length > 0 && !availabilityChecksAvailable ? (
-              <p role="status" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900">
-                Availability checks are unavailable. Verify that the member-availability migration is applied; assignments can still be managed.
-              </p>
+              <div className="mt-3">
+                <Feedback tone="warning" title="Availability checks unavailable">
+                  Verify that the member-availability migration is applied. Assignments can still be managed.
+                </Feedback>
+              </div>
             ) : null}
 
             {teamAssignments.length > 0 ? (
               <>
                 <div className="mt-4 grid grid-cols-3 gap-2">
-                  <div className="rounded-xl bg-emerald-50 px-3 py-2.5">
-                    <p className="text-lg font-bold text-emerald-700">
+                  <div className="rounded-xl bg-[var(--success-soft)] px-3 py-2.5">
+                    <p className="text-lg font-bold text-[var(--success)]">
                       {confirmedAssignments}
                     </p>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--success)]">
                       Confirmed
                     </p>
                   </div>
-                  <div className="rounded-xl bg-amber-50 px-3 py-2.5">
-                    <p className="text-lg font-bold text-amber-700">
+                  <div className="rounded-xl bg-[var(--warning-soft)] px-3 py-2.5">
+                    <p className="text-lg font-bold text-[var(--warning)]">
                       {pendingAssignments}
                     </p>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--warning)]">
                       Pending
                     </p>
                   </div>
-                  <div className="rounded-xl bg-rose-50 px-3 py-2.5">
-                    <p className="text-lg font-bold text-rose-700">
+                  <div className="rounded-xl bg-[var(--danger-soft)] px-3 py-2.5">
+                    <p className="text-lg font-bold text-[var(--danger)]">
                       {declinedAssignments}
                     </p>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-rose-700">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--danger)]">
                       Declined
                     </p>
                   </div>
@@ -1408,7 +1405,7 @@ export default async function SetlistPage({
                             {availabilityChecksAvailable && assignment.availability ? (
                               <span
                                 aria-label={`Availability: ${assignment.availability.label}`}
-                                className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${availabilityBadgeClass(assignment.availability.status)}`}
+                                className={`wf-status mt-1 ${availabilityBadgeClass(assignment.availability.status)}`}
                               >
                                 {assignment.availability.label}
                               </span>
@@ -1417,12 +1414,12 @@ export default async function SetlistPage({
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           <span
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                            className={`wf-status ${
                               assignment.confirmation_status === "confirmed"
-                                ? "bg-emerald-50 text-emerald-700"
+                                ? "wf-status-success"
                                 : assignment.confirmation_status === "declined"
-                                  ? "bg-rose-50 text-rose-700"
-                                  : "bg-amber-50 text-amber-700"
+                                  ? "wf-status-danger"
+                                  : "wf-status-warning"
                             }`}
                           >
                             {assignment.confirmation_status === "confirmed"
