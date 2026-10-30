@@ -30,10 +30,10 @@ const statusLabels: Record<ReviewStatus, string> = {
 }
 
 const statusStyles: Record<ReviewStatus, string> = {
-  draft: "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]",
-  in_review: "border-sky-200 bg-sky-50 text-sky-800",
-  changes_requested: "border-amber-200 bg-amber-50 text-amber-800",
-  approved: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  draft: "wf-status-neutral",
+  in_review: "wf-status-info",
+  changes_requested: "wf-status-warning",
+  approved: "wf-status-success",
 }
 
 function formatDate(value: string) {
@@ -48,14 +48,17 @@ export default function SongReviewPanel({ songId, canEdit, initialStatus, commen
   const [status, setStatus] = useState<ReviewStatus>(initialStatus)
   const [body, setBody] = useState("")
   const [message, setMessage] = useState("")
+  const [messageIsError, setMessageIsError] = useState(false)
   const [pending, startTransition] = useTransition()
 
   function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setMessage("")
+    setMessageIsError(false)
     startTransition(async () => {
       const result = await postSongReviewComment(songId, body)
       if (!result.ok) {
+        setMessageIsError(true)
         setMessage(result.error)
         return
       }
@@ -103,7 +106,7 @@ export default function SongReviewPanel({ songId, canEdit, initialStatus, commen
           <h2 id="song-review-heading" className="mt-2 text-lg font-semibold text-[var(--foreground)]">Song review</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">Discuss arrangement changes and move the chart through review.</p>
         </div>
-        <span className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${statusStyles[initialStatus]}`}>
+        <span className={`wf-status w-fit ${statusStyles[initialStatus]}`}>
           {initialStatus === "approved" ? <Check className="size-3.5" aria-hidden="true" /> : <ClipboardCheck className="size-3.5" aria-hidden="true" />}
           {statusLabels[initialStatus]}
         </span>
@@ -171,7 +174,15 @@ export default function SongReviewPanel({ songId, canEdit, initialStatus, commen
         </div>
       </form>
 
-      {message ? <p role="status" aria-live="polite" className="mt-3 text-sm text-[var(--muted)]">{message}</p> : null}
+      {message ? (
+        <p
+          role={messageIsError ? "alert" : "status"}
+          aria-live={messageIsError ? "assertive" : "polite"}
+          className={`mt-3 text-sm ${messageIsError ? "text-[var(--danger)]" : "text-[var(--success)]"}`}
+        >
+          {message}
+        </p>
+      ) : null}
     </section>
   )
 }
