@@ -12,6 +12,7 @@ import ThemeToggleButton from "@/components/theme-toggle-button"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 import { isActiveNavigationPath } from "@/lib/navigation"
 import { workspaceNavigationItems } from "@/lib/workspace-navigation"
+import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 
 type WorkspaceShellData = {
   userName: string
@@ -62,6 +63,10 @@ export default function WorshipFlowShell({
 }: WorshipFlowShellProps) {
   const pathname = usePathname() ?? "/"
   const pageTitle = getWorkspacePageTitle(pathname)
+
+  if (isImmersiveWorkspaceRoute(pathname)) {
+    return <>{children}</>
+  }
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -122,7 +127,7 @@ export default function WorshipFlowShell({
         </div>
       </aside>
 
-      <div className="min-h-screen min-w-0 lg:pl-[264px]">
+      <div className="wf-workspace-content min-h-screen min-w-0 lg:pl-[264px]">
         <header className="app-header sticky top-0 z-30 flex h-[78px] items-center border-b border-[var(--border)] bg-[var(--background)]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <DashboardMobileNavigation
