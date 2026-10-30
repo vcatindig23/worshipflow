@@ -224,6 +224,27 @@
     color: var(--info);
     background: var(--info-soft);
   }
+  .wf-feedback-warning {
+    color: var(--warning);
+    background: var(--warning-soft);
+  }
+  .wf-icon-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 0.75rem;
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+  }
+  .wf-icon-tile-info {
+    background: var(--info-soft);
+    color: var(--info);
+  }
+  .wf-icon-tile-warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
   .wf-status {
     display: inline-flex;
     align-items: center;
