@@ -556,7 +556,8 @@ describe("semantic theme foundations", () => {
   it("uses semantic status treatments in workspace notices and announcement acknowledgment", () => {
     expect(workspaceHeaderActions).toMatch(/var\(--danger-soft\)/)
     expect(workspaceHeaderActions).toMatch(/var\(--warning-soft\)/)
-    expect(workspaceHeaderActions).not.toMatch(/bg-red-50|border-red-100|text-red-700|bg-amber-50|border-amber-100|text-amber-800/)
+    expect(workspaceHeaderActions).toMatch(/wf-status-warning/)
+    expect(workspaceHeaderActions).not.toMatch(/bg-red-50|border-red-100|text-red-700|bg-amber-50|bg-amber-100|border-amber-100|text-amber-800/)
 
     expect(announcementAcknowledgment).toMatch(/wf-status wf-status-success/)
     expect(announcementAcknowledgment).not.toMatch(/bg-emerald-50|text-emerald-700/)
