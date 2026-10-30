@@ -107,7 +107,7 @@ export default async function OnboardingPage({
             <div className="mt-9 grid gap-5 md:grid-cols-2">
               <Link
                 href="/onboarding?mode=create"
-                className="group rounded-3xl border border-[var(--border)] bg-white p-7 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+                className="wf-card wf-card-interactive group p-7 transition hover:-translate-y-0.5"
               >
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
                   <Church className="size-6" />
@@ -130,7 +130,7 @@ export default async function OnboardingPage({
 
               <Link
                 href="/onboarding/join"
-                className="group rounded-3xl border border-[var(--border)] bg-white p-7 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+                className="wf-card wf-card-interactive group p-7 transition hover:-translate-y-0.5"
               >
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--brand)]">
                   <Users className="size-6" />
