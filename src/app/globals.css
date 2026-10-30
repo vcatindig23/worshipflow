@@ -31,7 +31,7 @@ button, input, select, textarea {
 
 ::selection {
   background: var(--brand-soft);
-  color: var(--brand-dark);
+  color: var(--brand-ink);
 }
 
 ::-webkit-scrollbar {
