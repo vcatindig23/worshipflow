@@ -119,6 +119,10 @@ const setlistCompletePage = readFileSync(
   join(process.cwd(), "src/app/setlists/[id]/complete/page.tsx"),
   "utf8"
 )
+const setlistPreparationPage = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/preparation/page.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -348,6 +352,20 @@ describe("semantic theme foundations", () => {
     expect(setlistCompletePage).toMatch(/<Textarea/)
     expect(setlistCompletePage).toMatch(/wf-card/)
     expect(setlistCompletePage).not.toMatch(/bg-white|bg-red-50|bg-emerald-50|text-red-700|text-emerald-800/)
+  })
+
+  it("uses shared semantic styling for Setlist Preparation", () => {
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="error"/)
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="success"/)
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="warning"/)
+    expect(setlistPreparationPage).toMatch(/<Input/)
+    expect(setlistPreparationPage).toMatch(/<Textarea/)
+    expect(setlistPreparationPage).toMatch(/wf-card/)
+    expect(setlistPreparationPage).toMatch(/wf-status-neutral/)
+    expect(setlistPreparationPage).toMatch(/wf-status-warning/)
+    expect(setlistPreparationPage).toMatch(/wf-status-success/)
+    expect(setlistPreparationPage).toMatch(/var\\(--success-soft\\)/)
+    expect(setlistPreparationPage).not.toMatch(/bg-white|bg-emerald-100|bg-amber-100|bg-amber-50|text-emerald-700|text-amber-800|border-amber-200/)
   })
 
 })
