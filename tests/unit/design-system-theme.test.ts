@@ -111,6 +111,7 @@ describe("semantic theme foundations", () => {
     expect(designSystem).toMatch(/\.wf-icon-tile-warning/)
     expect(designSystem).toMatch(/\.wf-feedback-warning/)
     expect(designSystem).toMatch(/\.wf-status-neutral/)
+    expect(designSystem).toMatch(/\.wf-readiness-supporting[\s\S]*?color:\s*var\(--success\)/)
   })
 
   it("uses semantic cards and status colors in the main workspace views", () => {
