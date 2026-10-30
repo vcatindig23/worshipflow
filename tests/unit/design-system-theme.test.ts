@@ -151,6 +151,30 @@ const songVersionComparison = readFileSync(
   join(process.cwd(), "src/components/songs/song-version-comparison.tsx"),
   "utf8"
 )
+const inviteMemberForm = readFileSync(
+  join(process.cwd(), "src/app/settings/team/invite-member-form.tsx"),
+  "utf8"
+)
+const songReferenceAudioManager = readFileSync(
+  join(process.cwd(), "src/components/songs/song-reference-audio-manager.tsx"),
+  "utf8"
+)
+const chordProImportEditor = readFileSync(
+  join(process.cwd(), "src/components/songs/chordpro-import-editor.tsx"),
+  "utf8"
+)
+const setlistReferenceUpload = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/setlist-reference-upload.tsx"),
+  "utf8"
+)
+const workspaceHeaderActions = readFileSync(
+  join(process.cwd(), "src/components/workspace-header-actions.tsx"),
+  "utf8"
+)
+const announcementAcknowledgment = readFileSync(
+  join(process.cwd(), "src/app/setlists/[id]/announcement-acknowledgment.tsx"),
+  "utf8"
+)
 const loginPage = readFileSync(
   join(process.cwd(), "src/app/login/page.tsx"),
   "utf8"
@@ -501,6 +525,41 @@ describe("semantic theme foundations", () => {
     expect(onboardingJoinPage).toMatch(/wf-card w-full/)
     expect(onboardingJoinPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
     expect(onboardingJoinPage).not.toMatch(/<input\b/)
+  })
+
+
+  it("uses shared feedback and semantic colors in invitation and reference-audio tools", () => {
+    expect(inviteMemberForm).toMatch(/<Feedback tone="error"/)
+    expect(inviteMemberForm).toMatch(/bg-\[var\(--success-soft\)\]/)
+    expect(inviteMemberForm).toMatch(/text-\[var\(--success\)\]/)
+    expect(inviteMemberForm).not.toMatch(/bg-red-50|bg-emerald-50|border-red-200|border-emerald-200|text-red-700|text-emerald-800/)
+
+    expect(songReferenceAudioManager).toMatch(/<Feedback tone="success"/)
+    expect(songReferenceAudioManager).toMatch(/<Feedback tone="error"/)
+    expect(songReferenceAudioManager).toMatch(/var\(--danger-soft\)/)
+    expect(songReferenceAudioManager).not.toMatch(/bg-red-50|bg-emerald-50|border-red-200|text-red-700|text-emerald-700/)
+  })
+
+  it("uses semantic feedback for ChordPro and setlist reference uploads", () => {
+    expect(chordProImportEditor).toMatch(/<Feedback tone="error"/)
+    expect(chordProImportEditor).toMatch(/<Feedback tone="success"/)
+    expect(chordProImportEditor).toMatch(/role=\{validation\.valid \? "status" : "alert"\}/)
+    expect(chordProImportEditor).toMatch(/var\(--danger\)/)
+    expect(chordProImportEditor).toMatch(/var\(--success\)/)
+    expect(chordProImportEditor).not.toMatch(/text-red-700|text-emerald-700/)
+
+    expect(setlistReferenceUpload).toMatch(/<Feedback tone="error"/)
+    expect(setlistReferenceUpload).toMatch(/<Input/)
+    expect(setlistReferenceUpload).not.toMatch(/text-red-700/)
+  })
+
+  it("uses semantic status treatments in workspace notices and announcement acknowledgment", () => {
+    expect(workspaceHeaderActions).toMatch(/var\(--danger-soft\)/)
+    expect(workspaceHeaderActions).toMatch(/var\(--warning-soft\)/)
+    expect(workspaceHeaderActions).not.toMatch(/bg-red-50|border-red-100|text-red-700|bg-amber-50|border-amber-100|text-amber-800/)
+
+    expect(announcementAcknowledgment).toMatch(/wf-status wf-status-success/)
+    expect(announcementAcknowledgment).not.toMatch(/bg-emerald-50|text-emerald-700/)
   })
 
 })
