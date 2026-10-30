@@ -1,5 +1,7 @@
 "use client"
 
+import { Feedback } from "@/components/ui/feedback"
+import { Input, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
 import { useMemo, useState, type ReactNode } from "react"
 import {
@@ -234,10 +236,10 @@ export default function ScheduleViewToggle({
                   <span className="size-2 rounded-full bg-[var(--brand)]" /> Service
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="size-2 rounded-full bg-rose-500" /> Time off
+                  <span className="size-2 rounded-full bg-[var(--danger)]" /> Time off
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="size-2 rounded-full bg-emerald-500" /> Weekly hours
+                  <span className="size-2 rounded-full bg-[var(--success)]" /> Weekly hours
                 </span>
               </div>
 
@@ -270,7 +272,7 @@ export default function ScheduleViewToggle({
                   return (
                     <div
                       key={date}
-                      className={`min-h-24 border-b border-r border-[var(--border)] p-1 transition-colors sm:min-h-28 sm:p-2 ${isSelected ? "bg-[var(--brand-soft)]/60" : isToday ? "bg-[var(--surface)]" : "bg-white"}`}
+                      className={`min-h-24 border-b border-r border-[var(--border)] p-1 transition-colors sm:min-h-28 sm:p-2 ${isSelected ? "bg-[var(--brand-soft)]/60" : isToday ? "bg-[var(--surface)]" : "bg-[var(--card)]"`}
                     >
                       <div className="mb-1 flex items-center justify-between gap-1">
                         <button
@@ -284,10 +286,10 @@ export default function ScheduleViewToggle({
                         </button>
                         <div className="flex min-w-0 items-center gap-1">
                           {dayAvailability.blockouts.length > 0 ? (
-                            <span title="Unavailable" aria-label="Unavailable" className="size-2 rounded-full bg-rose-500" />
+                            <span title="Unavailable" aria-label="Unavailable" className="size-2 rounded-full bg-[var(--danger)]" />
                           ) : null}
                           {dayAvailability.recurring.length > 0 ? (
-                            <span title="Weekly hours" aria-label="Weekly hours" className="size-2 rounded-full bg-emerald-500" />
+                            <span title="Weekly hours" aria-label="Weekly hours" className="size-2 rounded-full bg-[var(--success)]" />
                           ) : null}
                         </div>
                       </div>
@@ -314,9 +316,9 @@ export default function ScheduleViewToggle({
                           </button>
                         ) : null}
                         {dayAvailability.blockouts.length > 0 ? (
-                          <p className="truncate px-1 text-[9px] font-medium text-rose-700 sm:text-[10px]">Time off</p>
+                          <p className="truncate px-1 text-[9px] font-medium text-[var(--danger)] sm:text-[10px]">Time off</p>
                         ) : dayAvailability.recurring.length > 0 ? (
-                          <p className="truncate px-1 text-[9px] font-medium text-emerald-700 sm:text-[10px]">Usual hours</p>
+                          <p className="truncate px-1 text-[9px] font-medium text-[var(--success)] sm:text-[10px]">Usual hours</p>
                         ) : null}
                       </div>
                     </div>
@@ -325,7 +327,7 @@ export default function ScheduleViewToggle({
               </div>
             </div>
 
-            <aside className="min-w-0 rounded-xl border border-[var(--border)] bg-white p-4 sm:p-5">
+            <aside className="wf-card min-w-0 p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--brand)]">Selected day</p>
@@ -371,24 +373,26 @@ export default function ScheduleViewToggle({
                 <section className="border-t border-[var(--border)] pt-4">
                   <h5 className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Your availability</h5>
                   {!availabilityAvailable ? (
-                    <p role="status" className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-900">
-                      Availability details could not be loaded. Your service schedule is still available.
-                    </p>
+                    <div className="mt-2">
+                      <Feedback tone="warning" title="Availability unavailable">
+                        Your service schedule is still available.
+                      </Feedback>
+                    </div>
                   ) : (
                     <div className="mt-2 space-y-2">
                       {selectedAvailability.blockouts.map((entry) => (
-                        <div key={entry.id} className="rounded-lg border border-rose-200 bg-rose-50 p-3">
-                          <p className="text-xs font-semibold text-rose-800">{entry.title || "Unavailable"}</p>
-                          <p className="mt-1 text-[11px] text-rose-700">{formatDateRange(entry.starts_on, entry.ends_on)}</p>
-                          {entry.reason ? <p className="mt-1 text-[11px] leading-5 text-rose-700">{entry.reason}</p> : null}
+                        <div key={entry.id} className="wf-card p-3">
+                          <p className="text-xs font-semibold text-[var(--danger)]">{entry.title || "Unavailable"}</p>
+                          <p className="mt-1 text-[11px] text-[var(--danger)]">{formatDateRange(entry.starts_on, entry.ends_on)}</p>
+                          {entry.reason ? <p className="mt-1 text-[11px] leading-5 text-[var(--danger)]">{entry.reason}</p> : null}
                         </div>
                       ))}
                       {selectedAvailability.recurring.map((entry) => (
-                        <div key={entry.id} className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                          <p className="text-xs font-semibold text-emerald-800">{entry.title || "Usual weekly hours"}</p>
-                          <p className="mt-1 text-[11px] text-emerald-700">{availabilityTimeLabel(entry)}</p>
-                          <p className="mt-1 text-[10px] text-emerald-700">{entry.timezone || timeZone}</p>
-                          {entry.reason ? <p className="mt-1 text-[11px] leading-5 text-emerald-700">{entry.reason}</p> : null}
+                        <div key={entry.id} className="wf-card p-3">
+                          <p className="text-xs font-semibold text-[var(--success)]">{entry.title || "Usual weekly hours"}</p>
+                          <p className="mt-1 text-[11px] text-[var(--success)]">{availabilityTimeLabel(entry)}</p>
+                          <p className="mt-1 text-[10px] text-[var(--success)]">{entry.timezone || timeZone}</p>
+                          {entry.reason ? <p className="mt-1 text-[11px] leading-5 text-[var(--success)]">{entry.reason}</p> : null}
                         </div>
                       ))}
                       {selectedAvailability.blockouts.length === 0 && selectedAvailability.recurring.length === 0 ? (
@@ -416,11 +420,11 @@ export default function ScheduleViewToggle({
                       <input type="hidden" name="calendarPeriod" value={period} />
                       <div>
                         <label htmlFor="calendarBlockoutTitle" className="mb-1.5 block text-xs font-medium text-[var(--foreground)]">Title (optional)</label>
-                        <input id="calendarBlockoutTitle" name="title" maxLength={120} placeholder="e.g. Personal commitment" className="h-9 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-xs outline-none focus:border-[var(--brand)]" />
+                        <Input id="calendarBlockoutTitle" name="title" maxLength={120} placeholder="e.g. Personal commitment" className="h-9 text-xs" />
                       </div>
                       <div>
                         <label htmlFor="calendarBlockoutReason" className="mb-1.5 block text-xs font-medium text-[var(--foreground)]">Note (optional)</label>
-                        <textarea id="calendarBlockoutReason" name="reason" maxLength={500} rows={2} placeholder="Add a note for your team" className="w-full rounded-lg border border-[var(--border)] bg-white p-2.5 text-xs outline-none focus:border-[var(--brand)]" />
+                        <Textarea id="calendarBlockoutReason" name="reason" maxLength={500} rows={2} placeholder="Add a note for your team" className="min-h-[72px] py-2 text-xs" />
                       </div>
                       <button type="submit" className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
                         <Plus className="size-3.5" /> Save unavailable date
