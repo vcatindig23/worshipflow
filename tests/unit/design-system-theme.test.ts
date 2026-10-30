@@ -173,8 +173,8 @@ describe("semantic theme foundations", () => {
   })
 
   it("supports semantic warning feedback and neutral invitation status", () => {
-    expect(feedbackSource).toMatch(/"success" \\| "error" \\| "info" \\| "warning"/)
-    expect(feedbackSource).toMatch(/wf-feedback-\\$\\{tone\\}/)
+    expect(feedbackSource).toContain('tone?: "success" | "error" | "info" | "warning"')
+    expect(feedbackSource).toContain('className={`wf-feedback wf-feedback-${tone}`}')
     expect(teamInvitation).toMatch(/wf-status wf-status-neutral/)
   })
 
@@ -182,7 +182,7 @@ describe("semantic theme foundations", () => {
     expect(profilePage).toMatch(/wf-page max-w-6xl/)
     expect(profilePage).toMatch(/wf-card p-5 sm:p-6/)
     expect(profilePage).toMatch(/buttonVariants/)
-    expect(profilePage).not.toMatch(/bg-white(?:["\\s]|$)/)
+    expect(profilePage).not.toMatch(/bg-white(?!\\/)/
 
     expect(settingsPage).toMatch(/wf-feedback wf-feedback-warning/)
     expect(settingsPage).toMatch(/wf-card/)
