@@ -1,4 +1,5 @@
 import { buttonVariants } from "@/components/ui/button"
+import { Feedback } from "@/components/ui/feedback"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -100,46 +101,57 @@ export default async function ServiceTemplatesPage({
       />
 
       {notice ? (
-        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <Feedback tone="success" title="Template updated">
           {notice}
-        </p>
+        </Feedback>
       ) : null}
 
       {typeof params.error === "string" ? (
-        <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <Feedback
+          tone={params.error === "migration_missing" ? "warning" : "error"}
+          title={
+            params.error === "migration_missing"
+              ? "Service Templates need a database migration"
+              : "Template action could not be completed"
+          }
+          actions={
+            params.error === "migration_missing" ? (
+              <a
+                href="https://github.com/vcatindig23/worshipflow/blob/main/supabase/migrations/20261012150000_service_templates.sql"
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold underline underline-offset-4"
+              >
+                View migration
+              </a>
+            ) : undefined
+          }
+        >
           {params.error === "migration_missing"
-            ? "Service Templates need the new Supabase migration. Apply 20261012150000_service_templates.sql, then refresh this page."
-            : "The requested template action could not be completed. Please try again."}
-          {params.error === "migration_missing" ? (
+            ? "Apply 20261012150000_service_templates.sql, then refresh this page."
+            : "Please try the requested template action again."}
+        </Feedback>
+      ) : null}
+
+      {error ? (
+        <Feedback
+          tone="warning"
+          title="Templates database setup required"
+          actions={
             <a
               href="https://github.com/vcatindig23/worshipflow/blob/main/supabase/migrations/20261012150000_service_templates.sql"
               target="_blank"
               rel="noreferrer"
-              className="ml-1 font-semibold underline"
+              className="font-semibold underline underline-offset-4"
             >
-              View migration
+              Open the migration in GitHub
             </a>
-          ) : null}
-        </div>
-      ) : null}
-
-      {error ? (
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6">
-          <h2 className="font-semibold text-amber-950">Templates database setup required</h2>
-          <p className="mt-2 text-sm leading-6 text-amber-900">
-            The service-template table is not available yet. Apply the new Supabase migration before using this feature.
-          </p>
-          <a
-            href="https://github.com/vcatindig23/worshipflow/blob/main/supabase/migrations/20261012150000_service_templates.sql"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 inline-flex text-sm font-semibold text-amber-950 underline"
-          >
-            Open the migration in GitHub
-          </a>
-        </section>
+          }
+        >
+          The service-template table is not available yet. Apply the new Supabase migration before using this feature.
+        </Feedback>
       ) : templates.length === 0 ? (
-        <section className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center">
+        <section className="wf-card border-dashed px-6 py-16 text-center">
           <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
             <Copy className="size-5" />
           </div>
@@ -165,7 +177,7 @@ export default async function ServiceTemplatesPage({
               <Link
                 key={template.id}
                 href={"/services/templates/" + template.id}
-                className="group rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+                className="wf-card wf-card-interactive group p-5"
               >
                 <div className="flex items-start gap-3">
                   <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">

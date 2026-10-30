@@ -396,7 +396,7 @@ export default function UploadFileForm({
       </div>
 
       {uploads.length > 0 ? (
-        <section aria-label="Upload queue" className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white">
+        <section aria-label="Upload queue" className="wf-card overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
             <div>
               <p className="text-sm font-semibold text-[var(--foreground)]">Upload queue</p>
@@ -426,12 +426,12 @@ export default function UploadFileForm({
 
               return (
                 <li key={item.id} className="flex items-start gap-3 px-4 py-4 sm:items-center">
-                  <span className={`mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl ${
+                  <span className={`wf-icon-tile mt-0.5 size-10 rounded-xl ${
                     isComplete
-                      ? "bg-emerald-50 text-emerald-700"
+                      ? "wf-icon-tile-success"
                       : isError
-                        ? "bg-red-50 text-red-700"
-                        : "bg-[var(--brand-soft)] text-[var(--brand)]"
+                        ? "wf-icon-tile-danger"
+                        : ""
                   }`}>
                     <Icon className="size-5" strokeWidth={1.8} />
                   </span>
@@ -457,9 +457,9 @@ export default function UploadFileForm({
                       <div
                         className={`h-full rounded-full transition-[width,background-color] duration-200 ease-out motion-reduce:transition-none ${
                           isComplete
-                            ? "bg-emerald-600"
+                            ? "bg-[var(--success)]"
                             : isError
-                              ? "bg-red-500"
+                              ? "bg-[var(--danger)]"
                               : "bg-[var(--brand)]"
                         }`}
                         style={{ width: `${item.progress}%` }}
@@ -468,12 +468,12 @@ export default function UploadFileForm({
 
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
                       {isComplete ? (
-                        <span className="inline-flex items-center gap-1.5 font-medium text-emerald-700">
+                        <span className="wf-status wf-status-success">
                           <CheckCircle2 className="size-3.5" />
                           Uploaded successfully
                         </span>
                       ) : isError ? (
-                        <span className="inline-flex items-start gap-1.5 text-red-700">
+                        <span className="inline-flex items-start gap-1.5 text-[var(--danger)]">
                           <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
                           <span>{item.error ?? "Upload failed."}</span>
                         </span>
@@ -494,7 +494,7 @@ export default function UploadFileForm({
                       onClick={() => removeUpload(item)}
                       aria-label={isActive ? `Cancel upload of ${item.file.name}` : `Remove ${item.file.name} from upload queue`}
                       title={isActive ? "Cancel upload" : "Remove file"}
-                      className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
+                      className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)]/25"
                     >
                       <X className="size-4" />
                     </button>

@@ -71,6 +71,22 @@ const churchSettingsPage = readFileSync(
   join(process.cwd(), "src/app/settings/church/page.tsx"),
   "utf8"
 )
+const filesPage = readFileSync(
+  join(process.cwd(), "src/app/files/page.tsx"),
+  "utf8"
+)
+const uploadFileForm = readFileSync(
+  join(process.cwd(), "src/app/files/upload-file-form.tsx"),
+  "utf8"
+)
+const serviceTemplatesPage = readFileSync(
+  join(process.cwd(), "src/app/services/templates/page.tsx"),
+  "utf8"
+)
+const serviceInsightsPage = readFileSync(
+  join(process.cwd(), "src/app/services/insights/page.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -137,6 +153,8 @@ describe("semantic theme foundations", () => {
     expect(designSystem).toMatch(/\.wf-readiness-panel\[data-state="incomplete"\]/)
     expect(designSystem).toMatch(/\.wf-icon-tile-info/)
     expect(designSystem).toMatch(/\.wf-icon-tile-warning/)
+    expect(designSystem).toMatch(/\.wf-icon-tile-success/)
+    expect(designSystem).toMatch(/\.wf-icon-tile-danger/)
     expect(designSystem).toMatch(/\.wf-feedback-warning/)
     expect(designSystem).toMatch(/\.wf-status-neutral/)
     expect(designSystem).toMatch(/\.wf-readiness-supporting[\s\S]*?color:\s*var\(--success\)/)
@@ -205,6 +223,31 @@ describe("semantic theme foundations", () => {
     expect(churchSettingsPage).toMatch(/<Feedback tone="warning"/)
     expect(churchSettingsPage).toMatch(/wf-card p-5 sm:p-7/)
     expect(churchSettingsPage).not.toMatch(/bg-white|bg-amber-50|text-amber-800/)
+  })
+
+  it("uses semantic cards and feedback in Files and service reporting", () => {
+    expect(filesPage).toMatch(/<Feedback tone="warning"/)
+    expect(filesPage).toMatch(/<Feedback tone="info"/)
+    expect(filesPage).toMatch(/wf-card mb-4/)
+    expect(filesPage).toMatch(/wf-card overflow-hidden/)
+    expect(filesPage).not.toMatch(/bg-white|bg-amber-50|text-amber-800/)
+
+    expect(uploadFileForm).toMatch(/wf-card overflow-hidden/)
+    expect(uploadFileForm).toMatch(/wf-icon-tile-success/)
+    expect(uploadFileForm).toMatch(/wf-icon-tile-danger/)
+    expect(uploadFileForm).toMatch(/var\(--success\)/)
+    expect(uploadFileForm).toMatch(/var\(--danger\)/)
+    expect(uploadFileForm).toMatch(/wf-status wf-status-success/)
+    expect(uploadFileForm).not.toMatch(/bg-emerald-50|bg-red-50|text-red-700|text-emerald-700/)
+
+    expect(serviceTemplatesPage).toMatch(/<Feedback tone="success"/)
+    expect(serviceTemplatesPage).toMatch(/params.error === "migration_missing" \? "warning" : "error"/)
+    expect(serviceTemplatesPage).toMatch(/wf-card wf-card-interactive/)
+    expect(serviceTemplatesPage).not.toMatch(/bg-white|bg-amber-50|bg-emerald-50|text-amber-800/)
+
+    expect(serviceInsightsPage).toMatch(/wf-card/)
+    expect(serviceInsightsPage).toMatch(/<Feedback tone="success"/)
+    expect(serviceInsightsPage).not.toMatch(/bg-white|bg-emerald-50|text-emerald-800/)
   })
 
 })
