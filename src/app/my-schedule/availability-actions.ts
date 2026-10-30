@@ -48,12 +48,45 @@ const entrySchema = z.object({
   }
 })
 
-function availabilityRedirect(status: "saved" | "invalid_entry" | "save_failed" | "delete_failed") {
+function parseCalendarReturnDate(value: string) {
+  const parsed = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).safeParse(value)
+  if (!parsed.success) return undefined
+
+  const date = new Date(`${parsed.data}T00:00:00.000Z`)
+  return !Number.isNaN(date.getTime()) &&
+    date.toISOString().slice(0, 10) === parsed.data
+    ? parsed.data
+    : undefined
+}
+
+function availabilityRedirect(
+  status: "saved" | "invalid_entry" | "save_failed" | "delete_failed",
+  calendarDate?: string,
+  calendarPeriod?: "past" | "all"
+): never {
   const key = status === "saved" ? "availabilitySaved" : "availabilityError"
-  return redirect(`/my-schedule?${key}=${status === "saved" ? "1" : status}`)
+  const parameters = new URLSearchParams({
+    [key]: status === "saved" ? "1" : status,
+  })
+
+  if (calendarDate) {
+    parameters.set("date", calendarDate)
+    parameters.set("view", "calendar")
+    if (calendarPeriod) parameters.set("period", calendarPeriod)
+  }
+
+  redirect(`/my-schedule?${parameters.toString()}`)
 }
 
 export async function createAvailabilityEntry(formData: FormData) {
+  const calendarDate = formData.get("calendarView") === "1"
+    ? parseCalendarReturnDate(String(formData.get("calendarDate") ?? ""))
+    : undefined
+  const requestedPeriod = String(formData.get("calendarPeriod") ?? "")
+  const calendarPeriod = requestedPeriod === "past" || requestedPeriod === "all"
+    ? requestedPeriod
+    : undefined
+
   const { supabase, userId, organizationId } = await requireWorkspaceAuthorization()
   const weekdays = formData.getAll("weekdays").map((value) => Number(value))
   const parsed = entrySchema.safeParse({
@@ -68,7 +101,7 @@ export async function createAvailabilityEntry(formData: FormData) {
     timezone: String(formData.get("timezone") ?? "Asia/Manila").trim(),
   })
 
-  if (!parsed.success) return availabilityRedirect("invalid_entry")
+  if (!parsed.success) return availabilityRedirect("invalid_entry", calendarDate, calendarPeriod)
 
   const entry = parsed.data
   const { error } = await supabase.from("member_availability").insert({
@@ -85,10 +118,10 @@ export async function createAvailabilityEntry(formData: FormData) {
     timezone: entry.timezone,
   })
 
-  if (error) availabilityRedirect("save_failed")
+  if (error) availabilityRedirect("save_failed", calendarDate, calendarPeriod)
   revalidatePath("/my-schedule")
   revalidatePath("/services")
-  availabilityRedirect("saved")
+  availabilityRedirect("saved", calendarDate, calendarPeriod)
 }
 
 export async function deleteAvailabilityEntry(formData: FormData) {
