@@ -184,7 +184,7 @@ export default async function SearchPage({
           </p>
         </div>
       ) : !hasResults ? (
-        <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center">
+        <div className="wf-card border-dashed px-6 py-16 text-center">
           <Search className="mx-auto size-8 text-[var(--muted)]" />
           <h2 className="mt-4 text-lg font-semibold text-[var(--foreground)]">
             No matches found
