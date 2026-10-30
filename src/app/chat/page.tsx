@@ -1,4 +1,4 @@
-import { AlertCircle } from "lucide-react"
+import { Feedback } from "@/components/ui/feedback"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import TeamChatClient, {
@@ -137,30 +137,15 @@ export default async function TeamChatPage() {
   return (
     <main className="mx-auto max-w-[1500px] px-2 py-3 text-[var(--foreground)] sm:px-4 sm:py-4 lg:px-6">
       {schemaUnavailable ? (
-        <section
-          role="status"
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-6 sm:p-8"
-        >
-          <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-amber-700">
-              <AlertCircle className="size-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-amber-950">
-                Finish setting up Team Chat
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-900">
-                The chat table is not available in your Supabase database yet. Apply
-                <code className="mx-1 rounded bg-white/80 px-1.5 py-0.5 text-xs">
-                  20261010063000_team_chat.sql
-                </code>
-                from the repository&apos;s <code>supabase/migrations</code> folder,
-                then refresh this page. The migration also configures the access
-                rules and live message updates.
-              </p>
-            </div>
-          </div>
-        </section>
+        <Feedback tone="warning" title="Finish setting up Team Chat">
+          The chat table is not available in your Supabase database yet. Apply{" "}
+          <code className="rounded bg-[var(--warning-soft)] px-1.5 py-0.5 text-xs">
+            20261010063000_team_chat.sql
+          </code>{" "}
+          from the repository&apos;s <code>supabase/migrations</code> folder, then
+          refresh this page. The migration also configures the access rules and
+          live message updates.
+        </Feedback>
       ) : (
         <TeamChatClient
           organizationId={workspace.organizationId}
