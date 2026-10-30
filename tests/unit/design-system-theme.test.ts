@@ -151,6 +151,34 @@ const songVersionComparison = readFileSync(
   join(process.cwd(), "src/components/songs/song-version-comparison.tsx"),
   "utf8"
 )
+const loginPage = readFileSync(
+  join(process.cwd(), "src/app/login/page.tsx"),
+  "utf8"
+)
+const signupPage = readFileSync(
+  join(process.cwd(), "src/app/signup/page.tsx"),
+  "utf8"
+)
+const forgotPasswordPage = readFileSync(
+  join(process.cwd(), "src/app/forgot-password/page.tsx"),
+  "utf8"
+)
+const resetPasswordPage = readFileSync(
+  join(process.cwd(), "src/app/reset-password/page.tsx"),
+  "utf8"
+)
+const checkEmailPage = readFileSync(
+  join(process.cwd(), "src/app/check-email/page.tsx"),
+  "utf8"
+)
+const onboardingPage = readFileSync(
+  join(process.cwd(), "src/app/onboarding/page.tsx"),
+  "utf8"
+)
+const onboardingJoinPage = readFileSync(
+  join(process.cwd(), "src/app/onboarding/join/page.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -429,6 +457,48 @@ describe("semantic theme foundations", () => {
 
     expect(songVersionComparison).toMatch(/var\(--warning-soft\)/)
     expect(songVersionComparison).not.toMatch(/bg-amber-50/)
+  })
+
+
+  it("uses shared feedback and form controls across authentication screens", () => {
+    expect(loginPage).toMatch(/<Feedback tone="error"/)
+    expect(loginPage).toMatch(/<Input/)
+    expect(loginPage).toMatch(/wf-input h-12 pl-10 pr-12/)
+    expect(loginPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
+
+    expect(signupPage).toMatch(/<Feedback tone="error"/)
+    expect(signupPage).toMatch(/<Input/)
+    expect(signupPage).toMatch(/wf-input h-12 pl-3\.5 pr-12/)
+    expect(signupPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
+
+    expect(forgotPasswordPage).toMatch(/<Feedback tone="success"/)
+    expect(forgotPasswordPage).toMatch(/<Feedback tone="error"/)
+    expect(forgotPasswordPage).toMatch(/<Input/)
+    expect(forgotPasswordPage).not.toMatch(/bg-red-50|bg-emerald-50|border-red-200|text-red-700|text-emerald-800/)
+
+    expect(resetPasswordPage).toMatch(/<Feedback tone="error"/)
+    expect(resetPasswordPage).toMatch(/wf-card/)
+    expect(resetPasswordPage).toMatch(/wf-input h-12 px-4 pr-12/)
+    expect(resetPasswordPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
+
+    expect(checkEmailPage).toMatch(/wf-card rounded-3xl/)
+  })
+
+  it("uses shared feedback, cards, and controls in church onboarding", () => {
+    expect(onboardingPage).toMatch(/<Feedback tone="error"/)
+    expect(onboardingPage).toMatch(/<Input/)
+    expect(onboardingPage).toMatch(/<Select/)
+    expect(onboardingPage).toMatch(/<Textarea/)
+    expect(onboardingPage).toMatch(/wf-card p-6 sm:p-7/)
+    expect(onboardingPage).toMatch(/wf-card wf-card-interactive/)
+    expect(onboardingPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
+    expect(onboardingPage).not.toMatch(/<input\b|<textarea\b|<select\b/)
+
+    expect(onboardingJoinPage).toMatch(/<Feedback tone="error"/)
+    expect(onboardingJoinPage).toMatch(/<Input/)
+    expect(onboardingJoinPage).toMatch(/wf-card w-full/)
+    expect(onboardingJoinPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
+    expect(onboardingJoinPage).not.toMatch(/<input\b/)
   })
 
 })
