@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { ArrowRight, KeyRound } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
+import { Feedback } from "@/components/ui/feedback"
 import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import PasswordInput from "@/components/auth/password-input"
 import { createClient } from "@/lib/supabase/server"
@@ -49,7 +50,7 @@ export default async function ResetPasswordPage({
 
   return (
     <AuthLayout>
-          <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
+          <section className="wf-card rounded-3xl p-6 sm:p-8">
             <div className="mb-7 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <KeyRound className="size-5" />
             </div>
@@ -84,11 +85,10 @@ export default async function ResetPasswordPage({
                 </p>
 
                 {errorMessage ? (
-                  <div
-                    role="alert"
-                    className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
-                  >
-                    {errorMessage}
+                  <div className="mt-6">
+                    <Feedback tone="error" title="Password could not be updated">
+                      {errorMessage}
+                    </Feedback>
                   </div>
                 ) : null}
 
@@ -107,7 +107,7 @@ export default async function ResetPasswordPage({
                       minLength={12}
                       maxLength={72}
                       autoComplete="new-password"
-                      className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                      className="wf-input h-12 px-4 pr-12"
                     />
                   </div>
                   <div>
@@ -124,7 +124,7 @@ export default async function ResetPasswordPage({
                       minLength={12}
                       maxLength={72}
                       autoComplete="new-password"
-                      className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 pr-12 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                      className="wf-input h-12 px-4 pr-12"
                     />
                   </div>
                   <AuthSubmitButton
@@ -139,10 +139,11 @@ export default async function ResetPasswordPage({
                 <h1 className="text-2xl font-semibold tracking-[-0.035em] text-[var(--foreground)]">
                   Reset link expired
                 </h1>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                  {errorMessage ??
-                    "Open the latest password reset email to choose a new password."}
-                </p>
+                <div className="mt-4">
+                  <Feedback tone="warning" title="This reset link can no longer be used">
+                    {errorMessage ?? "Open the latest password reset email to choose a new password."}
+                  </Feedback>
+                </div>
                 <Link
                   href="/forgot-password"
                   className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"

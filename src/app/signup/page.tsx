@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { Mail, UserRound } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
+import { Feedback } from "@/components/ui/feedback"
+import { Input } from "@/components/ui/form-controls"
 import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import PasswordInput from "@/components/auth/password-input"
 import { signup } from "./actions"
@@ -20,12 +22,6 @@ const errorMessages: Record<string, string> = {
   configuration_error:
     "Signup is temporarily unavailable. Please contact the project maintainer or try again later.",
 }
-
-const baseInputClassName =
-  "h-12 w-full rounded-xl border border-[var(--border)] bg-white text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] hover:border-[var(--brand)]/40 focus:border-[var(--brand)] focus:ring-4 focus:ring-[var(--brand-soft)]"
-
-const iconInputClassName = `${baseInputClassName} pl-10 pr-4`
-const passwordInputClassName = `${baseInputClassName} pl-3.5 pr-12`
 
 export default async function SignupPage({
   searchParams,
@@ -61,11 +57,10 @@ export default async function SignupPage({
           </div>
 
           {errorMessage ? (
-            <div
-              role="alert"
-              className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
-            >
-              {errorMessage}
+            <div className="mb-5">
+              <Feedback tone="error" title="Account could not be created">
+                {errorMessage}
+              </Feedback>
             </div>
           ) : null}
 
@@ -82,7 +77,7 @@ export default async function SignupPage({
                   aria-hidden="true"
                   className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
                 />
-                <input
+                <Input
                   id="fullName"
                   name="fullName"
                   type="text"
@@ -91,7 +86,7 @@ export default async function SignupPage({
                   minLength={2}
                   maxLength={120}
                   placeholder="Your full name"
-                  className={iconInputClassName}
+                  className="h-12 pl-10 pr-4"
                 />
               </div>
             </div>
@@ -108,7 +103,7 @@ export default async function SignupPage({
                   aria-hidden="true"
                   className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]"
                 />
-                <input
+                <Input
                   id="email"
                   name="email"
                   type="email"
@@ -116,7 +111,7 @@ export default async function SignupPage({
                   required
                   maxLength={320}
                   placeholder="you@example.com"
-                  className={iconInputClassName}
+                  className="h-12 pl-10 pr-4"
                 />
               </div>
             </div>
@@ -136,7 +131,7 @@ export default async function SignupPage({
                 maxLength={72}
                 required
                 placeholder="At least 12 characters"
-                className={passwordInputClassName}
+                className="wf-input h-12 pl-3.5 pr-12"
               />
               <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
                 Use at least 12 characters.
@@ -158,7 +153,7 @@ export default async function SignupPage({
                 maxLength={72}
                 required
                 placeholder="Enter your password again"
-                className={passwordInputClassName}
+                className="wf-input h-12 pl-3.5 pr-12"
               />
             </div>
 

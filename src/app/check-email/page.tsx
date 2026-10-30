@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function CheckEmailPage() {
   return (
     <AuthLayout>
-          <div className="rounded-3xl border border-[var(--border)] bg-white p-8 text-center shadow-sm">
+          <div className="wf-card rounded-3xl p-8 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <MailCheck className="size-6" />
             </div>
