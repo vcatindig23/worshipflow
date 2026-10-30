@@ -70,9 +70,11 @@ export default function SongReviewPanel({ songId, canEdit, initialStatus, commen
 
   function saveStatus() {
     setMessage("")
+    setMessageIsError(false)
     startTransition(async () => {
       const result = await setSongReviewStatus(songId, status)
       if (!result.ok) {
+        setMessageIsError(true)
         setMessage(result.error)
         return
       }
@@ -83,9 +85,11 @@ export default function SongReviewPanel({ songId, canEdit, initialStatus, commen
 
   function requestReview() {
     setMessage("")
+    setMessageIsError(false)
     startTransition(async () => {
       const result = await setSongReviewStatus(songId, "in_review")
       if (!result.ok) {
+        setMessageIsError(true)
         setMessage(result.error)
         return
       }
@@ -96,7 +100,7 @@ export default function SongReviewPanel({ songId, canEdit, initialStatus, commen
   }
 
   return (
-    <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6" aria-labelledby="song-review-heading">
+    <section className="wf-card p-5 sm:p-6" aria-labelledby="song-review-heading">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-[var(--brand)]">
