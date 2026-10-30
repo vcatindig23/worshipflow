@@ -235,13 +235,13 @@ describe("semantic theme foundations", () => {
     expect(uploadFileForm).toMatch(/wf-card overflow-hidden/)
     expect(uploadFileForm).toMatch(/wf-icon-tile-success/)
     expect(uploadFileForm).toMatch(/wf-icon-tile-danger/)
-    expect(uploadFileForm).toMatch(/var\\(--success\\)/)
-    expect(uploadFileForm).toMatch(/var\\(--danger\\)/)
+    expect(uploadFileForm).toMatch(/var\(--success\)/)
+    expect(uploadFileForm).toMatch(/var\(--danger\)/)
     expect(uploadFileForm).toMatch(/wf-status wf-status-success/)
     expect(uploadFileForm).not.toMatch(/bg-emerald-50|bg-red-50|text-red-700|text-emerald-700/)
 
     expect(serviceTemplatesPage).toMatch(/<Feedback tone="success"/)
-    expect(serviceTemplatesPage).toMatch(/params.error === "migration_missing" \\? "warning" : "error"/)
+    expect(serviceTemplatesPage).toMatch(/params.error === "migration_missing" \? "warning" : "error"/)
     expect(serviceTemplatesPage).toMatch(/wf-card wf-card-interactive/)
     expect(serviceTemplatesPage).not.toMatch(/bg-white|bg-amber-50|bg-emerald-50|text-amber-800/)
 
