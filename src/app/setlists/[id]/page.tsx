@@ -582,7 +582,7 @@ export default async function SetlistPage({
       : ""
 
   return (
-    <main className="setlist-print-layout mx-auto max-w-7xl space-y-7 px-6 py-8">
+    <main className="wf-page setlist-print-layout max-w-7xl space-y-7 px-6 py-8">
       <Link
         href="/setlists"
         className="setlist-print-hide inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -1337,9 +1337,11 @@ export default async function SetlistPage({
               Assign members to the positions set for them on the Team page. Saved time off and weekly hours help you review availability before assigning.
             </p>
             {canEdit && profileIds.length > 0 && !availabilityChecksAvailable ? (
-              <p role="status" className="wf-feedback wf-feedback-warning mt-3 text-xs leading-5">
-                Availability checks are unavailable. Verify that the member-availability migration is applied; assignments can still be managed.
-              </p>
+              <div className="mt-3">
+                <Feedback tone="warning" title="Availability checks unavailable">
+                  Verify that the member-availability migration is applied. Assignments can still be managed.
+                </Feedback>
+              </div>
             ) : null}
 
             {teamAssignments.length > 0 ? (
@@ -1403,7 +1405,7 @@ export default async function SetlistPage({
                             {availabilityChecksAvailable && assignment.availability ? (
                               <span
                                 aria-label={`Availability: ${assignment.availability.label}`}
-                                className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${availabilityBadgeClass(assignment.availability.status)}`}
+                                className={`mt-1 ${availabilityBadgeClass(assignment.availability.status)}`}
                               >
                                 {assignment.availability.label}
                               </span>
@@ -1412,7 +1414,7 @@ export default async function SetlistPage({
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           <span
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                            className={`wf-status ${
                               assignment.confirmation_status === "confirmed"
                                 ? "wf-status-success"
                                 : assignment.confirmation_status === "declined"
