@@ -563,4 +563,19 @@ describe("semantic theme foundations", () => {
     expect(announcementAcknowledgment).not.toMatch(/bg-emerald-50|text-emerald-700/)
   })
 
+
+  it("uses shared semantic controls and styling for Setlist Preparation", () => {
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="error"/)
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="success"/)
+    expect(setlistPreparationPage).toMatch(/<Feedback tone="warning"/)
+    expect(setlistPreparationPage).toMatch(/<Input/)
+    expect(setlistPreparationPage).toMatch(/<Textarea/)
+    expect(setlistPreparationPage).toMatch(/wf-card/)
+    expect(setlistPreparationPage).toMatch(/wf-status-neutral/)
+    expect(setlistPreparationPage).toMatch(/wf-status-warning/)
+    expect(setlistPreparationPage).toMatch(/wf-status-success/)
+    expect(setlistPreparationPage).toMatch(/var\(--success-soft\)/)
+    expect(setlistPreparationPage).not.toMatch(/bg-white|bg-emerald-100|bg-amber-100|bg-amber-50|text-emerald-700|text-amber-800|border-amber-200/)
+  })
+
 })

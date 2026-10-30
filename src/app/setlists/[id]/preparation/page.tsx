@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { buttonVariants } from "@/components/ui/button"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import { Feedback } from "@/components/ui/feedback"
+import { Input, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -323,7 +324,7 @@ export default async function ServicePreparationPage({
         Back to service
       </Link>
 
-      <header className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm sm:p-8">
+      <header className="wf-card p-6 sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
@@ -389,24 +390,24 @@ export default async function ServicePreparationPage({
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label htmlFor="rehearsalDate" className="mb-2 block text-sm font-medium text-[var(--foreground)]">Rehearsal date</label>
-                <input id="rehearsalDate" name="rehearsalDate" type="date" defaultValue={setlist.rehearsal_date ?? ""} className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]" />
+                <Input id="rehearsalDate" name="rehearsalDate" type="date" defaultValue={setlist.rehearsal_date ?? ""} className="h-11 px-3" />
               </div>
               <div>
                 <label htmlFor="rehearsalTime" className="mb-2 block text-sm font-medium text-[var(--foreground)]">Start time</label>
-                <input id="rehearsalTime" name="rehearsalTime" type="time" defaultValue={setlist.rehearsal_time?.slice(0, 5) ?? ""} className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]" />
+                <Input id="rehearsalTime" name="rehearsalTime" type="time" defaultValue={setlist.rehearsal_time?.slice(0, 5) ?? ""} className="h-11 px-3" />
               </div>
               <div>
                 <label htmlFor="rehearsalEndTime" className="mb-2 block text-sm font-medium text-[var(--foreground)]">End time</label>
-                <input id="rehearsalEndTime" name="rehearsalEndTime" type="time" min={setlist.rehearsal_time?.slice(0, 5) ?? undefined} defaultValue={setlist.rehearsal_end_time?.slice(0, 5) ?? ""} className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]" />
+                <Input id="rehearsalEndTime" name="rehearsalEndTime" type="time" min={setlist.rehearsal_time?.slice(0, 5) ?? undefined} defaultValue={setlist.rehearsal_end_time?.slice(0, 5) ?? ""} className="h-11 px-3" />
               </div>
               <div>
                 <label htmlFor="rehearsalLocation" className="mb-2 block text-sm font-medium text-[var(--foreground)]">Location</label>
-                <input id="rehearsalLocation" name="rehearsalLocation" maxLength={200} defaultValue={setlist.rehearsal_location ?? ""} placeholder="e.g. Main sanctuary" className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]" />
+                <Input id="rehearsalLocation" name="rehearsalLocation" maxLength={200} defaultValue={setlist.rehearsal_location ?? ""} placeholder="e.g. Main sanctuary" className="h-11 px-3" />
               </div>
             </div>
             <div>
               <label htmlFor="rehearsalNotes" className="mb-2 block text-sm font-medium text-[var(--foreground)]">Rehearsal notes</label>
-              <textarea id="rehearsalNotes" name="rehearsalNotes" maxLength={3000} rows={3} defaultValue={setlist.rehearsal_notes ?? ""} placeholder="Share what to practice, what to bring, or the order to work through." className="w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-sm leading-6 outline-none focus:border-[var(--brand)]" />
+              <Textarea id="rehearsalNotes" name="rehearsalNotes" maxLength={3000} rows={3} defaultValue={setlist.rehearsal_notes ?? ""} placeholder="Share what to practice, what to bring, or the order to work through." className="min-h-28 px-3 py-2.5 leading-6" />
             </div>
             <div className="flex justify-end">
               <FormSubmitButton pendingText="Saving rehearsal…" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:opacity-60">
@@ -445,7 +446,7 @@ export default async function ServicePreparationPage({
         ) : null}
       </section>
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
+      <section className="wf-card p-5 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
@@ -458,7 +459,7 @@ export default async function ServicePreparationPage({
               </p>
             </div>
           </div>
-          <span className="shrink-0 rounded-xl bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--muted)]">
+          <span className="wf-status wf-status-neutral shrink-0">
             {completedCount} of {tasks.length} completed
           </span>
         </div>
@@ -466,7 +467,7 @@ export default async function ServicePreparationPage({
         {tasks.length > 0 ? (
           <ul className="mt-5 space-y-2.5">
             {tasks.map((task) => (
-              <li key={task.id} className="flex items-start gap-3 rounded-2xl border border-[var(--border)] p-3.5">
+              <li key={task.id} className="wf-card flex items-start gap-3 p-3.5">
                 {canEdit ? (
                   <form action={togglePreparationTask} className="pt-0.5">
                     <input type="hidden" name="setlistId" value={id} />
@@ -498,7 +499,7 @@ export default async function ServicePreparationPage({
             ))}
           </ul>
         ) : (
-          <div className="mt-5 rounded-2xl border border-dashed border-[var(--border)] px-5 py-8 text-center">
+          <div className="wf-card mt-5 border-dashed px-5 py-8 text-center">
             <ClipboardCheck className="mx-auto size-6 text-[var(--muted)]" />
             <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">No custom tasks yet</p>
             <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Build a short checklist that fits this service and rehearsal.</p>
@@ -511,15 +512,15 @@ export default async function ServicePreparationPage({
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
               <div>
                 <label htmlFor="taskTitle" className="mb-2 block text-sm font-medium text-[var(--foreground)]">Task</label>
-                <input id="taskTitle" name="title" required minLength={1} maxLength={160} placeholder="e.g. Confirm all song keys" className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]" />
+                <Input id="taskTitle" name="title" required minLength={1} maxLength={160} placeholder="e.g. Confirm all song keys" className="h-11 px-3" />
               </div>
               <div>
                 <label htmlFor="taskDetails" className="mb-2 block text-sm font-medium text-[var(--foreground)]">Details (optional)</label>
-                <input id="taskDetails" name="details" maxLength={1000} placeholder="Who owns it, or what needs to be checked?" className="h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand)]" />
+                <Input id="taskDetails" name="details" maxLength={1000} placeholder="Who owns it, or what needs to be checked?" className="h-11 px-3" />
               </div>
             </div>
             <div className="flex justify-end">
-              <FormSubmitButton pendingText="Adding task…" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)] disabled:opacity-60">
+              <FormSubmitButton pendingText="Adding task…" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)] disabled:opacity-60">
                 <Plus className="size-4" />
                 Add task
               </FormSubmitButton>
@@ -528,7 +529,7 @@ export default async function ServicePreparationPage({
         ) : null}
       </section>
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
+      <section className="wf-card p-5 sm:p-6">
         <div className="flex items-start gap-3">
           <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${conflicts.length > 0 ? "bg-[var(--warning-soft)] text-[var(--warning)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
             <AlertTriangle className="size-5" />
@@ -553,7 +554,7 @@ export default async function ServicePreparationPage({
         ) : conflicts.length > 0 ? (
           <ul className="mt-5 space-y-3">
             {conflicts.map((conflict) => (
-              <li key={`${conflict.current.key}|${conflict.other.key}`} className="rounded-2xl border border-[var(--warning)]/30 bg-[var(--warning-soft)]/60 p-4">
+              <li key={`${conflict.current.key}|${conflict.other.key}`} className="wf-card border-[var(--warning)]/30 bg-[var(--warning-soft)]/50 p-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-[var(--foreground)]">
