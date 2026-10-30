@@ -1,3 +1,5 @@
+import { Feedback } from "@/components/ui/feedback"
+import { Input, Textarea } from "@/components/ui/form-controls"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -518,37 +520,27 @@ export default async function MySchedulePage({
           </div>
 
           {pendingCount > 0 ? (
-            <div className="shrink-0 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-xs font-semibold text-amber-800">
-                {pendingCount}{" "}
-                pending{" "}
-                {pendingCount === 1
-                  ? "response"
-                  : "responses"}
-              </p>
-
-              <p className="mt-0.5 text-[11px] text-amber-700">
-                Please review your assignments.
-              </p>
-            </div>
+            <span className="wf-status wf-status-warning shrink-0">
+              {pendingCount} pending {pendingCount === 1 ? "response" : "responses"}
+            </span>
           ) : null}
         </div>
       </section>
 
       {getParam(params.swapRequested) === "1" ? (
-        <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Swap request sent. Your proposed substitute and worship leaders have been notified.
-        </div>
+        <Feedback tone="success" title="Swap request sent">
+          Your proposed substitute and worship leaders have been notified.
+        </Feedback>
       ) : null}
       {getParam(params.swapError) ? (
-        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {swapErrorMessages[getParam(params.swapError) ?? ""] ?? "The swap request could not be completed."}
-        </div>
+        <Feedback tone="error" title="Swap request could not be completed">
+          {swapErrorMessages[getParam(params.swapError) ?? ""] ?? "Please try again."}
+        </Feedback>
       ) : null}
 
       <section
         id="availability"
-        className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6"
+        className="wf-card p-5 shadow-sm sm:p-6"
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -569,27 +561,33 @@ export default async function MySchedulePage({
         </div>
 
         {getParam(params.availabilitySaved) === "1" ? (
-          <p role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            Your availability has been updated.
-          </p>
+          <div className="mt-4">
+            <Feedback tone="success" title="Availability updated">
+              Your saved availability is now reflected in your schedule.
+            </Feedback>
+          </div>
         ) : null}
         {getParam(params.availabilityError) ? (
-          <p role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-            {getParam(params.availabilityError) === "invalid_entry"
-              ? "Check the dates, days, and times and try again."
-              : getParam(params.availabilityError) === "delete_failed"
-                ? "This availability entry could not be removed. Please try again."
-                : "Your availability could not be saved. Please try again."}
-          </p>
+          <div className="mt-4">
+            <Feedback tone="error" title="Availability could not be updated">
+              {getParam(params.availabilityError) === "invalid_entry"
+                ? "Check the dates, days, and times and try again."
+                : getParam(params.availabilityError) === "delete_failed"
+                  ? "This availability entry could not be removed. Please try again."
+                  : "Your availability could not be saved. Please try again."}
+            </Feedback>
+          </div>
         ) : null}
         {availabilityLoadError ? (
-          <p role="status" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-            Availability is temporarily unavailable. Your existing service schedule is still available; ask your workspace administrator to verify that the availability migration has been applied.
-          </p>
+          <div className="mt-4">
+            <Feedback tone="warning" title="Availability is temporarily unavailable">
+              Your existing service schedule is still available. Ask your workspace administrator to verify that the availability migration has been applied.
+            </Feedback>
+          </div>
         ) : (
           <>
             <div className="mt-5 grid gap-4 xl:grid-cols-2">
-              <form action={createAvailabilityEntry} className="space-y-3 rounded-xl border border-[var(--border)] p-4">
+              <form action={createAvailabilityEntry} className="wf-card space-y-3 p-4">
                 <input type="hidden" name="entryType" value="blockout" />
                 <input type="hidden" name="timezone" value={workspace.organizationTimezone} />
                 <div>
@@ -598,21 +596,21 @@ export default async function MySchedulePage({
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
                   Title (optional)
-                  <input name="title" maxLength={120} placeholder="e.g. Family trip" className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                  <Input name="title" maxLength={120} placeholder="e.g. Family trip" className="mt-1.5 h-10" />
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="block text-sm font-medium text-[var(--foreground)]">
                     Start date
-                    <input type="date" name="startsOn" required className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                    <Input type="date" name="startsOn" required className="mt-1.5 h-10" />
                   </label>
                   <label className="block text-sm font-medium text-[var(--foreground)]">
                     End date
-                    <input type="date" name="endsOn" required className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                    <Input type="date" name="endsOn" required className="mt-1.5 h-10" />
                   </label>
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
                   Note (optional)
-                  <textarea name="reason" maxLength={500} rows={2} placeholder="Add context for your team" className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white p-3 text-sm" />
+                  <Textarea name="reason" maxLength={500} rows={2} placeholder="Add context for your team" className="mt-1.5 min-h-[72px] py-2" />
                 </label>
                 <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-sm font-semibold text-white transition hover:opacity-90">
                   <Plus className="size-4" />
@@ -620,7 +618,7 @@ export default async function MySchedulePage({
                 </button>
               </form>
 
-              <form action={createAvailabilityEntry} className="space-y-3 rounded-xl border border-[var(--border)] p-4">
+              <form action={createAvailabilityEntry} className="wf-card space-y-3 p-4">
                 <input type="hidden" name="entryType" value="recurring" />
                 <input type="hidden" name="timezone" value={workspace.organizationTimezone} />
                 <div>
@@ -629,7 +627,7 @@ export default async function MySchedulePage({
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
                   Title (optional)
-                  <input name="title" maxLength={120} placeholder="e.g. Weekday evenings" className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                  <Input name="title" maxLength={120} placeholder="e.g. Weekday evenings" className="mt-1.5 h-10" />
                 </label>
                 <fieldset className="space-y-2">
                   <legend className="text-sm font-medium text-[var(--foreground)]">Days of the week</legend>
@@ -645,16 +643,16 @@ export default async function MySchedulePage({
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="block text-sm font-medium text-[var(--foreground)]">
                     Available from
-                    <input type="time" name="startTime" required className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                    <Input type="time" name="startTime" required className="mt-1.5 h-10" />
                   </label>
                   <label className="block text-sm font-medium text-[var(--foreground)]">
                     Available until
-                    <input type="time" name="endTime" required className="mt-1.5 h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm" />
+                    <Input type="time" name="endTime" required className="mt-1.5 h-10" />
                   </label>
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
                   Note (optional)
-                  <textarea name="reason" maxLength={500} rows={2} placeholder="Add context for your team" className="mt-1.5 w-full rounded-lg border border-[var(--border)] bg-white p-3 text-sm" />
+                  <Textarea name="reason" maxLength={500} rows={2} placeholder="Add context for your team" className="mt-1.5 min-h-[72px] py-2" />
                 </label>
                 <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-sm font-semibold text-white transition hover:opacity-90">
                   <Plus className="size-4" />
@@ -666,7 +664,7 @@ export default async function MySchedulePage({
             <div className="mt-5">
               <h3 className="text-sm font-semibold text-[var(--foreground)]">Saved entries</h3>
               {availabilityEntries.length === 0 ? (
-                <div className="mt-3 rounded-xl border border-dashed border-[var(--border)] px-4 py-6 text-center">
+                <div className="wf-card mt-3 border-dashed px-4 py-6 text-center">
                   <Clock3 className="mx-auto size-5 text-[var(--muted)]" />
                   <p className="mt-2 text-sm font-medium text-[var(--foreground)]">No availability entries yet</p>
                   <p className="mt-1 text-xs text-[var(--muted)]">Your blockouts and recurring availability will appear here.</p>
@@ -674,9 +672,9 @@ export default async function MySchedulePage({
               ) : (
                 <div className="mt-3 grid gap-2 md:grid-cols-2">
                   {availabilityEntries.map((entry) => (
-                    <article key={entry.id} className="flex items-start justify-between gap-3 rounded-xl border border-[var(--border)] p-3.5">
+                    <article key={entry.id} className="wf-card flex items-start justify-between gap-3 p-3.5">
                       <div className="min-w-0">
-                        <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--brand)]">
+                        <span className={`wf-status ${entry.entry_type === "blockout" ? "wf-status-warning" : "wf-status-success"}`}>
                           {entry.entry_type === "blockout" ? "Unavailable" : "Weekly availability"}
                         </span>
                         <h4 className="mt-1 text-sm font-semibold text-[var(--foreground)]">
@@ -691,7 +689,7 @@ export default async function MySchedulePage({
                       </div>
                       <form action={deleteAvailabilityEntry} className="shrink-0">
                         <input type="hidden" name="id" value={entry.id} />
-                        <button type="submit" aria-label={`Delete ${entry.title || "availability entry"}`} className="rounded-lg p-2 text-[var(--muted)] transition hover:bg-rose-50 hover:text-rose-700">
+                        <button type="submit" aria-label={`Delete ${entry.title || "availability entry"}`} className="rounded-lg p-2 text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]">
                           <Trash2 className="size-4" />
                         </button>
                       </form>
@@ -764,7 +762,7 @@ export default async function MySchedulePage({
 
         {setlists.length ===
         0 ? (
-          <div className="rounded-3xl border border-dashed border-[var(--border)] bg-white px-6 py-16 text-center shadow-sm">
+          <div className="wf-card border-dashed px-6 py-16 text-center">
             <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
               <CalendarDays className="size-5" />
             </div>
@@ -809,7 +807,7 @@ export default async function MySchedulePage({
                 return (
                   <div
                     key={setlist.id}
-                    className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    className="wf-card flex flex-col gap-4 p-5 transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                       <Link
