@@ -1,0 +1,40 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import { describe, expect, it } from "vitest"
+
+const designSystem = readFileSync(
+  join(process.cwd(), "src/app/design-system.css"),
+  "utf8"
+)
+const globals = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8")
+
+describe("semantic theme foundations", () => {
+  it("keeps light and dark theme tokens in the design system", () => {
+    expect(designSystem).toMatch(/--background:\s*#f5f7f5/)
+    expect(designSystem).toMatch(/--surface:\s*#f0f4f0/)
+    expect(designSystem).toMatch(/--card:\s*#ffffff/)
+    expect(designSystem).toMatch(/:root\[data-theme="dark"\]/)
+    expect(designSystem).toMatch(/--background:\s*#101713/)
+    expect(designSystem).toMatch(/--focus-ring:\s*#a5d6b3/)
+  })
+
+  it("keeps global styles free of theme-specific utility overrides", () => {
+    expect(globals).not.toMatch(/:root\[data-theme=/)
+    expect(globals).toMatch(/outline:\s*2px solid var\(--focus-ring\)/)
+  })
+
+  it("maps legacy neutral utilities to semantic surface and text roles", () => {
+    expect(designSystem).toMatch(/\[class~="bg-white"\][\s\S]*?background-color:\s*var\(--card\)/)
+    expect(designSystem).toMatch(/\[class~="bg-slate-50"\][\s\S]*?background-color:\s*var\(--surface\)/)
+    expect(designSystem).toMatch(/\[class~="text-slate-900"\][\s\S]*?color:\s*var\(--foreground\)/)
+    expect(designSystem).toMatch(/\[class~="text-slate-600"\][\s\S]*?color:\s*var\(--muted\)/)
+    expect(designSystem).toMatch(/\[class~="border-slate-200"\][\s\S]*?border-color:\s*var\(--border\)/)
+  })
+
+  it("uses a separate focus token and accessible action colors", () => {
+    expect(designSystem).toMatch(/--focus-ring:/)
+    expect(button).toMatch(/focus-visible:ring-\[var\(--focus-ring\)\]/)
+    expect(button).toMatch(/bg-\[var\(--danger-action\)\]/)
+    expect(button).toMatch(/hover:bg-\[var\(--danger-action-hover\)\]/)
+  })
+})
