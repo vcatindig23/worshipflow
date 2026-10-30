@@ -421,15 +421,9 @@ export default async function ProfileSettingsPage({
                   {user.email ?? "No email address on this account"}
                 </dd>
                 {user.email ? (
-                  <dd className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium">
-                    <BadgeCheck
-                      className={`size-3.5 ${emailConfirmed ? "text-emerald-600" : "text-amber-600"}`}
-                    />
-                    <span
-                      className={
-                        emailConfirmed ? "text-emerald-700" : "text-amber-700"
-                      }
-                    >
+                  <dd className="mt-2">
+                    <span className={`wf-status ${emailConfirmed ? "wf-status-success" : "wf-status-warning"}`}>
+                      <BadgeCheck className="size-3.5" aria-hidden="true" />
                       {emailConfirmed ? "Email verified" : "Email not verified"}
                     </span>
                   </dd>
@@ -460,15 +454,10 @@ export default async function ProfileSettingsPage({
           </section>
 
           {!membership ? (
-            <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-semibold text-amber-950">
-                You are not in a church workspace yet
-              </p>
-              <p className="mt-1 text-sm leading-5 text-amber-800">
-                Complete onboarding or accept a team invitation to see your
-                church membership here.
-              </p>
-            </section>
+            <Feedback tone="warning" title="No church workspace yet">
+              Complete onboarding or accept a team invitation to see your
+              church membership here.
+            </Feedback>
           ) : null}
         </aside>
       </div>
