@@ -104,13 +104,13 @@ describe("semantic theme foundations", () => {
   })
 
   it("provides shared readiness panels and icon tile variants", () => {
-    expect(designSystem).toMatch(/\\.wf-readiness-panel\\[data-state="ready"\\]/)
-    expect(designSystem).toMatch(/\\.wf-readiness-panel\\[data-state="attention"\\]/)
-    expect(designSystem).toMatch(/\\.wf-readiness-panel\\[data-state="incomplete"\\]/)
-    expect(designSystem).toMatch(/\\.wf-icon-tile-info/)
-    expect(designSystem).toMatch(/\\.wf-icon-tile-warning/)
-    expect(designSystem).toMatch(/\\.wf-feedback-warning/)
-    expect(designSystem).toMatch(/\\.wf-status-neutral/)
+    expect(designSystem).toMatch(/\.wf-readiness-panel\[data-state="ready"\]/)
+    expect(designSystem).toMatch(/\.wf-readiness-panel\[data-state="attention"\]/)
+    expect(designSystem).toMatch(/\.wf-readiness-panel\[data-state="incomplete"\]/)
+    expect(designSystem).toMatch(/\.wf-icon-tile-info/)
+    expect(designSystem).toMatch(/\.wf-icon-tile-warning/)
+    expect(designSystem).toMatch(/\.wf-feedback-warning/)
+    expect(designSystem).toMatch(/\.wf-status-neutral/)
   })
 
   it("uses semantic cards and status colors in the main workspace views", () => {
@@ -129,7 +129,7 @@ describe("semantic theme foundations", () => {
 
     expect(songsPage).toMatch(/wf-card wf-card-interactive/)
     expect(songsPage).toMatch(/wf-status-warning/)
-    expect(songsPage).toMatch(/var\\(--warning-soft\\)/)
+    expect(songsPage).toMatch(/var\(--warning-soft\)/)
 
     expect(dashboardView).toMatch(/wf-card wf-card-interactive/)
     expect(dashboardView).toMatch(/wf-feedback-warning/)
