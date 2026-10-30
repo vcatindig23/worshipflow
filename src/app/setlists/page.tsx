@@ -249,7 +249,7 @@ export default async function SetlistsPage({
 
           <button
             type="submit"
-            className="h-11 rounded-xl bg-[var(--surface)] px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--brand-soft)]"
+            className={buttonVariants({ variant: "secondary" })}
           >
             Apply
           </button>
@@ -285,7 +285,7 @@ export default async function SetlistsPage({
                   <Link
                     key={setlist.id}
                     href={`/setlists/${setlist.id}`}
-                    className="group rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    className="wf-card wf-card-interactive group p-5"
                   >
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div className="flex min-w-0 items-start gap-4">
@@ -305,14 +305,12 @@ export default async function SetlistsPage({
                             </h2>
 
                             <span
-                              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                                setlist.status ===
-                                "published"
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : setlist.status ===
-                                      "archived"
-                                    ? "bg-amber-100 text-amber-800"
-                                    : "bg-[var(--surface)] text-[var(--muted)]"
+                              className={`wf-status ${
+                                setlist.status === "published"
+                                  ? "wf-status-success"
+                                  : setlist.status === "archived"
+                                    ? "wf-status-warning"
+                                    : "wf-status-neutral"
                               }`}
                             >
                               {statusLabel(
