@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
+import { buttonVariants } from "@/components/ui/button"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
+import { Feedback } from "@/components/ui/feedback"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -354,21 +356,21 @@ export default async function ServicePreparationPage({
       </header>
 
       {errorKey && errorMessages[errorKey] ? (
-        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <Feedback tone="error" title="Could not save preparation changes">
           {errorMessages[errorKey]}
-        </div>
+        </Feedback>
       ) : null}
       {saved === "rehearsal" ? (
-        <div role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Rehearsal plan saved.
-        </div>
+        <Feedback tone="success" title="Rehearsal plan saved">
+          Your rehearsal details are up to date.
+        </Feedback>
       ) : saved === "task" ? (
-        <div role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Preparation task added.
-        </div>
+        <Feedback tone="success" title="Preparation task added">
+          The new task is included in this service checklist.
+        </Feedback>
       ) : null}
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
+      <section className="wf-card p-5 sm:p-6">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
             <CalendarDays className="size-5" />
@@ -470,12 +472,12 @@ export default async function ServicePreparationPage({
                     <input type="hidden" name="setlistId" value={id} />
                     <input type="hidden" name="taskId" value={task.id} />
                     <input type="hidden" name="completed" value={String(!task.is_completed)} />
-                    <button type="submit" aria-label={task.is_completed ? `Reopen task: ${task.title}` : `Complete task: ${task.title}`} className={`flex size-8 items-center justify-center rounded-xl transition ${task.is_completed ? "bg-emerald-100 text-emerald-700" : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]"}`}>
+                    <button type="submit" aria-label={task.is_completed ? `Reopen task: ${task.title}` : `Complete task: ${task.title}`} className={`flex size-8 items-center justify-center rounded-xl transition ${task.is_completed ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]"}`}>
                       {task.is_completed ? <CheckCircle2 className="size-4" /> : <Circle className="size-4" />}
                     </button>
                   </form>
                 ) : (
-                  <span className={`mt-0.5 flex size-8 items-center justify-center rounded-xl ${task.is_completed ? "bg-emerald-100 text-emerald-700" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
+                  <span className={`mt-0.5 flex size-8 items-center justify-center rounded-xl ${task.is_completed ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
                     {task.is_completed ? <CheckCircle2 className="size-4" /> : <Circle className="size-4" />}
                   </span>
                 )}
@@ -528,7 +530,7 @@ export default async function ServicePreparationPage({
 
       <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
         <div className="flex items-start gap-3">
-          <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${conflicts.length > 0 ? "bg-amber-100 text-amber-700" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
+          <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${conflicts.length > 0 ? "bg-[var(--warning-soft)] text-[var(--warning)]" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
             <AlertTriangle className="size-5" />
           </div>
           <div className="min-w-0 flex-1">
@@ -538,20 +540,20 @@ export default async function ServicePreparationPage({
             </p>
           </div>
           {conflictsAvailable ? (
-            <span className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${conflicts.length > 0 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}>
+            <span className={`wf-status shrink-0 ${conflicts.length > 0 ? "wf-status-warning" : "wf-status-success"}`}>
               {conflicts.length > 0 ? `${conflicts.length} to review` : "No conflicts"}
             </span>
           ) : null}
         </div>
 
         {!conflictsAvailable ? (
-          <p role="status" className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-            Conflict checking is temporarily unavailable because the assignment schedule could not be loaded.
-          </p>
+          <Feedback tone="warning" title="Conflict checking unavailable">
+            The assignment schedule could not be loaded, so conflicts cannot be verified right now.
+          </Feedback>
         ) : conflicts.length > 0 ? (
           <ul className="mt-5 space-y-3">
             {conflicts.map((conflict) => (
-              <li key={`${conflict.current.key}|${conflict.other.key}`} className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+              <li key={`${conflict.current.key}|${conflict.other.key}`} className="rounded-2xl border border-[var(--warning)]/30 bg-[var(--warning-soft)]/60 p-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-[var(--foreground)]">
@@ -563,11 +565,11 @@ export default async function ServicePreparationPage({
                     <p className="text-sm leading-6 text-[var(--muted)]">
                       {conflict.other.serviceName} · {formatDate(conflict.other.date)} · {formatTime(conflict.other.startTime)}–{conflict.other.endTime}
                     </p>
-                    <p className="mt-2 text-xs leading-5 text-amber-900">
+                    <p className="mt-2 text-xs leading-5 text-[var(--warning)]">
                       Shared assigned team: {conflict.memberNames.join(", ")}
                     </p>
                   </div>
-                  <Link href={`/setlists/${conflict.other.setlistId}`} className="inline-flex h-9 shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-white px-3 text-xs font-semibold text-amber-900 transition hover:bg-amber-100">
+                  <Link href={`/setlists/${conflict.other.setlistId}`} className={buttonVariants({ variant: "outline", size: "sm", className: "h-9 shrink-0 border-[var(--warning)]/40 text-[var(--warning)] hover:border-[var(--warning)] hover:bg-[var(--warning-soft)] hover:text-[var(--warning)]" })}>
                     View plan
                   </Link>
                 </div>

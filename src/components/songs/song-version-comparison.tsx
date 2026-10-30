@@ -69,7 +69,7 @@ export default function SongVersionComparison({
       ) : (
         <div className="mt-4 space-y-2">
           {visibleLines.map((line) => (
-            <div key={line.lineNumber} className={"grid gap-2 rounded-xl border p-3 sm:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)] " + (line.status === "same" ? "border-[var(--border)]" : "border-amber-300/70 bg-amber-50/50")}>
+            <div key={line.lineNumber} className={"grid gap-2 rounded-xl border p-3 sm:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)] " + (line.status === "same" ? "border-[var(--border)]" : "border-[var(--warning)]/35 bg-[var(--warning-soft)]/50")}>
               <div className="flex items-center gap-2 text-xs font-semibold text-[var(--muted)] sm:block">
                 <span>Line {line.lineNumber}</span>
                 <span className="sm:mt-1 sm:block">{line.status === "same" ? "Same" : line.status === "changed" ? "Changed" : line.status === "current-only" ? "Added" : "Removed"}</span>

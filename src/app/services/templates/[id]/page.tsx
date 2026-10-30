@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Feedback } from "@/components/ui/feedback"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -105,12 +106,12 @@ export default async function ServiceTemplateDetailPage({
       </Link>
 
       {errorKey && errorMessages[errorKey] ? (
-        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <Feedback tone="error" title="Could not create service from template">
           {errorMessages[errorKey]}
-        </div>
+        </Feedback>
       ) : null}
 
-      <section className="rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm md:p-8">
+      <section className="wf-card p-6 md:p-8">
         <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
           <Layers className="size-3.5" />
           Service Template
@@ -231,9 +232,9 @@ export default async function ServiceTemplateDetailPage({
                   />
                 </div>
               ) : (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+                <Feedback tone="warning" title="Start times unavailable">
                   Start times become available after the service-time migration is applied.
-                </div>
+                </Feedback>
               )}
             </div>
 
