@@ -27,6 +27,11 @@ import { createClient } from "@/lib/supabase/server"
 import { formatServiceTime } from "@/lib/service-scheduling"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { teamPositionLabels } from "@/lib/team-positions"
+import {
+  assessMemberAvailability,
+  type MemberAvailabilityEntry,
+  type MemberAvailabilityStatus,
+} from "@/lib/member-availability"
 import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import ServiceResources from "./service-resources"
@@ -65,6 +70,7 @@ type Setlist = {
   announcements: string | null
   service_date: string | null
   service_time: string | null
+  end_time: string | null
   status:
     | "draft"
     | "published"
@@ -242,6 +248,22 @@ function statusLabel(
   }
 
   return "Draft"
+}
+
+function availabilityBadgeClass(status: MemberAvailabilityStatus) {
+  if (status === "unavailable") return "bg-rose-50 text-rose-700"
+  if (status === "outside_weekly_hours") return "bg-amber-50 text-amber-800"
+  if (status === "within_weekly_hours") return "bg-emerald-50 text-emerald-700"
+  if (status === "needs_schedule") return "bg-[var(--surface)] text-[var(--muted)]"
+  return "bg-[var(--surface)] text-[var(--muted)]"
+}
+
+const availabilityPriority: Record<MemberAvailabilityStatus, number> = {
+  within_weekly_hours: 0,
+  not_recorded: 1,
+  needs_schedule: 2,
+  outside_weekly_hours: 3,
+  unavailable: 4,
 }
 
 export default async function SetlistPage({
@@ -449,6 +471,37 @@ export default async function SetlistPage({
     teamProfiles = (data ?? []) as MemberProfile[]
   }
 
+  const availabilityResult = canEdit && profileIds.length > 0
+    ? await supabase
+        .from("member_availability")
+        .select("user_id, entry_type, starts_on, ends_on, weekdays, start_time, end_time, timezone")
+        .eq("organization_id", workspace.organizationId)
+        .eq("is_active", true)
+        .in("user_id", profileIds)
+    : null
+  const availabilityChecksAvailable =
+    canEdit && (profileIds.length === 0 || !availabilityResult?.error)
+  const memberAvailability = (
+    availabilityResult?.data ?? []
+  ) as MemberAvailabilityEntry[]
+  const availabilityAssessmentsByMemberId = new Map(
+    profileIds.map((userId) => [
+      userId,
+      assessMemberAvailability(memberAvailability, {
+        userId,
+        serviceDate: setlist.service_date,
+        serviceTime: setlist.service_time,
+        serviceEndTime: setlist.end_time,
+        serviceTimezone: workspace.organizationTimezone,
+      }),
+    ])
+  )
+
+  const teamAssignmentsWithAvailability = teamAssignments.map((assignment) => ({
+    ...assignment,
+    availability: availabilityAssessmentsByMemberId.get(assignment.user_id) ?? null,
+  }))
+
   const teamAvatarUrls = await getProfileAvatarUrlMap(
     supabase,
     teamProfiles.map((profile) => profile.avatar_url)
@@ -477,13 +530,32 @@ export default async function SetlistPage({
   const assignableOptions = teamMemberIdentities.flatMap((member) =>
     (member.team_positions ?? [])
       .filter((position) => teamPositions.includes(position))
-      .map((position) => ({
-        key: `${member.user_id}|${position}`,
-        label: `${teamProfileNames.get(member.user_id) ?? "Name not set"} — ${
-          teamPositionLabels[position] ?? position
-        }`,
-      }))
-  ).filter((option) => !existingAssignmentKeys.has(option.key))
+      .map((position) => {
+        const availability = availabilityAssessmentsByMemberId.get(member.user_id)
+        const availabilitySuffix =
+          availabilityChecksAvailable && availability
+            ? ` · ${availability.label}`
+            : ""
+
+        return {
+          key: `${member.user_id}|${position}`,
+          label: `${teamProfileNames.get(member.user_id) ?? "Name not set"} — ${
+            teamPositionLabels[position] ?? position
+          }${availabilitySuffix}`,
+          availabilityStatus: availability?.status ?? null,
+        }
+      })
+  )
+    .filter((option) => !existingAssignmentKeys.has(option.key))
+    .sort((a, b) => {
+      const priorityA = a.availabilityStatus
+        ? availabilityPriority[a.availabilityStatus]
+        : 1
+      const priorityB = b.availabilityStatus
+        ? availabilityPriority[b.availabilityStatus]
+        : 1
+      return priorityA - priorityB || a.label.localeCompare(b.label)
+    })
 
   const confirmedAssignments = teamAssignments.filter(
     (assignment) => assignment.confirmation_status === "confirmed"
@@ -1267,8 +1339,13 @@ export default async function SetlistPage({
             </div>
 
             <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-              Assign members to the positions set for them on the Team page.
+              Assign members to the positions set for them on the Team page. Saved time off and weekly hours help you review availability before assigning.
             </p>
+            {canEdit && profileIds.length > 0 && !availabilityChecksAvailable ? (
+              <p role="status" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900">
+                Availability checks are unavailable. Verify that the member-availability migration is applied; assignments can still be managed.
+              </p>
+            ) : null}
 
             {teamAssignments.length > 0 ? (
               <>
@@ -1299,7 +1376,7 @@ export default async function SetlistPage({
                   </div>
                 </div>
                 <ul className="mt-4 divide-y divide-[var(--border)]">
-                  {teamAssignments.map((assignment) => (
+                  {teamAssignmentsWithAvailability.map((assignment) => (
                     <li key={assignment.id} className="py-3">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-3">
@@ -1328,6 +1405,14 @@ export default async function SetlistPage({
                             <p className="mt-0.5 text-xs text-[var(--muted)]">
                               {teamPositionLabels[assignment.team_position] ?? assignment.team_position}
                             </p>
+                            {availabilityChecksAvailable && assignment.availability ? (
+                              <span
+                                aria-label={`Availability: ${assignment.availability.label}`}
+                                className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${availabilityBadgeClass(assignment.availability.status)}`}
+                              >
+                                {assignment.availability.label}
+                              </span>
+                            ) : null}
                           </div>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
