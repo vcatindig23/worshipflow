@@ -836,8 +836,8 @@ export default async function ServicesPage({
                             <span
                               className={
                                 readiness.hasSongs
-                                  ? readinessClasses.muted
-                                  : "text-rose-700"
+                                  ? "wf-readiness-supporting"
+                                  : "wf-readiness-missing"
                               }
                             >
                               {readiness.hasSongs
@@ -852,8 +852,8 @@ export default async function ServicesPage({
                             <span
                               className={
                                 readiness.hasTeam
-                                  ? readinessClasses.muted
-                                  : "text-rose-700"
+                                  ? "wf-readiness-supporting"
+                                  : "wf-readiness-missing"
                               }
                             >
                               {readiness.hasTeam
@@ -871,7 +871,7 @@ export default async function ServicesPage({
                                 className={
                                   readiness.confirmedAssignments ===
                                   readiness.totalAssignments
-                                    ? readinessClasses.muted
+                                    ? "wf-readiness-supporting"
                                     : "wf-readiness-pending"
                                 }
                               >
