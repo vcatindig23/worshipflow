@@ -7,6 +7,8 @@ import {
   Users,
 } from "lucide-react"
 import { joinOrganization } from "./actions"
+import { Feedback } from "@/components/ui/feedback"
+import { Input } from "@/components/ui/form-controls"
 
 type JoinPageProps = {
   searchParams: Promise<
@@ -52,7 +54,7 @@ export default async function JoinPage({
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-10">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-xl items-center justify-center">
-        <div className="w-full rounded-3xl border border-[var(--border)] bg-white p-7 shadow-sm sm:p-9">
+        <div className="wf-card w-full rounded-3xl p-7 sm:p-9">
           <Link
             href="/onboarding"
             className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
@@ -77,11 +79,10 @@ export default async function JoinPage({
           </div>
 
           {errors[errorKey] ? (
-            <div
-              role="alert"
-              className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
-            >
-              {errors[errorKey]}
+            <div className="mt-6">
+              <Feedback tone="error" title="Invitation could not be accepted">
+                {errors[errorKey]}
+              </Feedback>
             </div>
           ) : null}
 
@@ -97,7 +98,7 @@ export default async function JoinPage({
                 Invitation code
               </label>
 
-              <input
+              <Input
                 id="code"
                 name="code"
                 required
@@ -106,7 +107,7 @@ export default async function JoinPage({
                 autoComplete="off"
                 spellCheck={false}
                 placeholder="XXXXXXXXXXXX"
-                className="h-14 w-full rounded-2xl border border-[var(--border)] bg-white px-4 text-center text-lg font-bold uppercase tracking-[0.25em] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                className="h-14 rounded-2xl px-4 text-center text-lg font-bold uppercase tracking-[0.25em]"
               />
             </div>
 
