@@ -95,7 +95,7 @@ export default async function AnnouncementAcknowledgment({
 
         {canAcknowledge ? (
           hasAcknowledged ? (
-            <span className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-50 px-3 text-xs font-semibold text-emerald-700">
+            <span role="status" className="wf-status wf-status-success h-9 shrink-0 gap-2 rounded-xl px-3">
               <CheckCircle2 className="size-4" />
               Acknowledged
             </span>
