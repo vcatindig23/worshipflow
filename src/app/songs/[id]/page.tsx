@@ -260,7 +260,7 @@ export default async function SongPage({
               </span>
 
               {typedSong.status === "archived" ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                <span className="wf-status wf-status-warning">
                   <Archive className="size-3.5" />
                   Archived
                 </span>
@@ -314,8 +314,8 @@ export default async function SongPage({
                 title={isFavorite ? "Remove from favorites" : "Add to favorites"}
                 className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 ${
                   isFavorite
-                    ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                    : "border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-[var(--surface)]"
+                    ? "border-[var(--warning)]/30 bg-[var(--warning-soft)] text-[var(--warning)] hover:bg-[var(--warning-soft)]/80"
+                    : "border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--surface)]"
                 }`}
               >
                 <Star className="size-4" fill={isFavorite ? "currentColor" : "none"} />
