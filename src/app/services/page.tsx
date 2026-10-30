@@ -547,7 +547,7 @@ export default async function ServicesPage({
             className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
               period === item.value
                 ? "bg-[var(--brand)] text-white"
-                : "border border-[var(--border)] bg-white text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
             }`}
           >
             {item.label}
