@@ -273,7 +273,7 @@ export default async function ChurchSettingsPage({
               </div>
             </section>
 
-            <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-7">
+            <section className="wf-card p-5 sm:p-7">
               <div className="flex items-start gap-3">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                   <CalendarClock className="size-5" />
