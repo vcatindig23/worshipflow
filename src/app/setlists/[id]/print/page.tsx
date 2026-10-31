@@ -241,7 +241,7 @@ export default async function PrintServicePlanPage({
         </section>
       ) : null}
 
-      <section className="break-inside-avoid rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-lg font-bold"><Music2 className="size-5 text-slate-500" /> Worship order</h2>
           <span className="text-xs text-slate-500">{setlistSongs.length} songs</span>
@@ -278,7 +278,7 @@ export default async function PrintServicePlanPage({
       </section>
 
       {timeline.length > 0 ? (
-        <section className="break-inside-avoid rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-bold">Run of show</h2>
             <span className="text-xs text-slate-500">{totalPlannedMinutes} min planned</span>
@@ -301,7 +301,7 @@ export default async function PrintServicePlanPage({
         </section>
       ) : null}
 
-      <section className="break-inside-avoid rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
         <h2 className="flex items-center gap-2 text-lg font-bold"><Users className="size-5 text-slate-500" /> Team assignments</h2>
         {assignments.length === 0 ? (
           <p className="mt-3 text-sm text-slate-500">No team members assigned.</p>
@@ -322,7 +322,7 @@ export default async function PrintServicePlanPage({
       </section>
 
       {(setlist.rehearsal_date || setlist.rehearsal_time || setlist.rehearsal_location || setlist.rehearsal_notes) ? (
-        <section className="break-inside-avoid rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
           <h2 className="text-lg font-bold">Rehearsal plan</h2>
           <p className="mt-2 text-sm text-slate-700">
             {formatShortDate(setlist.rehearsal_date)} · {formatTime(setlist.rehearsal_time)}
@@ -334,7 +334,7 @@ export default async function PrintServicePlanPage({
       ) : null}
 
       {tasks.length > 0 ? (
-        <section className="break-inside-avoid rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
           <h2 className="flex items-center gap-2 text-lg font-bold"><FileText className="size-5 text-slate-500" /> Preparation checklist</h2>
           <ul className="mt-4 space-y-2">
             {tasks.map((task) => (
@@ -351,7 +351,7 @@ export default async function PrintServicePlanPage({
       ) : null}
 
       {resources.length > 0 ? (
-        <section className="break-inside-avoid rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 print:rounded-none print:p-0 print:border-0">
           <h2 className="text-lg font-bold">Service resources</h2>
           <ul className="mt-3 space-y-1.5">
             {resources.map((resource) => (

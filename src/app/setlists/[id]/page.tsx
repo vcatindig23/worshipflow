@@ -24,7 +24,6 @@ import {
 } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
 import ProfileAvatar from "@/components/profile-avatar"
-import PrintSetlistButton from "@/components/setlists/print-setlist-button"
 import { createClient } from "@/lib/supabase/server"
 import { formatServiceTime } from "@/lib/service-scheduling"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
@@ -749,8 +748,6 @@ export default async function SetlistPage({
               <FileDown className="size-4" />
               Service plan PDF
             </Link>
-
-            <PrintSetlistButton />
 
             {canEdit ? (
               <Link
