@@ -143,6 +143,14 @@ const songDetailPage = readFileSync(
   join(process.cwd(), "src/app/songs/[id]/page.tsx"),
   "utf8"
 )
+const newSongPage = readFileSync(
+  join(process.cwd(), "src/app/songs/new/page.tsx"),
+  "utf8"
+)
+const editSongPage = readFileSync(
+  join(process.cwd(), "src/app/songs/[id]/edit/page.tsx"),
+  "utf8"
+)
 const songReviewPanel = readFileSync(
   join(process.cwd(), "src/components/songs/song-review-panel.tsx"),
   "utf8"
@@ -576,6 +584,16 @@ describe("semantic theme foundations", () => {
     expect(setlistPreparationPage).toMatch(/wf-status-success/)
     expect(setlistPreparationPage).toMatch(/var\(--success-soft\)/)
     expect(setlistPreparationPage).not.toMatch(/bg-white|bg-emerald-100|bg-amber-100|bg-amber-50|text-emerald-700|text-amber-800|border-amber-200/)
+  })
+
+  it("uses shared feedback and semantic cards in song creation and editing", () => {
+    expect(newSongPage).toMatch(/<Feedback tone="error" title="Song could not be saved"/)
+    expect(newSongPage).toMatch(/wf-card p-5 sm:p-6/)
+    expect(newSongPage).not.toMatch(/bg-white|bg-red-50|border-red-200|text-red-700/)
+
+    expect(editSongPage).toMatch(/<Feedback tone="error" title="Song could not be updated"/)
+    expect(editSongPage).toMatch(/wf-card p-5 sm:p-6/)
+    expect(editSongPage).not.toMatch(/bg-white|bg-red-50|border-red-200|text-red-700/)
   })
 
 })
