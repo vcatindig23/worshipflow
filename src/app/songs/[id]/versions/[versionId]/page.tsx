@@ -84,7 +84,7 @@ export default async function SongVersionPage({
           </div>
         </div>
 
-        <header className="mt-8 rounded-2xl border border-[var(--border)] bg-white p-5 sm:p-6">
+        <header className="wf-card mt-8 p-5 sm:p-6">
           <div className="flex gap-4">
             <div className="hidden size-12 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)] sm:flex">
               <Music2 className="size-6" />
@@ -119,7 +119,7 @@ export default async function SongVersionPage({
         </div>
 
         {version.notes ? (
-          <section className="mt-6 rounded-2xl border border-[var(--border)] bg-white p-5 sm:p-6">
+          <section className="wf-card mt-6 p-5 sm:p-6">
             <h2 className="text-sm font-semibold">
               Arrangement notes
             </h2>
