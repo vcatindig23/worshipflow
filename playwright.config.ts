@@ -28,6 +28,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
+      WORSHIPFLOW_E2E: "true",
       NEXT_PUBLIC_SUPABASE_URL:
         process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://ci-placeholder.supabase.co",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:

@@ -528,8 +528,8 @@ export default function LiveStageView({
         </div>
       ) : (
         <>
-          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3 md:px-8 lg:px-12 xl:px-16 2xl:px-20 md:py-4">
-            <div className="mx-auto flex min-h-0 w-full max-w-none flex-1 flex-col">
+          <section className="flex min-h-0 flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3 md:px-6 lg:px-8 xl:px-10 2xl:px-12 md:py-4">
+            <div className="mx-auto flex min-h-0 w-full max-w-[1920px] flex-1 flex-col">
               {currentSong ? (
                 <>
                   <div className="mb-3 flex shrink-0 flex-col gap-3 sm:mb-4 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
