@@ -211,6 +211,14 @@ const onboardingJoinPage = readFileSync(
   join(process.cwd(), "src/app/onboarding/join/page.tsx"),
   "utf8"
 )
+const errorPage = readFileSync(
+  join(process.cwd(), "src/app/error/page.tsx"),
+  "utf8"
+)
+const accountSecurityPage = readFileSync(
+  join(process.cwd(), "src/app/settings/security/page.tsx"),
+  "utf8"
+)
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -594,6 +602,22 @@ describe("semantic theme foundations", () => {
     expect(editSongPage).toMatch(/<Feedback tone="error" title="Song could not be updated"/)
     expect(editSongPage).toMatch(/wf-card p-5 sm:p-6/)
     expect(editSongPage).not.toMatch(/bg-white|bg-red-50|border-red-200|text-red-700/)
+  })
+
+  it("uses semantic error styling on the recovery page", () => {
+    expect(errorPage).toMatch(/wf-card p-8 text-center/)
+    expect(errorPage).toMatch(/wf-icon-tile wf-icon-tile-danger/)
+    expect(errorPage).toContain("bg-[var(--card)]")
+    expect(errorPage).not.toMatch(/bg-white|bg-red-50|text-red-600/)
+    expect(errorPage).toMatch(/aria-hidden="true"/)
+  })
+
+  it("uses semantic danger tokens for account deletion without weakening confirmation", () => {
+    expect(accountSecurityPage).toContain("wf-card space-y-5 border-[var(--danger)]/30")
+    expect(accountSecurityPage).toContain("text-[var(--danger)]")
+    expect(accountSecurityPage).not.toMatch(/border-red-200|text-red-600/)
+    expect(accountSecurityPage).toMatch(/variant="destructive"/)
+    expect(accountSecurityPage).toContain('title="Permanently delete your account?"')
   })
 
 })

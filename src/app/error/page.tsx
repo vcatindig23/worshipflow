@@ -60,9 +60,9 @@ export default async function ErrorPage({
             </Link>
           </div>
 
-          <div className="rounded-3xl border border-[var(--border)] bg-white p-8 text-center shadow-sm">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-              <AlertCircle className="size-6" />
+          <div className="wf-card p-8 text-center">
+            <div className="wf-icon-tile wf-icon-tile-danger mx-auto size-14 rounded-2xl">
+              <AlertCircle className="size-6" aria-hidden="true" />
             </div>
 
             <h1 className="mt-6 text-2xl font-semibold tracking-[-0.035em]">
@@ -83,7 +83,7 @@ export default async function ErrorPage({
 
               <Link
                 href="/"
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
               >
                 Return home
               </Link>
