@@ -279,25 +279,25 @@ export default async function SongPage({
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
               {typedSong.current_key ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 font-medium text-[var(--foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 font-medium text-[var(--foreground)]">
                   Key {typedSong.current_key}
                 </span>
               ) : null}
 
               {typedSong.tempo ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 font-medium text-[var(--foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 font-medium text-[var(--foreground)]">
                   {typedSong.tempo} BPM
                 </span>
               ) : null}
 
               {typedSong.time_signature ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 font-medium text-[var(--foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 font-medium text-[var(--foreground)]">
                   {typedSong.time_signature}
                 </span>
               ) : null}
 
               {typedSong.capo !== null ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1.5 font-medium text-[var(--foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 font-medium text-[var(--foreground)]">
                   Capo {typedSong.capo}
                 </span>
               ) : null}
@@ -329,7 +329,7 @@ export default async function SongPage({
             />
             <Link
               href={`/songs/${typedSong.id}/print`}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
             >
               <Printer className="size-4" />
               Print / PDF
@@ -338,7 +338,7 @@ export default async function SongPage({
             {canEdit ? (
               <Link
                 href={`/songs/${typedSong.id}/edit`}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
               >
                 <Edit className="size-4" />
                 Edit Song
@@ -386,7 +386,7 @@ export default async function SongPage({
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section className="min-w-0 space-y-4 overflow-hidden rounded-3xl">
-          <div className="rounded-3xl border border-[var(--border)] bg-white px-5 py-5 shadow-sm sm:px-6">
+          <div className="wf-card px-5 py-5 sm:px-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">
@@ -432,7 +432,7 @@ export default async function SongPage({
         </section>
 
         <aside className="space-y-6">
-          <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <section className="wf-card p-5">
             <div className="flex items-center gap-2">
               <Tag className="size-4 text-[var(--brand)]" />
               <h2 className="font-semibold text-[var(--foreground)]">
@@ -481,7 +481,7 @@ export default async function SongPage({
                       .join(", ")}
                     placeholder="Worship, Slow, Communion"
                     maxLength={1000}
-                    className="h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    className="h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
                   />
                 </div>
 
@@ -495,7 +495,7 @@ export default async function SongPage({
             ) : null}
           </section>
 
-          <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <section className="wf-card p-5">
             <div className="flex items-center gap-2">
               <History className="size-4 text-[var(--brand)]" />
               <h2 className="font-semibold text-[var(--foreground)]">
@@ -539,7 +539,7 @@ export default async function SongPage({
             </div>
           </section>
 
-          <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+          <section className="wf-card p-5">
             <h2 className="font-semibold text-[var(--foreground)]">
               Song Details
             </h2>

@@ -487,6 +487,10 @@ describe("semantic theme foundations", () => {
 
     expect(songDetailPage).toMatch(/wf-status-warning/)
     expect(songDetailPage).toMatch(/var\(--warning-soft\)/)
+    expect(songDetailPage).toContain("wf-card px-5 py-5 sm:px-6")
+    expect(songDetailPage).toContain("wf-card p-5")
+    expect(songDetailPage).toContain("bg-[var(--card)]")
+    expect(songDetailPage).not.toContain("bg-white")
     expect(songDetailPage).not.toMatch(/bg-amber-100|bg-amber-50|text-amber-800/)
 
     expect(songReviewPanel).toMatch(/wf-status-info/)
