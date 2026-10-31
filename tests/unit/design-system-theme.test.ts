@@ -143,6 +143,10 @@ const songDetailPage = readFileSync(
   join(process.cwd(), "src/app/songs/[id]/page.tsx"),
   "utf8"
 )
+const songVersionPage = readFileSync(
+  join(process.cwd(), "src/app/songs/[id]/versions/[versionId]/page.tsx"),
+  "utf8"
+)
 const newSongPage = readFileSync(
   join(process.cwd(), "src/app/songs/new/page.tsx"),
   "utf8"
@@ -496,6 +500,10 @@ describe("semantic theme foundations", () => {
     expect(songDetailPage).toContain("bg-[var(--card)]")
     expect(songDetailPage).not.toContain("bg-white")
     expect(songDetailPage).not.toMatch(/bg-amber-100|bg-amber-50|text-amber-800/)
+
+    expect(songVersionPage).toContain("wf-card mt-8 p-5 sm:p-6")
+    expect(songVersionPage).toContain("wf-card mt-6 p-5 sm:p-6")
+    expect(songVersionPage).not.toContain("bg-white")
 
     expect(songReviewPanel).toMatch(/wf-status-info/)
     expect(songReviewPanel).toMatch(/wf-status-warning/)
