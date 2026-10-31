@@ -305,15 +305,19 @@ export default function SongViewer({
       tabIndex={0}
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
-          ? "flex-1 overflow-auto bg-[#0d120f] px-2 py-4 text-white sm:px-6 sm:py-6 md:px-10 lg:px-12 xl:px-16"
+          ? "flex-1 overflow-auto bg-[#0d120f] px-3 py-4 text-white sm:px-4 sm:py-6 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
           : practiceOpen
             ? "min-h-0 flex-1 overflow-auto bg-[var(--card)] px-4 py-5 sm:px-8 sm:py-8"
             : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
       }`}
     >
       <div
-        className={`mx-auto w-full max-w-none ${
-          stageMode ? "mx-auto max-w-none pb-14 text-center" : practiceOpen ? "mx-auto max-w-5xl pb-14" : "pb-8"
+        className={`mx-auto w-full ${
+          stageMode
+            ? "max-w-[1920px] pb-14 text-center"
+            : practiceOpen
+              ? "max-w-5xl pb-14"
+              : "max-w-none pb-8"
         } ${usesTwoColumns && !stageMode ? "columns-1 sm:columns-2 [column-gap:2rem]" : ""}`}
       >
         {displayLines.map((item, index) => {
@@ -396,7 +400,7 @@ export default function SongViewer({
                 : "justify-start text-left"
 
           return (
-            <div key={`line-${index}`} className={`mb-1 flex break-inside-avoid-column ${alignmentClass}`}>
+            <div key={`line-${index}`} className={`mb-1 flex w-full break-inside-avoid-column ${alignmentClass}`}>
               <ChordProLine
                 line={item.line}
                 fontSize={stageMode ? stageFontSize : fontSize}

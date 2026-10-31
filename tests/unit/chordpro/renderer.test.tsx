@@ -41,11 +41,14 @@ describe("ChordPro line rendering", () => {
       })
     )
 
-    expect(markup).toContain("w-full whitespace-pre-wrap")
-    expect(markup).toContain("font-size:clamp(32px, 3.08vw, 70px)")
-    expect(markup).toContain("padding-top:clamp(40px, 3.96vw, 79px)")
-    expect(markup).toContain("font-size:clamp(23px, 2.29vw, 49px)")
-    expect(markup).toContain("bottom:clamp(24px, 2.86vw, 46px)")
+    expect(markup).toContain("w-fit max-w-full")
+    expect(markup).toContain("font-size:44px")
+    expect(markup).toContain("padding-top:62.48px")
+    expect(markup).toContain("font-size:33px")
+    expect(markup).toContain("bottom:36.08px")
+    expect(markup).toContain('data-testid="stage-lyrics-line"')
+    expect(markup).not.toContain("text-justify")
+    expect(markup).not.toContain("text-align-last")
   })
 
   it("removes chord anchors and chord-row spacing when chords are hidden", () => {
@@ -83,6 +86,8 @@ describe("ChordPro line rendering", () => {
     )
 
     expect(markup).toContain("gap-x-8")
+    expect(markup).toContain('data-testid="stage-chord-progression"')
+    expect(markup).toContain("font-size:27px")
     expect(markup).toContain(">D/F#</button>")
     expect(markup).toContain(">Bm</button>")
     expect(markup).toContain(">A</button>")

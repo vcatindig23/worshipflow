@@ -24,28 +24,12 @@ export default function ChordProLine({
   const chordOnly = hasChords && !hasLyrics
   const chordFontSize = Math.max(13, Math.round(fontSize * 0.74))
 
-  // Keep a useful font-size preference as the baseline, while allowing projection
-  // layouts to scale naturally with the available width. Mobile stays readable,
-  // but does not shrink the lyrics to force an entire song onto one screen.
-  const stageLyricsFontSize = `clamp(${Math.round(fontSize * 0.72)}px, ${(
-    fontSize * 0.07
-  ).toFixed(2)}vw, ${Math.round(fontSize * 1.6)}px)`
-  const stageChordFontSize = `clamp(${Math.max(
-    18,
-    Math.round(fontSize * 0.52)
-  )}px, ${(fontSize * 0.052).toFixed(2)}vw, ${Math.round(
-    fontSize * 1.12
-  )}px)`
-  const stageChordPadding = `clamp(${Math.round(
-    fontSize * 0.9
-  )}px, ${(fontSize * 0.09).toFixed(2)}vw, ${Math.round(
-    fontSize * 1.8
-  )}px)`
-  const stageChordOffset = `clamp(${Math.round(
-    fontSize * 0.55
-  )}px, ${(fontSize * 0.065).toFixed(2)}vw, ${Math.round(
-    fontSize * 1.05
-  )}px)`
+  // Stage displays keep the selected pixel size at every aspect ratio. The
+  // chart container controls wrapping; it must not resize or justify lyric text.
+  const stageLyricsFontSize = `${fontSize}px`
+  const stageChordFontSize = `${chordFontSize}px`
+  const stageChordPadding = `${fontSize * 1.42}px`
+  const stageChordOffset = `${fontSize * 0.82}px`
 
   if (chordOnly) {
     if (!showChords) {
@@ -54,6 +38,7 @@ export default function ChordProLine({
 
     return (
       <div
+        data-testid={stageMode ? "stage-chord-progression" : undefined}
         className={`mb-4 flex w-full flex-wrap items-baseline justify-center gap-x-8 gap-y-3 font-semibold sm:mb-5 sm:gap-x-10 lg:mb-6 ${
           stageMode ? "text-sky-300" : "text-[var(--brand)]"
         }`}
@@ -77,8 +62,11 @@ export default function ChordProLine({
 
   return (
     <div
-      className={`min-h-[1.8em] w-full whitespace-pre-wrap font-medium leading-[1.9] ${
-        stageMode ? "relative text-center text-white" : "relative"
+      data-testid={stageMode ? "stage-lyrics-line" : undefined}
+      className={`min-h-[1.8em] whitespace-pre-wrap font-medium leading-[1.9] ${
+        stageMode
+          ? "relative mx-auto w-fit max-w-full text-center text-white"
+          : "relative w-full"
       }`}
       style={{
         fontSize: stageMode ? stageLyricsFontSize : `${fontSize}px`,

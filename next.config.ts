@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       ...(isPreviewDeployment() ? [{ source: "/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] }] : []),
-      ...[...protectedRouteRoots, "/auth", "/login", "/signup", "/forgot-password", "/reset-password", "/check-email", "/error", "/offline-stage.html"].map((path) => ({
+      ...[...protectedRouteRoots, "/e2e", "/auth", "/login", "/signup", "/forgot-password", "/reset-password", "/check-email", "/error", "/offline-stage.html"].map((path) => ({
         source: `${path}/:path*`,
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }, { key: "Cache-Control", value: "private, no-store" }],
       })),
