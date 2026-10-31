@@ -483,6 +483,10 @@ describe("semantic theme foundations", () => {
   it("uses semantic states in service-template and song collaboration views", () => {
     expect(serviceTemplateDetailPage).toMatch(/<Feedback tone="error"/)
     expect(serviceTemplateDetailPage).toMatch(/<Feedback tone="warning"/)
+    expect(serviceTemplateDetailPage).toContain("wf-card p-5")
+    expect(serviceTemplateDetailPage).toContain("wf-card p-5 md:p-6")
+    expect(serviceTemplateDetailPage).toContain("bg-[var(--card)]")
+    expect(serviceTemplateDetailPage).not.toContain("bg-white")
     expect(serviceTemplateDetailPage).not.toMatch(/bg-red-50|bg-amber-50|text-amber-900/)
 
     expect(songDetailPage).toMatch(/wf-status-warning/)

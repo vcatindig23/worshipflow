@@ -157,7 +157,7 @@ export default async function ServiceTemplateDetailPage({
       </section>
 
       {timeline.length > 0 ? (
-        <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm">
+        <section className="wf-card p-5">
           <h2 className="font-semibold text-[var(--foreground)]">Saved service flow</h2>
           <ol className="mt-4 space-y-2">
             {timeline.map((item, index) => (
@@ -181,7 +181,7 @@ export default async function ServiceTemplateDetailPage({
       ) : null}
 
       {canEdit ? (
-        <section className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-sm md:p-6">
+        <section className="wf-card p-5 md:p-6">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Create a service from this template</h2>
             <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
@@ -202,7 +202,7 @@ export default async function ServiceTemplateDetailPage({
                 maxLength={200}
                 defaultValue={template.name}
                 placeholder="e.g. Sunday Worship — October 18"
-                className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                className="h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
               />
             </div>
 
@@ -216,7 +216,7 @@ export default async function ServiceTemplateDetailPage({
                   name="serviceDate"
                   type="date"
                   required
-                  className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                  className="h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
                 />
               </div>
               {workspace.serviceTimeAvailable ? (
@@ -228,7 +228,7 @@ export default async function ServiceTemplateDetailPage({
                     id="service-time"
                     name="serviceTime"
                     type="time"
-                    className="h-12 w-full rounded-xl border border-[var(--border)] bg-white px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
+                    className="h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/10"
                   />
                 </div>
               ) : (
