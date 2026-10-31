@@ -607,17 +607,17 @@ describe("semantic theme foundations", () => {
   it("uses semantic error styling on the recovery page", () => {
     expect(errorPage).toMatch(/wf-card p-8 text-center/)
     expect(errorPage).toMatch(/wf-icon-tile wf-icon-tile-danger/)
-    expect(errorPage).toMatch(/bg-\\[var\\(--card\\)\\]/)
+    expect(errorPage).toContain("bg-[var(--card)]")
     expect(errorPage).not.toMatch(/bg-white|bg-red-50|text-red-600/)
     expect(errorPage).toMatch(/aria-hidden="true"/)
   })
 
   it("uses semantic danger tokens for account deletion without weakening confirmation", () => {
-    expect(accountSecurityPage).toMatch(/wf-card space-y-5 border-\\[var\\(--danger\\)\\]\\/30/)
-    expect(accountSecurityPage).toMatch(/text-\\[var\\(--danger\\)\\]/)
+    expect(accountSecurityPage).toContain("wf-card space-y-5 border-[var(--danger)]/30")
+    expect(accountSecurityPage).toContain("text-[var(--danger)]")
     expect(accountSecurityPage).not.toMatch(/border-red-200|text-red-600/)
     expect(accountSecurityPage).toMatch(/variant="destructive"/)
-    expect(accountSecurityPage).toMatch(/title="Permanently delete your account\\?"/)
+    expect(accountSecurityPage).toContain('title="Permanently delete your account?"')
   })
 
 })
