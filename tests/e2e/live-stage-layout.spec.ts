@@ -64,9 +64,9 @@ test("live stage keeps lyric size, chord placement, and line width stable across
       (element) => element.getBoundingClientRect().width
     )
     if (viewport.width >= 1024) {
-      const containerWidth = await lyricsRegion.evaluate(
-        (element) => element.clientWidth
-      )
+      const containerWidth = await page
+        .locator('[aria-label="Live lyrics and chords"]')
+        .evaluate((element) => element.clientWidth)
       expect(shortWidth, viewport.label).toBeLessThan(containerWidth - 100)
     }
   }
