@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Feedback } from "@/components/ui/feedback"
 import { ProtectedForm } from "@/components/ui/protected-form"
 import { Input, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
@@ -127,11 +128,10 @@ export default async function EditSongPage({
         </header>
 
         {errorMessage ? (
-          <div
-            role="alert"
-            className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
-          >
-            {errorMessage}
+          <div className="mt-6">
+            <Feedback tone="error" title="Song could not be updated">
+              {errorMessage}
+            </Feedback>
           </div>
         ) : null}
 
@@ -142,7 +142,7 @@ export default async function EditSongPage({
             value={song.id}
           />
 
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
+          <section className="wf-card p-5 sm:p-6">
             <h2 className="text-base font-semibold">
               Song information
             </h2>
@@ -245,7 +245,7 @@ export default async function EditSongPage({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
+          <section className="wf-card p-5 sm:p-6">
             <h2 className="text-base font-semibold">
               Chords and lyrics
             </h2>
@@ -260,7 +260,7 @@ export default async function EditSongPage({
             />
           </section>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
+          <section className="wf-card p-5 sm:p-6">
             <label
               htmlFor="notes"
               className="mb-2 block text-sm font-medium"
@@ -282,7 +282,7 @@ export default async function EditSongPage({
           <div className="flex flex-col-reverse gap-3 border-t border-[var(--border)] pt-6 sm:flex-row sm:justify-end">
             <Link
               href={`/songs/${song.id}`}
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-white px-5 text-sm font-semibold transition hover:bg-[var(--surface)]"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 text-sm font-semibold transition hover:bg-[var(--surface)]"
             >
               Cancel
             </Link>
