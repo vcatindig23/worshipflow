@@ -10,7 +10,7 @@ const aspectRatios = [
 
 test("live stage keeps lyric size, chord placement, and line width stable across aspect ratios", async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
-  await page.goto("/__e2e/live-stage")
+  await page.goto("/e2e/live-stage")
 
   await expect(page.getByRole("heading", { name: "Grace in Every Season" })).toBeVisible()
 
@@ -74,7 +74,7 @@ test("live stage keeps lyric size, chord placement, and line width stable across
 
 test("live stage handles missing charts and fullscreen transitions", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto("/__e2e/live-stage")
+  await page.goto("/e2e/live-stage")
 
   await expect(page.getByText("Key G", { exact: false })).toBeVisible()
   await page.getByRole("button", { name: "Next" }).click()
@@ -104,7 +104,7 @@ test("live stage handles missing charts and fullscreen transitions", async ({ pa
 
 test("Song Stage Mode keeps the chosen font size and centers natural lyric widths", async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
-  await page.goto("/__e2e/song-stage")
+  await page.goto("/e2e/song-stage")
 
   await page.getByRole("button", { name: "Stage Mode" }).click()
   const lyricsRegion = page.getByRole("region", {

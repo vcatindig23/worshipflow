@@ -24,8 +24,8 @@ export const publicPaths = [
   "/offline-stage.js",
   "/opengraph-image",
   // These component fixtures are enabled only by the Playwright test server.
-  "/__e2e/live-stage",
-  "/__e2e/song-stage",
+  "/e2e/live-stage",
+  "/e2e/song-stage",
 ] as const
 
 export const protectedRouteRoots = [
