@@ -5,7 +5,7 @@ describe("workspace breadcrumbs", () => {
   it.each([
     ["/songs/3a1b/edit", ["Songs", "Song chart", "Edit"]],
     ["/setlists/4b2c", ["Setlists", "Service plan"]],
-    ["/settings/team/invitations", ["Settings", "Team", "Details"]],
+    ["/settings/team/invitations", ["Settings", "Team", "Invitations"]],
     ["/services/templates", ["Services", "Service templates"]],
     ["/profile/9d8e", ["Profile", "Member profile"]],
     ["/chat", ["Team chat"]],
