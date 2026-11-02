@@ -218,10 +218,12 @@ export default function DashboardMobileNavigation({
                   </Link>
                 )
               })}
+            </nav>
 
-              <p className="px-3 pb-2 pt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--sidebar-muted)]">
-                Manage
-              </p>
+            <p className="px-3 pb-2 pt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--sidebar-muted)]">
+              Manage
+            </p>
+            <nav aria-label="Workspace management" className="space-y-1">
               {workspaceManagementNavigationItems.map((item) => {
                 const active = isActiveNavigationPath(normalizedPathname, item.href)
                 const exact = normalizedPathname === item.href
@@ -257,6 +259,7 @@ export default function DashboardMobileNavigation({
                 )
               })}
             </nav>
+          </div>
 
             <div className="shrink-0 border-t border-white/10 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
               <ThemeToggleButton className="mb-3" />

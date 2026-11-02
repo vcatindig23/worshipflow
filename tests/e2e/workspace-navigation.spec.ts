@@ -42,7 +42,8 @@ test("mobile navigation exposes the same destinations and account access", async
     await expect(workspaceNav.getByRole("link", { name: label })).toHaveAttribute("href", href)
   }
 
-  await expect(workspaceNav.getByRole("link", { name: "Team" })).toHaveAttribute("href", "/settings/team")
-  await expect(workspaceNav.getByRole("link", { name: "Settings" })).toHaveAttribute("href", "/settings")
+  const managementNav = drawer.getByRole("navigation", { name: "Workspace management" })
+  await expect(managementNav.getByRole("link", { name: "Team", exact: true })).toHaveAttribute("href", "/settings/team")
+  await expect(managementNav.getByRole("link", { name: "Settings", exact: true })).toHaveAttribute("href", "/settings")
   await expect(drawer.getByRole("link", { name: "View profile for Worship Leader" })).toHaveAttribute("href", "/profile")
 })
