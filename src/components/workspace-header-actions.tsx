@@ -328,6 +328,21 @@ export default function WorkspaceHeaderActions({
     ]
   }, [searchResults])
 
+  const activeSearchResult = searchResultTargets[
+    Math.min(activeSearchResultIndex, Math.max(searchResultTargets.length - 1, 0))
+  ]
+  const activeSearchResultDomId = activeSearchResult
+    ? `workspace-search-result-${activeSearchResult.key.replace(/[^a-zA-Z0-9_-]/g, "-")}`
+    : undefined
+
+  useEffect(() => {
+    if (!searchOpen || !activeSearchResultDomId) return
+    document.getElementById(activeSearchResultDomId)?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    })
+  }, [activeSearchResultDomId, searchOpen])
+
   const refreshNotifications = useCallback(async () => {
     setIsLoadingNotifications(true)
     setNotificationError("")
@@ -1165,6 +1180,7 @@ export default function WorkspaceHeaderActions({
                                     {searchResults.songs.map((song, index) => (
                                       <li key={song.id}>
                                         <Link
+                                          id={`workspace-search-result-song-${song.id}`}
                                           href={`/songs/${song.id}`}
                                           onClick={onCloseSearch}
                                           onMouseEnter={() => setActiveSearchResultIndex(index)}
@@ -1196,6 +1212,7 @@ export default function WorkspaceHeaderActions({
                                     {searchResults.setlists.map((setlist, index) => (
                                       <li key={setlist.id}>
                                         <Link
+                                          id={`workspace-search-result-setlist-${setlist.id}`}
                                           href={`/setlists/${setlist.id}`}
                                           onClick={onCloseSearch}
                                           onMouseEnter={() => setActiveSearchResultIndex(searchResults.songs.length + index)}

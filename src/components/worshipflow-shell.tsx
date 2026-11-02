@@ -36,13 +36,13 @@ function getWorkspacePageTitle(pathname: string) {
   const currentPath = pathname.replace(/\/+$/, "") || "/"
 
   if (currentPath === "/") return "Dashboard"
+  if (currentPath === "/songs/new") return "New song"
   if (currentPath.startsWith("/songs/")) {
     if (currentPath.endsWith("/edit")) return "Edit song"
     if (currentPath.endsWith("/print")) return "Print song"
     if (currentPath.endsWith("/versions")) return "Song versions"
     return "Song chart"
   }
-  if (currentPath === "/songs/new") return "New song"
   if (currentPath === "/setlists/new") return "Create setlist"
   if (currentPath.startsWith("/setlists/")) {
     if (currentPath.includes("/live")) return "Live Stage"
