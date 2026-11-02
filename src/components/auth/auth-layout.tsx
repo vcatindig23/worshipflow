@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         id="main-content"
         className="relative mx-auto flex min-h-[calc(100svh-2.5rem)] w-full max-w-[1240px] flex-col justify-center sm:min-h-[calc(100svh-4rem)] lg:min-h-[calc(100svh-4rem)]"
       >
-        <div className="grid w-full items-stretch lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:overflow-hidden lg:rounded-[32px] lg:border lg:border-white/50 lg:bg-white/30 lg:shadow-[0_32px_100px_-42px_rgba(15,23,42,0.36)] lg:backdrop-blur-xl">
+        <div className="grid w-full items-stretch lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:overflow-hidden lg:rounded-[32px] lg:border lg:border-[var(--border)] lg:bg-[var(--card)]/80 lg:shadow-[0_32px_100px_-42px_rgba(15,23,42,0.36)] lg:backdrop-blur-xl">
           <aside className="relative hidden min-h-full flex-col justify-between overflow-hidden bg-gradient-to-br from-[#173d2a] via-[#28523a] to-[#426949] p-10 text-white lg:flex xl:p-12">
             <div
               aria-hidden="true"
@@ -59,7 +59,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                   width={545}
                   height={100}
                   priority
-                  className="h-auto w-56 brightness-0 invert"
+                  className="wf-auth-wordmark h-auto w-56 brightness-0 invert"
                 />
               </Link>
               <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.24em] text-white/65">
@@ -101,7 +101,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             </div>
           </aside>
 
-          <section className="flex w-full flex-col justify-center rounded-[28px] border border-white/50 bg-white/55 px-4 py-7 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.22)] backdrop-blur-xl sm:px-8 sm:py-9 lg:min-w-0 lg:rounded-none lg:border-0 lg:bg-white/55 lg:px-10 lg:py-12 lg:shadow-none xl:px-14">
+          <section className="flex w-full flex-col justify-center rounded-[28px] border border-[var(--border)] bg-[var(--card)] px-4 py-7 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.22)] backdrop-blur-xl sm:px-8 sm:py-9 lg:min-w-0 lg:rounded-none lg:border-0 lg:bg-[var(--card)] lg:px-10 lg:py-12 lg:shadow-none xl:px-14">
             <div className="mx-auto w-full max-w-[500px]">
               <header className="mb-7 flex flex-col items-center text-center lg:hidden">
                 <Link
@@ -115,7 +115,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                     width={545}
                     height={100}
                     priority
-                    className="h-auto w-52 sm:w-56"
+                    className="wf-auth-wordmark h-auto w-52 sm:w-56"
                   />
                 </Link>
                 <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--brand)]">
