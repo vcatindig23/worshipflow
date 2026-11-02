@@ -36,13 +36,29 @@ function getWorkspacePageTitle(pathname: string) {
   const currentPath = pathname.replace(/\/+$/, "") || "/"
 
   if (currentPath === "/") return "Dashboard"
-  if (
-    currentPath === "/settings/team" ||
-    currentPath.startsWith("/settings/team/")
-  ) {
-    return "Team"
+  if (currentPath.startsWith("/songs/")) {
+    if (currentPath.endsWith("/edit")) return "Edit song"
+    if (currentPath.endsWith("/print")) return "Print song"
+    if (currentPath.endsWith("/versions")) return "Song versions"
+    return "Song chart"
   }
+  if (currentPath === "/songs/new") return "New song"
+  if (currentPath === "/setlists/new") return "Create setlist"
+  if (currentPath.startsWith("/setlists/")) {
+    if (currentPath.includes("/live")) return "Live Stage"
+    if (currentPath.endsWith("/edit")) return "Edit service"
+    if (currentPath.includes("/preparation")) return "Service preparation"
+    return "Service plan"
+  }
+  if (currentPath.startsWith("/services/templates")) return "Service templates"
+  if (currentPath.startsWith("/services/history")) return "Service history"
+  if (currentPath.startsWith("/services/insights")) return "Service insights"
+  if (currentPath.startsWith("/settings/team")) return "Team"
+  if (currentPath.startsWith("/settings/church")) return "Church settings"
+  if (currentPath.startsWith("/settings/profile")) return "Profile settings"
   if (currentPath.startsWith("/settings")) return "Settings"
+  if (currentPath.startsWith("/profile/")) return "Member profile"
+  if (currentPath.startsWith("/profile")) return "Profile"
   if (currentPath.startsWith("/chat")) return "Team chat"
   if (currentPath.startsWith("/activity")) return "Activity"
   if (currentPath.startsWith("/notifications")) return "Notifications"
