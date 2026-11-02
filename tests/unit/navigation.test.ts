@@ -17,6 +17,11 @@ describe("navigation active-path matching", () => {
     { pathname: "/settings/church", href: "/settings", active: true },
     { pathname: "/settings/church", href: "/settings/team", active: false },
     { pathname: "/songs/", href: "/songs", active: true },
+    { pathname: "/chat", href: "/chat", active: true },
+    { pathname: "/chat/thread-123", href: "/chat", active: true },
+    { pathname: "/files/shared", href: "/files", active: true },
+    { pathname: "/settings/team/invitations", href: "/settings/team", active: true },
+    { pathname: "/settings/church", href: "/settings/team", active: false },
   ])("matches $pathname against $href as $active", ({ pathname, href, active }) => {
     expect(isActiveNavigationPath(pathname, href)).toBe(active)
   })

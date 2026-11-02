@@ -195,7 +195,7 @@ describe("shared hierarchy and recovery", () => {
   it("shows parent navigation without exposing database IDs as labels", () => {
     pathname = "/songs/8be01/edit"
     render(<WorkspaceBreadcrumbs />)
-    expect(container.textContent).toContain("DashboardSongsDetailsEdit")
+    expect(container.textContent).toContain("DashboardSongsSong chartEdit")
     expect(container.textContent).not.toContain("8be01")
     expect(container.querySelector('[aria-current="page"]')?.textContent).toBe(
       "Edit"

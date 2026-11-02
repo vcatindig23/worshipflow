@@ -10,8 +10,8 @@ import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ThemeToggleButton from "@/components/theme-toggle-button"
 import { isActiveNavigationPath } from "@/lib/navigation"
 import {
+  workspaceManagementNavigationItems,
   workspaceNavigationItems,
-  workspaceSettingsNavigationItem,
 } from "@/lib/workspace-navigation"
 
 type DashboardMobileNavigationProps = {
@@ -19,8 +19,6 @@ type DashboardMobileNavigationProps = {
   role: string
   userAvatarUrl: string | null
 }
-
-const navigation = workspaceNavigationItems
 
 function formatRole(role: string) {
   return role
@@ -36,10 +34,6 @@ export default function DashboardMobileNavigation({
 }: DashboardMobileNavigationProps) {
   const pathname = usePathname()
   const normalizedPathname = pathname.replace(/\/+$/, "") || "/"
-  const settingsIsActive = isActiveNavigationPath(
-    normalizedPathname,
-    workspaceSettingsNavigationItem.href
-  )
   const [openForPathname, setOpenForPathname] = useState<string | null>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -177,14 +171,12 @@ export default function DashboardMobileNavigation({
               </button>
             </div>
 
-            <nav
-              aria-label="Workspace"
-              className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-5"
-            >
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5">
+              <nav aria-label="Workspace" className="space-y-1">
               <p className="px-3 pb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--sidebar-muted)]">
                 Workspace
               </p>
-              {navigation.map((item) => {
+              {workspaceNavigationItems.map((item) => {
                 const active = isActiveNavigationPath(normalizedPathname, item.href)
                 const exact = normalizedPathname === item.href
                 const Icon = item.icon
@@ -224,47 +216,48 @@ export default function DashboardMobileNavigation({
                   </Link>
                 )
               })}
+            </nav>
 
-              <p className="px-3 pb-2 pt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--sidebar-muted)]">
-                Manage
-              </p>
-              {(() => {
-                const SettingsIcon = workspaceSettingsNavigationItem.icon
+            <p className="px-3 pb-2 pt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--sidebar-muted)]">
+              Manage
+            </p>
+            <nav aria-label="Workspace management" className="space-y-1">
+              {workspaceManagementNavigationItems.map((item) => {
+                const active = isActiveNavigationPath(normalizedPathname, item.href)
+                const exact = normalizedPathname === item.href
+                const Icon = item.icon
+
                 return (
                   <Link
-                    href={workspaceSettingsNavigationItem.href}
+                    key={item.href}
+                    href={item.href}
                     onClick={() => closeNavigation(false)}
-                    aria-current={
-                      settingsIsActive
-                        ? normalizedPathname === workspaceSettingsNavigationItem.href
-                          ? "page"
-                          : "location"
-                        : undefined
-                    }
-                    className={`group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
-                      settingsIsActive
+                    aria-current={active ? (exact ? "page" : "location") : undefined}
+                    className={`group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
+                      active
                         ? "bg-white/10 text-white"
-                        : "text-[var(--sidebar-muted)] hover:text-white"
+                        : "text-[var(--sidebar-muted)] hover:bg-white/[0.07] hover:text-white"
                     }`}
                   >
-                    {settingsIsActive ? (
+                    {active ? (
                       <span
                         aria-hidden="true"
                         className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-[#b5d4bd]"
                       />
                     ) : null}
                     <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg transition duration-200 ${
-                      settingsIsActive
+                      active
                         ? "bg-[var(--brand)] text-white"
                         : "text-[var(--sidebar-muted)] group-hover:bg-white/10 group-hover:text-white"
                     }`}>
-                      <SettingsIcon aria-hidden="true" className="wf-icon-motion size-[18px]" strokeWidth={1.9} />
+                      <Icon aria-hidden="true" className="wf-icon-motion size-[18px]" strokeWidth={1.9} />
                     </span>
-                    <span>{workspaceSettingsNavigationItem.label}</span>
+                    <span>{item.label}</span>
                   </Link>
                 )
-              })()}
+              })}
             </nav>
+          </div>
 
             <div className="shrink-0 border-t border-white/10 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
               <ThemeToggleButton className="mb-3" />

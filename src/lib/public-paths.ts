@@ -26,6 +26,7 @@ export const publicPaths = [
   // These component fixtures are enabled only by the Playwright test server.
   "/e2e/live-stage",
   "/e2e/song-stage",
+  "/e2e/workspace-navigation",
 ] as const
 
 export const protectedRouteRoots = [

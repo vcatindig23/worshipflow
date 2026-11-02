@@ -12,6 +12,7 @@ type HeaderNotification = {
   title: string
   body: string
   setlist_id: string | null
+  song_id: string | null
   read_at: string | null
   created_at: string
 }
@@ -68,7 +69,7 @@ export async function loadNotificationPreview() {
   const [recentResult, unreadResult, unreadChatResult, activityResult] = await Promise.all([
     supabase
       .from("notifications")
-      .select("id, type, title, body, setlist_id, read_at, created_at")
+      .select("id, type, title, body, setlist_id, song_id, read_at, created_at")
       .eq("user_id", userId)
       .eq("organization_id", organizationId)
       .order("created_at", { ascending: false })

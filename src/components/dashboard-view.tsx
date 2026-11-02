@@ -91,7 +91,7 @@ export default function DashboardView({
       }}
     >
 <main id="main-content" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-            <div className="mx-auto max-w-[1480px]">
+            <div className="mx-auto max-w-[80rem]">
               <div data-tour="dashboard-welcome" className="mb-8">
                 <PageHeader title={workspace.organizationName} eyebrow={<>Welcome back, {workspace.userName}</>} description="Your worship workspace is ready. Manage songs, prepare worship services, and keep your team organized." actions={<DashboardGuidedTour userId={workspace.userId} />} />
               </div>

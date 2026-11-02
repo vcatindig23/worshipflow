@@ -95,6 +95,17 @@
     flex-direction: column;
     gap: var(--wf-space-4);
   }
+  @media (min-width: 768px) {
+    .wf-page-header {
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .wf-page-actions {
+      flex: 0 0 auto;
+      justify-content: flex-end;
+    }
+  }
   .wf-eyebrow {
     display: flex;
     flex-wrap: wrap;
