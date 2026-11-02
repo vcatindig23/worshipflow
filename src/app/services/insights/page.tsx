@@ -535,16 +535,16 @@ export default async function ServiceInsightsPage() {
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-[var(--surface)]">
                         <div
-                          className="h-full rounded-full bg-[var(--brand)] transition-all"
+                          className="origin-left h-full rounded-full bg-[var(--brand)] transition-transform"
                           style={{
-                            width: `${Math.max(
+                            transform: `scaleX(${Math.max(
                               6,
                               Math.round(
                                 (point.attendance /
                                   maxAttendance) *
                                   100
                               )
-                            )}%`,
+                            ) / 100})`,
                           }}
                         />
                       </div>
@@ -591,16 +591,16 @@ export default async function ServiceInsightsPage() {
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-[var(--surface)]">
                         <div
-                          className="h-full rounded-full bg-[var(--brand)] transition-all"
+                          className="origin-left h-full rounded-full bg-[var(--brand)] transition-transform"
                           style={{
-                            width: `${Math.max(
+                            transform: `scaleX(${Math.max(
                               6,
                               Math.round(
                                 (point.count /
                                   maxMonthCount) *
                                   100
                               )
-                            )}%`,
+                            ) / 100})`,
                           }}
                         />
                       </div>

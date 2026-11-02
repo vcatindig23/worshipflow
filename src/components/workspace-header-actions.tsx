@@ -844,7 +844,7 @@ export default function WorkspaceHeaderActions({
         aria-haspopup="dialog"
         aria-controls="workspace-global-search"
         aria-expanded={searchOpen}
-        className="group inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-medium text-[var(--muted)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:bg-[var(--surface)] hover:text-[var(--foreground)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
+        className="group inline-flex h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 text-sm font-medium text-[var(--muted)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:bg-[var(--surface)] hover:text-[var(--foreground)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
       >
         <Search className="wf-icon-motion size-4 group-hover:scale-110 group-hover:-rotate-6" />
         <span className="hidden sm:inline">Search</span>
@@ -857,7 +857,7 @@ export default function WorkspaceHeaderActions({
         href="/chat"
         title="Team Chat"
         aria-label={liveUnreadChatCount > 0 ? `Team Chat, ${liveUnreadChatCount} unread updates` : "Team Chat"}
-        className="group relative flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:bg-[var(--surface)] active:translate-y-0 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
+        className="group relative flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:bg-[var(--surface)] active:translate-y-0 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
       >
         <MessagesSquare className="wf-icon-motion size-[18px] group-hover:scale-110 group-hover:-rotate-3" />
         {liveUnreadChatCount > 0 ? (
@@ -876,7 +876,7 @@ export default function WorkspaceHeaderActions({
           aria-haspopup="dialog"
           aria-controls="workspace-notifications-panel"
           aria-expanded={notificationsOpen}
-          className="relative flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition hover:border-[var(--brand)] hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
+          className="relative flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition hover:border-[var(--brand)] hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20"
         >
           <Bell className="wf-icon-motion wf-bell-icon size-[18px]" />
           {unreadCount > 0 ? (
@@ -937,7 +937,7 @@ export default function WorkspaceHeaderActions({
                   onClick={closeNotificationsAndRestoreFocus}
                   aria-label="Close notifications"
                   title="Close notifications"
-                  className="flex size-9 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
+                  className="flex size-11 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
                 >
                   <X className="size-4" />
                 </button>

@@ -187,17 +187,31 @@
   .wf-input[aria-invalid="true"] {
     border-color: var(--danger);
   }
+  .wf-auth-wordmark {
+    display: block;
+    height: auto;
+  }
+  :root[data-theme="dark"] .wf-auth-wordmark {
+    filter: brightness(0) invert(1);
+  }
   .wf-dialog {
     position: fixed;
     inset: 0;
-    width: min(30rem, calc(100vw - 2rem));
-    max-height: calc(100dvh - 2rem);
+    width: min(
+      30rem,
+      calc(100vw - 2rem - env(safe-area-inset-left) - env(safe-area-inset-right))
+    );
+    max-height: calc(
+      100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+    );
     margin: auto;
     overflow-y: auto;
+    overscroll-behavior: contain;
     border: 1px solid var(--border);
     border-radius: var(--wf-radius-card);
     background: var(--card);
     padding: var(--wf-space-6);
+    padding-bottom: calc(var(--wf-space-6) + env(safe-area-inset-bottom));
     color: var(--foreground);
     box-shadow: 0 24px 80px rgb(0 0 0 / 24%);
   }

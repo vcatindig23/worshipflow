@@ -20,9 +20,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
+:where(a, button, [role="button"], summary) {
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--brand) 12%, transparent);
+  touch-action: manipulation;
+}
+
+:where(input, select, textarea) {
+  touch-action: manipulation;
+}
+
+select {
+  background-color: var(--card);
+  color: var(--foreground);
 }
 
 button, input, select, textarea {
@@ -205,6 +214,10 @@ iframe {
   outline-offset: 3px;
 }
 
+:where(h1, h2, h3, h4, h5, h6, [id]) {
+  scroll-margin-top: calc(78px + 1rem);
+}
+
 @media (max-width: 360px) {
   body {
     overflow-wrap: anywhere;
@@ -221,8 +234,8 @@ iframe {
 
 .wf-skip-link {
   position: fixed;
-  top: 0.75rem;
-  left: 0.75rem;
+  top: max(0.75rem, env(safe-area-inset-top));
+  left: max(0.75rem, env(safe-area-inset-left));
   z-index: 200;
   transform: translateY(-180%);
   border-radius: 0.75rem;
@@ -236,6 +249,28 @@ iframe {
 
 .wf-skip-link:focus {
   transform: translateY(0);
+}
+
+@media (pointer: coarse) {
+  [data-slot="button"][data-size="xs"],
+  [data-slot="button"][data-size="sm"],
+  :where(a, button, [role="button"])[class~="h-10"],
+  :where(a, button, [role="button"])[class~="h-9"],
+  :where(a, button, [role="button"])[class~="h-8"],
+  :where(input, select, textarea)[class~="h-10"],
+  :where(input, select, textarea)[class~="h-9"],
+  :where(input, select, textarea)[class~="h-8"] {
+    min-height: 44px;
+  }
+
+  [data-slot="button"][data-size="icon-xs"],
+  [data-slot="button"][data-size="icon-sm"],
+  :where(a, button, [role="button"])[class~="size-10"],
+  :where(a, button, [role="button"])[class~="size-9"],
+  :where(a, button, [role="button"])[class~="size-8"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 .wf-scroll-progress {
@@ -367,6 +402,19 @@ button.wf-action-loading::after {
 /* Aurora background surface — intentionally CSS-only and theme aware. */
 .wf-aurora-background {
   isolation: isolate;
+}
+
+.wf-cookie-notice {
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  left: max(0.75rem, env(safe-area-inset-left));
+  right: max(0.75rem, env(safe-area-inset-right));
+}
+
+@media (min-width: 640px) {
+  .wf-cookie-notice {
+    left: max(1.5rem, env(safe-area-inset-left));
+    right: max(1.5rem, env(safe-area-inset-right));
+  }
 }
 
 .wf-aurora-layer {

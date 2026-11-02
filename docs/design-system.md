@@ -17,6 +17,17 @@ Keep the forest-green identity and use the shared components before introducing 
 - Default buttons and controls are at least 44px tall. Compact variants are for dense contextual actions.
 - Retain existing `WorshipFlowLogo` and the root layout's PNG icon/Apple icon. Use `next/image` for local branding; keep authenticated remote media handling compatible with signed URLs.
 
+## Vercel interface baseline
+
+Apply the installed Web Interface Guidelines skill and repository `AGENTS.md` whenever UI is changed. Keep the forest-green visual identity, but treat interaction and accessibility requirements as part of the component contract rather than page-specific polish.
+
+- All interactive elements use `touch-action: manipulation`; small shared button variants expand to 44px targets on coarse pointers. Do not disable pinch zoom.
+- Fixed notices and modal surfaces account for safe-area insets. Modal scrolling is contained so it does not pull the page behind it.
+- Native selects declare both foreground and background colors. Theme changes also update the browser `theme-color` metadata.
+- Use `transform`/`opacity` for motion. Progress fills scale from the left rather than animating layout width; avoid `transition-all` and honor reduced motion.
+- Keep the original visible submit label while a request is pending; expose the pending state through `aria-busy` and an accessible pending label. Avoid mobile autofocus unless it is essential.
+- Use scroll margins for in-page targets and retain visible keyboard focus, skip navigation, semantic controls, and resilient safe-area spacing.
+
 ## Components
 
 | Component | Use |
