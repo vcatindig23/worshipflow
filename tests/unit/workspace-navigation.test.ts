@@ -2,18 +2,18 @@ import { describe, expect, it } from "vitest"
 import { isActiveNavigationPath } from "@/lib/navigation"
 import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 import {
+  workspaceAccountNavigationItems,
   workspaceNavigationItems,
   workspaceSettingsNavigationItem,
+  workspaceUtilityNavigationItems,
 } from "@/lib/workspace-navigation"
 
 describe("shared workspace navigation", () => {
   it("exposes each requested workspace destination exactly once", () => {
     const destinations = [
       ...workspaceNavigationItems.map(({ label, href }) => ({ label, href })),
-      {
-        label: workspaceSettingsNavigationItem.label,
-        href: workspaceSettingsNavigationItem.href,
-      },
+      ...workspaceUtilityNavigationItems.map(({ label, href }) => ({ label, href })),
+      ...workspaceAccountNavigationItems.map(({ label, href }) => ({ label, href })),
     ]
 
     expect(destinations).toEqual([
@@ -25,6 +25,10 @@ describe("shared workspace navigation", () => {
       { label: "My Schedule", href: "/my-schedule" },
       { label: "Team", href: "/settings/team" },
       { label: "Files", href: "/files" },
+      { label: "Team chat", href: "/chat" },
+      { label: "Search", href: "/search" },
+      { label: "Notifications", href: "/notifications" },
+      { label: "Activity", href: "/activity" },
       { label: "Profile", href: "/profile" },
       { label: "Settings", href: "/settings" },
     ])
@@ -42,6 +46,10 @@ describe("shared workspace navigation", () => {
     expect(isActiveNavigationPath("/songs/abc/edit", "/songs")).toBe(true)
     expect(isActiveNavigationPath("/setlists/abc/live", "/setlists")).toBe(true)
     expect(isActiveNavigationPath("/files", "/profile")).toBe(false)
+    expect(isActiveNavigationPath("/chat/thread-123", "/chat")).toBe(true)
+    expect(isActiveNavigationPath("/notifications", "/notifications")).toBe(true)
+    expect(isActiveNavigationPath("/activity/entry-123", "/activity")).toBe(true)
+    expect(isActiveNavigationPath("/search", "/search")).toBe(true)
   })
 })
 

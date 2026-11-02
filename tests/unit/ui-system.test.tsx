@@ -7,7 +7,7 @@ import { ConfirmationDialog } from "../../src/components/ui/confirmation-dialog"
 import { ConfirmSubmitButton } from "../../src/components/ui/confirm-submit-button"
 import { ProtectedForm } from "../../src/components/ui/protected-form"
 import { Pagination } from "../../src/components/ui/pagination"
-import { PageHeader } from "../../src/components/ui/page"
+import { PageContainer, PageHeader } from "../../src/components/ui/page"
 import { EmptyState } from "../../src/components/ui/empty-state"
 import WorkspaceBreadcrumbs from "../../src/components/workspace-breadcrumbs"
 
@@ -194,11 +194,24 @@ describe("shared hierarchy and recovery", () => {
   })
   it("shows parent navigation without exposing database IDs as labels", () => {
     pathname = "/songs/8be01/edit"
-    render(<WorkspaceBreadcrumbs />)
-    expect(container.textContent).toContain("DashboardSongsDetailsEdit")
+    render(<WorkspaceBreadcrumbs currentLabel="Grace in Every Season" />)
+    expect(container.textContent).toContain("DashboardSongsGrace in Every SeasonEdit")
     expect(container.textContent).not.toContain("8be01")
     expect(container.querySelector('[aria-current="page"]')?.textContent).toBe(
       "Edit"
     )
+  })
+
+  it("keeps regular page containers on the shared maximum width and allows named breadcrumbs", () => {
+    pathname = "/songs/8be01"
+    render(
+      <PageContainer className="max-w-3xl" breadcrumbTitle="Grace in Every Season">
+        <p>Song detail</p>
+      </PageContainer>
+    )
+    const main = container.querySelector("main")
+    expect(main?.className).toContain("max-w-[80rem]")
+    expect(main?.className).not.toContain("max-w-3xl")
+    expect(container.textContent).toContain("Grace in Every Season")
   })
 })

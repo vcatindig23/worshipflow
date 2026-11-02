@@ -72,6 +72,7 @@ export default async function SearchPage({
     const [
       songTitlesResult,
       songArtistsResult,
+      songAlbumsResult,
       setlistNamesResult,
       setlistDescriptionsResult,
     ] = await Promise.all([

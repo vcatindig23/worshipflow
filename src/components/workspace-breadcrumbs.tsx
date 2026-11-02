@@ -3,34 +3,17 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronRight, House } from "lucide-react"
+import { buildWorkspaceBreadcrumbs } from "@/lib/workspace-breadcrumbs"
 
-const labels: Record<string, string> = {
-  songs: "Songs",
-  setlists: "Setlists",
-  services: "Services",
-  files: "Files",
-  settings: "Settings",
-  security: "Account security",
-  team: "Team",
-  profile: "Profile",
-  church: "Church settings",
-  "my-schedule": "My schedule",
-  notifications: "Notifications",
-  activity: "Activity",
-  templates: "Templates",
-  history: "Service history",
-  insights: "Insights",
-  new: "Create",
-  edit: "Edit",
-  complete: "Complete service",
-  preparation: "Preparation",
-  versions: "Versions",
-  search: "Search",
-}
-export default function WorkspaceBreadcrumbs() {
+export default function WorkspaceBreadcrumbs({
+  currentLabel,
+}: {
+  currentLabel?: string
+}) {
   const pathname = usePathname()
-  const segments = pathname.split("/").filter(Boolean)
-  if (!segments.length) return null
+  const items = buildWorkspaceBreadcrumbs(pathname, currentLabel)
+  if (items.length === 0) return null
+
   return (
     <nav
       aria-label="Breadcrumb"
@@ -46,24 +29,25 @@ export default function WorkspaceBreadcrumbs() {
             Dashboard
           </Link>
         </li>
-        {segments.map((segment, index) => (
-          <li key={index} className="inline-flex min-w-0 items-center gap-2">
+        {items.map((item) => (
+          <li
+            key={item.href}
+            className="inline-flex min-w-0 items-center gap-2"
+          >
             <ChevronRight className="size-3 shrink-0" aria-hidden="true" />
-            {index === segments.length - 1 || segment === "versions" ? (
+            {item.current ? (
               <span
-                aria-current={
-                  index === segments.length - 1 ? "page" : undefined
-                }
-                className="font-medium text-[var(--foreground)]"
+                aria-current="page"
+                className="max-w-[min(55vw,24rem)] truncate font-medium text-[var(--foreground)]"
               >
-                {labels[segment] ?? "Details"}
+                {item.label}
               </span>
             ) : (
               <Link
-                href={"/" + segments.slice(0, index + 1).join("/")}
-                className="hover:text-[var(--foreground)]"
+                href={item.href}
+                className="max-w-[min(55vw,24rem)] truncate hover:text-[var(--foreground)]"
               >
-                {labels[segment] ?? "Details"}
+                {item.label}
               </Link>
             )}
           </li>

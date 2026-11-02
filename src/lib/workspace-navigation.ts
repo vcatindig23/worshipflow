@@ -1,4 +1,6 @@
 import {
+  Activity,
+  Bell,
   CalendarClock,
   CalendarDays,
   ContactRound,
@@ -6,7 +8,9 @@ import {
   Guitar,
   LayoutDashboard,
   ListMusic,
+  MessagesSquare,
   Music2,
+  Search,
   Settings2,
   UsersRound,
   type LucideIcon,
@@ -18,6 +22,7 @@ export type WorkspaceNavigationItem = {
   icon: LucideIcon
 }
 
+/** The destinations used most often while planning and running a service. */
 export const workspaceNavigationItems: WorkspaceNavigationItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/songs", label: "Songs", icon: Music2 },
@@ -27,11 +32,21 @@ export const workspaceNavigationItems: WorkspaceNavigationItem[] = [
   { href: "/my-schedule", label: "My Schedule", icon: CalendarClock },
   { href: "/settings/team", label: "Team", icon: UsersRound },
   { href: "/files", label: "Files", icon: FolderOpen },
-  { href: "/profile", label: "Profile", icon: ContactRound },
+  { href: "/chat", label: "Team chat", icon: MessagesSquare },
 ]
 
-export const workspaceSettingsNavigationItem: WorkspaceNavigationItem = {
-  href: "/settings",
-  label: "Settings",
-  icon: Settings2,
-}
+/** Helpful destinations kept separate from the primary worship workflow. */
+export const workspaceUtilityNavigationItems: WorkspaceNavigationItem[] = [
+  { href: "/search", label: "Search", icon: Search },
+  { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/activity", label: "Activity", icon: Activity },
+]
+
+/** Personal and administrative destinations are grouped away from workspace work. */
+export const workspaceAccountNavigationItems: WorkspaceNavigationItem[] = [
+  { href: "/profile", label: "Profile", icon: ContactRound },
+  { href: "/settings", label: "Settings", icon: Settings2 },
+]
+
+export const workspaceSettingsNavigationItem =
+  workspaceAccountNavigationItems[1]

@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-  CalendarDays,
   ChevronDown,
   ChevronRight,
   ContactRound,
@@ -143,16 +142,6 @@ export default function AccountOptionsMenu({
               <ContactRound aria-hidden="true" className="size-4 text-[var(--muted)]" />
               <span>Profile</span>
               <Shortcut>Alt ⇧ P</Shortcut>
-            </Link>
-
-            <Link
-              href="/my-schedule"
-              onClick={closeMenu}
-              className="flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
-            >
-              <CalendarDays aria-hidden="true" className="size-4 text-[var(--muted)]" />
-              <span>My Schedule</span>
-              <Shortcut>Alt ⇧ M</Shortcut>
             </Link>
 
             <Link

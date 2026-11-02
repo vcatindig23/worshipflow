@@ -13,6 +13,7 @@ import {
   Printer,
 } from "lucide-react"
 import RecordSongOpen from "@/components/songs/record-song-open"
+import WorkspaceBreadcrumbs from "@/components/workspace-breadcrumbs"
 import SongViewer from "@/components/songs/song-viewer"
 import SongVersionComparison from "@/components/songs/song-version-comparison"
 import SongReviewPanel, { type SongReviewComment } from "@/components/songs/song-review-panel"
@@ -239,17 +240,11 @@ export default async function SongPage({
   const canEdit = editableRoles.includes(membership.role)
 
   return (
-    <main className="mx-auto max-w-7xl space-y-7 px-4 py-6 sm:px-6 sm:py-8">
+    <main className="wf-page max-w-[80rem] space-y-7">
       <RecordSongOpen songId={typedSong.id} />
+      <WorkspaceBreadcrumbs currentLabel={typedSong.title} />
 
       <div className="flex flex-col gap-4">
-        <Link
-          href="/songs"
-          className="inline-flex w-fit items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
-        >
-          <ArrowLeft className="size-4" />
-          Songs
-        </Link>
 
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">

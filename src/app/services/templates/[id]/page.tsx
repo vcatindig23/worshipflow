@@ -96,15 +96,7 @@ export default async function ServiceTemplateDetailPage({
   const errorKey = typeof query.error === "string" ? query.error : ""
 
   return (
-    <PageContainer className="max-w-4xl">
-      <Link
-        href="/services/templates"
-        className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
-      >
-        <ArrowLeft className="size-4" />
-        All templates
-      </Link>
-
+    <PageContainer breadcrumbTitle={template.name}>
       {errorKey && errorMessages[errorKey] ? (
         <Feedback tone="error" title="Could not create service from template">
           {errorMessages[errorKey]}

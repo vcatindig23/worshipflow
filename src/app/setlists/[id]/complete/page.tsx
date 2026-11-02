@@ -81,7 +81,7 @@ export default async function CompleteServicePage({
   )
 
   return (
-    <PageContainer className="max-w-3xl">
+    <PageContainer breadcrumbTitle={setlist.name}>
       <Link
         href={`/setlists/${id}`}
         className="inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"

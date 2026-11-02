@@ -8,6 +8,7 @@ import {
 import { notFound, redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import SongViewer from "@/components/songs/song-viewer"
+import WorkspaceBreadcrumbs from "@/components/workspace-breadcrumbs"
 
 type VersionPageProps = {
   params: Promise<{
@@ -67,17 +68,10 @@ export default async function SongVersionPage({
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link
-            href={`/songs/${id}`}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)] hover:text-[var(--foreground)]"
-          >
-            <ArrowLeft className="size-4" />
-            Current song
-          </Link>
-
+    <main className="wf-page max-w-[80rem]">
+      <div className="mx-auto w-full max-w-6xl">
+        <WorkspaceBreadcrumbs currentLabel={version.title} />
+        <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--muted)]">
             <History className="size-4" />
             Version {version.version_number}

@@ -2,14 +2,23 @@ import type { ComponentProps, ReactNode } from "react"
 import WorkspaceBreadcrumbs from "@/components/workspace-breadcrumbs"
 import { cn } from "@/lib/utils"
 
+type PageContainerProps = ComponentProps<"main"> & {
+  breadcrumbTitle?: string
+}
+
 export function PageContainer({
   className,
   children,
+  breadcrumbTitle,
   ...props
-}: ComponentProps<"main">) {
+}: PageContainerProps) {
   return (
-    <main id="main-content" className={cn("wf-page", className)} {...props}>
-      <WorkspaceBreadcrumbs />
+    <main
+      id="main-content"
+      className={cn("wf-page", className, "max-w-[80rem]")}
+      {...props}
+    >
+      <WorkspaceBreadcrumbs currentLabel={breadcrumbTitle} />
       {children}
     </main>
   )

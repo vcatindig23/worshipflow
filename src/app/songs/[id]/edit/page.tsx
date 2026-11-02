@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ArrowLeft, Save } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
 import ChordProImportEditor from "@/components/songs/chordpro-import-editor"
+import WorkspaceBreadcrumbs from "@/components/workspace-breadcrumbs"
 import { createClient } from "@/lib/supabase/server"
 import { updateSong } from "./actions"
 
@@ -96,20 +97,11 @@ export default async function EditSongPage({
     : null
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href={`/songs/${song.id}`}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)] hover:text-[var(--foreground)]"
-          >
-            <ArrowLeft className="size-4" />
-            Song
-          </Link>
-
-          <span className="text-sm font-semibold">
-            Edit song
-          </span>
+    <main className="wf-page max-w-[80rem]">
+      <div className="mx-auto w-full max-w-5xl">
+        <WorkspaceBreadcrumbs currentLabel={song.title} />
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <span className="text-sm font-semibold">Edit song</span>
         </div>
 
         <header className="mt-8">

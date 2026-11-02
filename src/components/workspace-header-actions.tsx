@@ -28,6 +28,8 @@ import {
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { createPortal } from "react-dom"
 import { describeActivity, type ActivityEntry } from "@/lib/activity-log"
+import SearchHighlight from "@/components/search-highlight"
+import { getGlobalSearchOptionId } from "@/lib/global-search"
 
 import { searchWorkspaceLive } from "@/app/search/actions"
 import {
@@ -42,6 +44,7 @@ type HeaderNotification = {
   title: string
   body: string
   setlist_id: string | null
+  song_id: string | null
   read_at: string | null
   created_at: string
 }
@@ -143,6 +146,10 @@ function notificationHref(notification: HeaderNotification) {
     return "/chat"
   }
 
+  if (notification.song_id) {
+    return `/songs/${notification.song_id}`
+  }
+
   if (notification.setlist_id) {
     return `/setlists/${notification.setlist_id}`
   }
@@ -183,10 +190,33 @@ function NotificationIcon({ type }: { type: string }) {
   }
 
   if (type === "team_chat_message") {
+    return <MessagesSquare className="wf-icon-motion size-4 group-hover:scale-110" />
+  }
+
+  if (type === "song_edited" || type === "song_review_comment" || type === "song_review_status") {
+    return <Music2 className="wf-icon-motion size-4 group-hover:scale-110" />
+  }
+
+  if (type === "assignment_swap_request" || type === "assignment_swap_status") {
+    return <Users className="wf-icon-motion size-4 group-hover:scale-110" />
+  }
+
+  if (type === "service_announcement") {
     return <Bell className="wf-icon-motion size-4 group-hover:scale-110" />
   }
 
   return <CalendarDays className="wf-icon-motion size-4 group-hover:scale-110" />
+}
+
+function notificationCategoryLabel(type: string) {
+  if (type === "team_chat_mention") return "Mention"
+  if (type === "team_chat_message") return "Team chat"
+  if (type.startsWith("song_")) return "Song update"
+  if (type.startsWith("assignment_swap_")) return "Assignment change"
+  if (type === "service_announcement") return "Announcement"
+  if (type === "service_assignment_removed") return "Assignment update"
+  if (type === "service_assignment" || type === "service_reminder") return "Service update"
+  return "Notification"
 }
 
 export default function WorkspaceHeaderActions({
@@ -478,6 +508,7 @@ export default function WorkspaceHeaderActions({
           songs: result.songs as SearchSong[],
           setlists: result.setlists as SearchSetlist[],
         })
+        setActiveSearchResultIndex(0)
       } catch {
         if (!cancelled) {
           setSearchResults(null)
@@ -965,6 +996,7 @@ export default function WorkspaceHeaderActions({
                           type="button"
                           onClick={() => void openNotification(notification)}
                           disabled={isBusy}
+                          aria-label={`${notification.read_at ? "Read" : "Unread"} notification: ${notification.title}`}
                           className={`group flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/25 disabled:opacity-60 ${notification.read_at ? "bg-white" : "bg-[var(--brand-soft)]/40"}`}
                         >
                           <span className="relative mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-[var(--brand)] ring-1 ring-[var(--border)]">
@@ -974,6 +1006,9 @@ export default function WorkspaceHeaderActions({
                             ) : null}
                           </span>
                           <span className="min-w-0 flex-1">
+                            <span className="mb-1 block text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--brand)]">
+                              {notificationCategoryLabel(notification.type)}
+                            </span>
                             <span className="block text-sm font-semibold leading-5 text-[var(--foreground)]">
                               {notification.title}
                             </span>
@@ -1038,6 +1073,16 @@ export default function WorkspaceHeaderActions({
                               autoCorrect="off"
                               spellCheck={false}
                               type="search"
+                              role="combobox"
+                              aria-autocomplete="list"
+                              aria-expanded={searchQuery.trim().length >= 2}
+                              aria-activedescendant={
+                                searchResultTargets.length > 0
+                                  ? getGlobalSearchOptionId(
+                                      searchResultTargets[Math.min(activeSearchResultIndex, searchResultTargets.length - 1)]?.key ?? ""
+                                    )
+                                  : undefined
+                              }
                               value={searchQuery}
                               maxLength={100}
                               onChange={(event) => {
@@ -1051,6 +1096,22 @@ export default function WorkspaceHeaderActions({
                               className="h-9 w-full border-0 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:ring-0"
                             />
                           </label>
+                          {searchQuery ? (
+                            <button
+                              type="button"
+                              aria-label="Clear search"
+                              onClick={() => {
+                                setSearchQuery("")
+                                setSearchResults(null)
+                                setSearchError("")
+                                setActiveSearchResultIndex(0)
+                                searchInputRef.current?.focus({ preventScroll: true })
+                              }}
+                              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
+                            >
+                              <X className="size-4" />
+                            </button>
+                          ) : null}
                           <button
                             type="button"
                             aria-label="Close search"
@@ -1061,7 +1122,13 @@ export default function WorkspaceHeaderActions({
                           </button>
                         </div>
             
-                        <div id="workspace-global-search-results" className="min-h-[220px] flex-1 overflow-y-auto px-3 py-3 sm:px-4">
+                        <div
+                          id="workspace-global-search-results"
+                          role="listbox"
+                          aria-label="Global search results"
+                          aria-busy={isSearching}
+                          className="min-h-[220px] flex-1 overflow-y-auto px-3 py-3 sm:px-4"
+                        >
                           {searchQuery.trim().length < 2 ? (
                             <div className="flex min-h-[190px] flex-col items-center justify-center text-center">
                               <span className="flex size-11 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
@@ -1087,8 +1154,8 @@ export default function WorkspaceHeaderActions({
                           ) : !searchResults || (searchResults.songs.length === 0 && searchResults.setlists.length === 0) ? (
                             <div className="flex min-h-[190px] flex-col items-center justify-center px-5 text-center">
                               <Search className="size-6 text-[var(--muted)]" />
-                              <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">No matches found</p>
-                              <p className="mt-1 text-xs text-[var(--muted)]">Try a song title, artist, album, or setlist name.</p>
+                              <p className="mt-3 text-sm font-semibold text-[var(--foreground)]">No results for “{searchQuery.trim()}”</p>
+                              <p className="mt-1 text-xs text-[var(--muted)]">Try a different song, artist, album, or service name, or clear your search.</p>
                             </div>
                           ) : (
                             <div className="space-y-4">
@@ -1101,6 +1168,9 @@ export default function WorkspaceHeaderActions({
                                     {searchResults.songs.map((song, index) => (
                                       <li key={song.id}>
                                         <Link
+                                          id={getGlobalSearchOptionId(`song:${song.id}`)}
+                                          role="option"
+                                          aria-selected={activeSearchResultIndex === index}
                                           href={`/songs/${song.id}`}
                                           onClick={onCloseSearch}
                                           onMouseEnter={() => setActiveSearchResultIndex(index)}
@@ -1110,8 +1180,12 @@ export default function WorkspaceHeaderActions({
                                             <Music2 className="size-4" />
                                           </span>
                                           <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{song.title}</span>
-                                            <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">{song.artist || song.album || "Artist not set"}</span>
+                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]">
+                                              <SearchHighlight value={song.title} query={searchQuery} />
+                                            </span>
+                                            <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">
+                                              <SearchHighlight value={song.artist || song.album || "Artist not set"} query={searchQuery} />
+                                            </span>
                                           </span>
                                           {song.status === "archived" ? (
                                             <span className="wf-status wf-status-warning">Archived</span>
@@ -1132,6 +1206,9 @@ export default function WorkspaceHeaderActions({
                                     {searchResults.setlists.map((setlist, index) => (
                                       <li key={setlist.id}>
                                         <Link
+                                          id={getGlobalSearchOptionId(`setlist:${setlist.id}`)}
+                                          role="option"
+                                          aria-selected={activeSearchResultIndex === searchResults.songs.length + index}
                                           href={`/setlists/${setlist.id}`}
                                           onClick={onCloseSearch}
                                           onMouseEnter={() => setActiveSearchResultIndex(searchResults.songs.length + index)}
@@ -1141,7 +1218,9 @@ export default function WorkspaceHeaderActions({
                                             {setlist.service_date ? <CalendarDays className="size-4" /> : <ListMusic className="size-4" />}
                                           </span>
                                           <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{setlist.name}</span>
+                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]">
+                                              <SearchHighlight value={setlist.name} query={searchQuery} />
+                                            </span>
                                             <span className="mt-0.5 block text-xs text-[var(--muted)]">
                                               {setlist.service_date
                                                 ? new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${setlist.service_date}T00:00:00Z`))

@@ -31,17 +31,36 @@ type Notification = {
   created_at: string
 }
 
+function notificationCategoryLabel(type: Notification["type"]) {
+  if (type === "team_chat_mention") return "Mention"
+  if (type === "team_chat_message") return "Team chat"
+  if (type.startsWith("song_")) return "Song update"
+  if (type.startsWith("assignment_swap_")) return "Assignment change"
+  if (type === "service_announcement") return "Announcement"
+  if (type === "service_assignment_removed") return "Assignment update"
+  if (type === "service_assignment" || type === "service_reminder") return "Service update"
+  return "Notification"
+}
+
 export default async function NotificationsPage() {
   const workspace = await getWorkspace()
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("notifications")
-    .select("id, type, title, body, setlist_id, song_id, read_at, created_at")
-    .eq("user_id", workspace.userId)
-    .order("created_at", { ascending: false })
-    .limit(100)
+  const [notificationsResult, unreadResult] = await Promise.all([
+    supabase
+      .from("notifications")
+      .select("id, type, title, body, setlist_id, song_id, read_at, created_at")
+      .eq("user_id", workspace.userId)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", workspace.userId)
+      .is("read_at", null),
+  ])
 
-  if (error) {
+  if (notificationsResult.error || unreadResult.error) {
+    const error = notificationsResult.error ?? unreadResult.error
     console.error("load_notifications failed:", {
       code: error.code,
       message: error.message,
@@ -49,10 +68,8 @@ export default async function NotificationsPage() {
     throw new Error("Unable to load your notifications.")
   }
 
-  const notifications = (data ?? []) as Notification[]
-  const unreadCount = notifications.filter(
-    (notification) => !notification.read_at
-  ).length
+  const notifications = (notificationsResult.data ?? []) as Notification[]
+  const unreadCount = unreadResult.count ?? 0
 
   return (
     <PageContainer className="max-w-4xl">
@@ -113,22 +130,35 @@ export default async function NotificationsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-sm font-semibold">
-                        {notification.title}
-                      </h2>
+                      <span className="inline-flex rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]">
+                        {notificationCategoryLabel(notification.type)}
+                      </span>
                       {!notification.read_at ? (
-                        <span className="size-2 rounded-full bg-[var(--brand)]" aria-label="Unread" />
-                      ) : null}
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-[var(--brand)]">
+                          <span className="size-1.5 rounded-full bg-[var(--brand)]" />
+                          Unread
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-medium text-[var(--muted)]">
+                          Read
+                        </span>
+                      )}
                     </div>
+                    <h2 className="mt-1 text-sm font-semibold">
+                      {notification.title}
+                    </h2>
                     <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
                       {notification.body}
                     </p>
-                    <p className="mt-2 text-xs text-[var(--muted)]">
+                    <time
+                      dateTime={notification.created_at}
+                      className="mt-2 block text-xs text-[var(--muted)]"
+                    >
                       {new Intl.DateTimeFormat("en-PH", {
                         dateStyle: "medium",
                         timeStyle: "short",
                       }).format(new Date(notification.created_at))}
-                    </p>
+                    </time>
                     <div className="mt-3 flex flex-wrap items-center gap-4">
                       {notification.type === "team_chat_message" ||
                       notification.type === "team_chat_mention" ? (
@@ -162,6 +192,7 @@ export default async function NotificationsPage() {
                           />
                           <button
                             type="submit"
+                            aria-label={`Mark “${notification.title}” as read`}
                             className="text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
                           >
                             Mark as read

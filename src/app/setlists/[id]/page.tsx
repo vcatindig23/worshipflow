@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
+import WorkspaceBreadcrumbs from "@/components/workspace-breadcrumbs"
 import { Feedback } from "@/components/ui/feedback"
 import { Input, Select, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
@@ -582,14 +583,10 @@ export default async function SetlistPage({
       : ""
 
   return (
-    <main className="wf-page setlist-print-layout max-w-7xl space-y-7 px-6 py-8">
-      <Link
-        href="/setlists"
-        className="setlist-print-hide inline-flex items-center gap-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
-      >
-        <ArrowLeft className="size-4" />
-        Setlists
-      </Link>
+    <main className="wf-page setlist-print-layout max-w-[80rem] space-y-7 px-6 py-8">
+      <div className="setlist-print-hide">
+        <WorkspaceBreadcrumbs currentLabel={setlist.name} />
+      </div>
 
       {errorMessage ? (
         <Feedback tone="error" title="Setlist action could not be completed">
