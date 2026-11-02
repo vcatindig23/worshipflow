@@ -20,6 +20,8 @@ export default function AuthSubmitButton({
     <button
       type="submit"
       disabled={pending}
+      aria-busy={pending}
+      aria-label={pending ? pendingLabel : undefined}
       className={
         className ??
         "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-dark)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-60"
@@ -30,7 +32,7 @@ export default function AuthSubmitButton({
       ) : (
         <ArrowRight aria-hidden="true" className="size-4" />
       )}
-      {pending ? pendingLabel : label}
+      {label}
     </button>
   )
 }

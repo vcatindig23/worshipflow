@@ -33,6 +33,21 @@ describe("Vercel web interface guidelines baseline", () => {
     expect(submit).not.toContain("{pending ? pendingText : children}")
   })
 
+  it("preserves visible authentication submit labels during pending requests", () => {
+    const authSubmit = source("src/components/auth/auth-submit-button.tsx")
+    const login = source("src/app/login/page.tsx")
+
+    expect(authSubmit).toContain("aria-busy={pending}")
+    expect(authSubmit).toContain("aria-label={pending ? pendingLabel : undefined}")
+    expect(authSubmit).toContain("{label}")
+    expect(authSubmit).not.toContain("{pending ? pendingLabel : label}")
+
+    expect(login).toContain("aria-busy={pending}")
+    expect(login).toContain('aria-label={pending ? "Signing in…" : undefined}')
+    expect(login).toContain("Sign in")
+    expect(login).not.toContain('pending ? "Signing in…" : "Sign in"')
+  })
+
   it("keeps authentication surfaces and browser chrome synchronized with the theme", () => {
     const auth = source("src/components/auth/auth-layout.tsx")
     const theme = source("src/components/site-preferences.tsx")
