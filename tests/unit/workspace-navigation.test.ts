@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { isActiveNavigationPath } from "@/lib/navigation"
 import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 import {
+  workspaceManagementNavigationItems,
   workspaceNavigationItems,
   workspaceSettingsNavigationItem,
 } from "@/lib/workspace-navigation"
@@ -10,10 +11,7 @@ describe("shared workspace navigation", () => {
   it("exposes each requested workspace destination exactly once", () => {
     const destinations = [
       ...workspaceNavigationItems.map(({ label, href }) => ({ label, href })),
-      {
-        label: workspaceSettingsNavigationItem.label,
-        href: workspaceSettingsNavigationItem.href,
-      },
+      ...workspaceManagementNavigationItems.map(({ label, href }) => ({ label, href })),
     ]
 
     expect(destinations).toEqual([
@@ -23,9 +21,9 @@ describe("shared workspace navigation", () => {
       { label: "Setlists", href: "/setlists" },
       { label: "Services", href: "/services" },
       { label: "My Schedule", href: "/my-schedule" },
-      { label: "Team", href: "/settings/team" },
+      { label: "Team Chat", href: "/chat" },
       { label: "Files", href: "/files" },
-      { label: "Profile", href: "/profile" },
+      { label: "Team", href: "/settings/team" },
       { label: "Settings", href: "/settings" },
     ])
     expect(new Set(destinations.map(({ href }) => href)).size).toBe(destinations.length)

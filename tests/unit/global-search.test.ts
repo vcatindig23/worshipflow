@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   normalizeGlobalSearchQuery,
   toSearchPattern,
+  splitSearchHighlights,
 } from "../../src/lib/global-search"
 
 describe("global search query helpers", () => {
@@ -18,5 +19,26 @@ describe("global search query helpers", () => {
 
   it("escapes SQL LIKE wildcard characters", () => {
     expect(toSearchPattern("100%_ready\\")).toBe("%100\\%\\_ready\\\\%")
+  })
+})
+
+describe("global search highlighting", () => {
+  it("highlights multiple query terms without changing unmatched text", () => {
+    expect(splitSearchHighlights("Amazing Grace (My Chains Are Gone)", "amazing gone")).toEqual([
+      { text: "Amazing", match: true },
+      { text: " Grace (My Chains Are ", match: false },
+      { text: "Gone", match: true },
+      { text: ")", match: false },
+    ])
+  })
+
+  it("treats query punctuation literally and ignores empty terms", () => {
+    expect(splitSearchHighlights("100% Ready", "  100%   ")).toEqual([
+      { text: "100%", match: true },
+      { text: " Ready", match: false },
+    ])
+    expect(splitSearchHighlights("Untouched", "   ")).toEqual([
+      { text: "Untouched", match: false },
+    ])
   })
 })

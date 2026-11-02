@@ -72,7 +72,7 @@ export default async function NotificationsPage() {
   ).length
 
   return (
-    <PageContainer className="max-w-4xl">
+    <PageContainer>
         <PageHeader
           className="border-b border-[var(--border)] pb-6"
           title="Notifications"
