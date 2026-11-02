@@ -420,14 +420,14 @@ export default function DashboardView({
                             aria-valuenow={setlist.readiness.percentage}
                           >
                             <div
-                              className={"h-full rounded-full transition-all " + (
+                              className={"h-full rounded-full origin-left transition-transform " + (
                                 setlist.readiness.status === "ready"
                                   ? "bg-[var(--success)]"
                                   : setlist.readiness.status === "needs_attention"
                                     ? "bg-[var(--warning)]"
                                     : "bg-[var(--danger)]"
                               )}
-                              style={{ width: String(setlist.readiness.percentage) + "%" }}
+                              style={{ transform: `scaleX(${setlist.readiness.percentage / 100})` }}
                             />
                           </div>
                           <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-[10px] leading-4 text-[var(--muted)]">

@@ -27,7 +27,7 @@ export default async function MfaPage({ searchParams }: { searchParams: Promise<
     <form action={verifyMfa} className="space-y-4">
       <input type="hidden" name="next" value={next} />
       <label htmlFor="mfa-code" className="block text-sm font-medium">Authenticator code</label>
-      <Input id="mfa-code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required autoFocus />
+      <Input id="mfa-code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required />
       <FormSubmitButton pendingText="Verifying…" className="w-full">Verify sign-in</FormSubmitButton>
     </form>
     <p className="text-sm leading-6 text-[var(--muted)]">Lost your authenticator? Use another signed-in device to manage it, or contact the project maintainer for help with verified account recovery. A password reset does not remove MFA.</p>

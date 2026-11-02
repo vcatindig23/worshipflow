@@ -813,9 +813,9 @@ export default async function ServicesPage({
 
                           <div className="wf-readiness-progress-track mt-3 h-1.5 overflow-hidden rounded-full">
                             <div
-                              className="wf-readiness-progress-fill h-full rounded-full transition-all"
+                              className="wf-readiness-progress-fill origin-left h-full rounded-full transition-transform"
                               style={{
-                                width: `${readiness.percentage}%`,
+                                transform: `scaleX(${readiness.percentage / 100})`,
                               }}
                             />
                           </div>
