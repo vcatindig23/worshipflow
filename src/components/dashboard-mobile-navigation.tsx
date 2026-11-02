@@ -171,10 +171,8 @@ export default function DashboardMobileNavigation({
               </button>
             </div>
 
-            <nav
-              aria-label="Workspace"
-              className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-5"
-            >
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5">
+              <nav aria-label="Workspace" className="space-y-1">
               <p className="px-3 pb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--sidebar-muted)]">
                 Workspace
               </p>
