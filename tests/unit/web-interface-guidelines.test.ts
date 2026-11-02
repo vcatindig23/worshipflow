@@ -14,6 +14,8 @@ describe("Vercel web interface guidelines baseline", () => {
 
     expect(globals).toContain("touch-action: manipulation")
     expect(globals).toContain("@media (pointer: coarse)")
+    expect(globals).toContain('[class~="h-10"]')
+    expect(globals).toContain('[class~="size-10"]')
     expect(globals).toContain("env(safe-area-inset-bottom)")
     expect(designSystem).toContain("overscroll-behavior: contain")
     expect(designSystem).toContain("env(safe-area-inset-top)")
