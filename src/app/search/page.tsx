@@ -1,6 +1,6 @@
 import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/form-controls"
-import { PageContainer } from "@/components/ui/page"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
   CalendarDays,
@@ -135,19 +135,12 @@ export default async function SearchPage({
   const hasResults = songs.length > 0 || setlists.length > 0
 
   return (
-    <PageContainer className="max-w-5xl">
-      <section>
-        <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-          <Search className="size-3.5" />
-          Workspace search
-        </span>
-        <h1 className="wf-page-title mt-3">
-          Search songs and setlists
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-          Search your {workspace.organizationName} workspace.
-        </p>
-      </section>
+    <PageContainer>
+      <PageHeader
+        eyebrow="Workspace search"
+        title="Search songs and setlists"
+        description={`Search your ${workspace.organizationName} workspace.`}
+      />
 
       <form
         action="/search"
@@ -167,6 +160,14 @@ export default async function SearchPage({
             className="h-12 pl-10 pr-4"
           />
         </label>
+        {query ? (
+          <Link
+            href="/search"
+            className={buttonVariants({ variant: "outline", size: "lg", className: "h-12 px-4" })}
+          >
+            Clear
+          </Link>
+        ) : null}
         <button
           type="submit"
           className={buttonVariants({ size: "lg", className: "h-12 px-5" })}
