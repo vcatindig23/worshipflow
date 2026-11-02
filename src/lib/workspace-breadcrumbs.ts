@@ -12,6 +12,8 @@ const routeLabels: Record<string, string> = {
   settings: "Settings",
   security: "Account security",
   team: "Team",
+  invitations: "Invitations",
+  audit: "Activity log",
   profile: "Profile",
   church: "Church settings",
   "my-schedule": "My schedule",

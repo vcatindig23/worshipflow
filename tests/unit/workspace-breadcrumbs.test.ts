@@ -3,7 +3,7 @@ import { getWorkspaceBreadcrumbs } from "@/lib/workspace-breadcrumbs"
 
 describe("workspace breadcrumbs", () => {
   it.each([
-    ["/songs/3a1b/song-edit", ["Songs", "Song chart", "Edit"]],
+    ["/songs/3a1b/edit", ["Songs", "Song chart", "Edit"]],
     ["/setlists/4b2c", ["Setlists", "Service plan"]],
     ["/settings/team/invitations", ["Settings", "Team", "Details"]],
     ["/services/templates", ["Services", "Service templates"]],

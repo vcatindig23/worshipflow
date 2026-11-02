@@ -4,7 +4,6 @@ import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 import {
   workspaceManagementNavigationItems,
   workspaceNavigationItems,
-  workspaceSettingsNavigationItem,
 } from "@/lib/workspace-navigation"
 
 describe("shared workspace navigation", () => {

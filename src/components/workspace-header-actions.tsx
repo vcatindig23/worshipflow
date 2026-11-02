@@ -1174,8 +1174,8 @@ export default function WorkspaceHeaderActions({
                                             <Music2 className="size-4" />
                                           </span>
                                           <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{song.title}</span>
-                                            <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">{song.artist || song.album || "Artist not set"}</span>
+                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]"><HighlightedMatch value={song.title} query={searchQuery} /></span>
+                                            <span className="mt-0.5 block truncate text-xs text-[var(--muted)]"><HighlightedMatch value={song.artist || song.album || "Artist not set"} query={searchQuery} /></span>
                                           </span>
                                           {song.status === "archived" ? (
                                             <span className="wf-status wf-status-warning">Archived</span>
