@@ -260,13 +260,20 @@ export default function ServicePreparationChecklist({
         </div>
       </div>
 
-      <div className="mt-5 h-2 overflow-hidden rounded-full bg-[var(--surface)]">
+      <div
+        className="mt-5 h-2 overflow-hidden rounded-full bg-[var(--surface)]"
+        role="progressbar"
+        aria-label="Core service preparation"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={completionPercent}
+      >
         <div
           className={
-            "h-full rounded-full transition-all " +
+            "origin-left h-full rounded-full transition-transform " +
             (isReady ? "bg-[var(--success)]" : completionPercent >= 50 ? "bg-[var(--warning)]" : "bg-[var(--danger)]")
           }
-          style={{ width: `${completionPercent}%` }}
+          style={{ transform: `scaleX(${completionPercent / 100})` }}
         />
       </div>
 
