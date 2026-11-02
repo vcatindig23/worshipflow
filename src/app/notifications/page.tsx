@@ -31,6 +31,23 @@ type Notification = {
   created_at: string
 }
 
+function notificationTypeLabel(type: Notification["type"]) {
+  const labels: Record<Notification["type"], string> = {
+    service_assignment: "Service assignment",
+    service_assignment_removed: "Assignment update",
+    team_chat_message: "Team chat",
+    team_chat_mention: "Mention",
+    service_announcement: "Announcement",
+    assignment_swap_request: "Swap request",
+    assignment_swap_status: "Swap update",
+    service_reminder: "Service reminder",
+    song_edited: "Song updated",
+    song_review_comment: "Song review",
+    song_review_status: "Review status",
+  }
+  return labels[type]
+}
+
 export default async function NotificationsPage() {
   const workspace = await getWorkspace()
   const supabase = await createClient()
@@ -113,6 +130,9 @@ export default async function NotificationsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-[var(--surface)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">
+                        {notificationTypeLabel(notification.type)}
+                      </span>
                       <h2 className="text-sm font-semibold">
                         {notification.title}
                       </h2>

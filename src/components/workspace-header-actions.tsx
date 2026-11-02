@@ -30,6 +30,7 @@ import { createPortal } from "react-dom"
 import { describeActivity, type ActivityEntry } from "@/lib/activity-log"
 
 import { searchWorkspaceLive } from "@/app/search/actions"
+import { splitSearchHighlights } from "@/lib/global-search"
 import {
   loadNotificationPreview,
   markHeaderNotificationRead,
@@ -42,6 +43,7 @@ type HeaderNotification = {
   title: string
   body: string
   setlist_id: string | null
+  song_id: string | null
   read_at: string | null
   created_at: string
 }
@@ -135,12 +137,55 @@ function formatNotificationTime(value: string) {
   }).format(date)
 }
 
+function formatNotificationDate(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "Date unavailable"
+  return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeStyle: "short" }).format(date)
+}
+
+function notificationTypeLabel(type: string) {
+  const labels: Record<string, string> = {
+    team_chat_message: "Team chat",
+    team_chat_mention: "Mention",
+    service_assignment: "Service assignment",
+    service_assignment_removed: "Assignment update",
+    service_announcement: "Announcement",
+    assignment_swap_request: "Swap request",
+    assignment_swap_status: "Swap update",
+    service_reminder: "Service reminder",
+    song_edited: "Song updated",
+    song_review_comment: "Song review",
+    song_review_status: "Review status",
+  }
+  return labels[type] ?? "Workspace update"
+}
+
+function HighlightedMatch({ value, query }: { value: string; query: string }) {
+  return (
+    <>
+      {splitSearchHighlights(value, query).map((part, index) =>
+        part.match ? (
+          <mark key={index} className="rounded-sm bg-[var(--warning-soft)] px-0.5 text-[var(--foreground)]">
+            {part.text}
+          </mark>
+        ) : (
+          <span key={index}>{part.text}</span>
+        )
+      )}
+    </>
+  )
+}
+
 function notificationHref(notification: HeaderNotification) {
   if (
     notification.type === "team_chat_message" ||
     notification.type === "team_chat_mention"
   ) {
     return "/chat"
+  }
+
+  if (notification.song_id) {
+    return `/songs/${notification.song_id}`
   }
 
   if (notification.setlist_id) {
@@ -981,7 +1026,9 @@ export default function WorkspaceHeaderActions({
                               {notification.body}
                             </span>
                             <span className="mt-1.5 flex items-center gap-1.5 text-[10px] font-medium text-[var(--muted)]">
-                              {formatNotificationTime(notification.created_at)}
+                              <time dateTime={notification.created_at} title={formatNotificationDate(notification.created_at)}>
+                                {formatNotificationTime(notification.created_at)}
+                              </time>
                               {href ? <span>· Open update</span> : null}
                             </span>
                           </span>
@@ -1051,6 +1098,23 @@ export default function WorkspaceHeaderActions({
                               className="h-9 w-full border-0 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] focus:ring-0"
                             />
                           </label>
+                          {searchQuery ? (
+                            <button
+                              type="button"
+                              aria-label="Clear search query"
+                              title="Clear search query"
+                              onClick={() => {
+                                setSearchQuery("")
+                                setSearchResults(null)
+                                setSearchError("")
+                                setActiveSearchResultIndex(0)
+                                searchInputRef.current?.focus()
+                              }}
+                              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
+                            >
+                              <X className="size-4" />
+                            </button>
+                          ) : null}
                           <button
                             type="button"
                             aria-label="Close search"
@@ -1141,7 +1205,7 @@ export default function WorkspaceHeaderActions({
                                             {setlist.service_date ? <CalendarDays className="size-4" /> : <ListMusic className="size-4" />}
                                           </span>
                                           <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]">{setlist.name}</span>
+                                            <span className="block truncate text-sm font-semibold text-[var(--foreground)]"><HighlightedMatch value={setlist.name} query={searchQuery} /></span>
                                             <span className="mt-0.5 block text-xs text-[var(--muted)]">
                                               {setlist.service_date
                                                 ? new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${setlist.service_date}T00:00:00Z`))
