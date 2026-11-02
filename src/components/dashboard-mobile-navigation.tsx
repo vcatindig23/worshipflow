@@ -122,7 +122,7 @@ export default function DashboardMobileNavigation({
         aria-haspopup="dialog"
         aria-controls="mobile-workspace-navigation"
         aria-expanded={open}
-        className="group inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition duration-200 hover:border-[var(--brand)]/40 hover:bg-[var(--brand-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 lg:hidden"
+        className="group inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition duration-200 hover:border-[var(--brand)]/40 hover:bg-[var(--brand-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 lg:hidden"
       >
         <Menu aria-hidden="true" className="wf-icon-motion size-5" />
       </button>
@@ -165,7 +165,7 @@ export default function DashboardMobileNavigation({
                 type="button"
                 aria-label="Close navigation"
                 onClick={() => closeNavigation()}
-                className="group inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-[var(--sidebar-muted)] transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                className="group inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-[var(--sidebar-muted)] transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
               >
                 <X aria-hidden="true" className="wf-icon-motion size-5" />
               </button>
