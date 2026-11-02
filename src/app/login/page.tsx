@@ -126,6 +126,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={pending}
+              aria-busy={pending}
+              aria-label={pending ? "Signing in…" : undefined}
               className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pending ? (
@@ -136,7 +138,7 @@ export default function LoginPage() {
                   className="size-4 transition-transform group-hover:translate-x-0.5"
                 />
               )}
-              {pending ? "Signing in…" : "Sign in"}
+              Sign in
             </button>
           </form>
         </section>

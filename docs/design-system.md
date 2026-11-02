@@ -25,7 +25,7 @@ Apply the installed Web Interface Guidelines skill and repository `AGENTS.md` wh
 - Fixed notices and modal surfaces account for safe-area insets. Modal scrolling is contained so it does not pull the page behind it.
 - Native selects declare both foreground and background colors. Theme changes also update the browser `theme-color` metadata.
 - Use `transform`/`opacity` for motion. Progress fills scale from the left rather than animating layout width; avoid `transition-all` and honor reduced motion.
-- Keep the original visible submit label while a request is pending; expose the pending state through `aria-busy` and an accessible pending label. Avoid mobile autofocus unless it is essential.
+- Keep the original visible submit label while a request is pending across standard and authentication forms; expose the pending state through `aria-busy` and an accessible pending label. Avoid mobile autofocus unless it is essential.
 - Use scroll margins for in-page targets and retain visible keyboard focus, skip navigation, semantic controls, and resilient safe-area spacing.
 
 ## Components
