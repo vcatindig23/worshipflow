@@ -15,8 +15,8 @@ describe("song library and Chord Chart UX", () => {
     expect(songsPage).toContain("keepCurrentPage")
     expect(songsPage).toContain("href={clearFiltersHref}")
     expect(songsPage).toContain("Sort: ")
-    expect(songsPage).toContain(">List</Link>")
-    expect(songsPage).toContain(">Grid</Link>")
+    expect(songsPage).toContain('aria-label="List view"')
+    expect(songsPage).toContain('aria-label="Grid view"')
   })
 
   it("keeps scan-critical song metadata visible in list and grid cards", () => {
