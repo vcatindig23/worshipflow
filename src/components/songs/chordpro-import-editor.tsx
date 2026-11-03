@@ -61,10 +61,11 @@ export default function ChordProImportEditor({
     const lineIndex = lineNumber - 1
     if (lineIndex < 0 || lineIndex >= lines.length) return
 
+    const sourceLine = lines[lineIndex] ?? ""
     const lineStart = lines
       .slice(0, lineIndex)
       .reduce((offset, line) => offset + line.length + 1, 0)
-    const lineEnd = lineStart + lines[lineIndex].length
+    const lineEnd = lineStart + sourceLine.length
 
     textarea.focus()
     textarea.setSelectionRange(lineStart, lineEnd)
