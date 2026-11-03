@@ -135,7 +135,7 @@ export default async function EditSongPage({
           </div>
         ) : null}
 
-        <ProtectedForm action={updateSong} className="mt-6 space-y-6">
+        <ProtectedForm action={updateSong} showStatus className="mt-6 space-y-6">
           <input
             type="hidden"
             name="id"
