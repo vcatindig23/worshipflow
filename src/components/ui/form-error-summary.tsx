@@ -1,7 +1,7 @@
 "use client"
 
+import { CircleAlert } from "lucide-react"
 import { useEffect, useRef, type ReactNode } from "react"
-import { Feedback } from "./feedback"
 
 type FormErrorSummaryProps = {
   title: string
@@ -27,9 +27,13 @@ export function FormErrorSummary({ title, children }: FormErrorSummaryProps) {
       data-form-error-summary
       className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)] focus-visible:ring-offset-2"
     >
-      <Feedback tone="error" title={title}>
-        {children}
-      </Feedback>
+      <div role="alert" className="wf-feedback wf-feedback-error">
+        <CircleAlert className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">{title}</p>
+          <div className="mt-1 text-sm leading-6">{children}</div>
+        </div>
+      </div>
     </div>
   )
 }
