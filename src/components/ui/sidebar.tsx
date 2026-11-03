@@ -91,7 +91,7 @@ export function SidebarProvider({
       <div
         data-slot="sidebar-wrapper"
         data-state={contextValue.state}
-        className={`group/sidebar-wrapper flex min-h-svh w-full ${className}`.trim()}
+        className={`group/sidebar-wrapper min-h-svh w-full ${className}`.trim()}
         style={providerStyle}
         {...props}
       >
@@ -312,7 +312,7 @@ export function SidebarMenuButton({
     .join(" ")
 
   const enhancedProps = {
-    className: [element.props.className, buttonClasses].filter(Boolean).join(" "),
+    className: [(element.props as React.HTMLAttributes<HTMLElement>).className, buttonClasses].filter(Boolean).join(" "),
     "data-slot": "sidebar-menu-button",
     "data-active": isActive ? "true" : "false",
     "aria-current": isActive ? ariaCurrent : undefined,
