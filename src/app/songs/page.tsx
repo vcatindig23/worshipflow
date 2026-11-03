@@ -1077,6 +1077,11 @@ export default async function SongsPage({
                             name="songId"
                             value={song.id}
                           />
+                          <input
+                            type="hidden"
+                            name="redirectTo"
+                            value={buildHref(params, {})}
+                          />
 
                           <input
                             type="hidden"
