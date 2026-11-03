@@ -716,7 +716,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
 
           <section
             id="your-upcoming-assignments"
-            data-tour="member-assignments"
+            data-tour="team-priorities"
             aria-labelledby="dashboard-my-assignments-title"
             className="mt-6 wf-card overflow-hidden"
           >
