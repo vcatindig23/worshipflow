@@ -38,7 +38,7 @@ describe("composable workspace sidebar", () => {
       </SidebarProvider>
     )
 
-    expect(markup).toContain('data-sidebar-state="collapsed"')
+    expect(markup).toContain('data-state="collapsed"')
     expect(markup).toContain('data-collapsible="icon"')
     expect(markup).toContain("var(--sidebar-width-icon)")
   })
