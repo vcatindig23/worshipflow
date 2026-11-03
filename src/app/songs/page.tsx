@@ -509,7 +509,6 @@ export default async function SongsPage({
     selectedTag ? "Tag: " + selectedTag : null,
     selectedKey ? "Key: " + selectedKey : null,
     tempoBucket !== "all" ? tempoBucketLabels[tempoBucket] : null,
-    sort !== "title" ? "Sort: " + sortLabels[sort] : null,
   ].filter((description): description is string => Boolean(description))
   const keepCurrentPage = (updates: Record<string, string | undefined>) =>
     buildHref(params, { ...updates, page: String(page) })
