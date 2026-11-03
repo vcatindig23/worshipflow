@@ -88,7 +88,7 @@ export default async function NewSongPage({
             </div>
           ) : null}
 
-          <ProtectedForm action={createSong} className="space-y-7">
+          <ProtectedForm action={createSong} showStatus className="space-y-7">
             <section>
               <div className="mb-4">
                 <h2 className="text-base font-semibold">

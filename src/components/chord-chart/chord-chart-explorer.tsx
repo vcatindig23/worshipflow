@@ -310,6 +310,9 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
           ))}
         </svg>
       </div>
+      <p className="text-xs text-[var(--muted)] sm:hidden">
+        Swipe horizontally to view all six strings and the full fretboard.
+      </p>
       <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
         <span className="font-medium text-[var(--foreground)]">String notes (low E → high e):</span>
         <span>{stringNotes.join(" · ")}</span>
@@ -335,13 +338,74 @@ function GuitarShapeSelector({ root, intervals, chordTypeId }: { root: number; i
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2" aria-label="Select guitar inversion or voicing">
+      <div
+        role="group"
+        aria-label="Select guitar inversion or voicing"
+        className="flex flex-wrap gap-2"
+      >
         {shapes.map((item, index) => {
-          const sameBassCount = shapes.slice(0, index).filter((previous) => previous.bassPitchClass === item.bassPitchClass).length
-          const label = getInversionName(root, item.bassPitchClass, chordOrder) + (sameBassCount ? " · Voicing " + (sameBassCount + 1) : "")
-          return <button key={item.frets.join("-")} type="button" onClick={() => setSelectedIndex(index)} aria-pressed={safeIndex === index} className={"rounded-lg border px-3 py-2 text-xs font-semibold transition " + (safeIndex === index ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")}>{label}</button>
+          const sameBassCount = shapes
+            .slice(0, index)
+            .filter((previous) => previous.bassPitchClass === item.bassPitchClass)
+            .length
+          const label =
+            getInversionName(root, item.bassPitchClass, chordOrder) +
+            (sameBassCount ? " · Voicing " + (sameBassCount + 1) : "")
+
+          return (
+            <button
+              key={item.frets.join("-")}
+              type="button"
+              onClick={() => setSelectedIndex(index)}
+              onKeyDown={(event) => {
+                let nextIndex: number
+                if (event.key === "ArrowRight") {
+                  nextIndex = (index + 1) % shapes.length
+                } else if (event.key === "ArrowLeft") {
+                  nextIndex = (index - 1 + shapes.length) % shapes.length
+                } else if (event.key === "Home") {
+                  nextIndex = 0
+                } else if (event.key === "End") {
+                  nextIndex = shapes.length - 1
+                } else {
+                  return
+                }
+
+                event.preventDefault()
+                setSelectedIndex(nextIndex)
+                event.currentTarget.parentElement
+                  ?.querySelectorAll<HTMLButtonElement>("button")[nextIndex]
+                  ?.focus()
+              }}
+              tabIndex={safeIndex === index ? 0 : -1}
+              aria-pressed={safeIndex === index}
+              className={
+                "rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " +
+                (safeIndex === index
+                  ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
+                  : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")
+              }
+            >
+              {label}
+            </button>
+          )
         })}
       </div>
+      {!shape.reference ? (
+        <div
+          role="status"
+          className="rounded-xl border border-[var(--warning)]/35 bg-[var(--warning-soft)] px-3.5 py-3 text-xs leading-5 text-[var(--foreground)]"
+        >
+          <span className="font-semibold">Calculated fallback voicing.</span>{" "}
+          This chord shape matches the selected chord tones, but it does not come
+          with a verified reference fingering. Treat the note positions as a
+          suggested starting point and check the fingering by ear and hand comfort.
+        </div>
+      ) : (
+        <p className="text-xs text-[var(--muted)]">
+          Reference fingering with a suggested finger placement.
+        </p>
+      )}
       <GuitarShapeDiagram shape={shape} root={root} chordOrder={chordOrder} index={safeIndex} total={shapes.length} />
     </div>
   )
@@ -417,6 +481,9 @@ function PianoKeyboard({ root, intervals, inversionIndex }: { root: number; inte
         </svg>
       </div>
       <p className="text-xs leading-5 text-[var(--muted)]">Only the notes in this inversion are highlighted; unselected keys remain neutral.</p>
+      <p className="text-xs text-[var(--muted)] sm:hidden">
+        Swipe horizontally to view the full keyboard from C3 to C5.
+      </p>
     </div>
   )
 }
@@ -482,9 +549,9 @@ export default function ChordChartExplorer() {
             </label>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" aria-label="Instrument">
-              <button type="button" onClick={() => changeInstrument("guitar")} aria-pressed={instrument === "guitar"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition " + (instrument === "guitar" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Guitar className="size-4" />Guitar</button>
-              <button type="button" onClick={() => changeInstrument("piano")} aria-pressed={instrument === "piano"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition " + (instrument === "piano" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Piano className="size-4" />Piano</button>
+            <div role="group" className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" aria-label="Instrument">
+              <button type="button" onClick={() => changeInstrument("guitar")} aria-pressed={instrument === "guitar"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (instrument === "guitar" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Guitar className="size-4" />Guitar</button>
+              <button type="button" onClick={() => changeInstrument("piano")} aria-pressed={instrument === "piano"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (instrument === "piano" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Piano className="size-4" />Piano</button>
             </div>
             <button type="button" onClick={handlePlaySample} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2"><Volume2 className="size-4" />{playing ? "Playing sample…" : "Play " + instrument + " sample"}</button>
           </div>
@@ -501,7 +568,70 @@ export default function ChordChartExplorer() {
           <div><h2 className="text-lg font-semibold text-[var(--foreground)]">{instrument === "guitar" ? "Guitar shape" : "Piano inversion"}</h2><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{instrument === "guitar" ? "One playable fingering at a time, on the fretboard through fret 15." : "One inversion at a time, on a compact C3–C5 keyboard."}</p></div>
           <ChordToneLegend />
         </div>
-        {instrument === "guitar" ? <GuitarShapeSelector key={chordSymbol} root={root} intervals={quality.intervals} chordTypeId={quality.id} /> : <div className="space-y-4"><div className="flex flex-wrap gap-2" aria-label="Select piano inversion">{Array.from({ length: pianoVoicingCount }, (_, index) => <button key={index} type="button" onClick={() => setInversionIndex(index)} aria-pressed={inversionIndex === index} className={"rounded-lg border px-3 py-2 text-xs font-semibold transition " + (inversionIndex === index ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")}>{index === 0 ? "Root position" : index + (index === 1 ? "st" : index === 2 ? "nd" : index === 3 ? "rd" : "th") + " inversion"}</button>)}</div><PianoKeyboard root={root} intervals={quality.intervals} inversionIndex={inversionIndex} /></div>}
+        {instrument === "guitar" ? (
+          <GuitarShapeSelector
+            key={chordSymbol}
+            root={root}
+            intervals={quality.intervals}
+            chordTypeId={quality.id}
+          />
+        ) : (
+          <div className="space-y-4">
+            <div
+              role="group"
+              aria-label="Select piano inversion"
+              className="flex flex-wrap gap-2"
+            >
+              {Array.from({ length: pianoVoicingCount }, (_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setInversionIndex(index)}
+                  onKeyDown={(event) => {
+                    let nextIndex: number
+                    if (event.key === "ArrowRight") {
+                      nextIndex = (index + 1) % pianoVoicingCount
+                    } else if (event.key === "ArrowLeft") {
+                      nextIndex = (index - 1 + pianoVoicingCount) % pianoVoicingCount
+                    } else if (event.key === "Home") {
+                      nextIndex = 0
+                    } else if (event.key === "End") {
+                      nextIndex = pianoVoicingCount - 1
+                    } else {
+                      return
+                    }
+
+                    event.preventDefault()
+                    setInversionIndex(nextIndex)
+                    event.currentTarget.parentElement
+                      ?.querySelectorAll<HTMLButtonElement>("button")[nextIndex]
+                      ?.focus()
+                  }}
+                  tabIndex={inversionIndex === index ? 0 : -1}
+                  aria-pressed={inversionIndex === index}
+                  className={
+                    "rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " +
+                    (inversionIndex === index
+                      ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
+                      : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")
+                  }
+                >
+                  {index === 0
+                    ? "Root position"
+                    : index + (index === 1 ? "st" : index === 2 ? "nd" : index === 3 ? "rd" : "th") + " inversion"}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-[var(--muted)]">
+              Use the left and right arrow keys to switch inversions, or Home and End to jump to the first and last voicing.
+            </p>
+            <PianoKeyboard
+              root={root}
+              intervals={quality.intervals}
+              inversionIndex={inversionIndex}
+            />
+          </div>
+        )}
       </section>
     </div>
   )

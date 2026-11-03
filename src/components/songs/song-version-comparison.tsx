@@ -1,7 +1,14 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { ArrowLeftRight, GitCompareArrows } from "lucide-react"
+import {
+  ArrowLeftRight,
+  Check,
+  GitCompareArrows,
+  Minus,
+  PencilLine,
+  Plus,
+} from "lucide-react"
 import { compareChordProSources } from "@/features/chordpro/compare"
 
 type SongVersion = {
@@ -72,7 +79,24 @@ export default function SongVersionComparison({
             <div key={line.lineNumber} className={"grid gap-2 rounded-xl border p-3 sm:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)] " + (line.status === "same" ? "border-[var(--border)]" : "border-[var(--warning)]/35 bg-[var(--warning-soft)]/50")}>
               <div className="flex items-center gap-2 text-xs font-semibold text-[var(--muted)] sm:block">
                 <span>Line {line.lineNumber}</span>
-                <span className="sm:mt-1 sm:block">{line.status === "same" ? "Same" : line.status === "changed" ? "Changed" : line.status === "current-only" ? "Added" : "Removed"}</span>
+                <span className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 sm:mt-2">
+                  {line.status === "same" ? (
+                    <Check className="size-3.5" aria-hidden="true" />
+                  ) : line.status === "changed" ? (
+                    <PencilLine className="size-3.5" aria-hidden="true" />
+                  ) : line.status === "current-only" ? (
+                    <Plus className="size-3.5" aria-hidden="true" />
+                  ) : (
+                    <Minus className="size-3.5" aria-hidden="true" />
+                  )}
+                  {line.status === "same"
+                    ? "Same"
+                    : line.status === "changed"
+                      ? "Changed"
+                      : line.status === "current-only"
+                        ? "Added"
+                        : "Removed"}
+                </span>
               </div>
               <div className="min-w-0 rounded-lg bg-[var(--card)] p-2.5">
                 <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">Current</p>

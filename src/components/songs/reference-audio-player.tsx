@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 
 type AudioSeekRequest = { seconds: number; token: number }
+type AudioLoadState = "loading" | "ready" | "buffering" | "error" | "blocked"
 
 type ReferenceAudioPlayerProps = {
   src: string
@@ -41,6 +42,7 @@ export default function ReferenceAudioPlayer({
 }: ReferenceAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying] = useState(false)
+  const [audioState, setAudioState] = useState<AudioLoadState>("loading")
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
   const [playbackRate, setPlaybackRate] = useSongPracticePreference(
@@ -102,7 +104,8 @@ export default function ReferenceAudioPlayer({
     try {
       await audio.play()
     } catch {
-      setError("Audio could not start. Check your connection and browser audio permissions, then try again.")
+      setAudioState("blocked")
+      setError("Playback could not start. Check your browser audio permissions and try again.")
     }
   }
 
@@ -193,13 +196,23 @@ export default function ReferenceAudioPlayer({
         preload="metadata"
         loop={repeatTrack}
         className="hidden"
-        onPlay={() => setPlaying(true)}
+        onLoadStart={() => {
+          setAudioState("loading")
+          setError("")
+        }}
+        onPlay={() => {
+          setPlaying(true)
+          setAudioState("ready")
+        }}
         onPause={() => setPlaying(false)}
         onLoadedMetadata={(event) => {
           const nextDuration = event.currentTarget.duration
           setDuration(Number.isFinite(nextDuration) ? nextDuration : 0)
           setCurrentTime(event.currentTarget.currentTime)
+          setAudioState("ready")
         }}
+        onCanPlay={() => setAudioState("ready")}
+        onWaiting={() => setAudioState("buffering")}
         onDurationChange={(event) => {
           const nextDuration = event.currentTarget.duration
           setDuration(Number.isFinite(nextDuration) ? nextDuration : 0)
@@ -207,7 +220,19 @@ export default function ReferenceAudioPlayer({
         onTimeUpdate={handleTimeUpdate}
         onSeeked={(event) => setCurrentTime(event.currentTarget.currentTime)}
         onEnded={() => setPlaying(false)}
-        onError={() => setError("The reference audio could not be loaded. It may have expired or been removed; refresh the page and try again.")}
+        onError={(event) => {
+          const mediaError = event.currentTarget.error
+          const message = mediaError?.code === MediaError.MEDIA_ERR_NETWORK
+            ? "A network error interrupted the recording. Check your connection and retry."
+            : mediaError?.code === MediaError.MEDIA_ERR_DECODE
+              ? "The recording could not be decoded. The uploaded audio file may be damaged."
+              : mediaError?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
+                ? "This audio format is not supported, or the recording is no longer available."
+                : "The recording could not be loaded. Refresh the page or ask a song editor to replace it."
+          setAudioState("error")
+          setPlaying(false)
+          setError(message)
+        }}
       />
 
       <div className="flex items-start gap-3">
@@ -215,7 +240,30 @@ export default function ReferenceAudioPlayer({
           <AudioLines className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className={"text-xs font-semibold uppercase tracking-[0.14em] " + muted}>Reference audio</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className={"text-xs font-semibold uppercase tracking-[0.14em] " + muted}>Reference audio</p>
+            <span
+              role="status"
+              aria-live="polite"
+              className={"rounded-full px-2 py-1 text-[10px] font-semibold " + subtleSurface + " " + (
+                audioState === "error" || audioState === "blocked"
+                  ? (dark ? "text-rose-200" : "text-[var(--danger)]")
+                  : audioState === "ready"
+                    ? (dark ? "text-emerald-200" : "text-[var(--success)]")
+                    : muted
+              )}
+            >
+              {audioState === "loading"
+                ? "Loading recording"
+                : audioState === "buffering"
+                  ? "Buffering"
+                  : audioState === "ready"
+                    ? "Ready to play"
+                    : audioState === "blocked"
+                      ? "Playback blocked"
+                      : "Audio unavailable"}
+            </span>
+          </div>
           <h3 className={"mt-1 truncate text-sm font-semibold " + foreground} title={title}>{title}</h3>
           <p className={"mt-1 text-xs " + muted}>Slow the track down, loop a section, and practice along with the chord chart.</p>
         </div>
@@ -339,9 +387,23 @@ export default function ReferenceAudioPlayer({
       </div>
 
       {error ? (
-        <p role="alert" className={"mt-3 rounded-lg border px-3 py-2 text-xs " + (dark ? "border-rose-300/20 bg-rose-300/10 text-rose-100" : "border-rose-200 bg-rose-50 text-rose-700")}>
-          {error}
-        </p>
+        <div role="alert" className={"mt-3 flex flex-col gap-2 rounded-lg border px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between " + (dark ? "border-rose-300/20 bg-rose-300/10 text-rose-100" : "border-rose-200 bg-rose-50 text-rose-700")}>
+          <p className="leading-5">{error}</p>
+          <button
+            type="button"
+            onClick={() => {
+              const audio = audioRef.current
+              if (!audio) return
+              setError("")
+              setAudioState("loading")
+              audio.load()
+            }}
+            className={"inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 font-semibold transition " + (dark ? "border-white/15 bg-white/5 text-white hover:bg-white/10" : "border-rose-200 bg-white text-rose-800 hover:bg-rose-100")}
+          >
+            <RotateCcw className="size-3.5" />
+            Retry audio
+          </button>
+        </div>
       ) : null}
     </section>
   )

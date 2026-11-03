@@ -3,6 +3,8 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { buttonVariants } from "@/components/ui/button"
 import { Input, Select } from "@/components/ui/form-controls"
 import { Card } from "@/components/ui/card"
+import { Feedback } from "@/components/ui/feedback"
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
 import {
@@ -25,6 +27,7 @@ import { redirect } from "next/navigation"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { createClient } from "@/lib/supabase/server"
 import {
+  bulkSetSongStatus,
   setSongStatus,
   toggleFavorite,
 } from "./actions"
@@ -86,6 +89,17 @@ const tempoBucketLabels: Record<TempoBucket, string> = {
   unset: "Tempo not set",
 }
 
+const sortLabels: Record<SongSort, string> = {
+  title: "Title A–Z",
+  recent: "Recently used",
+  artist: "Artist A–Z",
+  album: "Album A–Z",
+  newest: "Recently added",
+  updated: "Recently updated",
+  "tempo-asc": "Slowest tempo",
+  "tempo-desc": "Fastest tempo",
+}
+
 const editableRoles = [
   "admin",
   "worship_leader",
@@ -116,6 +130,7 @@ function buildHref(
   for (const [key, value] of Object.entries(
     currentParams
   )) {
+    if (key === "error" || key === "bulk") continue
     const normalized = getParam(value)
 
     if (normalized) {
@@ -495,6 +510,39 @@ export default async function SongsPage({
     selectedKey ? "Key: " + selectedKey : null,
     tempoBucket !== "all" ? tempoBucketLabels[tempoBucket] : null,
   ].filter((description): description is string => Boolean(description))
+  const keepCurrentPage = (updates: Record<string, string | undefined>) =>
+    buildHref(params, { ...updates, page: String(page) })
+  const filterChips: { label: string; href: string }[] = []
+
+  if (query) filterChips.push({ label: "Search: " + query, href: keepCurrentPage({ q: undefined }) })
+  if (status !== "active") filterChips.push({
+    label: status === "archived" ? "Archived songs" : "Active and archived",
+    href: keepCurrentPage({ status: undefined }),
+  })
+  if (favoriteOnly) filterChips.push({ label: "Favorites", href: keepCurrentPage({ favorite: undefined }) })
+  if (selectedTag) filterChips.push({ label: "Tag: " + selectedTag, href: keepCurrentPage({ tag: undefined }) })
+  if (selectedKey) filterChips.push({ label: "Key: " + selectedKey, href: keepCurrentPage({ key: undefined }) })
+  if (tempoBucket !== "all") filterChips.push({
+    label: tempoBucketLabels[tempoBucket],
+    href: keepCurrentPage({ tempo: undefined }),
+  })
+  if (sort !== "title") filterChips.push({
+    label: "Sort: " + sortLabels[sort],
+    href: keepCurrentPage({ sort: undefined }),
+  })
+
+  const listError = getParam(params.error)
+  const listErrorMessages: Record<string, string> = {
+    invalid_song: "The requested song could not be found.",
+    invalid_status: "Choose a valid song status.",
+    favorite_failed: "The favorite could not be updated. Please try again.",
+    status_update_failed: "The song status could not be updated.",
+    bulk_selection_invalid: "Select at least one song on this page before choosing a bulk action.",
+    bulk_status_update_failed: "The selected songs could not be updated. Please try again.",
+    membership_failed: "Your church membership could not be verified.",
+    not_authorized: "You do not have permission to manage song status.",
+  }
+  const bulkNotice = getParam(params.bulk)
 
   return (
     <PageContainer>
@@ -513,6 +561,19 @@ export default async function SongsPage({
         </Link>
         </> : null}
       />
+
+      {listError && listErrorMessages[listError] ? (
+        <Feedback tone="error" title="Song library action failed">
+          {listErrorMessages[listError]}
+        </Feedback>
+      ) : null}
+      {bulkNotice === "archived" || bulkNotice === "active" ? (
+        <Feedback tone="success" title="Bulk update complete">
+          {bulkNotice === "archived"
+            ? "The selected songs were archived."
+            : "The selected songs were restored to the active library."}
+        </Feedback>
+      ) : null}
 
       <section aria-label="Song usage analytics" className="grid gap-4 lg:grid-cols-2">
         <Card className="p-5 sm:p-6">
@@ -719,6 +780,31 @@ export default async function SongsPage({
         </details>
       </section>
 
+      {filterChips.length > 0 ? (
+        <section aria-label="Active song filters" className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+            Active filters
+          </span>
+          {filterChips.map((chip) => (
+            <Link
+              key={chip.label}
+              href={chip.href}
+              className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--brand)] hover:bg-[var(--brand-soft)]"
+              title={"Remove " + chip.label}
+            >
+              <span className="min-w-0 truncate">{chip.label}</span>
+              <span aria-hidden="true" className="text-[var(--muted)]">×</span>
+            </Link>
+          ))}
+          <Link
+            href={clearFiltersHref}
+            className="inline-flex min-h-8 items-center px-2 text-xs font-semibold text-[var(--brand)] hover:underline"
+          >
+            Clear all
+          </Link>
+        </section>
+      ) : null}
+
       <section>
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -762,32 +848,78 @@ export default async function SongsPage({
                 Clear filters
               </Link>
             ) : null}
-            <div role="group" aria-label="Song layout" className="wf-card inline-flex items-center p-1 shadow-sm">
-              <Link
-                href={buildHref(params, { view: undefined })}
-                aria-label="List view"
-                aria-current={view === "list" ? "page" : undefined}
-                title="List view"
-                className={`flex size-8 items-center justify-center rounded-lg transition ${
-                  view === "list" ? "bg-[var(--brand-soft)] text-[var(--brand)]" : "text-[var(--muted)] hover:bg-[var(--surface)]"
-                }`}
-              >
-                <List className="size-4" />
-              </Link>
-              <Link
-                href={buildHref(params, { view: "grid" })}
-                aria-label="Grid view"
-                aria-current={view === "grid" ? "page" : undefined}
-                title="Grid view"
-                className={`flex size-8 items-center justify-center rounded-lg transition ${
-                  view === "grid" ? "bg-[var(--brand-soft)] text-[var(--brand)]" : "text-[var(--muted)] hover:bg-[var(--surface)]"
-                }`}
-              >
-                <Grid2X2 className="size-4" />
-              </Link>
+            <div className="flex items-center gap-2">
+              <span className="hidden text-[11px] font-medium text-[var(--muted)] sm:inline">
+                View
+              </span>
+              <div role="group" aria-label="Song layout" className="wf-card inline-flex items-center p-1 shadow-sm">
+                <Link
+                  href={buildHref(params, { view: undefined })}
+                  aria-label="List view"
+                  aria-current={view === "list" ? "page" : undefined}
+                  title="List view"
+                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition ${
+                    view === "list" ? "bg-[var(--brand-soft)] text-[var(--brand)]" : "text-[var(--muted)] hover:bg-[var(--surface)]"
+                  }`}
+                >
+                  <List className="size-4" />
+                  List
+                </Link>
+                <Link
+                  href={buildHref(params, { view: "grid" })}
+                  aria-label="Grid view"
+                  aria-current={view === "grid" ? "page" : undefined}
+                  title="Grid view"
+                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition ${
+                    view === "grid" ? "bg-[var(--brand-soft)] text-[var(--brand)]" : "text-[var(--muted)] hover:bg-[var(--surface)]"
+                  }`}
+                >
+                  <Grid2X2 className="size-4" />
+                  Grid
+                </Link>
+              </div>
             </div>
           </div>
         </div>
+
+        {canEdit && paginatedSongs.length > 0 ? (
+          <form
+            id="bulk-song-actions"
+            action={bulkSetSongStatus}
+            className="mb-3 flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4"
+          >
+            <input type="hidden" name="redirectTo" value={buildHref(params, {})} />
+            <p className="text-xs leading-5 text-[var(--muted)]">
+              Select songs on this page to archive or restore them together.
+            </p>
+            <div role="group" aria-label="Bulk song actions" className="flex flex-wrap gap-2">
+              <ConfirmSubmitButton
+                name="status"
+                value="archived"
+                title="Archive selected songs?"
+                description="Selected songs will be moved out of the active library. Their charts and version history will be preserved."
+                confirmLabel="Archive selected"
+                className="min-h-10"
+              >
+                <Archive className="size-3.5" />
+                Archive selected
+              </ConfirmSubmitButton>
+              {status !== "active" ? (
+                <ConfirmSubmitButton
+                  name="status"
+                  value="active"
+                  title="Restore selected songs?"
+                  description="Selected songs will return to the active song library."
+                  confirmLabel="Restore selected"
+                  className="min-h-10"
+                >
+                  <RotateCcw className="size-3.5" />
+                  Restore selected
+                </ConfirmSubmitButton>
+              ) : null}
+            </div>
+          </form>
+        ) : null}
 
         {filteredSongs.length === 0 ? (
           <EmptyState title={hasActiveFilters ? "No songs match your filters" : "Your song library is empty"} description={hasActiveFilters ? "Try a different search, key, or tempo, or clear your filters to see all songs." : "Add your first song to start preparing charts for your worship team."} icon={<Search className="size-5" />} actions={<> {hasActiveFilters ? <Link href={clearFiltersHref} className={buttonVariants({ variant: "outline" })}>Clear filters</Link> : null}{canEdit ? <Link href="/songs/new" className={buttonVariants()}><Plus className="size-4" aria-hidden="true" />Add song</Link> : null} </>} />
@@ -810,10 +942,23 @@ export default async function SongsPage({
                   <div className={`flex flex-col gap-4 ${
                     view === "grid" ? "flex-1" : "sm:flex-row sm:items-center sm:justify-between"
                   }`}>
-                    <Link
-                      href={`/songs/${song.id}`}
-                      className="min-w-0 flex-1"
-                    >
+                    <div className="flex min-w-0 items-start gap-3">
+                      {canEdit ? (
+                        <label className="mt-1 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card)] transition hover:bg-[var(--brand-soft)]">
+                          <input
+                            type="checkbox"
+                            name="songIds"
+                            value={song.id}
+                            form="bulk-song-actions"
+                            aria-label={"Select " + song.title + " for bulk actions"}
+                            className="size-4 accent-[var(--brand)]"
+                          />
+                        </label>
+                      ) : null}
+                      <Link
+                        href={`/songs/${song.id}`}
+                        className="min-w-0 flex-1"
+                      >
                       <div className="flex min-w-0 items-start gap-3">
                         <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                           {song.status === "archived" ? (
@@ -825,7 +970,10 @@ export default async function SongsPage({
 
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h2 className="truncate font-semibold text-[var(--foreground)] group-hover:text-[var(--brand)]">
+                            <h2
+                              title={song.title}
+                              className="line-clamp-2 break-words font-semibold text-[var(--foreground)] group-hover:text-[var(--brand)] [overflow-wrap:anywhere]"
+                            >
                               {song.title}
                             </h2>
 
@@ -846,39 +994,44 @@ export default async function SongsPage({
                           ) : null}
 
                           <div className="mt-2 flex flex-wrap gap-1.5">
-                            {songTags
-                              .slice(0, 4)
-                              .map((tag) => (
-                                <span
-                                  key={tag.id}
-                                  className="rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] font-medium text-[var(--muted)]"
-                                >
+                            {song.current_key ? (
+                              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[10px] font-semibold text-[var(--foreground)]">
+                                Key {song.current_key}
+                              </span>
+                            ) : null}
+                            {song.tempo !== null ? (
+                              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[10px] font-medium text-[var(--muted)]">
+                                {song.tempo} BPM
+                              </span>
+                            ) : null}
+                            {song.capo !== null ? (
+                              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[10px] font-medium text-[var(--muted)]">
+                                Capo {song.capo}
+                              </span>
+                            ) : null}
+                            {song.time_signature ? (
+                              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[10px] font-medium text-[var(--muted)]">
+                                {song.time_signature}
+                              </span>
+                            ) : null}
+                          </div>
+                          {songTags.length > 0 ? (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {songTags.slice(0, 4).map((tag) => (
+                                <span key={tag.id} className="rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] font-medium text-[var(--muted)]">
                                   {tag.name}
                                 </span>
                               ))}
-                          </div>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
-                    </Link>
+                      </Link>
+                    </div>
 
-                    <div className={`flex shrink-0 items-center gap-2 ${
+                    <div className={`flex shrink-0 flex-wrap items-center gap-2 ${
                       view === "grid" ? "mt-4 border-t border-[var(--border)] pt-3" : ""
                     }`}>
-                      {song.current_key ? (
-                        <span className={`rounded-full border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] ${
-                          view === "grid" ? "inline-flex" : "hidden md:inline-flex"
-                        }`}>
-                          {song.current_key}
-                        </span>
-                      ) : null}
-
-                      {song.tempo ? (
-                        <span className={`rounded-full border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted)] ${
-                          view === "grid" ? "inline-flex" : "hidden lg:inline-flex"
-                        }`}>
-                          {song.tempo} BPM
-                        </span>
-                      ) : null}
 
                       <form action={toggleFavorite}>
                         <input
@@ -922,6 +1075,11 @@ export default async function SongsPage({
                             type="hidden"
                             name="songId"
                             value={song.id}
+                          />
+                          <input
+                            type="hidden"
+                            name="redirectTo"
+                            value={buildHref(params, {})}
                           />
 
                           <input

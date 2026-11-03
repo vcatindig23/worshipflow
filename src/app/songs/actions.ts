@@ -18,6 +18,17 @@ const statusSchema = z.object({
   status: z.enum(["active", "archived"]),
 })
 
+const bulkStatusSchema = z.object({
+  songIds: z.array(z.string().uuid()).min(1).max(50),
+  status: z.enum(["active", "archived"]),
+})
+
+function withSongListQuery(path: string, key: string, value: string) {
+  const url = new URL(path, "https://worshipflow.local")
+  url.searchParams.set(key, value)
+  return url.pathname + url.search + url.hash
+}
+
 export async function toggleFavorite(formData: FormData) {
   const result = songIdSchema.safeParse({
     songId: formData.get("songId"),
@@ -126,7 +137,76 @@ export async function setSongStatus(formData: FormData) {
   revalidatePath("/songs")
   revalidatePath(`/songs/${result.data.songId}`)
 
-  redirect("/songs")
+  const redirectTo = getSafeAuthNextPath(
+    String(formData.get("redirectTo") || "/songs")
+  )
+  redirect(redirectTo)
+}
+
+export async function bulkSetSongStatus(formData: FormData) {
+  const redirectTo = getSafeAuthNextPath(
+    String(formData.get("redirectTo") || "/songs")
+  )
+  const result = bulkStatusSchema.safeParse({
+    songIds: Array.from(new Set(
+      formData.getAll("songIds").filter(
+        (value): value is string => typeof value === "string"
+      )
+    )),
+    status: formData.get("status"),
+  })
+
+  if (!result.success) {
+    redirect(withSongListQuery(redirectTo, "error", "bulk_selection_invalid"))
+  }
+
+  const supabase = await createClient()
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const userId = claimsData?.claims?.sub
+
+  if (!userId) {
+    redirect("/login")
+  }
+
+  const { data: membership, error: membershipError } =
+    await supabase
+      .from("organization_members")
+      .select("organization_id, role")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle()
+
+  if (membershipError) {
+    redirect(withSongListQuery(redirectTo, "error", "membership_failed"))
+  }
+
+  if (!membership) {
+    redirect("/onboarding")
+  }
+
+  if (!hasPermission(membership.role, "songs:edit")) {
+    redirect(withSongListQuery(redirectTo, "error", "not_authorized"))
+  }
+
+  const { error } = await supabase
+    .from("songs")
+    .update({
+      status: result.data.status,
+      updated_by: userId,
+    })
+    .in("id", result.data.songIds)
+    .eq("organization_id", membership.organization_id)
+
+  if (error) {
+    redirect(withSongListQuery(redirectTo, "error", "bulk_status_update_failed"))
+  }
+
+  revalidatePath("/songs")
+  for (const songId of result.data.songIds) {
+    revalidatePath(`/songs/${songId}`)
+  }
+
+  redirect(withSongListQuery(redirectTo, "bulk", result.data.status))
 }
 
 export async function setSongTags(formData: FormData) {
