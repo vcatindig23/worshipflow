@@ -51,6 +51,25 @@ export default function ChordProImportEditor({
   const validation = useMemo(() => validateChordPro(value), [value])
   const metadata = parsedSong.metadata
 
+  function focusValidationLine(message: string) {
+    const match = message.match(/^Line (\d+)/)
+    const lineNumber = match ? Number(match[1]) : null
+    const textarea = formSource.current
+    if (!lineNumber || !textarea) return
+
+    const lines = value.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n")
+    const lineIndex = lineNumber - 1
+    if (lineIndex < 0 || lineIndex >= lines.length) return
+
+    const lineStart = lines
+      .slice(0, lineIndex)
+      .reduce((offset, line) => offset + line.length + 1, 0)
+    const lineEnd = lineStart + lines[lineIndex].length
+
+    textarea.focus()
+    textarea.setSelectionRange(lineStart, lineEnd)
+  }
+
   async function importFile(file: File | undefined) {
     setError("")
     setMessage("")
@@ -191,9 +210,22 @@ export default function ChordProImportEditor({
                 <p className="font-semibold text-[var(--danger)]">
                   {validation.errors.length} syntax issue{validation.errors.length === 1 ? "" : "s"} found
                 </p>
-                <ul className="mt-1 list-disc space-y-1 pl-5 text-[var(--danger)]">
+                <ul className="mt-1 space-y-1">
                   {validation.errors.slice(0, 8).map((validationError) => (
-                    <li key={validationError}>{validationError}</li>
+                    <li key={validationError}>
+                      <button
+                        type="button"
+                        onClick={() => focusValidationLine(validationError)}
+                        className="rounded text-left leading-5 text-[var(--danger)] underline decoration-dotted underline-offset-2 transition hover:decoration-solid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)]"
+                      >
+                        {validationError}
+                        {/^Line \d+/.test(validationError) ? (
+                          <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide">
+                            · jump to line
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
                   ))}
                 </ul>
                 {validation.errors.length > 8 ? <p className="mt-1 text-[var(--danger)]">And {validation.errors.length - 8} more issue(s).</p> : null}
