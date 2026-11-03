@@ -310,6 +310,9 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
           ))}
         </svg>
       </div>
+      <p className="text-xs text-[var(--muted)] sm:hidden">
+        Swipe horizontally to view all six strings and the full fretboard.
+      </p>
       <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
         <span className="font-medium text-[var(--foreground)]">String notes (low E → high e):</span>
         <span>{stringNotes.join(" · ")}</span>
@@ -478,6 +481,9 @@ function PianoKeyboard({ root, intervals, inversionIndex }: { root: number; inte
         </svg>
       </div>
       <p className="text-xs leading-5 text-[var(--muted)]">Only the notes in this inversion are highlighted; unselected keys remain neutral.</p>
+      <p className="text-xs text-[var(--muted)] sm:hidden">
+        Swipe horizontally to view the full keyboard from C3 to C5.
+      </p>
     </div>
   )
 }
@@ -543,9 +549,9 @@ export default function ChordChartExplorer() {
             </label>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" aria-label="Instrument">
-              <button type="button" onClick={() => changeInstrument("guitar")} aria-pressed={instrument === "guitar"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition " + (instrument === "guitar" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Guitar className="size-4" />Guitar</button>
-              <button type="button" onClick={() => changeInstrument("piano")} aria-pressed={instrument === "piano"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition " + (instrument === "piano" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Piano className="size-4" />Piano</button>
+            <div role="group" className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" aria-label="Instrument">
+              <button type="button" onClick={() => changeInstrument("guitar")} aria-pressed={instrument === "guitar"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (instrument === "guitar" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Guitar className="size-4" />Guitar</button>
+              <button type="button" onClick={() => changeInstrument("piano")} aria-pressed={instrument === "piano"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (instrument === "piano" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Piano className="size-4" />Piano</button>
             </div>
             <button type="button" onClick={handlePlaySample} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2"><Volume2 className="size-4" />{playing ? "Playing sample…" : "Play " + instrument + " sample"}</button>
           </div>
