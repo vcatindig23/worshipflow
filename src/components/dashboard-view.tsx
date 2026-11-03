@@ -308,12 +308,12 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
             className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold"
           >
             <Link
-              href="/songs/new"
+              href={canEditServices ? "/songs/new" : "/songs"}
               data-tour="create-song"
               className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
             >
-              <Plus className="size-3.5" />
-              Add a song
+              <Music2 className="size-3.5" />
+              {canEditServices ? "Add a song" : "Browse songs"}
             </Link>
             {canEditServices ? (
               <Link
@@ -325,13 +325,23 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                 Plan a service
               </Link>
             ) : (
-              <Link
-                href="/my-schedule"
-                className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
-              >
-                <CalendarDays className="size-3.5" />
-                My Schedule
-              </Link>
+              <>
+                <Link
+                  href="/setlists"
+                  data-tour="build-setlist"
+                  className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
+                >
+                  <ListMusic className="size-3.5" />
+                  Browse setlists
+                </Link>
+                <Link
+                  href="/my-schedule"
+                  className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
+                >
+                  <CalendarDays className="size-3.5" />
+                  My Schedule
+                </Link>
+              </>
             )}
             {workspace.role === "admin" ? (
               <Link
