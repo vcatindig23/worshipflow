@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { renderToStaticMarkup } from "react-dom/server"
+import Link from "next/link"
 import {
   Sidebar,
   SidebarMenuButton,
@@ -46,7 +47,7 @@ describe("composable workspace sidebar", () => {
     const markup = renderToStaticMarkup(
       <SidebarProvider open={false}>
         <Sidebar collapsible="icon">
-          <SidebarMenuButton render={<a href="/songs" />} tooltip="Songs">
+          <SidebarMenuButton render={<Link href="/songs" />} tooltip="Songs">
             <span aria-hidden="true">S</span>
             <span>Songs</span>
           </SidebarMenuButton>
