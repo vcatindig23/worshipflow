@@ -35,10 +35,10 @@ const tourSteps: TourStep[] = [
     mobileSelector: '[data-tour="mobile-navigation"]',
   },
   {
-    title: "Your workspace at a glance",
+    title: "Your next step",
     description:
-      "These summary cards show your song library, team size, default service, and the role you have in this workspace.",
-    selector: '[data-tour="workspace-overview"]',
+      "This panel highlights the most useful action based on your workspace. It changes as your songs, services, and team plans progress.",
+    selector: '[data-tour="dashboard-next-action"]',
   },
   {
     title: "Build your song library",
@@ -53,9 +53,9 @@ const tourSteps: TourStep[] = [
     selector: '[data-tour="build-setlist"]',
   },
   {
-    title: "Stay ahead of team priorities",
+    title: "Stay ahead of service priorities",
     description:
-      "Keep an eye on service readiness and pending team confirmations, and use My Schedule to review your own commitments.",
+      "Leaders can open a service issue directly. Team members can review their upcoming assignments and respond to confirmations here.",
     selector: '[data-tour="team-priorities"]',
   },
 ]
