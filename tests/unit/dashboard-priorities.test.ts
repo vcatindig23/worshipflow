@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 import { getDashboardSetlistPriority } from "../../src/lib/dashboard-priorities"
 
@@ -78,5 +80,42 @@ describe("dashboard service priorities", () => {
 
     expect(priority.complete).toBe(true)
     expect(priority.href).toBe("/setlists/service-123")
+  })
+})
+
+
+const dashboardView = readFileSync(
+  join(process.cwd(), "src/components/dashboard-view.tsx"),
+  "utf8",
+)
+const workspaceLoader = readFileSync(
+  join(process.cwd(), "src/lib/workspace/get-workspace.ts"),
+  "utf8",
+)
+
+describe("role-aware dashboard presentation", () => {
+  it("renders members' real assignment confirmation controls on the dashboard", () => {
+    expect(dashboardView).toContain('id="your-upcoming-assignments"')
+    expect(dashboardView).toContain("<AssignmentConfirmation")
+    expect(dashboardView).toContain('href: "#your-upcoming-assignments"')
+    expect(workspaceLoader).toContain("confirmation_status, responded_at, response_note")
+  })
+
+  it("limits the team roster preview while preserving the full assignment count", () => {
+    expect(dashboardView).toContain("teamAssignments.slice(0, 4)")
+    expect(dashboardView).toContain("hiddenAssignmentCount")
+    expect(dashboardView).toContain('leaderRoles.includes(workspace.role)')
+  })
+
+  it("wraps long workspace and song names without forcing horizontal overflow", () => {
+    expect(dashboardView).toContain("[overflow-wrap:anywhere]")
+    expect(dashboardView).toContain("min-w-0")
+    expect(dashboardView).toContain("line-clamp-2")
+  })
+
+  it("keeps the getting-started checklist limited to administrators", () => {
+    expect(dashboardView).toContain('workspace.role === "admin"')
+    expect(dashboardView).toContain('href: "/settings/team"')
+    expect(dashboardView).toContain("Make your first assignment")
   })
 })
