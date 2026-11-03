@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ArrowLeft, KeyRound, Mail } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
 import { Feedback } from "@/components/ui/feedback"
+import { FormErrorSummary } from "@/components/ui/form-error-summary"
 import { Input } from "@/components/ui/form-controls"
 import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import { requestPasswordReset } from "./actions"
@@ -55,9 +56,9 @@ export default async function ForgotPasswordPage({
               <>
                 {errorMessage ? (
                   <div className="mt-6">
-                    <Feedback tone="error" title="Reset link could not be sent">
+                    <FormErrorSummary title="Reset link could not be sent">
                       {errorMessage}
-                    </Feedback>
+                    </FormErrorSummary>
                   </div>
                 ) : null}
 

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Suspense, useActionState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Feedback } from "@/components/ui/feedback"
+import { FormErrorSummary } from "@/components/ui/form-error-summary"
 import { Input } from "@/components/ui/form-controls"
 import {
   ArrowRight,
@@ -58,9 +59,9 @@ export default function LoginPage() {
           <div className="mb-5"><Suspense fallback={null}><LoginFeedback /></Suspense></div>
           {state.error ? (
             <div className="mb-5">
-              <Feedback tone="error" title="Sign-in failed">
+              <FormErrorSummary title="Sign-in failed">
                 {state.error}
-              </Feedback>
+              </FormErrorSummary>
             </div>
           ) : null}
 

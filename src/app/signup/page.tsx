@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Mail, UserRound } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
 import { Feedback } from "@/components/ui/feedback"
+import { FormErrorSummary } from "@/components/ui/form-error-summary"
 import { Input } from "@/components/ui/form-controls"
 import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import PasswordInput from "@/components/auth/password-input"
@@ -58,9 +59,9 @@ export default async function SignupPage({
 
           {errorMessage ? (
             <div className="mb-5">
-              <Feedback tone="error" title="Account could not be created">
+              <FormErrorSummary title="Account could not be created">
                 {errorMessage}
-              </Feedback>
+              </FormErrorSummary>
             </div>
           ) : null}
 
