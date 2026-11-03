@@ -41,15 +41,15 @@ const tourSteps: TourStep[] = [
     selector: '[data-tour="dashboard-next-action"]',
   },
   {
-    title: "Build your song library",
+    title: "Explore your song library",
     description:
-      "Add a song with lyrics, chords, key, tempo, and other details your team needs to prepare and perform together.",
+      "Open the shared song charts your team uses to prepare and perform. Editors can create and update charts from here.",
     selector: '[data-tour="create-song"]',
   },
   {
-    title: "Prepare your setlist",
+    title: "Open your service plans",
     description:
-      "Arrange songs and shape the flow of a worship service. You can add service details and coordinate assignments as you go.",
+      "Browse upcoming worship plans and their details. Editors can create setlists and coordinate service preparation.",
     selector: '[data-tour="build-setlist"]',
   },
   {
