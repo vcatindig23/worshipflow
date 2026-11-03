@@ -14,7 +14,8 @@ describe("form error summary accessibility", () => {
     expect(component).toContain("summaryRef.current?.focus()")
     expect(component).toContain("tabIndex={-1}")
     expect(component).toContain("data-form-error-summary")
-    expect(component).toContain('<Feedback tone="error" title={title}>')
+    expect(component).toContain('role="alert"')
+    expect(component).toContain("wf-feedback-error")
     expect(component).toContain("focus-visible:ring-2")
   })
 
