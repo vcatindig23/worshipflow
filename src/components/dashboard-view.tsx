@@ -213,9 +213,12 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
       icon: <CheckCircle2 className="size-4" />,
     },
   ]
+  const completedGettingStartedSteps = gettingStartedSteps.filter(
+    (step) => step.complete,
+  ).length
   const showGettingStarted =
     workspace.role === "admin" &&
-    gettingStartedSteps.some((step) => !step.complete)
+    completedGettingStartedSteps < gettingStartedSteps.length
 
   return (
     <WorshipFlowShell
@@ -369,9 +372,26 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                 >
                   Build your worship workspace
                 </h2>
-                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                  Follow these first steps to bring your songs, service plans, and team together.
-                </p>
+                <div className="mt-3 flex items-center gap-3">
+                  <div
+                    role="progressbar"
+                    aria-label="Workspace setup progress"
+                    aria-valuemin={0}
+                    aria-valuemax={gettingStartedSteps.length}
+                    aria-valuenow={completedGettingStartedSteps}
+                    className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-[var(--surface)]"
+                  >
+                    <div
+                      className="h-full origin-left rounded-full bg-[var(--brand)] transition-transform duration-200 motion-reduce:transition-none"
+                      style={{
+                        transform: `scaleX(${completedGettingStartedSteps / gettingStartedSteps.length})`,
+                      }}
+                    />
+                  </div>
+                  <span className="shrink-0 text-[11px] font-semibold tabular-nums text-[var(--muted)]">
+                    {completedGettingStartedSteps} of {gettingStartedSteps.length} complete
+                  </span>
+                </div>
               </div>
               <ol className="grid gap-px bg-[var(--border)] sm:grid-cols-2">
                 {gettingStartedSteps.map((step, index) => (
@@ -604,7 +624,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                       <Link
                         key={setlist.id}
                         href={priority.href}
-                        className="wf-card group flex min-w-0 flex-col p-4 transition hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:shadow-md"
+                        className="wf-card wf-card-interactive group flex min-w-0 flex-col p-4"
                       >
                         <div className="flex min-w-0 items-start gap-3">
                           <span className="wf-icon-tile flex size-10 shrink-0 items-center justify-center">
