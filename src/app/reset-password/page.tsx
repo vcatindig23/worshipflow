@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { ArrowRight, KeyRound } from "lucide-react"
 import AuthLayout from "@/components/auth/auth-layout"
 import { Feedback } from "@/components/ui/feedback"
+import { FormErrorSummary } from "@/components/ui/form-error-summary"
 import AuthSubmitButton from "@/components/auth/auth-submit-button"
 import PasswordInput from "@/components/auth/password-input"
 import { createClient } from "@/lib/supabase/server"
@@ -86,9 +87,9 @@ export default async function ResetPasswordPage({
 
                 {errorMessage ? (
                   <div className="mt-6">
-                    <Feedback tone="error" title="Password could not be updated">
+                    <FormErrorSummary title="Password could not be updated">
                       {errorMessage}
-                    </Feedback>
+                    </FormErrorSummary>
                   </div>
                 ) : null}
 
