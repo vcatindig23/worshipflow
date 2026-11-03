@@ -15,17 +15,24 @@ function fingerprint(form: HTMLFormElement) {
 }
 
 /** Opt in only for editing forms; never stores field values outside this component. */
-export function ProtectedForm({ children, ...props }: ComponentProps<"form">) {
+export function ProtectedForm({
+  children,
+  showStatus = false,
+  ...props
+}: ComponentProps<"form"> & { showStatus?: boolean }) {
   const ref = useRef<HTMLFormElement>(null)
   const baseline = useRef("")
   const dirty = useRef(false)
   const [destination, setDestination] = useState<string | null>(null)
+  const [saveStatus, setSaveStatus] = useState<"clean" | "dirty" | "saving">("clean")
   useEffect(() => {
     const form = ref.current
     if (!form) return
     baseline.current = fingerprint(form)
     const update = () => {
-      dirty.current = fingerprint(form) !== baseline.current
+      const hasChanges = fingerprint(form) !== baseline.current
+      dirty.current = hasChanges
+      if (showStatus) setSaveStatus(hasChanges ? "dirty" : "clean")
     }
     const beforeUnload = (event: BeforeUnloadEvent) => {
       if (dirty.current) {
@@ -65,15 +72,17 @@ export function ProtectedForm({ children, ...props }: ComponentProps<"form">) {
     }
     form.addEventListener("input", update)
     form.addEventListener("change", update)
+    form.addEventListener("reset", update)
     window.addEventListener("beforeunload", beforeUnload)
     document.addEventListener("click", click, true)
     return () => {
       form.removeEventListener("input", update)
       form.removeEventListener("change", update)
+      form.removeEventListener("reset", update)
       window.removeEventListener("beforeunload", beforeUnload)
       document.removeEventListener("click", click, true)
     }
-  }, [])
+  }, [showStatus])
   return (
     <>
       <form
@@ -81,9 +90,43 @@ export function ProtectedForm({ children, ...props }: ComponentProps<"form">) {
         ref={ref}
         onSubmit={(event) => {
           props.onSubmit?.(event)
-          if (!event.defaultPrevented) dirty.current = false
+          if (!event.defaultPrevented) {
+            dirty.current = false
+            if (showStatus) setSaveStatus("saving")
+          }
         }}
       >
+        {showStatus ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="mb-5 flex min-h-9 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs"
+          >
+            <span
+              aria-hidden="true"
+              className={
+                "size-2 shrink-0 rounded-full " +
+                (saveStatus === "dirty"
+                  ? "bg-[var(--warning)]"
+                  : saveStatus === "saving"
+                    ? "animate-pulse bg-[var(--brand)]"
+                    : "bg-[var(--success)]")
+              }
+            />
+            <span className="font-medium text-[var(--foreground)]">
+              {saveStatus === "dirty"
+                ? "Unsaved changes"
+                : saveStatus === "saving"
+                  ? "Saving your song…"
+                  : "No unsaved changes"}
+            </span>
+            {saveStatus === "dirty" ? (
+              <span className="text-[var(--muted)]">
+                Your edits are protected while you stay on this page.
+              </span>
+            ) : null}
+          </div>
+        ) : null}
         {children}
       </form>
       <ConfirmationDialog
