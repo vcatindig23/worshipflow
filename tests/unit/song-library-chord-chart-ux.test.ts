@@ -67,7 +67,7 @@ describe("song library and Chord Chart UX", () => {
     expect(editor).toContain("Live chart preview")
     expect(editor).toContain("focusValidationLine(validationError)")
     expect(editor).toContain("jump to line")
-    expect(editor).toContain("Line (\\\\d+)")
+    expect(editor).toContain("message.match(/^Line")
   })
 
   it("labels changed, added, and removed lines with text and icons", () => {
