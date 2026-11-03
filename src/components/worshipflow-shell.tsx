@@ -12,6 +12,7 @@ import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ThemeToggleButton from "@/components/theme-toggle-button"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
 import { isActiveNavigationPath } from "@/lib/navigation"
+import { editorRoles } from "@/lib/permissions"
 import { workspaceNavigationItems } from "@/lib/workspace-navigation"
 import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 import {
@@ -239,14 +240,16 @@ export default function WorshipFlowShell({
               <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
             </div>
             <WorkspaceHeaderActions unreadChatCount={workspace.unreadChatNotificationCount} />
-            <Link
-              href="/songs/new"
-              className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
-            >
-              <Plus aria-hidden="true" className="wf-icon-motion size-4" />
-              <span className="hidden md:inline">New Song</span>
-              <span className="md:hidden">New</span>
-            </Link>
+            {editorRoles.includes(workspace.role) ? (
+              <Link
+                href="/songs/new"
+                className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
+              >
+                <Plus aria-hidden="true" className="wf-icon-motion size-4" />
+                <span className="hidden md:inline">New Song</span>
+                <span className="md:hidden">New</span>
+              </Link>
+            ) : null}
           </div>
         </header>
 
