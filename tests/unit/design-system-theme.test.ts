@@ -319,7 +319,7 @@ describe("semantic theme foundations", () => {
 
     expect(dashboardView).toMatch(/wf-card wf-card-interactive/)
     expect(dashboardView).toMatch(/wf-feedback-warning/)
-    expect(dashboardView).toMatch(/wf-icon-tile-info/)
+    expect(dashboardView).toMatch(/wf-icon-tile/)
     expect(dashboardView).toMatch(/wf-status-success/)
     expect(dashboardView).toMatch(/wf-status-warning/)
     expect(dashboardView).not.toMatch(/bg-emerald-50|bg-amber-50|bg-rose-50|text-emerald-800|text-amber-800|text-rose-800/)

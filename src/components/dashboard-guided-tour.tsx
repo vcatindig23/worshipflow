@@ -35,27 +35,27 @@ const tourSteps: TourStep[] = [
     mobileSelector: '[data-tour="mobile-navigation"]',
   },
   {
-    title: "Your workspace at a glance",
+    title: "Your next step",
     description:
-      "These summary cards show your song library, team size, default service, and the role you have in this workspace.",
-    selector: '[data-tour="workspace-overview"]',
+      "This panel highlights the most useful action based on your workspace. It changes as your songs, services, and team plans progress.",
+    selector: '[data-tour="dashboard-next-action"]',
   },
   {
-    title: "Build your song library",
+    title: "Explore your song library",
     description:
-      "Add a song with lyrics, chords, key, tempo, and other details your team needs to prepare and perform together.",
+      "Open the shared song charts your team uses to prepare and perform. Editors can create and update charts from here.",
     selector: '[data-tour="create-song"]',
   },
   {
-    title: "Prepare your setlist",
+    title: "Open your service plans",
     description:
-      "Arrange songs and shape the flow of a worship service. You can add service details and coordinate assignments as you go.",
+      "Browse upcoming worship plans and their details. Editors can create setlists and coordinate service preparation.",
     selector: '[data-tour="build-setlist"]',
   },
   {
-    title: "Stay ahead of team priorities",
+    title: "Stay ahead of service priorities",
     description:
-      "Keep an eye on service readiness and pending team confirmations, and use My Schedule to review your own commitments.",
+      "Leaders can open a service issue directly. Team members can review their upcoming assignments and respond to confirmations here.",
     selector: '[data-tour="team-priorities"]',
   },
 ]

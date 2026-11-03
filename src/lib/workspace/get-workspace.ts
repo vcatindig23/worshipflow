@@ -21,8 +21,12 @@ type MemberProfile = {
 }
 
 type MemberAssignmentRow = {
+  id: string
   setlist_id: string
   team_position: string
+  confirmation_status: "pending" | "confirmed" | "declined"
+  responded_at: string | null
+  response_note: string | null
 }
 
 export type WorkspaceData = {
@@ -44,6 +48,7 @@ export type WorkspaceData = {
   serviceTimeAvailable: boolean
   role: string
   songCount: number
+  setlistCount: number
   memberCount: number
   unreadNotificationCount: number
   unreadChatNotificationCount: number
@@ -84,6 +89,13 @@ export type WorkspaceData = {
     service_date: string
     service_time: string | null
     positions: string[]
+    confirmations: {
+      id: string
+      position: string
+      status: "pending" | "confirmed" | "declined"
+      respondedAt: string | null
+      responseNote: string | null
+    }[]
   }[]
 }
 
@@ -128,6 +140,7 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
 
   const [
     songCountResult,
+    setlistCountResult,
     memberCountResult,
     recentSongsResult,
     upcomingSetlistsResult,
@@ -140,6 +153,11 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
         .select("id", { count: "exact", head: true })
         .eq("organization_id", organizationId)
         .eq("status", "active"),
+
+      supabase
+        .from("setlists")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", organizationId),
 
       supabase
         .from("organization_members")
@@ -167,7 +185,7 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
 
       supabase
         .from("setlist_team_assignments")
-        .select("setlist_id, team_position")
+        .select("id, setlist_id, team_position, confirmation_status, responded_at, response_note")
         .eq("user_id", userId),
 
       supabase
@@ -180,6 +198,10 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
 
   if (songCountResult.error) {
     throw new Error("Unable to count songs.")
+  }
+
+  if (setlistCountResult.error) {
+    throw new Error("Unable to count service plans.")
   }
 
   if (memberCountResult.error) {
@@ -225,20 +247,33 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
       throw new Error("Unable to load your upcoming assigned services.")
     }
 
-    const positionsBySetlist = new Map<string, string[]>()
+    const memberAssignmentsBySetlist = new Map<string, MemberAssignmentRow[]>()
     for (const assignment of memberAssignments) {
-      const positions = positionsBySetlist.get(assignment.setlist_id) ?? []
-      positions.push(assignment.team_position)
-      positionsBySetlist.set(assignment.setlist_id, positions)
+      const serviceAssignments =
+        memberAssignmentsBySetlist.get(assignment.setlist_id) ?? []
+      serviceAssignments.push(assignment)
+      memberAssignmentsBySetlist.set(assignment.setlist_id, serviceAssignments)
     }
 
-    myUpcomingAssignments = (assignedSetlists ?? []).map((setlist) => ({
-      ...setlist,
-      service_time: serviceTimeAvailable
-        ? setlist.service_time
-        : null,
-      positions: positionsBySetlist.get(setlist.id) ?? [],
-    }))
+    myUpcomingAssignments = (assignedSetlists ?? []).map((setlist) => {
+      const serviceAssignments =
+        memberAssignmentsBySetlist.get(setlist.id) ?? []
+
+      return {
+        ...setlist,
+        service_time: serviceTimeAvailable
+          ? setlist.service_time
+          : null,
+        positions: serviceAssignments.map((assignment) => assignment.team_position),
+        confirmations: serviceAssignments.map((assignment) => ({
+          id: assignment.id,
+          position: assignment.team_position,
+          status: assignment.confirmation_status,
+          respondedAt: assignment.responded_at,
+          responseNote: assignment.response_note,
+        })),
+      }
+    })
   }
 
   const upcomingSetlists = (upcomingSetlistsResult.data ??
@@ -341,6 +376,7 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
     serviceTimeAvailable,
     role,
     songCount: songCountResult.count ?? 0,
+    setlistCount: setlistCountResult.count ?? 0,
     memberCount: memberCountResult.count ?? 0,
     unreadNotificationCount: unreadNotificationsResult.count ?? 0,
     unreadChatNotificationCount,
