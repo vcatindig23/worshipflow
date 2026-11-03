@@ -198,7 +198,7 @@ function WorshipFlowShellLayout({
         collapsible="icon"
         aria-label="Workspace navigation"
         aria-hidden={sidebarHidden}
-        className={sidebarHidden ? "hidden" : "hidden lg:flex"}
+        className={sidebarHidden ? "lg:hidden" : "lg:flex"}
       >
         <WorkspaceSidebarBrand />
         <SidebarContent>
