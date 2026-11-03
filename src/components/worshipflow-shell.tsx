@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut, PanelLeft, PanelLeftClose, Plus } from "lucide-react"
+import { LogOut, PanelLeft, Plus } from "lucide-react"
 import { useEffect, useState } from "react"
 import AccountOptionsMenu from "@/components/account-options-menu"
 import DashboardDesktopNavigation from "@/components/dashboard-desktop-navigation"
@@ -11,14 +11,27 @@ import ProfileAvatar from "@/components/profile-avatar"
 import WorshipFlowLogo from "@/components/songs/worshipflow-logo"
 import ThemeToggleButton from "@/components/theme-toggle-button"
 import WorkspaceHeaderActions from "@/components/workspace-header-actions"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarInset,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar"
 import { isActiveNavigationPath } from "@/lib/navigation"
 import { editorRoles } from "@/lib/permissions"
-import { workspaceNavigationItems } from "@/lib/workspace-navigation"
-import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 import {
+  isWorkspaceSidebarCollapsedPreference,
   isWorkspaceSidebarHiddenPreference,
+  WORKSPACE_SIDEBAR_COLLAPSED_STORAGE_KEY,
   WORKSPACE_SIDEBAR_HIDDEN_STORAGE_KEY,
 } from "@/lib/workspace-sidebar-preference"
+import { workspaceNavigationItems } from "@/lib/workspace-navigation"
+import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 
 type WorkspaceShellData = {
   userName: string
@@ -79,30 +92,227 @@ function roleLabel(role: string) {
     .join(" ")
 }
 
+function WorkspaceSidebarFooter({ workspace }: { workspace: WorkspaceShellData }) {
+  const { state } = useSidebar()
+  const collapsed = state === "collapsed"
+
+  return (
+    <SidebarFooter>
+      <ThemeToggleButton
+        className={
+          collapsed
+            ? "mb-2 justify-center px-0 [&>span:last-child]:sr-only"
+            : "mb-2"
+        }
+      />
+      <div className={`rounded-xl bg-white/5 ${collapsed ? "p-1" : "p-3"}`}>
+        <div
+          className={
+            collapsed
+              ? "flex flex-col items-center gap-1"
+              : "flex items-center gap-2"
+          }
+        >
+          <Link
+            href="/profile"
+            aria-label={`View profile for ${workspace.userName}`}
+            title="View profile"
+            className={`group flex min-w-0 items-center gap-3 rounded-lg p-1 transition hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
+              collapsed ? "w-full justify-center" : "min-w-0 flex-1"
+            }`}
+          >
+            <ProfileAvatar
+              name={workspace.userName}
+              imageUrl={workspace.userAvatarUrl}
+              sizeClassName="size-9"
+              className="text-xs"
+            />
+            {!collapsed ? (
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-white">
+                  {workspace.userName}
+                </span>
+                <span className="block truncate text-xs text-[var(--sidebar-muted)]">
+                  {roleLabel(workspace.role)}
+                </span>
+              </span>
+            ) : null}
+          </Link>
+          <form action="/auth/signout" method="post">
+            <button
+              type="submit"
+              aria-label="Sign out"
+              title="Sign out"
+              className="group inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-[var(--sidebar-muted)] transition hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            >
+              <LogOut aria-hidden="true" className="wf-icon-motion size-4" />
+            </button>
+          </form>
+        </div>
+      </div>
+    </SidebarFooter>
+  )
+}
+
+function WorkspaceSidebarBrand() {
+  const { state } = useSidebar()
+
+  return (
+    <SidebarHeader>
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-[var(--sidebar)]">
+          <WorshipFlowLogo className="size-7" />
+        </div>
+        {state === "expanded" ? (
+          <div className="min-w-0">
+            <p className="text-[15px] font-semibold tracking-[-0.02em]">
+              WorshipFlow
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--sidebar-muted)]">
+              Worship workspace
+            </p>
+          </div>
+        ) : null}
+      </div>
+    </SidebarHeader>
+  )
+}
+
+function WorshipFlowShellLayout({
+  children,
+  workspace,
+  sidebarHidden,
+  onToggleSidebarVisibility,
+}: WorshipFlowShellProps & {
+  sidebarHidden: boolean
+  onToggleSidebarVisibility: () => void
+}) {
+  const pathname = usePathname() ?? "/"
+  const pageTitle = getWorkspacePageTitle(pathname)
+  const { open } = useSidebar()
+
+  return (
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+      <Sidebar
+        id="workspace-sidebar"
+        collapsible="icon"
+        aria-label="Workspace navigation"
+        aria-hidden={sidebarHidden}
+        className={sidebarHidden ? "lg:hidden" : "lg:flex"}
+      >
+        <WorkspaceSidebarBrand />
+        <SidebarContent>
+          <DashboardDesktopNavigation />
+        </SidebarContent>
+        <WorkspaceSidebarFooter workspace={workspace} />
+        <SidebarRail />
+      </Sidebar>
+
+      <SidebarInset
+        className={`wf-workspace-content min-h-screen min-w-0 transition-[padding] duration-200 motion-reduce:transition-none ${
+          sidebarHidden
+            ? "lg:pl-0"
+            : open
+              ? "lg:pl-[264px]"
+              : "lg:pl-[76px]"
+        }`}
+      >
+        <header className="app-header sticky top-0 z-30 flex h-[78px] items-center border-b border-[var(--border)] bg-[var(--background)]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <DashboardMobileNavigation
+              userName={workspace.userName}
+              role={workspace.role}
+              userAvatarUrl={workspace.userAvatarUrl}
+            />
+            <SidebarTrigger className="group hidden size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition duration-200 hover:border-[var(--brand)]/40 hover:bg-[var(--brand-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 lg:inline-flex" />
+            <button
+              type="button"
+              onClick={onToggleSidebarVisibility}
+              aria-label={
+                sidebarHidden
+                  ? "Show sidebar navigation"
+                  : "Hide sidebar navigation"
+              }
+              aria-controls="workspace-sidebar"
+              aria-expanded={!sidebarHidden}
+              title={
+                sidebarHidden
+                  ? "Show sidebar navigation"
+                  : "Hide sidebar navigation"
+              }
+              className="group hidden size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition duration-200 hover:border-[var(--brand)]/40 hover:bg-[var(--brand-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 lg:inline-flex"
+            >
+              <PanelLeft aria-hidden="true" className="wf-icon-motion size-[18px]" />
+            </button>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-[var(--muted)]">
+                {workspace.organizationName}
+              </p>
+              <p className="truncate text-sm font-semibold">{pageTitle}</p>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="hidden sm:block">
+              <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
+            </div>
+            <WorkspaceHeaderActions
+              unreadChatCount={workspace.unreadChatNotificationCount}
+            />
+            {editorRoles.includes(workspace.role) ? (
+              <Link
+                href="/songs/new"
+                className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
+              >
+                <Plus aria-hidden="true" className="wf-icon-motion size-4" />
+                <span className="hidden md:inline">New Song</span>
+                <span className="md:hidden">New</span>
+              </Link>
+            ) : null}
+          </div>
+        </header>
+
+        <div className="min-h-[calc(100vh-78px)] min-w-0">{children}</div>
+      </SidebarInset>
+    </div>
+  )
+}
+
 export default function WorshipFlowShell({
   children,
   workspace,
 }: WorshipFlowShellProps) {
   const pathname = usePathname() ?? "/"
-  const pageTitle = getWorkspacePageTitle(pathname)
   const [sidebarHidden, setSidebarHidden] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   useEffect(() => {
     try {
-      // Hydrate the saved preference after mount to keep server markup deterministic.
+      // Hydrate saved preferences after mount to keep server markup deterministic.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSidebarHidden(
         isWorkspaceSidebarHiddenPreference(
           window.localStorage.getItem(WORKSPACE_SIDEBAR_HIDDEN_STORAGE_KEY)
         )
       )
+      setSidebarCollapsed(
+        isWorkspaceSidebarCollapsedPreference(
+          window.localStorage.getItem(WORKSPACE_SIDEBAR_COLLAPSED_STORAGE_KEY)
+        )
+      )
     } catch {
-      // The sidebar stays visible when browser storage is unavailable.
+      // The sidebar remains visible and expanded when storage is unavailable.
     }
 
     function handleStorage(event: StorageEvent) {
-      if (event.key !== WORKSPACE_SIDEBAR_HIDDEN_STORAGE_KEY) return
-      setSidebarHidden(isWorkspaceSidebarHiddenPreference(event.newValue))
+      if (event.key === WORKSPACE_SIDEBAR_HIDDEN_STORAGE_KEY) {
+        setSidebarHidden(isWorkspaceSidebarHiddenPreference(event.newValue))
+      }
+      if (event.key === WORKSPACE_SIDEBAR_COLLAPSED_STORAGE_KEY) {
+        setSidebarCollapsed(
+          isWorkspaceSidebarCollapsedPreference(event.newValue)
+        )
+      }
     }
 
     window.addEventListener("storage", handleStorage)
@@ -123,140 +333,37 @@ export default function WorshipFlowShell({
     }
   }
 
+  function handleSidebarOpenChange(open: boolean) {
+    const nextCollapsed = !open
+    setSidebarCollapsed(nextCollapsed)
+
+    try {
+      window.localStorage.setItem(
+        WORKSPACE_SIDEBAR_COLLAPSED_STORAGE_KEY,
+        String(nextCollapsed)
+      )
+    } catch {
+      // Keep the selected collapse state for the current page when storage is unavailable.
+    }
+  }
+
   if (isImmersiveWorkspaceRoute(pathname)) {
     return <>{children}</>
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <aside
-        id="workspace-sidebar"
-        aria-hidden={sidebarHidden}
-        className={`app-sidebar fixed inset-y-0 left-0 z-40 hidden w-[264px] flex-col border-r border-white/10 bg-[var(--sidebar)] text-white ${
-          sidebarHidden ? "lg:hidden" : "lg:flex"
-        }`}
+    <SidebarProvider
+      open={!sidebarCollapsed}
+      onOpenChange={handleSidebarOpenChange}
+      className="min-h-screen"
+    >
+      <WorshipFlowShellLayout
+        workspace={workspace}
+        sidebarHidden={sidebarHidden}
+        onToggleSidebarVisibility={toggleSidebarVisibility}
       >
-        <div className="flex h-[78px] shrink-0 items-center gap-3 border-b border-white/8 px-5">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-white text-[var(--sidebar)]">
-            <WorshipFlowLogo className="size-7" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[15px] font-semibold tracking-[-0.02em]">
-              WorshipFlow
-            </p>
-            <p className="mt-0.5 text-[11px] text-[var(--sidebar-muted)]">
-              Worship workspace
-            </p>
-          </div>
-        </div>
-
-        <DashboardDesktopNavigation />
-
-        <div className="shrink-0 border-t border-white/8 p-3">
-          <ThemeToggleButton className="mb-2" />
-          <div className="rounded-xl bg-white/5 p-3">
-            <div className="flex items-center gap-2">
-              <Link
-                href="/profile"
-                aria-label={`View profile for ${workspace.userName}`}
-                title="View profile"
-                className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 transition hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
-              >
-                <ProfileAvatar
-                  name={workspace.userName}
-                  imageUrl={workspace.userAvatarUrl}
-                  sizeClassName="size-9"
-                  className="text-xs"
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium transition group-hover:text-white">
-                    {workspace.userName}
-                  </span>
-                  <span className="block truncate text-xs text-[var(--sidebar-muted)]">
-                    {roleLabel(workspace.role)}
-                  </span>
-                </span>
-              </Link>
-              <form action="/auth/signout" method="post">
-                <button
-                  type="submit"
-                  aria-label="Sign out"
-                  title="Sign out"
-                  className="group rounded-lg p-1.5 text-[var(--sidebar-muted)] transition hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                >
-                  <LogOut aria-hidden="true" className="wf-icon-motion size-4" />
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <div
-        className={`wf-workspace-content min-h-screen min-w-0 transition-[padding] duration-200 motion-reduce:transition-none ${
-          sidebarHidden ? "lg:pl-0" : "lg:pl-[264px]"
-        }`}
-      >
-        <header className="app-header sticky top-0 z-30 flex h-[78px] items-center border-b border-[var(--border)] bg-[var(--background)]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <DashboardMobileNavigation
-              userName={workspace.userName}
-              role={workspace.role}
-              userAvatarUrl={workspace.userAvatarUrl}
-            />
-            <button
-              type="button"
-              onClick={toggleSidebarVisibility}
-              aria-label={
-                sidebarHidden
-                  ? "Show sidebar navigation"
-                  : "Hide sidebar navigation"
-              }
-              aria-controls="workspace-sidebar"
-              aria-expanded={!sidebarHidden}
-              title={
-                sidebarHidden
-                  ? "Show sidebar navigation"
-                  : "Hide sidebar navigation"
-              }
-              className="group hidden size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition duration-200 hover:border-[var(--brand)]/40 hover:bg-[var(--brand-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 lg:inline-flex"
-            >
-              {sidebarHidden ? (
-                <PanelLeft aria-hidden="true" className="wf-icon-motion size-[18px]" />
-              ) : (
-                <PanelLeftClose aria-hidden="true" className="wf-icon-motion size-[18px]" />
-              )}
-            </button>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium text-[var(--muted)]">
-                {workspace.organizationName}
-              </p>
-              <p className="truncate text-sm font-semibold">{pageTitle}</p>
-            </div>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2">
-            <div className="hidden sm:block">
-              <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
-            </div>
-            <WorkspaceHeaderActions unreadChatCount={workspace.unreadChatNotificationCount} />
-            {editorRoles.includes(workspace.role) ? (
-              <Link
-                href="/songs/new"
-                className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
-              >
-                <Plus aria-hidden="true" className="wf-icon-motion size-4" />
-                <span className="hidden md:inline">New Song</span>
-                <span className="md:hidden">New</span>
-              </Link>
-            ) : null}
-          </div>
-        </header>
-
-        <div className="min-h-[calc(100vh-78px)] min-w-0">
-          {children}
-        </div>
-      </div>
-    </div>
+        {children}
+      </WorshipFlowShellLayout>
+    </SidebarProvider>
   )
 }
