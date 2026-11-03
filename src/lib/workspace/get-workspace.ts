@@ -48,6 +48,7 @@ export type WorkspaceData = {
   serviceTimeAvailable: boolean
   role: string
   songCount: number
+  setlistCount: number
   memberCount: number
   unreadNotificationCount: number
   unreadChatNotificationCount: number
@@ -139,6 +140,7 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
 
   const [
     songCountResult,
+    setlistCountResult,
     memberCountResult,
     recentSongsResult,
     upcomingSetlistsResult,
@@ -151,6 +153,11 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
         .select("id", { count: "exact", head: true })
         .eq("organization_id", organizationId)
         .eq("status", "active"),
+
+      supabase
+        .from("setlists")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", organizationId),
 
       supabase
         .from("organization_members")
@@ -191,6 +198,10 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
 
   if (songCountResult.error) {
     throw new Error("Unable to count songs.")
+  }
+
+  if (setlistCountResult.error) {
+    throw new Error("Unable to count service plans.")
   }
 
   if (memberCountResult.error) {
@@ -365,6 +376,7 @@ export const getWorkspace = cache(async function getWorkspace(): Promise<Workspa
     serviceTimeAvailable,
     role,
     songCount: songCountResult.count ?? 0,
+    setlistCount: setlistCountResult.count ?? 0,
     memberCount: memberCountResult.count ?? 0,
     unreadNotificationCount: unreadNotificationsResult.count ?? 0,
     unreadChatNotificationCount,
