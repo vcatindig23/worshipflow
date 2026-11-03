@@ -300,7 +300,7 @@ export function SidebarMenuButton({
         ? "min-h-12 text-sm"
         : "min-h-11 text-sm"
   const buttonClasses = [
-    "relative flex w-full min-w-0 items-center gap-3 rounded-xl px-3.5 py-2.5 text-left font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
+    "group relative flex w-full min-w-0 items-center gap-3 rounded-xl px-3.5 py-2.5 text-left font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
     sizeClasses,
     collapsed ? "justify-center px-2 [&>span:last-child]:sr-only" : "",
     isActive
