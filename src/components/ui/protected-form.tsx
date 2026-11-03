@@ -72,13 +72,11 @@ export function ProtectedForm({
     }
     form.addEventListener("input", update)
     form.addEventListener("change", update)
-    form.addEventListener("reset", update)
     window.addEventListener("beforeunload", beforeUnload)
     document.addEventListener("click", click, true)
     return () => {
       form.removeEventListener("input", update)
       form.removeEventListener("change", update)
-      form.removeEventListener("reset", update)
       window.removeEventListener("beforeunload", beforeUnload)
       document.removeEventListener("click", click, true)
     }
