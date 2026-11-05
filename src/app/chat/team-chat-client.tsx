@@ -1430,6 +1430,18 @@ export default function TeamChatClient({
             currentUserId={currentUserId}
             conversation={activeDirectConversation}
             onBackToGroup={() => setActiveDirectConversation(null)}
+            onConversationActivity={(preview, createdAt) => {
+              setDirectConversations((current) =>
+                current
+                  .map((item) => item.id === activeDirectConversation.id
+                    ? { ...item, lastMessagePreview: preview, lastMessageAt: createdAt }
+                    : item
+                  )
+                  .sort((first, second) =>
+                    (second.lastMessageAt ?? "").localeCompare(first.lastMessageAt ?? "")
+                  )
+              )
+            }}
           />
         ) : (
         <main className="flex min-h-[560px] min-w-0 flex-1 flex-col bg-[var(--card)] md:min-h-0">
