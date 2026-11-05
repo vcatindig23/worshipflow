@@ -79,7 +79,7 @@ describe("Vercel web interface guidelines baseline", () => {
     }
     const checklist = source(progressFiles[3])
     expect(checklist).toContain('role="progressbar"')
-    expect(checklist).toContain("aria-valuenow={completionPercent}")
+    expect(checklist).toContain("aria-valuenow={readiness.percentage}")
   })
 
   it("keeps mobile workspace action targets at or above 44px", () => {

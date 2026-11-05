@@ -19,6 +19,7 @@ const typeSchema = z.enum([
   "message",
   "communion",
   "closing",
+  "break",
   "transition",
   "other",
 ])

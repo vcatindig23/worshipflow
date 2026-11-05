@@ -3,7 +3,7 @@ import { ProtectedForm } from "@/components/ui/protected-form"
 import { Input, Textarea } from "@/components/ui/form-controls"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
-import { ArrowLeft, CalendarDays } from "lucide-react"
+import { ArrowLeft, CalendarDays, ChevronDown } from "lucide-react"
 import { redirect } from "next/navigation"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { createSetlist } from "../actions"
@@ -157,23 +157,68 @@ export default async function NewSetlistPage({
             </div>
           ) : null}
 
-          <div>
-            <label
-              htmlFor="description"
-              className="mb-2 block text-sm font-medium text-[var(--foreground)]"
-            >
-              Description
-            </label>
+          <details className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)]/40 p-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-[var(--foreground)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+              <span className="min-w-0">
+                <span className="block">Optional service details</span>
+                <span className="mt-0.5 block text-xs font-normal text-[var(--muted)]">Description, team notes, and announcements</span>
+              </span>
+              <ChevronDown className="size-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-180" aria-hidden="true" />
+            </summary>
 
-            <Textarea
-              id="description"
-              name="description"
-              maxLength={2000}
-              rows={5}
-              placeholder="Optional notes about this service, theme, or special arrangements."
-              className="w-full resize-y px-4 py-3 leading-6"
-            />
-          </div>
+            <div className="mt-4 space-y-4 border-t border-[var(--border)] pt-4">
+              <div>
+                <label
+                  htmlFor="description"
+                  className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                >
+                  Service description or theme
+                </label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  maxLength={2000}
+                  rows={3}
+                  placeholder="Optional theme, focus, or special arrangements."
+                  className="w-full resize-y px-4 py-3 leading-6"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="serviceNotes"
+                  className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                >
+                  Preparation notes for the team
+                </label>
+                <Textarea
+                  id="serviceNotes"
+                  name="serviceNotes"
+                  maxLength={3000}
+                  rows={3}
+                  placeholder="Share direction, transitions, reminders, or preparation details."
+                  className="w-full resize-y px-4 py-3 leading-6"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="announcements"
+                  className="mb-2 block text-sm font-medium text-[var(--foreground)]"
+                >
+                  Service announcements
+                </label>
+                <Textarea
+                  id="announcements"
+                  name="announcements"
+                  maxLength={3000}
+                  rows={3}
+                  placeholder="Optional reminders or announcements for the congregation and team."
+                  className="w-full resize-y px-4 py-3 leading-6"
+                />
+              </div>
+            </div>
+          </details>
 
           <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end">
             <Link

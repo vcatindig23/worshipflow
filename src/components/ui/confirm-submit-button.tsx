@@ -10,12 +10,14 @@ export function ConfirmSubmitButton({
   title,
   description,
   confirmLabel = "Confirm",
+  destructive = true,
   children,
   ...props
 }: ComponentProps<typeof Button> & {
   title: string
   description: string
   confirmLabel?: string
+  destructive?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLButtonElement>(null)
@@ -44,7 +46,7 @@ export function ConfirmSubmitButton({
         open={open}
         title={title}
         description={description}
-        destructive
+        destructive={destructive}
         confirmLabel={confirmLabel}
         onCancel={() => setOpen(false)}
         onConfirm={() => {

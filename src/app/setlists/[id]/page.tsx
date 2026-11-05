@@ -35,6 +35,7 @@ import {
 } from "@/lib/member-availability"
 import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
+import { getServiceReadiness } from "@/lib/service-readiness"
 import ServiceResources from "./service-resources"
 import ServiceTimeline from "./service-timeline"
 import ServicePreparationChecklist from "./service-preparation-checklist"
@@ -408,7 +409,7 @@ export default async function SetlistPage({
   const [
     teamMembersResult,
     teamAssignmentsResult,
-    timelineCountResult,
+    timelineItemsResult,
     resourcesCountResult,
   ] = await Promise.all([
     supabase
@@ -425,7 +426,7 @@ export default async function SetlistPage({
       .order("created_at", { ascending: true }),
     supabase
       .from("setlist_timeline_items")
-      .select("id", { count: "exact", head: true })
+      .select("id, item_type, song_id, duration_minutes")
       .eq("setlist_id", id)
       .eq("organization_id", workspace.organizationId),
     supabase
@@ -444,9 +445,18 @@ export default async function SetlistPage({
   const teamAssignments = (
     teamAssignmentsResult.data ?? []
   ) as TeamAssignment[]
-  const timelineCount = timelineCountResult.error
+  const timelineRows = timelineItemsResult.data ?? []
+  const timelineSummary = timelineItemsResult.error
     ? null
-    : timelineCountResult.count ?? 0
+    : {
+        itemCount: timelineRows.length,
+        unlinkedSongCount: timelineRows.filter(
+          (item) => item.item_type === "song" && !item.song_id
+        ).length,
+        untimedItemCount: timelineRows.filter(
+          (item) => item.duration_minutes === null
+        ).length,
+      }
   const resourceCount = resourcesCountResult.error
     ? null
     : resourcesCountResult.count ?? 0
@@ -569,6 +579,66 @@ export default async function SetlistPage({
   const declinedAssignments = teamAssignments.filter(
     (assignment) => assignment.confirmation_status === "declined"
   ).length
+
+  const readiness = getServiceReadiness(setlist, setlistSongs.length, teamAssignments)
+  const checklistAssignments = teamAssignmentsWithAvailability.map((assignment) => ({
+    memberName: teamProfileNames.get(assignment.user_id) ?? "Name not set",
+    teamPosition: teamPositionLabels[assignment.team_position] ?? assignment.team_position,
+    confirmation_status: assignment.confirmation_status,
+    availability: assignment.availability,
+  }))
+  const unavailableAssignmentCount = teamAssignmentsWithAvailability.filter(
+    (assignment) => assignment.availability?.status === "unavailable"
+  ).length
+  const outsideHoursAssignmentCount = teamAssignmentsWithAvailability.filter(
+    (assignment) => assignment.availability?.status === "outside_weekly_hours"
+  ).length
+  const publishReadinessWarnings = [
+    !readiness.hasSchedule ? "The service date or start time is missing" : null,
+    !readiness.hasSongs ? "No songs have been added" : null,
+    !readiness.hasTeam ? "No worship-team members are assigned" : null,
+    declinedAssignments > 0
+      ? `${declinedAssignments} team assignment(s) were declined`
+      : null,
+    pendingAssignments > 0
+      ? `${pendingAssignments} team confirmation(s) are still pending`
+      : null,
+    availabilityChecksAvailable && unavailableAssignmentCount > 0
+      ? `${unavailableAssignmentCount} assigned member(s) have marked time off`
+      : null,
+    availabilityChecksAvailable && outsideHoursAssignmentCount > 0
+      ? `${outsideHoursAssignmentCount} assigned member(s) are outside their usual available hours`
+      : null,
+  ].filter((item): item is string => Boolean(item))
+  const publishRecommendations = [
+    timelineSummary === null
+      ? "Timeline details could not be checked"
+      : timelineSummary.itemCount === 0
+        ? "Add a service run of show"
+        : timelineSummary.unlinkedSongCount > 0
+          ? "Link song timeline items to their setlist charts"
+          : null,
+    timelineSummary && timelineSummary.untimedItemCount > 0
+      ? `${timelineSummary.untimedItemCount} timeline item(s) have no planned duration`
+      : null,
+    resourceCount === null
+      ? "Shared resources could not be checked"
+      : resourceCount === 0
+        ? "Link rehearsal resources if needed"
+        : null,
+    !setlist.service_notes && !setlist.announcements
+      ? "Add service notes or announcements if needed"
+      : null,
+  ].filter((item): item is string => Boolean(item))
+  const publishConfirmationDescription = [
+    "Publishing marks this plan as Published in your church workspace. It does not complete the service or prevent later edits.",
+    publishReadinessWarnings.length > 0
+      ? `Core readiness gaps to review: ${publishReadinessWarnings.join("; ")}.`
+      : "All four core readiness checks are complete.",
+    publishRecommendations.length > 0
+      ? `Recommended but optional: ${publishRecommendations.join("; ")}.`
+      : null,
+  ].filter(Boolean).join(" ")
 
   const errorKey =
     typeof queryParams.error === "string"
@@ -780,20 +850,27 @@ export default async function SetlistPage({
                   }
                 />
 
-                <button
-                  type="submit"
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-                >
-                  {setlist.status ===
-                  "draft" ? (
-                    "Publish"
-                  ) : (
-                    <>
-                      <Archive className="size-4" />
-                      Archive
-                    </>
-                  )}
-                </button>
+                {setlist.status === "draft" ? (
+                  <ConfirmSubmitButton
+                    title="Publish this service plan?"
+                    description={publishConfirmationDescription}
+                    confirmLabel="Publish plan"
+                    destructive={false}
+                    variant="default"
+                    type="submit"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                  >
+                    Publish
+                  </ConfirmSubmitButton>
+                ) : (
+                  <button
+                    type="submit"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                  >
+                    <Archive className="size-4" />
+                    Archive
+                  </button>
+                )}
               </form>
             ) : null}
 
@@ -848,14 +925,54 @@ export default async function SetlistPage({
         serviceDate={setlist.service_date}
         serviceTime={setlist.service_time}
         songCount={setlistSongs.length}
-        teamAssignments={teamAssignments}
-        timelineCount={timelineCount}
+        readiness={readiness}
+        teamAssignments={checklistAssignments}
+        availabilityChecksAvailable={availabilityChecksAvailable}
+        timeline={timelineSummary}
         resourceCount={resourceCount}
         hasServiceNotes={Boolean(setlist.service_notes)}
         hasAnnouncements={Boolean(setlist.announcements)}
         canEdit={canEdit}
         isCompleted={Boolean(setlist.completed_at)}
       />
+
+      {setlist.completed_at ? (
+        <section className="wf-card rounded-3xl p-5 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--success)]">After-service review</p>
+              <h2 className="mt-1 text-lg font-semibold text-[var(--foreground)]">Completion summary</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">Review the attendance, actual duration, and notes saved for this service.</p>
+            </div>
+            <span className="wf-status wf-status-success"><CheckCircle2 className="size-3.5" /> Completed</span>
+          </div>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl bg-[var(--surface)] p-3">
+              <dt className="text-xs text-[var(--muted)]">Attendance</dt>
+              <dd className="mt-1 text-base font-semibold text-[var(--foreground)]">
+                {setlist.attendance_count === null ? "Not recorded" : setlist.attendance_count.toLocaleString("en-PH")}
+              </dd>
+            </div>
+            <div className="rounded-xl bg-[var(--surface)] p-3">
+              <dt className="text-xs text-[var(--muted)]">Actual duration</dt>
+              <dd className="mt-1 text-base font-semibold text-[var(--foreground)]">
+                {setlist.actual_duration_minutes === null ? "Not recorded" : `${setlist.actual_duration_minutes} min`}
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-4 rounded-xl border border-[var(--border)] p-4">
+            <h3 className="text-sm font-semibold text-[var(--foreground)]">After-service notes</h3>
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--muted)]">
+              {setlist.after_service_notes || "No after-service notes have been recorded yet."}
+            </p>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/services/history" className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]">Service history</Link>
+            <Link href="/services/insights" className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]">View insights</Link>
+            <Link href={`/setlists/${id}/complete`} className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border)] px-4 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]">Edit review</Link>
+          </div>
+        </section>
+      ) : null}
 
       {(setlist.announcements || setlist.service_notes) ? (
         <section

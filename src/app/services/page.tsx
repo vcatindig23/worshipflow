@@ -22,6 +22,7 @@ import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
+import { getServiceReadiness, getReadinessLabel } from "@/lib/service-readiness"
 
 type ServicesPageProps = {
   searchParams: Promise<
@@ -60,24 +61,6 @@ type MemberProfile = {
 }
 
 type Period = "upcoming" | "past" | "all"
-
-type ReadinessStatus =
-  | "ready"
-  | "attention"
-  | "incomplete"
-
-type ServiceReadiness = {
-  status: ReadinessStatus
-  percentage: number
-  confirmedAssignments: number
-  pendingAssignments: number
-  declinedAssignments: number
-  totalAssignments: number
-  hasSchedule: boolean
-  hasSongs: boolean
-  hasTeam: boolean
-  hasUnconfirmedTeam: boolean
-}
 
 function getParam(
   value: string | string[] | undefined
@@ -119,112 +102,6 @@ function statusLabel(status: Setlist["status"]) {
   }
 
   return "Draft"
-}
-
-function getServiceReadiness(
-  setlist: Setlist,
-  songCount: number,
-  assignments: TeamAssignment[]
-): ServiceReadiness {
-  const hasSchedule =
-    Boolean(setlist.service_date) &&
-    Boolean(setlist.service_time)
-
-  const hasSongs = songCount > 0
-  const hasTeam = assignments.length > 0
-
-  const confirmedAssignments =
-    assignments.filter(
-      (assignment) =>
-        assignment.confirmation_status === "confirmed"
-    ).length
-
-  const pendingAssignments =
-    assignments.filter(
-      (assignment) =>
-        assignment.confirmation_status === "pending"
-    ).length
-
-  const declinedAssignments =
-    assignments.filter(
-      (assignment) =>
-        assignment.confirmation_status === "declined"
-    ).length
-
-  const totalAssignments = assignments.length
-
-  const hasUnconfirmedTeam =
-    pendingAssignments > 0 ||
-    declinedAssignments > 0
-
-  /*
-   * Readiness is calculated from four equally weighted areas:
-   *
-   * 1. Schedule
-   * 2. Songs
-   * 3. Team
-   * 4. Team confirmations
-   *
-   * The confirmation check is considered complete when:
-   * - there is no team assigned, or
-   * - every assigned member has confirmed.
-   *
-   * A service without a team cannot be considered ready, so
-   * the Team check itself remains incomplete in that case.
-   */
-  const checks = [
-    hasSchedule,
-    hasSongs,
-    hasTeam,
-    hasTeam &&
-      totalAssignments > 0 &&
-      confirmedAssignments === totalAssignments,
-  ]
-
-  const completedChecks =
-    checks.filter(Boolean).length
-
-  const percentage =
-    Math.round(
-      (completedChecks / checks.length) * 100
-    )
-
-  let status: ReadinessStatus
-
-  if (percentage === 100) {
-    status = "ready"
-  } else if (percentage >= 50) {
-    status = "attention"
-  } else {
-    status = "incomplete"
-  }
-
-  return {
-    status,
-    percentage,
-    confirmedAssignments,
-    pendingAssignments,
-    declinedAssignments,
-    totalAssignments,
-    hasSchedule,
-    hasSongs,
-    hasTeam,
-    hasUnconfirmedTeam,
-  }
-}
-
-function getReadinessLabel(
-  readiness: ServiceReadiness
-) {
-  if (readiness.status === "ready") {
-    return "Ready"
-  }
-
-  if (readiness.status === "attention") {
-    return "Needs attention"
-  }
-
-  return "Incomplete"
 }
 
 
