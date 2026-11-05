@@ -850,45 +850,44 @@ export default async function MySchedulePage({
                   assignmentsBySetlist.get(
                     setlist.id
                   ) ?? []
+                const availabilityAssessment = availabilityBySetlist.get(setlist.id)
+                const serviceConflicts = scheduleConflicts.get(setlist.id) ?? []
 
                 return (
                   <div
                     key={setlist.id}
                     className="wf-card flex min-w-0 flex-col gap-4 p-4 transition hover:border-[var(--brand)] hover:shadow-md sm:p-5"
                   >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                    <div className="space-y-4">
                       <Link
                         href={`/setlists/${setlist.id}`}
-                        className="group flex min-w-0 flex-1 items-start gap-4"
+                        className="group grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3"
                       >
                         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                           <ListMusic className="size-5" />
                         </div>
 
-                        <div className="min-w-0 flex-1">
+                        <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <h2 className="text-base font-semibold text-[var(--foreground)] group-hover:text-[var(--brand)]">
                               {setlist.name}
                             </h2>
-
                             <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-[10px] font-semibold text-[var(--muted)]">
-                              {setlist.status ===
-                              "published"
+                              {setlist.status === "published"
                                 ? "Published"
-                                : setlist.status ===
-                                    "archived"
+                                : setlist.status === "archived"
                                   ? "Archived"
                                   : "Draft"}
                             </span>
                           </div>
 
                           {setlist.description ? (
-                            <p className="mt-1 text-sm text-[var(--muted)]">
+                            <p className="mt-1 text-sm leading-5 text-[var(--muted)]">
                               {setlist.description}
                             </p>
                           ) : null}
 
-                          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                          <div className="mt-3 flex flex-col items-start gap-1.5">
                             <span className="text-sm font-semibold text-[var(--foreground)]">
                               {formatDate(setlist.service_date)}
                             </span>
@@ -898,108 +897,113 @@ export default async function MySchedulePage({
                                 : "Service start time not set"}
                             </span>
                             <span className="rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]">
-                              {setlist.service_date && setlist.service_date < today ? "Past assignment" : "Upcoming assignment"}
+                              {setlist.service_date && setlist.service_date < today
+                                ? "Past assignment"
+                                : "Upcoming assignment"}
                             </span>
                           </div>
 
                           <div className="mt-3 flex flex-wrap gap-2">
-                            {(
-                              positionsBySetlist.get(
-                                setlist.id
-                              ) ?? []
-                            ).map(
-                              (
-                                position
-                              ) => (
-                                <span
-                                  key={
-                                    position
-                                  }
-                                  className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-xs font-medium text-[var(--brand)]"
-                                >
-                                  {getTeamPositionLabel(
-                                    position
-                                  )}
-                                </span>
-                              )
-                            )}
+                            {(positionsBySetlist.get(setlist.id) ?? []).map((position) => (
+                              <span
+                                key={position}
+                                className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-xs font-medium text-[var(--brand)]"
+                              >
+                                {getTeamPositionLabel(position)}
+                              </span>
+                            ))}
                           </div>
                         </div>
 
                         <ArrowRight className="mt-1 size-5 shrink-0 text-[var(--muted)] transition group-hover:translate-x-1 group-hover:text-[var(--brand)]" />
                       </Link>
 
-                      <AssignmentConfirmation
-                        assignmentId={
-                          assignmentsForService[0]
-                            ?.id ?? ""
-                        }
-                        status={
-                          assignmentsForService[0]
-                            ?.confirmation_status ??
-                          "pending"
-                        }
-                        responseNote={
-                          assignmentsForService[0]
-                            ?.response_note ??
-                          null
-                        }
-                        respondedAt={
-                          assignmentsForService[0]
-                            ?.responded_at ??
-                          null
-                        }
-                        timeZone={
-                          workspace.organizationTimezone
-                        }
-                      />
-                    </div>
-
-                    {assignmentsForService.length >
-                    1 ? (
-                      <div className="border-t border-[var(--border)] pt-3">
-                        <p className="text-[11px] font-medium text-[var(--muted)]">
-                          You have{" "}
-                          {
-                            assignmentsForService.length
-                          }{" "}
-                          assigned positions for this service.
-                        </p>
-
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {assignmentsForService.map(
-                            (
-                              assignment
-                            ) => (
-                              <span
-                                key={
-                                  assignment.id
-                                }
-                                className={`wf-status ${
-                                  assignment.confirmation_status === "confirmed"
-                                    ? "wf-status-success"
-                                    : assignment.confirmation_status === "declined"
-                                      ? "wf-status-danger"
-                                      : "wf-status-warning"
-                                }`}
-                              >
-                                {getTeamPositionLabel(
-                                  assignment.team_position
-                                )}
-                                {" · "}
-                                {assignment.confirmation_status ===
-                                "confirmed"
-                                  ? "Confirmed"
-                                  : assignment.confirmation_status ===
-                                      "declined"
-                                    ? "Declined"
-                                    : "Pending"}
-                              </span>
-                            )
-                          )}
+                      {availabilityAssessment && availabilityAssessment.status !== "within_weekly_hours" ? (
+                        <div
+                          role="status"
+                          className={`flex items-start gap-2.5 rounded-xl border p-3 ${
+                            availabilityAssessment.status === "unavailable"
+                              ? "border-[var(--danger)]/25 bg-[var(--danger-soft)] text-[var(--danger)]"
+                              : availabilityAssessment.status === "outside_weekly_hours"
+                                ? "border-[var(--warning)]/30 bg-[var(--warning-soft)] text-[var(--warning)]"
+                                : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
+                          }`}
+                        >
+                          <Clock3 className="mt-0.5 size-4 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold">
+                              {availabilityAssessment.status === "unavailable"
+                                ? "Conflicts with your saved time off"
+                                : availabilityAssessment.status === "outside_weekly_hours"
+                                  ? "Outside your usual weekly hours"
+                                  : availabilityAssessment.status === "needs_schedule"
+                                    ? "Availability needs a service time"
+                                    : "No usual availability recorded"}
+                            </p>
+                            <p className="mt-0.5 text-xs leading-5">
+                              {availabilityAssessment.status === "unavailable"
+                                ? "Your unavailable-date entry overlaps this service. Review it before confirming your assignment."
+                                : availabilityAssessment.status === "outside_weekly_hours"
+                                  ? "This service is outside the recurring hours you saved. Check the timing before confirming."
+                                  : availabilityAssessment.status === "needs_schedule"
+                                    ? "A valid service date and start time are needed to compare your weekly availability."
+                                    : "This service can still be confirmed, but no recurring availability window is available to compare."}
+                            </p>
+                            <Link href="#availability" className="mt-1 inline-flex text-xs font-semibold underline underline-offset-2">
+                              Review availability
+                            </Link>
+                          </div>
                         </div>
+                      ) : availabilityAssessment?.status === "within_weekly_hours" ? (
+                        <p className="inline-flex items-center gap-2 text-xs font-medium text-[var(--success)]">
+                          <CheckCircle2 className="size-3.5" />
+                          This service fits your saved weekly availability.
+                        </p>
+                      ) : null}
+
+                      {serviceConflicts.length > 0 ? (
+                        <div className="rounded-xl border border-[var(--danger)]/25 bg-[var(--danger-soft)] p-3">
+                          <p className="text-xs font-semibold text-[var(--danger)]">Overlapping service assignment</p>
+                          <p className="mt-0.5 text-xs leading-5 text-[var(--danger)]">
+                            This service overlaps the current one-hour calendar window for:
+                          </p>
+                          <ul className="mt-2 space-y-1.5">
+                            {serviceConflicts.map((conflict) => (
+                              <li key={conflict.serviceId}>
+                                <Link
+                                  href={`/setlists/${conflict.serviceId}`}
+                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--danger)] underline underline-offset-2"
+                                >
+                                  {conflict.serviceName}
+                                  <ArrowRight className="size-3" />
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="mt-2 text-[10px] leading-4 text-[var(--danger)]">
+                            Review both plans with your worship leader before accepting overlapping commitments.
+                          </p>
+                        </div>
+                      ) : null}
+
+                      <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+                        {assignmentsForService.map((assignment) => (
+                          <div key={assignment.id} className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-3">
+                            <p className="mb-2 text-xs font-semibold text-[var(--foreground)]">
+                              {getTeamPositionLabel(assignment.team_position)}
+                            </p>
+                            <AssignmentConfirmation
+                              assignmentId={assignment.id}
+                              status={assignment.confirmation_status}
+                              responseNote={assignment.response_note}
+                              respondedAt={assignment.responded_at}
+                              timeZone={workspace.organizationTimezone}
+                              positionLabel={getTeamPositionLabel(assignment.team_position)}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ) : null}
+                    </div>
 
                     {swapFeatureAvailable && assignmentsForService.length > 0 && setlist.status !== "archived" && (!setlist.service_date || setlist.service_date >= today) && period !== "past" ? (
                       <div className="space-y-3 border-t border-[var(--border)] pt-3">
