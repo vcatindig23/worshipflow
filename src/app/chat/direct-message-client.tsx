@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react"
 import { Feedback } from "@/components/ui/feedback"
+import { MessageReactionPicker } from "./message-reaction-picker"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import {
   loadTeamChatDirectMessageReactions,
@@ -25,7 +26,6 @@ import {
 } from "./actions"
 import type { TeamChatAttachment } from "./team-chat-client"
 
-const REACTION_EMOJIS = ["👍", "❤️", "😂", "🙏", "👏", "🔥", "🎉", "😮"]
 const COMPOSER_EMOJIS = [
   "😀", "😃", "😄", "😁", "😊", "🥰", "😍", "😘",
   "😂", "🤣", "🥲", "😉", "😎", "🤔", "😮", "😢",
@@ -393,13 +393,11 @@ export default function DirectMessageClient({
                           >
                             <Smile className="size-3.5" />
                           </button>
-                          <div className={`absolute bottom-full left-0 z-20 mb-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-1.5 shadow-xl ${reactionPickerMessageId === message.id ? "flex" : "hidden"}`}>
-                            <div className="flex gap-1">
-                              {REACTION_EMOJIS.map((emoji) => (
-                                <button key={emoji} type="button" onClick={() => toggleReaction(message.id, emoji)} aria-label={`React with ${emoji}`} className="flex size-8 items-center justify-center rounded-lg text-base hover:bg-[var(--surface)]">{emoji}</button>
-                              ))}
-                            </div>
-                          </div>
+                          <MessageReactionPicker
+                            isOwnMessage={own}
+                            isOpen={reactionPickerMessageId === message.id}
+                            onSelect={(emoji) => toggleReaction(message.id, emoji)}
+                          />
                         </div>
                       </div>
                     </div>
