@@ -15,6 +15,7 @@ test("desktop navigation separates workspace work from management", async ({ pag
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto("/e2e/workspace-navigation")
 
+  await page.locator("#workspace-sidebar").hover()
   const workspaceNav = page.getByRole("navigation", { name: "Workspace navigation" })
   const managementNav = page.getByRole("navigation", { name: "Workspace management" })
 
@@ -48,36 +49,29 @@ test("mobile navigation exposes the same destinations and account access", async
   await expect(drawer.getByRole("link", { name: "View profile for Worship Leader" })).toHaveAttribute("href", "/profile")
 })
 
-test("desktop sidebar collapses to an icon rail and can be hidden independently", async ({ page }) => {
+test("desktop sidebar expands on hover and returns to the logo rail on pointer leave", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto("/e2e/workspace-navigation")
 
   const sidebar = page.locator("#workspace-sidebar")
   await expect(sidebar).toBeVisible()
-  await expect(sidebar).toHaveAttribute("data-state", "expanded")
-  await expect(sidebar).toHaveCSS("width", "264px")
-
-  await page.keyboard.press("Control+b")
   await expect(sidebar).toHaveAttribute("data-state", "collapsed")
   await expect(sidebar).toHaveAttribute("data-collapsible", "icon")
   await expect(sidebar).toHaveCSS("width", "76px")
-  await expect(sidebar.getByRole("link", { name: "Songs" })).toHaveAttribute(
-    "aria-label",
-    "Songs"
-  )
+  await expect(sidebar.getByRole("navigation", { name: "Workspace navigation" })).toBeHidden()
 
-  await page.reload()
-  await expect(sidebar).toHaveAttribute("data-collapsible", "icon")
+  await sidebar.hover()
+  await expect(sidebar).toHaveAttribute("data-state", "expanded")
+  await expect(sidebar.getByRole("link", { name: "Songs" })).toBeVisible()
+  await expect(sidebar).toHaveCSS("width", "264px")
+  await expect(sidebar.getByRole("link", { name: "Songs" })).toBeVisible()
+
+  await page.locator("header").hover()
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed")
   await expect(sidebar).toHaveCSS("width", "76px")
 
-  await page.keyboard.press("Control+b")
-  await expect(sidebar).toHaveAttribute("data-state", "expanded")
-  await expect(sidebar).toHaveCSS("width", "264px")
-
-  await page.getByRole("button", { name: "Hide sidebar navigation" }).click()
-  await expect(sidebar).toBeHidden()
-
-  await page.getByRole("button", { name: "Show sidebar navigation" }).click()
-  await expect(sidebar).toBeVisible()
-  await expect(sidebar).toHaveAttribute("data-state", "expanded")
+  await page.reload()
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed")
+  await expect(sidebar).toHaveCSS("width", "76px")
+  await expect(page.getByRole("button", { name: "Hide sidebar navigation" })).toHaveCount(0)
 })

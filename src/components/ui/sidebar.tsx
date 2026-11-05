@@ -124,9 +124,11 @@ export function Sidebar({
   className = "",
   children,
   style,
+  onPointerMove,
+  onPointerLeave,
   ...props
 }: SidebarProps) {
-  const { open } = useSidebar()
+  const { open, setOpen } = useSidebar()
   const collapsed = !open && collapsible === "icon"
   const offcanvas = !open && collapsible === "offcanvas"
 
@@ -157,6 +159,14 @@ export function Sidebar({
         ...style,
       }}
       {...props}
+      onPointerMove={(event) => {
+        onPointerMove?.(event)
+        if (!event.defaultPrevented && collapsible === "icon") setOpen(true)
+      }}
+      onPointerLeave={(event) => {
+        onPointerLeave?.(event)
+        if (!event.defaultPrevented && collapsible === "icon") setOpen(false)
+      }}
     >
       <div className="flex h-full min-h-0 w-full flex-col">{children}</div>
     </aside>
