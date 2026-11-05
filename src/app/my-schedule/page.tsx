@@ -700,6 +700,9 @@ export default async function MySchedulePage({
                             ? `${formatDate(entry.starts_on)} – ${formatDate(entry.ends_on)}`
                             : `${(entry.weekdays ?? []).slice().sort((a, b) => a - b).map((day) => weekdayLabels[day]).join(", ")} · ${formatAvailabilityTime(entry.start_time)}–${formatAvailabilityTime(entry.end_time)}`}
                         </p>
+                        <p className="mt-1 text-[10px] font-medium text-[var(--muted)]">
+                          Time zone: {entry.timezone}
+                        </p>
                         {entry.reason ? <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">{entry.reason}</p> : null}
                       </div>
                       <form action={deleteAvailabilityEntry} className="shrink-0">
