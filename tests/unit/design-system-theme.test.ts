@@ -329,7 +329,7 @@ describe("semantic theme foundations", () => {
   it("supports semantic warning feedback and neutral invitation status", () => {
     expect(feedbackSource).toContain('tone?: "success" | "error" | "info" | "warning"')
     expect(feedbackSource).toContain('className={`wf-feedback wf-feedback-${tone}`}')
-    expect(teamInvitation).toMatch(/wf-status \\{statusClass\\}/)
+    expect(teamInvitation).toContain("className={`wf-status ${statusClass}")
     expect(teamInvitation).toContain('"accepted"')
     expect(teamInvitation).toContain('"expired"')
     expect(teamInvitation).toContain('"revoked"')
