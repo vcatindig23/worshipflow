@@ -684,6 +684,21 @@ export default function TeamChatClient({
           )
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "team_chat_message_reactions",
+          filter: `organization_id=eq.${organizationId}`,
+        },
+        () => {
+          const ids = messages.map((message) => message.id)
+          void loadTeamChatMessageReactions(ids).then((result) => {
+            if (result.success) setMessageReactions(result.reactions)
+          })
+        }
+      )
       .subscribe((
         status: "SUBSCRIBED" | "CHANNEL_ERROR" | "TIMED_OUT" | "CLOSED"
       ) => {
@@ -1302,7 +1317,7 @@ export default function TeamChatClient({
   return (
     <section className="wf-card overflow-hidden !rounded-[28px] p-0 shadow-[0_24px_64px_-44px_rgba(21,35,27,0.45)]">
       <div className="flex min-h-0 flex-col md:h-[min(78vh,860px)] md:min-h-[620px] md:flex-row">
-        <aside className="flex max-h-[260px] shrink-0 flex-col overflow-y-auto border-b border-[var(--border)] bg-[#fbfcfd] md:max-h-none md:w-[286px] md:border-b-0 md:border-r">
+        <aside className={`flex max-h-[260px] shrink-0 flex-col overflow-y-auto border-b border-[var(--border)] bg-[#fbfcfd] md:max-h-none md:w-[286px] md:border-b-0 md:border-r ${activeDirectConversation ? "hidden md:flex" : ""}`}>
           <div className="px-4 pb-4 pt-5 sm:px-5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -1402,7 +1417,6 @@ export default function TeamChatClient({
 
         {activeDirectConversation ? (
           <DirectMessageClient
-            organizationId={organizationId}
             currentUserId={currentUserId}
             conversation={activeDirectConversation}
             onBackToGroup={() => setActiveDirectConversation(null)}
