@@ -429,10 +429,7 @@ export default function TeamChatClient({
   }, [messages])
 
   useEffect(() => {
-    if (!messageIdsKey) {
-      setMessageReactions({})
-      return
-    }
+    if (!messageIdsKey) return
     let cancelled = false
     const ids = messageIdsKey.split(",").filter(Boolean)
     void loadTeamChatMessageReactions(ids).then((result) => {
@@ -1431,6 +1428,7 @@ export default function TeamChatClient({
 
         {activeDirectConversation ? (
           <DirectMessageClient
+            key={activeDirectConversation.id}
             currentUserId={currentUserId}
             conversation={activeDirectConversation}
             onBackToGroup={() => setActiveDirectConversation(null)}
