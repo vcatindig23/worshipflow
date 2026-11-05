@@ -63,6 +63,7 @@ type Props = {
   currentUserId: string
   conversation: DirectConversation
   onBackToGroup: () => void
+  onConversationActivity: (preview: string, createdAt: string) => void
 }
 
 function initials(name: string) {
@@ -86,6 +87,7 @@ export default function DirectMessageClient({
   currentUserId,
   conversation,
   onBackToGroup,
+  onConversationActivity,
 }: Props) {
   const [messages, setMessages] = useState<DirectMessage[]>([])
   const [reactions, setReactions] = useState<Record<string, ReactionSummary[]>>({})
@@ -152,6 +154,7 @@ export default function DirectMessageClient({
         (payload: { new: Record<string, unknown> }) => {
           const row = payload.new as unknown as DirectMessage
           if (!row || typeof row.id !== "string") return
+          onConversationActivity(row.body, row.created_at)
           setMessages((current) => {
             if (current.some((message) => message.id === row.id)) return current
             return [...current, {
@@ -188,7 +191,7 @@ export default function DirectMessageClient({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [conversation.id, supabase])
+  }, [conversation.id, onConversationActivity, supabase])
 
   useEffect(() => {
     const paths = Array.from(new Set(
@@ -267,6 +270,7 @@ export default function DirectMessageClient({
       setMessages((current) => current.some((item) => item.id === message.id)
         ? current
         : [...current, message].slice(-100))
+      onConversationActivity(message.body, message.created_at)
       setDraft("")
       setSelectedFiles([])
       setShowEmojiPicker(false)
