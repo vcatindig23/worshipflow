@@ -1,10 +1,15 @@
 import Image from "next/image"
 import {
+  AlertCircle,
+  Ban,
+  CheckCircle2,
   Clock3,
   Users,
 } from "lucide-react"
 import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
+
+export type TeamInvitationStatus = "pending" | "accepted" | "revoked" | "expired" | "failed"
 
 export type TeamInvitationProps = {
   email: string
@@ -12,6 +17,7 @@ export type TeamInvitationProps = {
   roleLabel: string
   createdAt: string
   expiresAt: string
+  status?: TeamInvitationStatus
   avatarSrc?: string | null
   actions?: ReactNode
   className?: string
@@ -29,10 +35,46 @@ function formatInvitationDate(value: string) {
   }).format(date)
 }
 
+const statusPresentation: Record<
+  TeamInvitationStatus,
+  { label: string; detail: string; className: string; icon: typeof Clock3 }
+> = {
+  pending: {
+    label: "Invited",
+    detail: "Waiting for the invitee to accept the invitation.",
+    className: "wf-status-neutral",
+    icon: Clock3,
+  },
+  accepted: {
+    label: "Accepted",
+    detail: "The invited person has joined the church workspace.",
+    className: "wf-status-success",
+    icon: CheckCircle2,
+  },
+  revoked: {
+    label: "Revoked",
+    detail: "This invitation code is no longer active.",
+    className: "wf-status-neutral",
+    icon: Ban,
+  },
+  expired: {
+    label: "Expired",
+    detail: "The seven-day invitation window has ended. Create a new invitation to invite this person.",
+    className: "wf-status-warning",
+    icon: AlertCircle,
+  },
+  failed: {
+    label: "Failed",
+    detail: "The invitation was not created. Review the error and try again.",
+    className: "wf-status-danger",
+    icon: AlertCircle,
+  },
+}
+
 /**
- * A reusable invitation card for invitations a church administrator has sent.
- * Action controls are supplied by the parent so this presentation component
- * does not invent invitation acceptance or revocation behavior.
+ * Invitation lifecycle presentation. A pending record whose expiry date has
+ * passed is displayed as expired even if the database has not yet refreshed
+ * its status column.
  */
 export function TeamInvitation({
   email,
@@ -40,10 +82,18 @@ export function TeamInvitation({
   roleLabel,
   createdAt,
   expiresAt,
+  status = "pending",
   avatarSrc,
   actions,
   className,
 }: TeamInvitationProps) {
+  const effectiveStatus: TeamInvitationStatus =
+    status === "pending" && new Date(expiresAt).getTime() <= Date.now()
+      ? "expired"
+      : status
+  const presentation = statusPresentation[effectiveStatus]
+  const StatusIcon = presentation.icon
+
   return (
     <article
       aria-label={`Invitation for ${email}`}
@@ -52,7 +102,7 @@ export function TeamInvitation({
         className,
       )}
     >
-      <div className="flex items-start gap-3 sm:gap-4">
+      <div className="flex min-w-0 items-start gap-3 sm:gap-4">
         <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--brand-soft)] text-[var(--brand)]">
           {avatarSrc ? (
             <Image
@@ -88,13 +138,17 @@ export function TeamInvitation({
             </div>
 
             <div className="flex shrink-0 items-center gap-2 self-start">
-              <span className="wf-status wf-status-neutral h-8 rounded-lg px-2.5">
-                <Clock3 aria-hidden="true" className="size-3.5" />
-                Pending
+              <span className={`wf-status h-8 rounded-lg px-2.5 ${presentation.className}`}>
+                <StatusIcon aria-hidden="true" className="size-3.5" />
+                {presentation.label}
               </span>
-              {actions}
+              {effectiveStatus === "pending" ? actions : null}
             </div>
           </div>
+
+          <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+            {presentation.detail}
+          </p>
         </div>
       </div>
 
@@ -104,7 +158,7 @@ export function TeamInvitation({
           Created {formatInvitationDate(createdAt)}
         </span>
         <span>
-          Expires {formatInvitationDate(expiresAt)}
+          {effectiveStatus === "accepted" ? "Expires" : "Expires"} {formatInvitationDate(expiresAt)}
         </span>
         <span className="rounded-md border border-[var(--border)] px-2 py-1 font-medium text-[var(--foreground)]">
           {roleLabel}
