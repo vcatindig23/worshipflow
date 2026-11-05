@@ -119,10 +119,6 @@ export default function DirectMessageClient({
   useEffect(() => {
     void markTeamChatDirectNotificationsRead(conversation.id)
     let cancelled = false
-    setLoading(true)
-    setError("")
-    setMessages([])
-    setReactions({})
     void loadTeamChatDirectMessages(conversation.id).then(async (result) => {
       if (cancelled) return
       if (!result.success) {
