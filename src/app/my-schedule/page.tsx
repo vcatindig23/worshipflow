@@ -26,6 +26,12 @@ import {
   type MemberAvailabilityAssessment,
   type MemberAvailabilityEntry,
 } from "@/lib/member-availability"
+import {
+  buildScheduleEvents,
+  findScheduleConflicts,
+  type ScheduleConflict,
+  type SetlistSchedule,
+} from "@/lib/schedule-conflicts"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import AssignmentConfirmation from "./assignment-confirmation"
 import ScheduleViewToggle from "./schedule-view-toggle"
@@ -58,6 +64,7 @@ type Setlist = {
   service_time: string | null
   status: "draft" | "published" | "archived"
   availabilityAssessment: MemberAvailabilityAssessment | null
+  scheduleConflicts: ScheduleConflict[] | null
 }
 
 type WorkspaceMember = {
@@ -304,7 +311,7 @@ export default async function MySchedulePage({
   )
 
   const assignmentIds = memberAssignments.map((assignment) => assignment.id)
-  const [membersResult, swapRequestsResult, serviceAssignmentsResult] = await Promise.all([
+  const [membersResult, swapRequestsResult, allSchedulesResult] = await Promise.all([
     supabase
       .from("organization_members")
       .select("user_id, team_positions")
@@ -317,13 +324,30 @@ export default async function MySchedulePage({
           .in("assignment_id", assignmentIds)
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [], error: null }),
-    setlistIds.length > 0
-      ? supabase
-          .from("setlist_team_assignments")
-          .select("setlist_id, user_id, team_position")
-          .in("setlist_id", setlistIds)
-      : Promise.resolve({ data: [], error: null }),
+    supabase
+      .from("setlists")
+      .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time")
+      .eq("organization_id", workspace.organizationId),
   ])
+
+  const allSchedules = (allSchedulesResult.data ?? []) as SetlistSchedule[]
+  const allScheduleIds = allSchedules.map((schedule) => schedule.id)
+  const serviceAssignmentsResult = allScheduleIds.length > 0
+    ? await supabase
+        .from("setlist_team_assignments")
+        .select("setlist_id, user_id, team_position")
+        .in("setlist_id", allScheduleIds)
+    : { data: [], error: null }
+  const scheduleConflictChecksAvailable = !allSchedulesResult.error && !serviceAssignmentsResult.error
+  const scheduleEvents = scheduleConflictChecksAvailable
+    ? buildScheduleEvents(allSchedules)
+    : []
+  const scheduleAssignmentsBySetlist = new Map<string, Set<string>>()
+  for (const assignment of serviceAssignmentsResult.data ?? []) {
+    const members = scheduleAssignmentsBySetlist.get(assignment.setlist_id) ?? new Set<string>()
+    members.add(assignment.user_id)
+    scheduleAssignmentsBySetlist.set(assignment.setlist_id, members)
+  }
 
   const workspaceMembers = (membersResult.data ?? []) as WorkspaceMember[]
   const swapFeatureAvailable = !swapRequestsResult.error && !membersResult.error && !serviceAssignmentsResult.error
@@ -431,6 +455,15 @@ export default async function MySchedulePage({
                 serviceEndTime: null,
                 serviceTimezone: workspace.organizationTimezone,
               }),
+          scheduleConflicts: scheduleConflictChecksAvailable
+            ? findScheduleConflicts(
+                setlist.id,
+                scheduleEvents,
+                scheduleAssignmentsBySetlist,
+                namesByMemberId,
+                workspace.userId
+              )
+            : null,
         })
       ) as Setlist[]
   }
