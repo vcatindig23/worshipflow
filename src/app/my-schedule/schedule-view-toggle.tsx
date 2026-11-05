@@ -27,6 +27,10 @@ type ScheduleEntry = {
   service_date: string | null
   service_time: string | null
   status: "draft" | "published" | "archived"
+  availabilityAssessment: {
+    status: "unavailable" | "outside_weekly_hours" | "within_weekly_hours" | "not_recorded" | "needs_schedule"
+    label: string
+  } | null
 }
 
 type Period = "upcoming" | "past" | "all"
@@ -241,6 +245,9 @@ export default function ScheduleViewToggle({
                 <span className="inline-flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-[var(--success)]" /> Weekly hours
                 </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-[var(--warning)]" /> Assignment warning
+                </span>
               </div>
 
               <div className="grid grid-cols-7 border-x border-t border-[var(--border)] bg-[var(--surface)]">
@@ -267,6 +274,10 @@ export default function ScheduleViewToggle({
                   const dayServices = servicesByDate.get(date) ?? []
                   const dayAvailability = getAvailabilityForDate(availabilityEntries, date)
                   const isToday = date === today
+                  const hasAvailabilityWarning = dayServices.some((entry) =>
+                    entry.availabilityAssessment &&
+                    ["unavailable", "outside_weekly_hours", "needs_schedule"].includes(entry.availabilityAssessment.status)
+                  )
                   const isSelected = date === selectedDate
 
                   return (
@@ -291,6 +302,9 @@ export default function ScheduleViewToggle({
                           {dayAvailability.recurring.length > 0 ? (
                             <span title="Weekly hours" aria-label="Weekly hours" className="size-2 rounded-full bg-[var(--success)]" />
                           ) : null}
+                          {hasAvailabilityWarning ? (
+                            <span title="Assignment availability warning" aria-label="Assignment availability warning" className="size-2 rounded-full bg-[var(--warning)]" />
+                          ) : null}
                         </div>
                       </div>
 
@@ -300,7 +314,11 @@ export default function ScheduleViewToggle({
                             key={entry.id}
                             href={`/setlists/${entry.id}`}
                             title={entry.name}
-                            className="block truncate rounded-md border border-[var(--brand)]/20 bg-[var(--brand-soft)] px-1.5 py-1 text-[9px] font-semibold leading-3.5 text-[var(--foreground)] transition hover:border-[var(--brand)] sm:text-[11px] sm:leading-4"
+                            className={`block truncate rounded-md border px-1.5 py-1 text-[9px] font-semibold leading-3.5 text-[var(--foreground)] transition hover:border-[var(--brand)] sm:text-[11px] sm:leading-4 ${
+                              entry.availabilityAssessment && ["unavailable", "outside_weekly_hours", "needs_schedule"].includes(entry.availabilityAssessment.status)
+                                ? "border-[var(--warning)]/40 bg-[var(--warning-soft)]"
+                                : "border-[var(--brand)]/20 bg-[var(--brand-soft)]"
+                            }`}
                           >
                             {entry.service_time ? <span className="hidden sm:inline">{displayTime(entry.service_time)} </span> : null}
                             {entry.name}
@@ -355,12 +373,21 @@ export default function ScheduleViewToggle({
                             <span className="text-sm font-semibold text-[var(--foreground)]">{entry.name}</span>
                             <span className="shrink-0 rounded-full bg-[var(--surface)] px-2 py-1 text-[9px] font-semibold text-[var(--muted)]">{statusLabel(entry.status)}</span>
                           </div>
-                          <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[var(--muted)]">
+                          <p className="mt-1 inline-flex flex-wrap items-center gap-1.5 text-xs text-[var(--muted)]">
                             <Clock3 className="size-3.5" /> {displayTime(entry.service_time)}
+                            <span className="text-[10px]">· {timeZone}</span>
+                          </p>
+                          <p className="mt-1 text-[10px] font-medium text-[var(--muted)]">
+                            {entry.service_date && entry.service_date < today ? "Past assignment" : "Upcoming assignment"}
                           </p>
                           {entry.description ? <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--muted)]">{entry.description}</p> : null}
                           <span className="mt-2 block text-[11px] font-semibold text-[var(--brand)]">Open service plan</span>
                         </Link>
+                        {entry.availabilityAssessment && !["within_weekly_hours", "not_recorded"].includes(entry.availabilityAssessment.status) ? (
+                          <p className="rounded-lg border border-[var(--warning)]/30 bg-[var(--warning-soft)] px-3 py-2 text-[11px] leading-5 text-[var(--warning)]">
+                            {entry.availabilityAssessment.label}. Review your availability before serving.
+                          </p>
+                        ) : null}
                       ))}
                     </div>
                   ) : (
@@ -443,7 +470,7 @@ export default function ScheduleViewToggle({
             </aside>
           </div>
           <div className="border-t border-[var(--border)] px-4 py-3 text-[10px] text-[var(--muted)] sm:px-6 sm:text-xs">
-            Calendar dates use {timeZone}. Select a day to review its services and availability; select a service to open its plan.
+            Service dates, service times, and recurring availability are evaluated using {timeZone}. Select a day to review conflicts and availability; select a service to open its plan.
           </div>
         </section>
       )}
