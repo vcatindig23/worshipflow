@@ -49,6 +49,7 @@ import {
   toggleTeamChatMessageReaction,
 } from "./actions"
 import DirectMessageClient from "./direct-message-client"
+import { MessageReactionPicker } from "./message-reaction-picker"
 
 function currentTimeMs() {
   return Date.now()
@@ -97,7 +98,6 @@ type TeamChatReactionSummary = {
   userReacted: boolean
 }
 
-const CHAT_REACTION_EMOJIS = ["👍", "❤️", "😂", "🙏", "👏", "🔥", "🎉", "😮"]
 const CHAT_COMPOSER_EMOJIS = [
   "😀", "😃", "😄", "😁", "😊", "🥰", "😍", "😘",
   "😂", "🤣", "🥲", "😉", "😎", "🤔", "😮", "😢",
@@ -1830,13 +1830,12 @@ export default function TeamChatClient({
                             <button type="button" onClick={() => setReactionPickerMessageId((current) => current === message.id ? null : message.id)} aria-label="Add reaction" title="Add reaction" className="inline-flex size-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:border-[var(--brand)]/30 hover:text-[var(--brand)]">
                               <Smile className="size-3.5" />
                             </button>
-                            <div className={`absolute bottom-full left-0 z-20 mb-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-1.5 shadow-xl ${reactionPickerMessageId === message.id ? "flex" : "hidden"}`}>
-                              <div className="flex gap-1">
-                                {CHAT_REACTION_EMOJIS.map((emoji) => (
-                                  <button key={emoji} type="button" onClick={() => handleAddReaction(message.id, emoji)} aria-label={`React with ${emoji}`} className="flex size-8 items-center justify-center rounded-lg text-base hover:bg-[var(--surface)]">{emoji}</button>
-                                ))}
-                              </div>
-                            </div>
+                            <MessageReactionPicker
+                              isOwnMessage={isOwnMessage}
+                              hasAvatar
+                              isOpen={reactionPickerMessageId === message.id}
+                              onSelect={(emoji) => handleAddReaction(message.id, emoji)}
+                            />
                           </div>
                         </div>
                         {editingMessageId !== message.id ? (
