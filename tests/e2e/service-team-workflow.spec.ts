@@ -393,25 +393,35 @@ test.describe("isolated multi-member service workflow", () => {
       await expect(leader.getByText(requesterName, { exact: true })).toBeVisible()
 
       await signIn(requester, requesterEmail, requesterPassword)
+      await requester.setViewportSize({ width: 320, height: 740 })
       await requester.goto("/my-schedule")
       await expect(requester.getByText(serviceName, { exact: true })).toBeVisible()
+      await expectResponsiveLayout(requester, "My Schedule compact phone", "top")
+      await expect(requester.getByText("Asia/Manila", { exact: true })).toBeVisible()
 
       await requester.getByRole("button", { name: "Confirm", exact: true }).click()
-      await expect(requester.getByText("Confirmed", { exact: true })).toBeVisible()
+      await expect(requester.getByText("Drummer · Confirmed", { exact: true })).toBeVisible()
 
       await requester.getByText("Request a swap", { exact: true }).click()
+      await expectResponsiveLayout(requester, "My Schedule swap form compact phone", "top")
       const substituteSelect = requester.locator('select[name="substituteUserId"]')
       await expect(substituteSelect).toBeVisible()
       await substituteSelect.selectOption({ label: substituteName })
       await requester.locator('textarea[name="reason"]').fill("Automated E2E coverage change")
       await requester.getByRole("button", { name: "Send swap request", exact: true }).click()
       await expect(requester).toHaveURL(/\/my-schedule\?swapRequested=1$/)
+      await expect(requester.getByText("Waiting for teammate", { exact: true })).toBeVisible()
       await expect(
         requester.getByText(
-          `Swap request sent to ${substituteName}; waiting for their response.`,
+          `Next: ${substituteName} needs to respond to your request.`,
           { exact: true }
         )
       ).toBeVisible()
+
+      await requester.goto("/settings/team")
+      await expect(requester.getByText(/^Your access:/)).toBeVisible()
+      await expect(requester.getByText(/Only church administrators can create or revoke invitations/)).toBeVisible()
+      await expect(requester.getByRole("heading", { name: "Invite a Team Member" })).toBeHidden()
 
       await signIn(substitute, substituteEmail, substitutePassword)
       await substitute.goto("/notifications")
