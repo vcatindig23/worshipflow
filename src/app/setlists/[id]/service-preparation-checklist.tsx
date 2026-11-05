@@ -358,7 +358,7 @@ export default function ServicePreparationChecklist({
 
       <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded-full bg-[var(--danger-soft)] px-2.5 py-1 font-semibold text-[var(--danger)]">
-          {coreItems.filter((item) => !item.complete).length} blocking essentials to resolve
+          {coreItems.filter((item) => !item.complete).length} essential checks need attention
         </span>
         {unavailableCount > 0 ? (
           <span className="rounded-full bg-[var(--danger-soft)] px-2.5 py-1 font-semibold text-[var(--danger)]">
@@ -388,7 +388,7 @@ export default function ServicePreparationChecklist({
       )}
 
       <div className="mt-5">
-        <h3 className="mb-3 text-sm font-semibold text-[var(--foreground)]">Blocking essentials</h3>
+        <h3 className="mb-3 text-sm font-semibold text-[var(--foreground)]">Essential readiness checks</h3>
         <div className="grid gap-3 md:grid-cols-2">
           {coreItems.map((item) => <ChecklistRow key={item.label} item={item} />)}
         </div>
