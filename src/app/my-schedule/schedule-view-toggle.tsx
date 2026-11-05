@@ -319,13 +319,16 @@ export default function ScheduleViewToggle({
                           <Link
                             key={entry.id}
                             href={`/setlists/${entry.id}`}
-                            title={entry.name}
-                            className={`block truncate rounded-md border px-1.5 py-1 text-[9px] font-semibold leading-3.5 text-[var(--foreground)] transition hover:border-[var(--brand)] sm:text-[11px] sm:leading-4 ${
+                            title={`${entry.name} · ${entry.service_date && entry.service_date < today ? "Past assignment" : "Upcoming assignment"}`}
+                            aria-label={`${entry.name}, ${entry.service_date && entry.service_date < today ? "past" : "upcoming"} assignment`}
+                            className={`block truncate rounded-md border px-1.5 py-1 text-[9px] font-semibold leading-3.5 transition hover:border-[var(--brand)] sm:text-[11px] sm:leading-4 ${
                               entry.availabilityAssessment?.status === "unavailable"
-                                ? "border-[var(--danger)]/40 bg-[var(--danger-soft)]"
+                                ? "border-[var(--danger)]/40 bg-[var(--danger-soft)] text-[var(--danger)]"
                                 : entry.availabilityAssessment && ["outside_weekly_hours", "needs_schedule"].includes(entry.availabilityAssessment.status)
-                                  ? "border-[var(--warning)]/40 bg-[var(--warning-soft)]"
-                                  : "border-[var(--brand)]/20 bg-[var(--brand-soft)]"
+                                  ? "border-[var(--warning)]/40 bg-[var(--warning-soft)] text-[var(--warning)]"
+                                  : entry.service_date && entry.service_date < today
+                                    ? "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
+                                    : "border-[var(--brand)]/20 bg-[var(--brand-soft)] text-[var(--foreground)]"
                             }`}
                           >
                             {entry.service_time ? <span className="hidden sm:inline">{displayTime(entry.service_time)} </span> : null}
