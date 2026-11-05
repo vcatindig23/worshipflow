@@ -149,7 +149,6 @@ export default async function TeamSettingsPage({
         "organization_id",
         workspace.organizationId
       )
-      .eq("status", "pending")
       .order("created_at", {
         ascending: false,
       }),
@@ -382,6 +381,17 @@ export default async function TeamSettingsPage({
         </Feedback>
       ) : null}
 
+      {!canManageTeam ? (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+          <p className="text-sm font-semibold text-[var(--foreground)]">
+            Your access: {roleLabels[workspace.role] ?? workspace.role}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+            Only church administrators can create or revoke invitations, change member roles, edit worship-team positions, or remove members. Ask an administrator if you need one of these changes.
+          </p>
+        </div>
+      ) : null}
+
       {membersResult.error ? (
         <Feedback tone="error" title="Members could not be loaded">
           Please refresh the page and try again.
@@ -414,11 +424,11 @@ export default async function TeamSettingsPage({
         <section className="wf-card p-5 sm:p-6">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
-              Pending Invitations
+              Invitation status
             </h2>
 
             <p className="mt-1 text-sm text-[var(--muted)]">
-              These people have not joined yet.
+              Track invitations that are waiting for acceptance, have been accepted, have expired, or were revoked.
             </p>
           </div>
 
@@ -434,21 +444,24 @@ export default async function TeamSettingsPage({
                 }
                 createdAt={invitation.created_at}
                 expiresAt={invitation.expires_at}
+                status={invitation.status as "pending" | "accepted" | "expired" | "revoked"}
                 actions={
-                  <form action={revokeInvitation} className="shrink-0">
-                    <input
-                      type="hidden"
-                      name="invitationId"
-                      value={invitation.id}
-                    />
-                    <ConfirmSubmitButton title="Revoke this invitation?" description="The invitation link will stop working. You can send a new invitation later." confirmLabel="Revoke invitation"
-                      type="submit"
-                      aria-label={`Revoke invitation for ${invitation.email}`}
-                      className="inline-flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)]/30"
-                    >
-                      <X aria-hidden="true" className="size-4" />
-                    </ConfirmSubmitButton>
-                  </form>
+                  invitation.status === "pending" && new Date(invitation.expires_at).getTime() > Date.now() ? (
+                    <form action={revokeInvitation} className="shrink-0">
+                      <input
+                        type="hidden"
+                        name="invitationId"
+                        value={invitation.id}
+                      />
+                      <ConfirmSubmitButton title="Revoke this invitation?" description="The invitation code will stop working. You can send a new invitation later." confirmLabel="Revoke invitation"
+                        type="submit"
+                        aria-label={`Revoke invitation for ${invitation.email}`}
+                        className="inline-flex size-9 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)]/30"
+                      >
+                        <X aria-hidden="true" className="size-4" />
+                      </ConfirmSubmitButton>
+                    </form>
+                  ) : null
                 }
               />
             ))}
@@ -613,12 +626,14 @@ export default async function TeamSettingsPage({
                         ) : null}
                       </div>
 
-                      <p className="mt-1 text-sm text-[var(--muted)]">
-                        {roleLabels[
-                          member.role
-                        ] ??
-                          member.role}
-                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <p className="text-sm text-[var(--muted)]">
+                          {roleLabels[member.role] ?? member.role}
+                        </p>
+                        <span className="wf-status wf-status-success h-6 px-2 text-[10px]">
+                          Active member
+                        </span>
+                      </div>
 
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {member.team_positions?.length ? (

@@ -17,7 +17,6 @@ import {
   getCalendarMonthCells,
   type AvailabilityCalendarEntry,
 } from "@/lib/schedule-calendar"
-import { getTeamPositionLabel } from "@/lib/team-positions"
 import { createAvailabilityEntry } from "./availability-actions"
 
 type ScheduleEntry = {
@@ -27,6 +26,11 @@ type ScheduleEntry = {
   service_date: string | null
   service_time: string | null
   status: "draft" | "published" | "archived"
+  availabilityAssessment: {
+    status: "unavailable" | "outside_weekly_hours" | "within_weekly_hours" | "not_recorded" | "needs_schedule"
+    label: string
+  } | null
+  scheduleConflictCount: number | null
 }
 
 type Period = "upcoming" | "past" | "all"
@@ -241,6 +245,9 @@ export default function ScheduleViewToggle({
                 <span className="inline-flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-[var(--success)]" /> Weekly hours
                 </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-[var(--warning)]" /> Assignment warning
+                </span>
               </div>
 
               <div className="grid grid-cols-7 border-x border-t border-[var(--border)] bg-[var(--surface)]">
@@ -267,6 +274,16 @@ export default function ScheduleViewToggle({
                   const dayServices = servicesByDate.get(date) ?? []
                   const dayAvailability = getAvailabilityForDate(availabilityEntries, date)
                   const isToday = date === today
+                  const hasUnavailableAssignment = dayServices.some(
+                    (entry) => entry.availabilityAssessment?.status === "unavailable"
+                  )
+                  const hasScheduleConflict = dayServices.some(
+                    (entry) => (entry.scheduleConflictCount ?? 0) > 0
+                  )
+                  const hasAvailabilityWarning = dayServices.some((entry) =>
+                    entry.availabilityAssessment &&
+                    ["unavailable", "outside_weekly_hours", "needs_schedule"].includes(entry.availabilityAssessment.status)
+                  )
                   const isSelected = date === selectedDate
 
                   return (
@@ -291,6 +308,16 @@ export default function ScheduleViewToggle({
                           {dayAvailability.recurring.length > 0 ? (
                             <span title="Weekly hours" aria-label="Weekly hours" className="size-2 rounded-full bg-[var(--success)]" />
                           ) : null}
+                          {hasAvailabilityWarning ? (
+                            <span
+                              title={hasUnavailableAssignment ? "Unavailable assignment" : "Assignment availability warning"}
+                              aria-label={hasUnavailableAssignment ? "Unavailable assignment" : "Assignment availability warning"}
+                              className={`size-2 rounded-full ${hasUnavailableAssignment ? "bg-[var(--danger)]" : "bg-[var(--warning)]"}`}
+                            />
+                          ) : null}
+                          {hasScheduleConflict ? (
+                            <span title="Overlapping service or rehearsal" aria-label="Overlapping service or rehearsal" className="size-2 rounded-full bg-[var(--warning)]" />
+                          ) : null}
                         </div>
                       </div>
 
@@ -299,8 +326,19 @@ export default function ScheduleViewToggle({
                           <Link
                             key={entry.id}
                             href={`/setlists/${entry.id}`}
-                            title={entry.name}
-                            className="block truncate rounded-md border border-[var(--brand)]/20 bg-[var(--brand-soft)] px-1.5 py-1 text-[9px] font-semibold leading-3.5 text-[var(--foreground)] transition hover:border-[var(--brand)] sm:text-[11px] sm:leading-4"
+                            title={`${entry.name} · ${entry.service_date && entry.service_date < today ? "Past assignment" : "Upcoming assignment"}`}
+                            aria-label={`${entry.name}, ${entry.service_date && entry.service_date < today ? "past" : "upcoming"} assignment`}
+                            className={`block truncate rounded-md border px-1.5 py-1 text-[9px] font-semibold leading-3.5 transition hover:border-[var(--brand)] sm:text-[11px] sm:leading-4 ${
+                              entry.availabilityAssessment?.status === "unavailable"
+                                ? "border-[var(--danger)]/40 bg-[var(--danger-soft)] text-[var(--danger)]"
+                                : entry.scheduleConflictCount && entry.scheduleConflictCount > 0
+                                  ? "border-[var(--warning)]/40 bg-[var(--warning-soft)] text-[var(--warning)]"
+                                  : entry.availabilityAssessment && ["outside_weekly_hours", "needs_schedule"].includes(entry.availabilityAssessment.status)
+                                    ? "border-[var(--warning)]/40 bg-[var(--warning-soft)] text-[var(--warning)]"
+                                    : entry.service_date && entry.service_date < today
+                                      ? "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
+                                      : "border-[var(--brand)]/20 bg-[var(--brand-soft)] text-[var(--foreground)]"
+                            }`}
                           >
                             {entry.service_time ? <span className="hidden sm:inline">{displayTime(entry.service_time)} </span> : null}
                             {entry.name}
@@ -346,21 +384,44 @@ export default function ScheduleViewToggle({
                   {selectedServices.length > 0 ? (
                     <div className="mt-2 space-y-2">
                       {selectedServices.map((entry) => (
-                        <Link
-                          key={entry.id}
-                          href={`/setlists/${entry.id}`}
+                        <div key={entry.id} className="space-y-2">
+                          <Link
+                            href={`/setlists/${entry.id}`}
                           className="block rounded-xl border border-[var(--border)] p-3 transition hover:border-[var(--brand)] hover:bg-[var(--surface)]"
                         >
                           <div className="flex items-start justify-between gap-2">
                             <span className="text-sm font-semibold text-[var(--foreground)]">{entry.name}</span>
                             <span className="shrink-0 rounded-full bg-[var(--surface)] px-2 py-1 text-[9px] font-semibold text-[var(--muted)]">{statusLabel(entry.status)}</span>
                           </div>
-                          <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[var(--muted)]">
+                          <p className="mt-1 inline-flex flex-wrap items-center gap-1.5 text-xs text-[var(--muted)]">
                             <Clock3 className="size-3.5" /> {displayTime(entry.service_time)}
+                            <span className="text-[10px]">· {timeZone}</span>
+                          </p>
+                          <p className="mt-1 text-[10px] font-medium text-[var(--muted)]">
+                            {!entry.service_date ? "Date not set" : entry.service_date < today ? "Past assignment" : "Upcoming assignment"}
                           </p>
                           {entry.description ? <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--muted)]">{entry.description}</p> : null}
                           <span className="mt-2 block text-[11px] font-semibold text-[var(--brand)]">Open service plan</span>
-                        </Link>
+                          </Link>
+                          {entry.scheduleConflictCount === null ? (
+                            <p className="rounded-lg border border-[var(--warning)]/30 bg-[var(--warning-soft)] px-3 py-2 text-[11px] leading-5 text-[var(--warning)]">
+                              Overlapping service and rehearsal commitments could not be checked.
+                            </p>
+                          ) : entry.scheduleConflictCount > 0 ? (
+                            <p className="rounded-lg border border-[var(--warning)]/30 bg-[var(--warning-soft)] px-3 py-2 text-[11px] leading-5 text-[var(--warning)]">
+                              {entry.scheduleConflictCount} overlapping {entry.scheduleConflictCount === 1 ? "commitment" : "commitments"} found. <Link className="font-semibold underline underline-offset-2" href={`/setlists/${entry.id}/preparation`}>Review conflicts</Link>.
+                            </p>
+                          ) : null}
+                          {entry.availabilityAssessment && !["within_weekly_hours", "not_recorded"].includes(entry.availabilityAssessment.status) ? (
+                          <p className={`rounded-lg border px-3 py-2 text-[11px] leading-5 ${
+                            entry.availabilityAssessment.status === "unavailable"
+                              ? "border-[var(--danger)]/30 bg-[var(--danger-soft)] text-[var(--danger)]"
+                              : "border-[var(--warning)]/30 bg-[var(--warning-soft)] text-[var(--warning)]"
+                          }`}>
+                            {entry.availabilityAssessment.label}. Review your availability before serving.
+                          </p>
+                          ) : null}
+                        </div>
                       ))}
                     </div>
                   ) : (
@@ -384,6 +445,7 @@ export default function ScheduleViewToggle({
                         <div key={entry.id} className="wf-card p-3">
                           <p className="text-xs font-semibold text-[var(--danger)]">{entry.title || "Unavailable"}</p>
                           <p className="mt-1 text-[11px] text-[var(--danger)]">{formatDateRange(entry.starts_on, entry.ends_on)}</p>
+                          <p className="mt-1 text-[10px] text-[var(--danger)]">Time zone: {entry.timezone || timeZone}</p>
                           {entry.reason ? <p className="mt-1 text-[11px] leading-5 text-[var(--danger)]">{entry.reason}</p> : null}
                         </div>
                       ))}
@@ -426,7 +488,7 @@ export default function ScheduleViewToggle({
                         <label htmlFor="calendarBlockoutReason" className="mb-1.5 block text-xs font-medium text-[var(--foreground)]">Note (optional)</label>
                         <Textarea id="calendarBlockoutReason" name="reason" maxLength={500} rows={2} placeholder="Add a note for your team" className="min-h-[72px] py-2 text-xs" />
                       </div>
-                      <button type="submit" className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
+                      <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
                         <Plus className="size-3.5" /> Save unavailable date
                       </button>
                     </form>
@@ -443,7 +505,7 @@ export default function ScheduleViewToggle({
             </aside>
           </div>
           <div className="border-t border-[var(--border)] px-4 py-3 text-[10px] text-[var(--muted)] sm:px-6 sm:text-xs">
-            Calendar dates use {timeZone}. Select a day to review its services and availability; select a service to open its plan.
+            Service dates, service times, and recurring availability are evaluated using {timeZone}. Select a day to review conflicts and availability; select a service to open its plan.
           </div>
         </section>
       )}

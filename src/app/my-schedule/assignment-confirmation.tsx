@@ -16,6 +16,7 @@ type ConfirmationStatus =
 
 type AssignmentConfirmationProps = {
   assignmentId: string
+  positionLabel: string
   status: ConfirmationStatus
   responseNote: string | null
   respondedAt: string | null
@@ -45,6 +46,7 @@ function formatResponseDate(
 
 export default function AssignmentConfirmation({
   assignmentId,
+  positionLabel,
   status,
   responseNote,
   respondedAt,
@@ -157,9 +159,10 @@ export default function AssignmentConfirmation({
           <Check className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold">Confirmed</p>
+          <p className="text-xs font-semibold">{positionLabel} · Confirmed</p>
+          <p className="mt-0.5 text-[11px]">Saved. The worship leader can now see your response.</p>
           {responseDate ? (
-            <p className="mt-0.5 text-[11px]">{responseDate}</p>
+            <p className="mt-1 text-[10px] opacity-80">{responseDate} · {timeZone}</p>
           ) : null}
         </div>
       </div>
@@ -178,9 +181,10 @@ export default function AssignmentConfirmation({
           <X className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold">Declined</p>
+          <p className="text-xs font-semibold">{positionLabel} · Declined</p>
+          <p className="mt-0.5 text-[11px]">Saved. The worship leader has been notified and can plan coverage.</p>
           {responseDate ? (
-            <p className="mt-0.5 text-[11px]">{responseDate}</p>
+            <p className="mt-1 text-[10px] opacity-80">{responseDate} · {timeZone}</p>
           ) : null}
           {currentResponseNote ? (
             <div className="mt-3 rounded-lg border border-[var(--danger)]/20 bg-[var(--card)]/70 px-3 py-2">
@@ -203,9 +207,9 @@ export default function AssignmentConfirmation({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold">Pending confirmation</p>
+          <p className="text-xs font-semibold">{positionLabel} · Pending confirmation</p>
           <p className="mt-0.5 text-[11px]">
-            Please confirm your assignment.
+            Your response has not been recorded yet.
           </p>
         </div>
       </div>

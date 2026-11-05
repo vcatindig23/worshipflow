@@ -329,7 +329,10 @@ describe("semantic theme foundations", () => {
   it("supports semantic warning feedback and neutral invitation status", () => {
     expect(feedbackSource).toContain('tone?: "success" | "error" | "info" | "warning"')
     expect(feedbackSource).toContain('className={`wf-feedback wf-feedback-${tone}`}')
-    expect(teamInvitation).toMatch(/wf-status wf-status-neutral/)
+    expect(teamInvitation).toContain("className={`wf-status ${statusClass}")
+    expect(teamInvitation).toContain('"accepted"')
+    expect(teamInvitation).toContain('"expired"')
+    expect(teamInvitation).toContain('"revoked"')
   })
 
   it("uses shared semantic styling across profile and settings views", () => {
@@ -403,6 +406,19 @@ describe("semantic theme foundations", () => {
     expect(assignmentConfirmation).not.toMatch(/bg-emerald-50|bg-rose-50|bg-amber-50|text-rose-700|text-amber-800/)
 
     expect(scheduleViewToggle).toMatch(/<Feedback tone="warning"/)
+    expect(mySchedulePage).toContain("assessMemberAvailability")
+    expect(mySchedulePage).toContain("findScheduleConflicts")
+    expect(mySchedulePage).toContain("scheduleConflicts.map")
+    expect(mySchedulePage).toContain("assignmentsForService.map")
+    expect(scheduleViewToggle).toContain("Past assignment")
+    expect(scheduleViewToggle).toContain("Upcoming assignment")
+    expect(teamPage).toContain("Invitation status")
+    expect(teamPage).toContain("Only church administrators can create or revoke invitations")
+    expect(inviteMemberForm).toContain("Invitation failed")
+    expect(mySchedulePage).toContain("Service times and weekly availability use")
+    expect(assignmentConfirmation).toContain("Saved. The worship leader can now see your response.")
+    expect(assignmentConfirmation).toContain("Saved. The worship leader has been notified")
+    expect(scheduleViewToggle).toContain("Assignment warning")
     expect(scheduleViewToggle).toMatch(/<Input/)
     expect(scheduleViewToggle).toMatch(/<Textarea/)
     expect(scheduleViewToggle).toMatch(/bg-\[var\(--success\)\]/)

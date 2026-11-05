@@ -822,11 +822,9 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                               key={confirmation.id}
                               className="min-w-0 rounded-xl bg-[var(--surface)] p-3"
                             >
-                              <p className="mb-2 break-words text-xs font-semibold text-[var(--foreground)]">
-                                {getTeamPositionLabel(confirmation.position)}
-                              </p>
                               <AssignmentConfirmation
                                 assignmentId={confirmation.id}
+                                positionLabel={getTeamPositionLabel(confirmation.position)}
                                 status={confirmation.status}
                                 responseNote={confirmation.responseNote}
                                 respondedAt={confirmation.respondedAt}
