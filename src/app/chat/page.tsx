@@ -4,6 +4,7 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 import TeamChatClient, {
   type TeamChatMember,
   type TeamChatMessage,
+  type TeamChatDirectConversation,
 } from "./team-chat-client"
 
 type MemberRow = {
@@ -83,6 +84,65 @@ export default async function TeamChatPage() {
     role: member.role,
   }))
 
+  const { data: directRows, error: directRowsError } = await supabase
+    .from("team_chat_direct_conversations")
+    .select("id, organization_id, user_one_id, user_two_id, last_message_at, last_message_preview, updated_at")
+    .eq("organization_id", workspace.organizationId)
+    .or(`user_one_id.eq.${workspace.userId},user_two_id.eq.${workspace.userId}`)
+    .order("updated_at", { ascending: false })
+    .limit(100)
+
+  const directSchemaUnavailable =
+    directRowsError?.code === "42P01" ||
+    directRowsError?.code === "PGRST205"
+
+  if (directRowsError && !directSchemaUnavailable) {
+    console.error("load_team_chat_direct_conversations failed:", {
+      code: directRowsError.code,
+      message: directRowsError.message,
+    })
+    throw new Error("Unable to load your direct conversations.")
+  }
+
+  const directOtherUserIds = Array.from(new Set(
+    (directRows ?? []).map((conversation) =>
+      conversation.user_one_id === workspace.userId
+        ? conversation.user_two_id
+        : conversation.user_one_id
+    )
+  ))
+  const directOtherNames = new Map<string, string>()
+  if (directOtherUserIds.length > 0) {
+    const { data: directProfiles, error: directProfilesError } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", directOtherUserIds)
+
+    if (directProfilesError) {
+      console.error("load_team_chat_direct_profiles failed:", {
+        code: directProfilesError.code,
+        message: directProfilesError.message,
+      })
+    } else {
+      for (const profile of (directProfiles ?? []) as ProfileRow[]) {
+        directOtherNames.set(profile.id, profile.display_name?.trim() || "Worship Member")
+      }
+    }
+  }
+
+  const directConversations: TeamChatDirectConversation[] = (directRows ?? []).map((conversation) => {
+    const otherUserId = conversation.user_one_id === workspace.userId
+      ? conversation.user_two_id
+      : conversation.user_one_id
+    return {
+      id: conversation.id,
+      otherUserId,
+      otherUserName: directOtherNames.get(otherUserId) ?? "Worship Member",
+      lastMessageAt: conversation.last_message_at,
+      lastMessagePreview: conversation.last_message_preview || "Start a conversation",
+    }
+  })
+
   const { data: messageRows, error: messagesError } = await supabase
     .from("team_chat_messages")
     .select("id, organization_id, user_id, body, created_at, reply_to_message_id, reply_to_user_id, reply_to_body, pinned_at, pinned_by, mentioned_user_ids, attachments")
@@ -92,7 +152,8 @@ export default async function TeamChatPage() {
 
   const schemaUnavailable =
     messagesError?.code === "42P01" ||
-    messagesError?.code === "PGRST205"
+    messagesError?.code === "PGRST205" ||
+    directSchemaUnavailable
 
   if (messagesError && !schemaUnavailable) {
     console.error("load_team_chat_messages failed:", {
@@ -154,6 +215,7 @@ export default async function TeamChatPage() {
           canPinMessages={["admin", "worship_leader"].includes(workspace.role)}
           initialMessages={initialMessages}
           initialPinnedMessages={initialPinnedMessages}
+          initialDirectConversations={directConversations}
           members={members}
         />
       )}
