@@ -25,6 +25,7 @@ const typeLabels: Record<string, string> = {
   message: "Message",
   communion: "Communion",
   closing: "Closing",
+  break: "Break",
   transition: "Transition",
   other: "Other",
 }
@@ -126,7 +127,7 @@ export default async function ServiceTimeline({
             </h2>
           </div>
           <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-            Build the running order for worship, prayer, announcements, message, and other service moments.
+            Build a clear running order. Songs, breaks, and transitions have distinct visual cues; every item can include timing and notes.
           </p>
         </div>
         {items.length > 0 ? (
@@ -147,7 +148,15 @@ export default async function ServiceTimeline({
             return (
               <li
                 key={item.id}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"
+                className={`rounded-2xl border p-4 ${
+                  item.item_type === "break"
+                    ? "border-[var(--warning)]/30 bg-[var(--warning-soft)]"
+                    : item.item_type === "transition"
+                      ? "border-dashed border-[var(--brand)]/40 bg-[var(--brand-soft)]/40"
+                      : item.item_type === "song"
+                        ? "border-[var(--brand)]/20 bg-[var(--brand-soft)]/25"
+                        : "border-[var(--border)] bg-[var(--surface)]"
+                }`}
               >
                 <div className="flex gap-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-xs font-bold text-[var(--brand)]">
@@ -158,14 +167,23 @@ export default async function ServiceTimeline({
                       <h3 className="font-semibold text-[var(--foreground)]">
                         {item.title}
                       </h3>
-                      <span className="rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-[var(--muted)]">
+                      <span
+                        className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+                          item.item_type === "break"
+                            ? "bg-[var(--warning)]/15 text-[var(--warning)]"
+                            : item.item_type === "transition"
+                              ? "bg-[var(--brand)]/10 text-[var(--brand)]"
+                              : "bg-white text-[var(--muted)]"
+                        }`}
+                      >
                         {typeLabels[item.item_type] ?? "Other"}
                       </span>
-                      {item.duration_minutes ? (
-                        <span className="text-xs text-[var(--muted)]">
-                          {item.duration_minutes} min
-                        </span>
-                      ) : null}
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/75 px-2 py-1 text-[11px] font-medium text-[var(--muted)]">
+                        <Clock3 className="size-3" />
+                        {item.duration_minutes
+                          ? `Planned · ${item.duration_minutes} min`
+                          : "Duration not set"}
+                      </span>
                     </div>
                     {linkedSong ? (
                       <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--brand)]">
@@ -178,9 +196,14 @@ export default async function ServiceTimeline({
                       </p>
                     ) : null}
                     {item.notes ? (
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--muted)]">
-                        {item.notes}
-                      </p>
+                      <div className="mt-3 rounded-xl border border-[var(--border)]/70 bg-white/75 p-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                          Notes and transition cues
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[var(--foreground)]">
+                          {item.notes}
+                        </p>
+                      </div>
                     ) : null}
                   </div>
 
