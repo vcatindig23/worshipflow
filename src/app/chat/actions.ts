@@ -825,6 +825,7 @@ export async function markTeamChatDirectNotificationsRead(rawConversationId: str
     .eq("user_id", workspace.userId)
     .eq("organization_id", workspace.organizationId)
     .eq("type", "team_chat_direct_message")
+    .eq("direct_conversation_id", parsed.data)
     .is("read_at", null)
 
   if (error) {
