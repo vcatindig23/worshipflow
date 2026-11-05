@@ -188,14 +188,10 @@ function WorshipFlowShellLayout({
         className="lg:flex"
       >
         <WorkspaceSidebarBrand />
-        {expanded ? (
-          <>
-            <SidebarContent>
-              <DashboardDesktopNavigation />
-            </SidebarContent>
-            <WorkspaceSidebarFooter workspace={workspace} />
-          </>
-        ) : null}
+        <SidebarContent>
+          <DashboardDesktopNavigation />
+        </SidebarContent>
+        {expanded ? <WorkspaceSidebarFooter workspace={workspace} /> : null}
       </Sidebar>
 
       <SidebarInset
