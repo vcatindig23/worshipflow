@@ -638,7 +638,7 @@ export default async function MySchedulePage({
                 <input type="hidden" name="timezone" value={workspace.organizationTimezone} />
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--foreground)]">Weekly availability</h3>
-                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Choose the days and times you are usually available to serve.</p>
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Choose the days and times you are usually available to serve. Times use {workspace.organizationTimezone}.</p>
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
                   Title (optional)
@@ -1083,7 +1083,7 @@ export default async function MySchedulePage({
                           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
                         >
                           <CalendarPlus className="size-3.5" />
-                          Add to Google Calendar
+                          Add to Google Calendar · {workspace.organizationTimezone}
                         </a>
                       </div>
                     ) : null}
