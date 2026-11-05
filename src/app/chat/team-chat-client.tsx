@@ -564,13 +564,17 @@ export default function TeamChatClient({
           if (row.user_id === currentUserId) {
             forceScrollToBottomRef.current = true
             setNewMessageCount(0)
-          } else if (isNearBottom) {
-            forceScrollToBottomRef.current = true
-            setNewMessageCount(0)
+          } else if (!activeDirectConversation) {
+            if (isNearBottom) {
+              forceScrollToBottomRef.current = true
+              setNewMessageCount(0)
+            } else {
+              setNewMessageCount((count) => count + 1)
+            }
             void markTeamChatNotificationsRead()
           } else {
+            // Do not mark group messages as read while a private conversation is open.
             setNewMessageCount((count) => count + 1)
-            void markTeamChatNotificationsRead()
           }
 
           setMessages((current) => {
@@ -750,7 +754,7 @@ export default function TeamChatClient({
 
       void supabase.removeChannel(channel)
     }
-  }, [activeSearch, currentUserId, memberNames, organizationId, supabase])
+  }, [activeDirectConversation, activeSearch, currentUserId, memberNames, organizationId, supabase])
 
   useEffect(() => {
     if (activeSearch) {
