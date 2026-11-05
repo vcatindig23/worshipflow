@@ -105,11 +105,16 @@ export default function DirectMessageClient({
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
   const endRef = useRef<HTMLDivElement>(null)
   const messagesRef = useRef<DirectMessage[]>([])
+  const onConversationActivityRef = useRef(onConversationActivity)
   const supabase = useMemo(() => createBrowserClient(), [])
 
   useEffect(() => {
     messagesRef.current = messages
   }, [messages])
+
+  useEffect(() => {
+    onConversationActivityRef.current = onConversationActivity
+  }, [onConversationActivity])
 
   useEffect(() => {
     void markTeamChatDirectNotificationsRead(conversation.id)
@@ -154,7 +159,7 @@ export default function DirectMessageClient({
         (payload: { new: Record<string, unknown> }) => {
           const row = payload.new as unknown as DirectMessage
           if (!row || typeof row.id !== "string") return
-          onConversationActivity(row.body, row.created_at)
+          onConversationActivityRef.current(row.body, row.created_at)
           setMessages((current) => {
             if (current.some((message) => message.id === row.id)) return current
             return [...current, {
@@ -191,7 +196,7 @@ export default function DirectMessageClient({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [conversation.id, onConversationActivity, supabase])
+  }, [conversation.id, supabase])
 
   useEffect(() => {
     const paths = Array.from(new Set(
