@@ -954,11 +954,18 @@ export default async function MySchedulePage({
                       ))}
                     </div>
 
-                    {swapFeatureAvailable && assignmentsForService.length > 0 && setlist.status !== "archived" && (!setlist.service_date || setlist.service_date >= today) && period !== "past" ? (
+                    {swapFeatureAvailable &&
+                    assignmentsForService.length > 0 &&
+                    setlist.status !== "archived" &&
+                    (
+                      ((!setlist.service_date || setlist.service_date >= today) && period !== "past") ||
+                      assignmentsForService.some((assignment) => latestSwapByAssignment.has(assignment.id))
+                    ) ? (
                       <div className="space-y-3 border-t border-[var(--border)] pt-3">
                         <p className="text-xs font-semibold text-[var(--foreground)]">Need a substitute?</p>
                         {assignmentsForService.map((assignment) => {
                           const previousRequest = latestSwapByAssignment.get(assignment.id)
+                          const canRequestSwap = (!setlist.service_date || setlist.service_date >= today) && period !== "past"
                           const requestIsOpen = previousRequest?.status === "pending" || previousRequest?.status === "substitute_accepted"
                           const requestIsApproved = previousRequest?.status === "approved"
                           const substituteName = previousRequest
@@ -1017,7 +1024,7 @@ export default async function MySchedulePage({
                                     </div>
                                   ) : null}
                                 </div>
-                                {!requestIsOpen && !requestIsApproved && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
+                                {canRequestSwap && !requestIsOpen && !requestIsApproved && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
                                   <details className="shrink-0">
                                     <summary className="cursor-pointer list-none rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
                                       Request a swap
@@ -1057,7 +1064,7 @@ export default async function MySchedulePage({
                                       </button>
                                     </form>
                                   </details>
-                                ) : !requestIsOpen && !requestIsApproved && candidates.length === 0 ? (
+                                ) : canRequestSwap && !requestIsOpen && !requestIsApproved && candidates.length === 0 ? (
                                   <p className="text-xs text-[var(--muted)]">No eligible substitute is available for this position.</p>
                                 ) : null}
                               </div>
