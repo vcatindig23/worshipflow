@@ -142,7 +142,7 @@ export function TeamInvitation({
           Created {formatInvitationDate(createdAt)}
         </span>
         <span>
-          Expires {formatInvitationDate(expiresAt)}
+          {displayStatus === "expired" ? "Expired" : "Expires"} {formatInvitationDate(expiresAt)}
         </span>
         <span className="rounded-md border border-[var(--border)] px-2 py-1 font-medium text-[var(--foreground)]">
           {roleLabel}
