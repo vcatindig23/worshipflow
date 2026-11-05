@@ -309,6 +309,30 @@ using (
   )
 );
 
+-- Give direct-message notifications their own type so opening one-to-one
+-- conversations never clears the unread state of the church group chat.
+alter table public.notifications
+  drop constraint if exists notifications_type_check;
+
+alter table public.notifications
+  add constraint notifications_type_check
+  check (
+    type in (
+      'service_assignment',
+      'service_assignment_removed',
+      'team_chat_message',
+      'team_chat_mention',
+      'service_announcement',
+      'assignment_swap_request',
+      'assignment_swap_status',
+      'service_reminder',
+      'song_edited',
+      'song_review_comment',
+      'song_review_status',
+      'team_chat_direct_message'
+    )
+  );
+
 create or replace function private.update_direct_chat_conversation_activity()
 returns trigger
 language plpgsql
@@ -347,7 +371,7 @@ begin
       v_recipient,
       new.organization_id,
       null,
-      'team_chat_message',
+      'team_chat_direct_message',
       'New direct message',
       v_sender_name || ': ' || v_excerpt
     );
