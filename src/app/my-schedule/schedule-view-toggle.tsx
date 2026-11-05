@@ -423,6 +423,7 @@ export default function ScheduleViewToggle({
                         <div key={entry.id} className="wf-card p-3">
                           <p className="text-xs font-semibold text-[var(--danger)]">{entry.title || "Unavailable"}</p>
                           <p className="mt-1 text-[11px] text-[var(--danger)]">{formatDateRange(entry.starts_on, entry.ends_on)}</p>
+                          <p className="mt-1 text-[10px] text-[var(--danger)]">Time zone: {entry.timezone || timeZone}</p>
                           {entry.reason ? <p className="mt-1 text-[11px] leading-5 text-[var(--danger)]">{entry.reason}</p> : null}
                         </div>
                       ))}
