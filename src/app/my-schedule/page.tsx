@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CalendarPlus,
   CalendarDays,
+  CheckCircle2,
   Clock3,
   ListMusic,
   Plus,
@@ -194,6 +195,41 @@ const swapErrorMessages: Record<string, string> = {
   swap_already_open: "A swap request is already open for this assignment.",
   service_closed: "Completed or archived services cannot be swapped.",
   request_failed: "The swap request could not be created. Please try again.",
+}
+
+function getSwapStatusPresentation(status: SwapRequest["status"]) {
+  switch (status) {
+    case "pending":
+      return {
+        label: "Waiting for substitute",
+        nextAction: "The proposed teammate needs to accept or decline.",
+        className: "wf-status-warning",
+      }
+    case "substitute_accepted":
+      return {
+        label: "Awaiting leader approval",
+        nextAction: "A worship leader must review and approve the change.",
+        className: "wf-status-warning",
+      }
+    case "approved":
+      return {
+        label: "Approved",
+        nextAction: "Review the service plan to confirm the updated assignment.",
+        className: "wf-status-success",
+      }
+    case "declined":
+      return {
+        label: "Declined",
+        nextAction: "Choose another eligible teammate or keep your original assignment.",
+        className: "wf-status-danger",
+      }
+    case "cancelled":
+      return {
+        label: "Cancelled",
+        nextAction: "This request is closed. You may submit another request while the service is upcoming.",
+        className: "wf-status-neutral",
+      }
+  }
 }
 
 const periods: {
@@ -1018,21 +1054,31 @@ export default async function MySchedulePage({
                           )
 
                           return (
-                            <div key={assignment.id} className="rounded-xl bg-[var(--surface)] p-3">
-                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="min-w-0">
+                            <div key={assignment.id} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+                              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0 flex-1">
                                   <p className="text-xs font-semibold text-[var(--foreground)]">
                                     {getTeamPositionLabel(assignment.team_position)}
                                   </p>
-                                  {previousRequest && requestIsOpen ? (
-                                    <p className="mt-1 text-xs text-[var(--muted)]">
-                                      {previousRequest.status === "pending"
-                                        ? `Swap request sent to ${namesByMemberId.get(previousRequest.substitute_user_id) ?? "your proposed substitute"}; waiting for their response.`
-                                        : "Your proposed substitute accepted. Waiting for worship-leader approval."}
+                                  {previousRequest ? (
+                                    <div className="mt-2 rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <span className={`wf-status ${getSwapStatusPresentation(previousRequest.status).className}`}>
+                                          {getSwapStatusPresentation(previousRequest.status).label}
+                                        </span>
+                                        <span className="text-xs text-[var(--muted)]">
+                                          Proposed teammate: {namesByMemberId.get(previousRequest.substitute_user_id) ?? "Team member"}
+                                        </span>
+                                      </div>
+                                      <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+                                        Next action: {getSwapStatusPresentation(previousRequest.status).nextAction}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                                      No swap request has been submitted for this position.
                                     </p>
-                                  ) : previousRequest?.status === "declined" ? (
-                                    <p className="mt-1 text-xs text-[var(--danger)]">Your last swap request was declined.</p>
-                                  ) : null}
+                                  )}
                                 </div>
                                 {!requestIsOpen && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
                                   <details className="shrink-0">
@@ -1087,7 +1133,12 @@ export default async function MySchedulePage({
                     {calendarUrlsBySetlist.get(
                       setlist.id
                     ) ? (
-                      <div className="flex justify-end border-t border-[var(--border)] pt-3">
+                      <div className="flex flex-col gap-2 border-t border-[var(--border)] pt-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-[10px] leading-4 text-[var(--muted)]">
+                          {setlist.service_time
+                            ? `Exports as a 1-hour event in ${workspace.organizationTimezone}.`
+                            : "Exports as an all-day event because no start time is set."}
+                        </p>
                         <a
                           href={
                             calendarUrlsBySetlist.get(
@@ -1097,7 +1148,7 @@ export default async function MySchedulePage({
                           }
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)] sm:w-auto"
                         >
                           <CalendarPlus className="size-3.5" />
                           Add to Google Calendar
