@@ -671,16 +671,16 @@ export default async function MySchedulePage({
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
                   Title (optional)
-                  <Input name="title" maxLength={120} placeholder="e.g. Family trip" className="mt-1.5 h-10" />
+                  <Input name="title" maxLength={120} placeholder="e.g. Family trip" className="mt-1.5 h-11" />
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="block text-sm font-medium text-[var(--foreground)]">
                     Start date
-                    <Input type="date" name="startsOn" required className="mt-1.5 h-10" />
+                    <Input type="date" name="startsOn" required className="mt-1.5 h-11" />
                   </label>
                   <label className="block text-sm font-medium text-[var(--foreground)]">
                     End date
-                    <Input type="date" name="endsOn" required className="mt-1.5 h-10" />
+                    <Input type="date" name="endsOn" required className="mt-1.5 h-11" />
                   </label>
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
@@ -702,7 +702,7 @@ export default async function MySchedulePage({
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
                   Title (optional)
-                  <Input name="title" maxLength={120} placeholder="e.g. Weekday evenings" className="mt-1.5 h-10" />
+                  <Input name="title" maxLength={120} placeholder="e.g. Weekday evenings" className="mt-1.5 h-11" />
                 </label>
                 <fieldset className="space-y-2">
                   <legend className="text-sm font-medium text-[var(--foreground)]">Days of the week</legend>
@@ -718,11 +718,11 @@ export default async function MySchedulePage({
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="block text-sm font-medium text-[var(--foreground)]">
                     Available from
-                    <Input type="time" name="startTime" required className="mt-1.5 h-10" />
+                    <Input type="time" name="startTime" required className="mt-1.5 h-11" />
                   </label>
                   <label className="block text-sm font-medium text-[var(--foreground)]">
                     Available until
-                    <Input type="time" name="endTime" required className="mt-1.5 h-10" />
+                    <Input type="time" name="endTime" required className="mt-1.5 h-11" />
                   </label>
                 </div>
                 <label className="block text-sm font-medium text-[var(--foreground)]">
@@ -1082,7 +1082,7 @@ export default async function MySchedulePage({
                                 </div>
                                 {!requestIsOpen && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
                                   <details className="shrink-0">
-                                    <summary className="cursor-pointer list-none rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
+                                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
                                       Request a swap
                                     </summary>
                                     <form action={requestAssignmentSwap} className="wf-card mt-3 w-full space-y-3 p-3 sm:min-w-[300px]">
@@ -1094,7 +1094,7 @@ export default async function MySchedulePage({
                                           name="substituteUserId"
                                           required
                                           defaultValue=""
-                                          className="wf-input h-10"
+                                          className="wf-input h-11"
                                         >
                                           <option value="" disabled>Select a teammate</option>
                                           {candidates.map((member) => (
@@ -1115,7 +1115,7 @@ export default async function MySchedulePage({
                                           className="wf-input min-h-[72px] py-2"
                                         />
                                       </div>
-                                      <button type="submit" className="inline-flex h-9 w-full items-center justify-center rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
+                                      <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
                                         Send swap request
                                       </button>
                                     </form>
