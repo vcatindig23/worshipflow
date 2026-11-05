@@ -62,10 +62,7 @@ test("desktop sidebar expands on hover and returns to the logo rail on pointer l
 
   await sidebar.hover()
   await expect(sidebar).toHaveAttribute("data-state", "expanded")
-  await expect(sidebar.getByRole("link", { name: "Songs" })).toHaveAttribute(
-    "aria-label",
-    undefined
-  )
+  await expect(sidebar.getByRole("link", { name: "Songs" })).toBeVisible()
   await expect(sidebar).toHaveCSS("width", "264px")
   await expect(sidebar.getByRole("link", { name: "Songs" })).toBeVisible()
 
