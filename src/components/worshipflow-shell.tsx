@@ -176,6 +176,9 @@ function WorshipFlowShellLayout({
 }: WorshipFlowShellProps) {
   const pathname = usePathname() ?? "/"
   const pageTitle = getWorkspacePageTitle(pathname)
+  const { state } = useSidebar()
+  const expanded = state === "expanded"
+
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <Sidebar
@@ -185,10 +188,14 @@ function WorshipFlowShellLayout({
         className="lg:flex"
       >
         <WorkspaceSidebarBrand />
-        <SidebarContent>
-          <DashboardDesktopNavigation />
-        </SidebarContent>
-        <WorkspaceSidebarFooter workspace={workspace} />
+        {expanded ? (
+          <>
+            <SidebarContent>
+              <DashboardDesktopNavigation />
+            </SidebarContent>
+            <WorkspaceSidebarFooter workspace={workspace} />
+          </>
+        ) : null}
       </Sidebar>
 
       <SidebarInset
