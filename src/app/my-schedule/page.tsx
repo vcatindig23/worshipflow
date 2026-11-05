@@ -627,7 +627,7 @@ export default async function MySchedulePage({
                   Note (optional)
                   <Textarea name="reason" maxLength={500} rows={2} placeholder="Add context for your team" className="mt-1.5 min-h-[72px] py-2" />
                 </label>
-                <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-sm font-semibold text-white transition hover:opacity-90">
+                <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-sm font-semibold text-white transition hover:opacity-90 sm:w-auto">
                   <Plus className="size-4" />
                   Add blockout
                 </button>
@@ -669,7 +669,7 @@ export default async function MySchedulePage({
                   Note (optional)
                   <Textarea name="reason" maxLength={500} rows={2} placeholder="Add context for your team" className="mt-1.5 min-h-[72px] py-2" />
                 </label>
-                <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-sm font-semibold text-white transition hover:opacity-90">
+                <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3.5 text-sm font-semibold text-white transition hover:opacity-90 sm:w-auto">
                   <Plus className="size-4" />
                   Add weekly availability
                 </button>
@@ -903,30 +903,7 @@ export default async function MySchedulePage({
                         <ArrowRight className="mt-1 size-5 shrink-0 text-[var(--muted)] transition group-hover:translate-x-1 group-hover:text-[var(--brand)]" />
                       </Link>
 
-                      <AssignmentConfirmation
-                        assignmentId={
-                          assignmentsForService[0]
-                            ?.id ?? ""
-                        }
-                        status={
-                          assignmentsForService[0]
-                            ?.confirmation_status ??
-                          "pending"
-                        }
-                        responseNote={
-                          assignmentsForService[0]
-                            ?.response_note ??
-                          null
-                        }
-                        respondedAt={
-                          assignmentsForService[0]
-                            ?.responded_at ??
-                          null
-                        }
-                        timeZone={
-                          workspace.organizationTimezone
-                        }
-                      />
+
                     </div>
 
                     {setlist.availabilityAssessment &&
@@ -978,6 +955,33 @@ export default async function MySchedulePage({
                         {assignmentsForService.map((assignment) => {
                           const previousRequest = latestSwapByAssignment.get(assignment.id)
                           const requestIsOpen = previousRequest?.status === "pending" || previousRequest?.status === "substitute_accepted"
+                          const requestIsApproved = previousRequest?.status === "approved"
+                          const substituteName = previousRequest
+                            ? namesByMemberId.get(previousRequest.substitute_user_id) ?? "Your proposed substitute"
+                            : "Your proposed substitute"
+                          const swapStatus = previousRequest?.status
+                          const swapStatusLabel = swapStatus === "pending"
+                            ? "Waiting for teammate"
+                            : swapStatus === "substitute_accepted"
+                              ? "Awaiting leader approval"
+                              : swapStatus === "approved"
+                                ? "Approved"
+                                : swapStatus === "declined"
+                                  ? "Declined"
+                                  : swapStatus === "cancelled"
+                                    ? "Cancelled"
+                                    : null
+                          const swapStatusMessage = swapStatus === "pending"
+                            ? `Next: ${substituteName} needs to respond to your request.`
+                            : swapStatus === "substitute_accepted"
+                              ? `Next: a worship leader needs to review the request from ${substituteName}.`
+                              : swapStatus === "approved"
+                                ? `Complete: ${substituteName} is approved to take this position.`
+                                : swapStatus === "declined"
+                                  ? `${substituteName} declined. Choose another teammate or ask a worship leader for help.`
+                                  : swapStatus === "cancelled"
+                                    ? "This request was cancelled. You can send a new request if you still need a substitute."
+                                    : null
                           const candidates = workspaceMembers.filter((member) =>
                             member.user_id !== workspace.userId &&
                             member.team_positions.includes(assignment.team_position) &&
@@ -991,17 +995,24 @@ export default async function MySchedulePage({
                                   <p className="text-xs font-semibold text-[var(--foreground)]">
                                     {getTeamPositionLabel(assignment.team_position)}
                                   </p>
-                                  {previousRequest && requestIsOpen ? (
-                                    <p className="mt-1 text-xs text-[var(--muted)]">
-                                      {previousRequest.status === "pending"
-                                        ? `Swap request sent to ${namesByMemberId.get(previousRequest.substitute_user_id) ?? "your proposed substitute"}; waiting for their response.`
-                                        : "Your proposed substitute accepted. Waiting for worship-leader approval."}
-                                    </p>
-                                  ) : previousRequest?.status === "declined" ? (
-                                    <p className="mt-1 text-xs text-[var(--danger)]">Your last swap request was declined.</p>
+                                  {previousRequest && swapStatusLabel && swapStatusMessage ? (
+                                    <div className="mt-2 space-y-1.5">
+                                      <span className={`wf-status ${
+                                        swapStatus === "approved"
+                                          ? "wf-status-success"
+                                          : swapStatus === "declined"
+                                            ? "wf-status-danger"
+                                            : swapStatus === "cancelled"
+                                              ? "wf-status-neutral"
+                                              : "wf-status-warning"
+                                      }`}>
+                                        {swapStatusLabel}
+                                      </span>
+                                      <p className="text-xs leading-5 text-[var(--muted)]">{swapStatusMessage}</p>
+                                    </div>
                                   ) : null}
                                 </div>
-                                {!requestIsOpen && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
+                                {!requestIsOpen && !requestIsApproved && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
                                   <details className="shrink-0">
                                     <summary className="cursor-pointer list-none rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
                                       Request a swap
@@ -1041,7 +1052,7 @@ export default async function MySchedulePage({
                                       </button>
                                     </form>
                                   </details>
-                                ) : !requestIsOpen && candidates.length === 0 ? (
+                                ) : !requestIsOpen && !requestIsApproved && candidates.length === 0 ? (
                                   <p className="text-xs text-[var(--muted)]">No eligible substitute is available for this position.</p>
                                 ) : null}
                               </div>
