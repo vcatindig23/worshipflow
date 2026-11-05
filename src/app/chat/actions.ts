@@ -804,6 +804,39 @@ export async function sendTeamChatDirectMessage(formData: FormData) {
   return { success: true as const, message: data as TeamChatDirectMessageRow }
 }
 
+export async function markTeamChatDirectNotificationsRead(rawConversationId: string) {
+  const parsed = directConversationIdSchema.safeParse(rawConversationId)
+  if (!parsed.success) return { success: false as const }
+
+  const workspace = await getWorkspace()
+  const supabase = await createClient()
+  const { data: conversation, error: conversationError } = await supabase
+    .from("team_chat_direct_conversations")
+    .select("id")
+    .eq("id", parsed.data)
+    .eq("organization_id", workspace.organizationId)
+    .maybeSingle()
+
+  if (conversationError || !conversation) return { success: false as const }
+
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", workspace.userId)
+    .eq("organization_id", workspace.organizationId)
+    .eq("type", "team_chat_direct_message")
+    .is("read_at", null)
+
+  if (error) {
+    console.error("mark_team_chat_direct_notifications_read failed:", {
+      code: error.code,
+      message: error.message,
+    })
+    return { success: false as const }
+  }
+  return { success: true as const }
+}
+
 export async function toggleTeamChatMessageReaction(rawMessageId: string, rawEmoji: string) {
   const messageId = teamChatMessageIdSchema.safeParse(rawMessageId)
   const emoji = supportedChatEmojiSchema.safeParse(rawEmoji)
