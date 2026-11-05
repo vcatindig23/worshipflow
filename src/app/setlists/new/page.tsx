@@ -3,7 +3,7 @@ import { ProtectedForm } from "@/components/ui/protected-form"
 import { Input, Textarea } from "@/components/ui/form-controls"
 import { PageContainer } from "@/components/ui/page"
 import Link from "next/link"
-import { ArrowLeft, CalendarDays } from "lucide-react"
+import { ArrowLeft, CalendarDays, ChevronDown } from "lucide-react"
 import { redirect } from "next/navigation"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { createSetlist } from "../actions"
@@ -157,10 +157,13 @@ export default async function NewSetlistPage({
             </div>
           ) : null}
 
-          <details className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]/40 p-4">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-[var(--foreground)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
-              Optional service details
-              <span className="ml-2 text-xs font-normal text-[var(--muted)]">Description, team notes, and announcements</span>
+          <details className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)]/40 p-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-[var(--foreground)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+              <span className="min-w-0">
+                <span className="block">Optional service details</span>
+                <span className="mt-0.5 block text-xs font-normal text-[var(--muted)]">Description, team notes, and announcements</span>
+              </span>
+              <ChevronDown className="size-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-180" aria-hidden="true" />
             </summary>
 
             <div className="mt-4 space-y-4 border-t border-[var(--border)] pt-4">
