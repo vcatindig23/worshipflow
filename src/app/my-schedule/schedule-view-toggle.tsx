@@ -403,6 +403,15 @@ export default function ScheduleViewToggle({
                           {entry.description ? <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--muted)]">{entry.description}</p> : null}
                           <span className="mt-2 block text-[11px] font-semibold text-[var(--brand)]">Open service plan</span>
                           </Link>
+                          {entry.scheduleConflictCount === null ? (
+                            <p className="rounded-lg border border-[var(--warning)]/30 bg-[var(--warning-soft)] px-3 py-2 text-[11px] leading-5 text-[var(--warning)]">
+                              Overlapping service and rehearsal commitments could not be checked.
+                            </p>
+                          ) : entry.scheduleConflictCount > 0 ? (
+                            <p className="rounded-lg border border-[var(--warning)]/30 bg-[var(--warning-soft)] px-3 py-2 text-[11px] leading-5 text-[var(--warning)]">
+                              {entry.scheduleConflictCount} overlapping {entry.scheduleConflictCount === 1 ? "commitment" : "commitments"} found. <Link className="font-semibold underline underline-offset-2" href={`/setlists/${entry.id}/preparation`}>Review conflicts</Link>.
+                            </p>
+                          ) : null}
                           {entry.availabilityAssessment && !["within_weekly_hours", "not_recorded"].includes(entry.availabilityAssessment.status) ? (
                           <p className={`rounded-lg border px-3 py-2 text-[11px] leading-5 ${
                             entry.availabilityAssessment.status === "unavailable"
