@@ -232,7 +232,7 @@ export default function AssignmentConfirmation({
               type="button"
               onClick={handleConfirm}
               disabled={isPending}
-              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[var(--brand)] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[var(--brand)] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Check className="size-3.5" />
               {isPending
@@ -247,7 +247,7 @@ export default function AssignmentConfirmation({
                 setShowDeclineForm(true)
               }}
               disabled={isPending}
-              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--danger)]/25 bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--danger)] transition hover:bg-[var(--danger-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--danger)]/25 bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--danger)] transition hover:bg-[var(--danger-soft)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <X className="size-3.5" />
               Decline
@@ -295,7 +295,7 @@ export default function AssignmentConfirmation({
                   setError("")
                 }}
                 disabled={isPending}
-                className="min-h-10 flex-1 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-11 flex-1 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--muted)] transition hover:bg-[var(--surface)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -304,7 +304,7 @@ export default function AssignmentConfirmation({
                 type="button"
                 onClick={handleDecline}
                 disabled={isPending}
-                className="min-h-10 flex-1 rounded-lg bg-[var(--danger-action)] px-3 py-2 text-xs font-semibold text-[var(--danger-foreground)] transition hover:bg-[var(--danger-action-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-11 flex-1 rounded-lg bg-[var(--danger-action)] px-3 py-2 text-xs font-semibold text-[var(--danger-foreground)] transition hover:bg-[var(--danger-action-hover)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPending
                   ? "Saving..."
