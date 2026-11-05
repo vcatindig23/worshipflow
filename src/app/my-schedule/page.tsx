@@ -1105,7 +1105,7 @@ export default async function MySchedulePage({
                                 </div>
                                 {canRequestSwap && !requestIsOpen && !requestIsApproved && assignment.confirmation_status !== "declined" && candidates.length > 0 ? (
                                   <details className="shrink-0">
-                                    <summary className="cursor-pointer list-none rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
+                                    <summary className="flex min-h-10 cursor-pointer list-none items-center rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--background)]">
                                       Request a swap
                                     </summary>
                                     <form action={requestAssignmentSwap} className="wf-card mt-3 w-full space-y-3 p-3 sm:min-w-[300px]">
@@ -1138,7 +1138,7 @@ export default async function MySchedulePage({
                                           className="wf-input min-h-[72px] py-2"
                                         />
                                       </div>
-                                      <button type="submit" className="inline-flex h-9 w-full items-center justify-center rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
+                                      <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
                                         Send swap request
                                       </button>
                                     </form>
