@@ -4,7 +4,7 @@ import ServicePreparationChecklist from "@/app/setlists/[id]/service-preparation
 import { getServiceReadiness } from "@/lib/service-readiness"
 
 describe("service preparation overview", () => {
-  it("separates blocking essentials from optional run-of-show guidance", () => {
+  it("separates essential readiness checks from optional run-of-show guidance", () => {
     const readiness = getServiceReadiness(
       { service_date: "2026-11-08", service_time: "09:00" },
       2,
@@ -45,7 +45,7 @@ describe("service preparation overview", () => {
     )
 
     expect(markup).toContain("Service preparation overview")
-    expect(markup).toContain("Blocking essentials")
+    expect(markup).toContain("Essential readiness checks")
     expect(markup).toContain("Recommended preparation")
     expect(markup).toContain("3 of 4 essentials complete")
     expect(markup).toContain("1 unavailable")
