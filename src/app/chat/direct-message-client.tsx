@@ -93,6 +93,7 @@ export default function DirectMessageClient({
   const [draft, setDraft] = useState("")
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [reactionPickerMessageId, setReactionPickerMessageId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [connectionState, setConnectionState] = useState<"connecting" | "live" | "reconnecting">("connecting")
@@ -276,6 +277,7 @@ export default function DirectMessageClient({
   }
 
   function toggleReaction(messageId: string, emoji: string) {
+    setReactionPickerMessageId(null)
     void toggleTeamChatDirectMessageReaction(conversation.id, messageId, emoji).then((result) => {
       if (!result.success) {
         setError(result.error)
@@ -378,13 +380,14 @@ export default function DirectMessageClient({
                         <div className="group/reaction relative">
                           <button
                             type="button"
+                            onClick={() => setReactionPickerMessageId((current) => current === message.id ? null : message.id)}
                             aria-label="Add reaction"
                             title="Add reaction"
                             className="inline-flex size-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:border-[var(--brand)]/30 hover:text-[var(--brand)]"
                           >
                             <Smile className="size-3.5" />
                           </button>
-                          <div className="absolute bottom-full left-0 z-20 mb-1 hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-1.5 shadow-xl group-hover/reaction:flex group-focus-within/reaction:flex">
+                          <div className={`absolute bottom-full left-0 z-20 mb-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-1.5 shadow-xl ${reactionPickerMessageId === message.id ? "flex" : "hidden"}`}>
                             <div className="flex gap-1">
                               {REACTION_EMOJIS.map((emoji) => (
                                 <button key={emoji} type="button" onClick={() => toggleReaction(message.id, emoji)} aria-label={`React with ${emoji}`} className="flex size-8 items-center justify-center rounded-lg text-base hover:bg-[var(--surface)]">{emoji}</button>
