@@ -100,6 +100,8 @@ function AvailabilityReview({
   assignments: TeamAssignmentSummary[]
   checksAvailable: boolean
 }) {
+  if (assignments.length === 0) return null
+
   if (!checksAvailable) {
     return (
       <div className="mt-4 flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
