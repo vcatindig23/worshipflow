@@ -52,7 +52,7 @@ type InvitationRow = {
   id: string
   email: string
   role: string
-  status: string
+  status: "pending" | "accepted" | "revoked" | "expired"
   created_at: string
   expires_at: string
 }
@@ -149,10 +149,10 @@ export default async function TeamSettingsPage({
         "organization_id",
         workspace.organizationId
       )
-      .eq("status", "pending")
       .order("created_at", {
         ascending: false,
-      }),
+      })
+      .limit(30),
 
     supabase.auth.getClaims(),
   ])
@@ -388,6 +388,15 @@ export default async function TeamSettingsPage({
         </Feedback>
       ) : null}
 
+      {!canManageTeam ? (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+          <p className="text-sm font-semibold text-[var(--foreground)]">Team settings are view-only for your role</p>
+          <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+            Only a workspace Administrator can invite or revoke members, change workspace roles, or edit ministry positions. Contact an Administrator when one of those changes is needed.
+          </p>
+        </div>
+      ) : null}
+
       {teamPositionsUnavailable ? (
         <Feedback tone="warning" title="Worship-team positions unavailable">
           Members are loaded, but positions remain unavailable until the team-position database migration is applied.
@@ -414,11 +423,11 @@ export default async function TeamSettingsPage({
         <section className="wf-card p-5 sm:p-6">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">
-              Pending Invitations
+              Recent Invitations
             </h2>
 
             <p className="mt-1 text-sm text-[var(--muted)]">
-              These people have not joined yet.
+              Review invited, accepted, expired, and revoked invitation codes. New codes expire after seven days.
             </p>
           </div>
 
@@ -434,21 +443,24 @@ export default async function TeamSettingsPage({
                 }
                 createdAt={invitation.created_at}
                 expiresAt={invitation.expires_at}
+                status={invitation.status}
                 actions={
-                  <form action={revokeInvitation} className="shrink-0">
-                    <input
-                      type="hidden"
-                      name="invitationId"
-                      value={invitation.id}
-                    />
-                    <ConfirmSubmitButton title="Revoke this invitation?" description="The invitation link will stop working. You can send a new invitation later." confirmLabel="Revoke invitation"
-                      type="submit"
-                      aria-label={`Revoke invitation for ${invitation.email}`}
-                      className="inline-flex size-8 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)]/30"
-                    >
-                      <X aria-hidden="true" className="size-4" />
-                    </ConfirmSubmitButton>
-                  </form>
+                  invitation.status === "pending" && new Date(invitation.expires_at).getTime() > Date.now() ? (
+                    <form action={revokeInvitation} className="shrink-0">
+                      <input
+                        type="hidden"
+                        name="invitationId"
+                        value={invitation.id}
+                      />
+                      <ConfirmSubmitButton title="Revoke this invitation?" description="The invitation code will stop working. You can send a new invitation later." confirmLabel="Revoke invitation"
+                        type="submit"
+                        aria-label={`Revoke invitation for ${invitation.email}`}
+                        className="inline-flex size-11 items-center justify-center rounded-lg text-[var(--muted)] transition-colors hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)]/30"
+                      >
+                        <X aria-hidden="true" className="size-4" />
+                      </ConfirmSubmitButton>
+                    </form>
+                  ) : null
                 }
               />
             ))}
@@ -467,6 +479,9 @@ export default async function TeamSettingsPage({
               {canManageTeam
                 ? "Administrators can change app access and worship-team positions."
                 : "Application access and worship-team positions for your church members."}
+            </p>
+            <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+              Workspace roles control which app settings a member can manage. Ministry positions show which service assignments they are eligible for.
             </p>
 
             <p className="mt-2 text-xs font-medium text-[var(--muted)]" aria-live="polite">
@@ -605,9 +620,12 @@ export default async function TeamSettingsPage({
                           {displayName}
                         </Link>
 
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--success-soft)] px-2 py-1 text-[10px] font-semibold text-[var(--success)]">
+                          <CheckCircle2 className="size-3" />
+                          Active member
+                        </span>
                         {isCurrentUser ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-soft)] px-2 py-1 text-[10px] font-semibold text-[var(--brand)]">
-                            <CheckCircle2 className="size-3" />
                             You
                           </span>
                         ) : null}
