@@ -372,9 +372,9 @@ export default function ScheduleViewToggle({
                   {selectedServices.length > 0 ? (
                     <div className="mt-2 space-y-2">
                       {selectedServices.map((entry) => (
-                        <Link
-                          key={entry.id}
-                          href={`/setlists/${entry.id}`}
+                        <div key={entry.id} className="space-y-2">
+                          <Link
+                            href={`/setlists/${entry.id}`}
                           className="block rounded-xl border border-[var(--border)] p-3 transition hover:border-[var(--brand)] hover:bg-[var(--surface)]"
                         >
                           <div className="flex items-start justify-between gap-2">
@@ -390,8 +390,8 @@ export default function ScheduleViewToggle({
                           </p>
                           {entry.description ? <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--muted)]">{entry.description}</p> : null}
                           <span className="mt-2 block text-[11px] font-semibold text-[var(--brand)]">Open service plan</span>
-                        </Link>
-                        {entry.availabilityAssessment && !["within_weekly_hours", "not_recorded"].includes(entry.availabilityAssessment.status) ? (
+                          </Link>
+                          {entry.availabilityAssessment && !["within_weekly_hours", "not_recorded"].includes(entry.availabilityAssessment.status) ? (
                           <p className={`rounded-lg border px-3 py-2 text-[11px] leading-5 ${
                             entry.availabilityAssessment.status === "unavailable"
                               ? "border-[var(--danger)]/30 bg-[var(--danger-soft)] text-[var(--danger)]"
@@ -399,7 +399,8 @@ export default function ScheduleViewToggle({
                           }`}>
                             {entry.availabilityAssessment.label}. Review your availability before serving.
                           </p>
-                        ) : null}
+                          ) : null}
+                        </div>
                       ))}
                     </div>
                   ) : (
