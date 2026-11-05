@@ -14,10 +14,15 @@ import {
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import {
-  formatServiceTime,
   getCalendarDateRange,
   isValidServiceDate,
 } from "@/lib/service-scheduling"
+import {
+  assessMemberAvailability,
+  type MemberAvailabilityEntry,
+  type MemberAvailabilityAssessment,
+} from "@/lib/member-availability"
+import { getScheduleConflicts } from "@/lib/schedule-conflicts"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
@@ -484,6 +489,34 @@ export default async function MySchedulePage({
       )
     )
 
+  const availabilityBySetlist = new Map<string, MemberAvailabilityAssessment>()
+  if (!availabilityLoadError) {
+    for (const setlist of setlists) {
+      availabilityBySetlist.set(
+        setlist.id,
+        assessMemberAvailability(
+          availabilityEntries as MemberAvailabilityEntry[],
+          {
+            userId: workspace.userId,
+            serviceDate: setlist.service_date,
+            serviceTime: setlist.service_time,
+            serviceEndTime: null,
+            serviceTimezone: workspace.organizationTimezone,
+          }
+        )
+      )
+    }
+  }
+
+  const scheduleConflicts = getScheduleConflicts(
+    setlists.map((setlist) => ({
+      id: setlist.id,
+      name: setlist.name,
+      service_date: setlist.service_date,
+      service_time: setlist.service_time,
+    }))
+  )
+
   const pendingCount =
     setlists.reduce(
       (total, setlist) =>
@@ -515,7 +548,10 @@ export default async function MySchedulePage({
             </h1>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              Review services where you have been assigned, confirm your availability, and keep track of your worship team commitments.
+              Review your upcoming and past commitments, check availability conflicts, respond to each assigned position, and track swap requests.
+            </p>
+            <p className="mt-2 text-xs font-medium text-[var(--muted)]">
+              Service times and weekly availability use your church time zone: {workspace.organizationTimezone}.
             </p>
           </div>
 
@@ -540,7 +576,7 @@ export default async function MySchedulePage({
 
       <section
         id="availability"
-        className="wf-card p-5 shadow-sm sm:p-6"
+        className="wf-card p-4 shadow-sm sm:p-6"
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -553,6 +589,9 @@ export default async function MySchedulePage({
             </h2>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--muted)]">
               Add dates you cannot serve or set your usual weekly availability so leaders can plan assignments with better context.
+            </p>
+            <p className="mt-2 text-xs font-medium text-[var(--muted)]">
+              Weekly hours are interpreted in {workspace.organizationTimezone}. Availability conflicts appear beside the affected assignment.
             </p>
           </div>
           <span className="shrink-0 rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
@@ -682,14 +721,22 @@ export default async function MySchedulePage({
                         </h4>
                         <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
                           {entry.entry_type === "blockout"
-                            ? `${formatDate(entry.starts_on)} – ${formatDate(entry.ends_on)}`
-                            : `${(entry.weekdays ?? []).slice().sort((a, b) => a - b).map((day) => weekdayLabels[day]).join(", ")} · ${formatAvailabilityTime(entry.start_time)}–${formatAvailabilityTime(entry.end_time)}`}
+                            ? `${formatDate(entry.starts_on)} – ${formatDate(entry.ends_on)} · all day`
+                            : `${(entry.weekdays ?? []).slice().sort((a, b) => a - b).map((day) => weekdayLabels[day]).join(", ")}`}
+                        </p>
+                        {entry.entry_type === "recurring" ? (
+                          <p className="mt-1 text-xs font-semibold text-[var(--foreground)]">
+                            {formatAvailabilityTime(entry.start_time)} – {formatAvailabilityTime(entry.end_time)}
+                          </p>
+                        ) : null}
+                        <p className="mt-1 text-[10px] text-[var(--muted)]">
+                          {entry.entry_type === "recurring" ? `Weekly window · ${entry.timezone}` : `Date range recorded in ${entry.timezone}`}
                         </p>
                         {entry.reason ? <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">{entry.reason}</p> : null}
                       </div>
                       <form action={deleteAvailabilityEntry} className="shrink-0">
                         <input type="hidden" name="id" value={entry.id} />
-                        <button type="submit" aria-label={`Delete ${entry.title || "availability entry"}`} className="rounded-lg p-2 text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]">
+                        <button type="submit" aria-label={`Delete ${entry.title || "availability entry"}`} className="inline-flex size-11 items-center justify-center rounded-xl text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]">
                           <Trash2 className="size-4" />
                         </button>
                       </form>
@@ -807,7 +854,7 @@ export default async function MySchedulePage({
                 return (
                   <div
                     key={setlist.id}
-                    className="wf-card flex flex-col gap-4 p-5 transition hover:-translate-y-0.5 hover:border-[var(--brand)] hover:shadow-md"
+                    className="wf-card flex min-w-0 flex-col gap-4 p-4 transition hover:border-[var(--brand)] hover:shadow-md sm:p-5"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                       <Link
@@ -841,19 +888,19 @@ export default async function MySchedulePage({
                             </p>
                           ) : null}
 
-                          <p className="mt-3 text-xs text-[var(--muted)]">
-                            {formatDate(
-                              setlist.service_date
-                            )}
-
-                            {formatServiceTime(
-                              setlist.service_time
-                            )
-                              ? ` · ${formatServiceTime(
-                                  setlist.service_time
-                                )}`
-                              : ""}
-                          </p>
+                          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                            <span className="text-sm font-semibold text-[var(--foreground)]">
+                              {formatDate(setlist.service_date)}
+                            </span>
+                            <span className="text-sm font-semibold text-[var(--brand)]">
+                              {setlist.service_time
+                                ? `${formatAvailabilityTime(setlist.service_time)} · ${workspace.organizationTimezone}`
+                                : "Service start time not set"}
+                            </span>
+                            <span className="rounded-full bg-[var(--surface)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]">
+                              {setlist.service_date && setlist.service_date < today ? "Past assignment" : "Upcoming assignment"}
+                            </span>
+                          </div>
 
                           <div className="mt-3 flex flex-wrap gap-2">
                             {(
