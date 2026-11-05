@@ -73,7 +73,7 @@ describe("chat feature layout", () => {
     )
 
     expect(markup).toContain("Private conversation")
-    expect(markup).toContain("Start a private conversation")
+    expect(markup).toContain("Loading messages")
     expect(markup).toContain('aria-label="Attach images"')
     expect(markup).toContain('aria-label="Attach files"')
     expect(markup).toContain('aria-label="Choose emoji"')
