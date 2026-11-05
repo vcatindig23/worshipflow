@@ -68,6 +68,7 @@ describe("chat feature layout", () => {
           otherUserName: "Team Member",
         }}
         onBackToGroup={() => {}}
+        onConversationActivity={() => {}}
       />
     )
 
