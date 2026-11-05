@@ -171,7 +171,7 @@ export default function ScheduleViewToggle({
             type="button"
             onClick={() => setView("list")}
             aria-pressed={view === "list"}
-            className={`inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${view === "list" ? "bg-[var(--brand)] text-white" : "text-[var(--muted)] hover:bg-[var(--surface)]"}`}
+            className={`inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${view === "list" ? "bg-[var(--brand)] text-white" : "text-[var(--muted)] hover:bg-[var(--surface)]"}`}
           >
             <List className="size-4" /> List
           </button>
@@ -179,7 +179,7 @@ export default function ScheduleViewToggle({
             type="button"
             onClick={() => setView("calendar")}
             aria-pressed={view === "calendar"}
-            className={`inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${view === "calendar" ? "bg-[var(--brand)] text-white" : "text-[var(--muted)] hover:bg-[var(--surface)]"}`}
+            className={`inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${view === "calendar" ? "bg-[var(--brand)] text-white" : "text-[var(--muted)] hover:bg-[var(--surface)]"}`}
           >
             <CalendarDays className="size-4" /> Calendar
           </button>
@@ -206,7 +206,7 @@ export default function ScheduleViewToggle({
               <button
                 type="button"
                 onClick={goToToday}
-                className="h-9 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                className="min-h-11 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface)]"
               >
                 Today
               </button>
@@ -214,7 +214,7 @@ export default function ScheduleViewToggle({
                 type="button"
                 aria-label="Previous month"
                 onClick={() => changeMonth(-1)}
-                className="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                className="inline-flex size-11 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--foreground)] transition hover:bg-[var(--surface)]"
               >
                 <ChevronLeft className="size-4" />
               </button>
@@ -222,7 +222,7 @@ export default function ScheduleViewToggle({
                 type="button"
                 aria-label="Next month"
                 onClick={() => changeMonth(1)}
-                className="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--foreground)] transition hover:bg-[var(--surface)]"
+                className="inline-flex size-11 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--foreground)] transition hover:bg-[var(--surface)]"
               >
                 <ChevronRight className="size-4" />
               </button>
@@ -300,10 +300,14 @@ export default function ScheduleViewToggle({
                             key={entry.id}
                             href={`/setlists/${entry.id}`}
                             title={entry.name}
-                            className="block truncate rounded-md border border-[var(--brand)]/20 bg-[var(--brand-soft)] px-1.5 py-1 text-[9px] font-semibold leading-3.5 text-[var(--foreground)] transition hover:border-[var(--brand)] sm:text-[11px] sm:leading-4"
+                            className="block truncate rounded-md border border-[var(--brand)]/20 bg-[var(--brand-soft)] px-1 py-1 text-center text-[9px] font-semibold leading-3.5 text-[var(--foreground)] transition hover:border-[var(--brand)] sm:px-1.5 sm:text-left sm:text-[11px] sm:leading-4"
                           >
-                            {entry.service_time ? <span className="hidden sm:inline">{displayTime(entry.service_time)} </span> : null}
-                            {entry.name}
+                            <span className="sm:hidden">
+                              {entry.service_time ? displayTime(entry.service_time) : "Service"}
+                            </span>
+                            <span className="hidden sm:inline">
+                              {entry.service_time ? `${displayTime(entry.service_time)} · ` : ""}{entry.name}
+                            </span>
                           </Link>
                         ))}
                         {dayServices.length > 2 ? (
@@ -355,11 +359,14 @@ export default function ScheduleViewToggle({
                             <span className="text-sm font-semibold text-[var(--foreground)]">{entry.name}</span>
                             <span className="shrink-0 rounded-full bg-[var(--surface)] px-2 py-1 text-[9px] font-semibold text-[var(--muted)]">{statusLabel(entry.status)}</span>
                           </div>
-                          <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[var(--muted)]">
+                          <p className="mt-1 inline-flex flex-wrap items-center gap-1.5 text-xs font-semibold text-[var(--brand)]">
                             <Clock3 className="size-3.5" /> {displayTime(entry.service_time)}
                           </p>
+                          <p className="mt-1 text-[10px] text-[var(--muted)]">
+                            {timeZone} · {entry.service_date && entry.service_date < today ? "Past assignment" : "Upcoming assignment"}
+                          </p>
                           {entry.description ? <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--muted)]">{entry.description}</p> : null}
-                          <span className="mt-2 block text-[11px] font-semibold text-[var(--brand)]">Open service plan</span>
+                          <span className="mt-2 inline-flex min-h-10 items-center text-[11px] font-semibold text-[var(--brand)]">Open service plan</span>
                         </Link>
                       ))}
                     </div>
@@ -426,7 +433,7 @@ export default function ScheduleViewToggle({
                         <label htmlFor="calendarBlockoutReason" className="mb-1.5 block text-xs font-medium text-[var(--foreground)]">Note (optional)</label>
                         <Textarea id="calendarBlockoutReason" name="reason" maxLength={500} rows={2} placeholder="Add a note for your team" className="min-h-[72px] py-2 text-xs" />
                       </div>
-                      <button type="submit" className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
+                      <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
                         <Plus className="size-3.5" /> Save unavailable date
                       </button>
                     </form>
@@ -435,7 +442,7 @@ export default function ScheduleViewToggle({
 
                 <Link
                   href="#availability"
-                  className="inline-flex text-xs font-semibold text-[var(--brand)] hover:underline"
+                  className="inline-flex min-h-11 items-center text-xs font-semibold text-[var(--brand)] hover:underline"
                 >
                   Manage all availability settings
                 </Link>
@@ -443,7 +450,7 @@ export default function ScheduleViewToggle({
             </aside>
           </div>
           <div className="border-t border-[var(--border)] px-4 py-3 text-[10px] text-[var(--muted)] sm:px-6 sm:text-xs">
-            Calendar dates use {timeZone}. Select a day to review its services and availability; select a service to open its plan.
+            Dates, service start times, and weekly availability windows use {timeZone}. Google Calendar exports use this time zone; timed service entries are exported as one-hour events.
           </div>
         </section>
       )}
