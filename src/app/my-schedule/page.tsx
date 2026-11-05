@@ -10,6 +10,7 @@ import {
   ListMusic,
   Plus,
   Trash2,
+  AlertTriangle,
 } from "lucide-react"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
@@ -20,6 +21,11 @@ import {
 } from "@/lib/service-scheduling"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { getTeamPositionLabel } from "@/lib/team-positions"
+import {
+  assessMemberAvailability,
+  type MemberAvailabilityAssessment,
+  type MemberAvailabilityEntry,
+} from "@/lib/member-availability"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import AssignmentConfirmation from "./assignment-confirmation"
 import ScheduleViewToggle from "./schedule-view-toggle"
@@ -51,6 +57,7 @@ type Setlist = {
   service_date: string | null
   service_time: string | null
   status: "draft" | "published" | "archived"
+  availabilityAssessment: MemberAvailabilityAssessment | null
 }
 
 type WorkspaceMember = {
@@ -71,17 +78,10 @@ type Period =
   | "past"
   | "all"
 
-type AvailabilityEntry = {
+type AvailabilityEntry = MemberAvailabilityEntry & {
   id: string
-  entry_type: "blockout" | "recurring"
   title: string | null
   reason: string | null
-  starts_on: string | null
-  ends_on: string | null
-  weekdays: number[] | null
-  start_time: string | null
-  end_time: string | null
-  timezone: string
 }
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -133,9 +133,10 @@ function formatDate(
     "en-PH",
     {
       dateStyle: "full",
+      timeZone: "UTC",
     }
   ).format(
-    new Date(`${value}T00:00:00`)
+    new Date(`${value}T12:00:00Z`)
   )
 }
 
@@ -158,6 +159,7 @@ function getGoogleCalendarUrl(
     ...(setlist.description
       ? [setlist.description]
       : []),
+    `Service time zone: ${timeZone}`,
   ].join("\n")
 
   const parameters =
@@ -257,7 +259,7 @@ export default async function MySchedulePage({
     error: availabilityLoadError,
   } = await supabase
     .from("member_availability")
-    .select("id, entry_type, title, reason, starts_on, ends_on, weekdays, start_time, end_time, timezone")
+    .select("id, user_id, entry_type, title, reason, starts_on, ends_on, weekdays, start_time, end_time, timezone")
     .eq("organization_id", workspace.organizationId)
     .eq("user_id", workspace.userId)
     .order("created_at", { ascending: false })
@@ -420,6 +422,15 @@ export default async function MySchedulePage({
             serviceTimeAvailable
               ? setlist.service_time
               : null,
+          availabilityAssessment: availabilityLoadError
+            ? null
+            : assessMemberAvailability(availabilityEntries, {
+                userId: workspace.userId,
+                serviceDate: setlist.service_date,
+                serviceTime: serviceTimeAvailable ? setlist.service_time : null,
+                serviceEndTime: null,
+                serviceTimezone: workspace.organizationTimezone,
+              }),
         })
       ) as Setlist[]
   }
@@ -516,6 +527,10 @@ export default async function MySchedulePage({
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
               Review services where you have been assigned, confirm your availability, and keep track of your worship team commitments.
+            </p>
+            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted)]">
+              <Clock3 className="size-3.5" />
+              Service times and weekly availability use {workspace.organizationTimezone}.
             </p>
           </div>
 
@@ -743,6 +758,7 @@ export default async function MySchedulePage({
           service_date: setlist.service_date,
           service_time: setlist.service_time,
           status: setlist.status,
+          availabilityAssessment: setlist.availabilityAssessment,
         }))}
         availabilityEntries={availabilityEntries}
         today={today}
@@ -841,19 +857,24 @@ export default async function MySchedulePage({
                             </p>
                           ) : null}
 
-                          <p className="mt-3 text-xs text-[var(--muted)]">
-                            {formatDate(
-                              setlist.service_date
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <time
+                              dateTime={setlist.service_date ?? undefined}
+                              className="text-sm font-semibold text-[var(--foreground)]"
+                            >
+                              {formatDate(setlist.service_date)}
+                            </time>
+                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--surface)] px-2.5 py-1.5 text-xs font-semibold text-[var(--foreground)]">
+                              <Clock3 className="size-3.5 text-[var(--muted)]" />
+                              {formatServiceTime(setlist.service_time) ?? "Time not set"}
+                              <span className="font-normal text-[var(--muted)]">{workspace.organizationTimezone}</span>
+                            </span>
+                            {setlist.service_date && setlist.service_date < today ? (
+                              <span className="wf-status wf-status-neutral">Past assignment</span>
+                            ) : (
+                              <span className="wf-status wf-status-success">Upcoming</span>
                             )}
-
-                            {formatServiceTime(
-                              setlist.service_time
-                            )
-                              ? ` · ${formatServiceTime(
-                                  setlist.service_time
-                                )}`
-                              : ""}
-                          </p>
+                          </div>
 
                           <div className="mt-3 flex flex-wrap gap-2">
                             {(
@@ -908,51 +929,48 @@ export default async function MySchedulePage({
                       />
                     </div>
 
-                    {assignmentsForService.length >
-                    1 ? (
-                      <div className="border-t border-[var(--border)] pt-3">
-                        <p className="text-[11px] font-medium text-[var(--muted)]">
-                          You have{" "}
-                          {
-                            assignmentsForService.length
-                          }{" "}
-                          assigned positions for this service.
-                        </p>
-
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {assignmentsForService.map(
-                            (
-                              assignment
-                            ) => (
-                              <span
-                                key={
-                                  assignment.id
-                                }
-                                className={`wf-status ${
-                                  assignment.confirmation_status === "confirmed"
-                                    ? "wf-status-success"
-                                    : assignment.confirmation_status === "declined"
-                                      ? "wf-status-danger"
-                                      : "wf-status-warning"
-                                }`}
-                              >
-                                {getTeamPositionLabel(
-                                  assignment.team_position
-                                )}
-                                {" · "}
-                                {assignment.confirmation_status ===
-                                "confirmed"
-                                  ? "Confirmed"
-                                  : assignment.confirmation_status ===
-                                      "declined"
-                                    ? "Declined"
-                                    : "Pending"}
-                              </span>
-                            )
-                          )}
+                    {setlist.availabilityAssessment &&
+                    setlist.availabilityAssessment.status !== "within_weekly_hours" ? (
+                      <div
+                        role="status"
+                        className={`flex items-start gap-2 rounded-xl border px-3 py-2.5 ${
+                          setlist.availabilityAssessment.status === "unavailable"
+                            ? "border-[var(--danger)]/25 bg-[var(--danger-soft)] text-[var(--danger)]"
+                            : setlist.availabilityAssessment.status === "outside_weekly_hours" ||
+                                setlist.availabilityAssessment.status === "needs_schedule"
+                              ? "border-[var(--warning)]/30 bg-[var(--warning-soft)] text-[var(--warning)]"
+                              : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
+                        }`}
+                      >
+                        <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold">{setlist.availabilityAssessment.label}</p>
+                          <p className="mt-0.5 text-[11px] leading-5">
+                            {setlist.availabilityAssessment.status === "unavailable"
+                              ? "This service falls within a date you marked unavailable."
+                              : setlist.availabilityAssessment.status === "outside_weekly_hours"
+                                ? "The service time falls outside your recorded weekly availability."
+                                : setlist.availabilityAssessment.status === "needs_schedule"
+                                  ? "Add a service time to compare this assignment with your weekly hours."
+                                  : "You have not recorded availability details for this service date."}
+                          </p>
                         </div>
                       </div>
                     ) : null}
+
+                    <div className="grid gap-2 border-t border-[var(--border)] pt-3">
+                      {assignmentsForService.map((assignment) => (
+                        <AssignmentConfirmation
+                          key={assignment.id}
+                          assignmentId={assignment.id}
+                          positionLabel={getTeamPositionLabel(assignment.team_position)}
+                          status={assignment.confirmation_status}
+                          responseNote={assignment.response_note}
+                          respondedAt={assignment.responded_at}
+                          timeZone={workspace.organizationTimezone}
+                        />
+                      ))}
+                    </div>
 
                     {swapFeatureAvailable && assignmentsForService.length > 0 && setlist.status !== "archived" && (!setlist.service_date || setlist.service_date >= today) && period !== "past" ? (
                       <div className="space-y-3 border-t border-[var(--border)] pt-3">
