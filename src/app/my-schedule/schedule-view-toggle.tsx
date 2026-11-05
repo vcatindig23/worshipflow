@@ -453,7 +453,7 @@ export default function ScheduleViewToggle({
                         <label htmlFor="calendarBlockoutReason" className="mb-1.5 block text-xs font-medium text-[var(--foreground)]">Note (optional)</label>
                         <Textarea id="calendarBlockoutReason" name="reason" maxLength={500} rows={2} placeholder="Add a note for your team" className="min-h-[72px] py-2 text-xs" />
                       </div>
-                      <button type="submit" className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
+                      <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-3 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]">
                         <Plus className="size-3.5" /> Save unavailable date
                       </button>
                     </form>
