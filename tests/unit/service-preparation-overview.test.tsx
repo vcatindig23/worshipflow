@@ -47,7 +47,7 @@ describe("service preparation overview", () => {
     expect(markup).toContain("Service preparation overview")
     expect(markup).toContain("Blocking essentials")
     expect(markup).toContain("Recommended preparation")
-    expect(markup).toContain("2 of 4 essentials complete")
+    expect(markup).toContain("3 of 4 essentials complete")
     expect(markup).toContain("1 unavailable")
     expect(markup).toContain("Alex")
     expect(markup).toContain("Drummer")
