@@ -324,10 +324,12 @@ export default async function MySchedulePage({
           .in("assignment_id", assignmentIds)
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [], error: null }),
-    supabase
-      .from("setlists")
-      .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time")
-      .eq("organization_id", workspace.organizationId),
+    setlistIds.length > 0
+      ? supabase
+          .from("setlists")
+          .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time")
+          .eq("organization_id", workspace.organizationId)
+      : Promise.resolve({ data: [], error: null }),
   ])
 
   const allSchedules = (allSchedulesResult.data ?? []) as SetlistSchedule[]
@@ -795,6 +797,7 @@ export default async function MySchedulePage({
           service_time: setlist.service_time,
           status: setlist.status,
           availabilityAssessment: setlist.availabilityAssessment,
+          scheduleConflictCount: setlist.scheduleConflicts?.length ?? null,
         }))}
         availabilityEntries={availabilityEntries}
         today={today}
