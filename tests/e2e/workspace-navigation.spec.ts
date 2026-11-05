@@ -15,6 +15,7 @@ test("desktop navigation separates workspace work from management", async ({ pag
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto("/e2e/workspace-navigation")
 
+  await page.locator("#workspace-sidebar").hover()
   const workspaceNav = page.getByRole("navigation", { name: "Workspace navigation" })
   const managementNav = page.getByRole("navigation", { name: "Workspace management" })
 
@@ -57,13 +58,14 @@ test("desktop sidebar expands on hover and returns to the logo rail on pointer l
   await expect(sidebar).toHaveAttribute("data-state", "collapsed")
   await expect(sidebar).toHaveAttribute("data-collapsible", "icon")
   await expect(sidebar).toHaveCSS("width", "76px")
-  await expect(sidebar.getByRole("link", { name: "Songs" })).toHaveAttribute(
-    "aria-label",
-    "Songs"
-  )
+  await expect(sidebar.getByRole("navigation", { name: "Workspace navigation" })).toBeHidden()
 
   await sidebar.hover()
   await expect(sidebar).toHaveAttribute("data-state", "expanded")
+  await expect(sidebar.getByRole("link", { name: "Songs" })).toHaveAttribute(
+    "aria-label",
+    undefined
+  )
   await expect(sidebar).toHaveCSS("width", "264px")
   await expect(sidebar.getByRole("link", { name: "Songs" })).toBeVisible()
 
