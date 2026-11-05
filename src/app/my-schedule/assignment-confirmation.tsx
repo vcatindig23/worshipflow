@@ -20,6 +20,7 @@ type AssignmentConfirmationProps = {
   responseNote: string | null
   respondedAt: string | null
   timeZone: string
+  positionLabel: string
 }
 
 function formatResponseDate(
@@ -49,6 +50,7 @@ export default function AssignmentConfirmation({
   responseNote,
   respondedAt,
   timeZone,
+  positionLabel,
 }: AssignmentConfirmationProps) {
   const [
     currentStatus,
@@ -85,6 +87,8 @@ export default function AssignmentConfirmation({
     startTransition,
   ] = useTransition()
 
+  const [savedFeedback, setSavedFeedback] = useState("")
+
   const responseDate = currentRespondedAt
     ? formatResponseDate(
         currentRespondedAt,
@@ -95,6 +99,7 @@ export default function AssignmentConfirmation({
 
   function handleConfirm() {
     setError("")
+    setSavedFeedback("")
 
     startTransition(async () => {
       const result =
@@ -115,11 +120,13 @@ export default function AssignmentConfirmation({
       )
       setShowDeclineForm(false)
       setDeclineNote("")
+      setSavedFeedback("Confirmation saved. Your worship leader can now see your response.")
     })
   }
 
   function handleDecline() {
     setError("")
+    setSavedFeedback("")
 
     startTransition(async () => {
       const result =
@@ -142,6 +149,7 @@ export default function AssignmentConfirmation({
         new Date().toISOString()
       )
       setShowDeclineForm(false)
+      setSavedFeedback("Decline saved. Your worship leader can begin arranging coverage.")
     })
   }
 
@@ -157,9 +165,13 @@ export default function AssignmentConfirmation({
           <Check className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold">Confirmed</p>
+          <p className="text-xs font-semibold">{positionLabel} · Confirmed</p>
           {responseDate ? (
-            <p className="mt-0.5 text-[11px]">{responseDate}</p>
+            <p className="mt-0.5 text-[11px]">Saved {responseDate}</p>
+          ) : null}
+          <p className="mt-1 text-[11px] leading-5">Your worship leader can see that you are available to serve.</p>
+          {savedFeedback ? (
+            <p className="mt-1 text-[11px] font-semibold" aria-live="polite">{savedFeedback}</p>
           ) : null}
         </div>
       </div>
@@ -178,9 +190,13 @@ export default function AssignmentConfirmation({
           <X className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold">Declined</p>
+          <p className="text-xs font-semibold">{positionLabel} · Declined</p>
           {responseDate ? (
-            <p className="mt-0.5 text-[11px]">{responseDate}</p>
+            <p className="mt-0.5 text-[11px]">Saved {responseDate}</p>
+          ) : null}
+          <p className="mt-1 text-[11px] leading-5">Your worship leader can begin arranging coverage for this position.</p>
+          {savedFeedback ? (
+            <p className="mt-1 text-[11px] font-semibold" aria-live="polite">{savedFeedback}</p>
           ) : null}
           {currentResponseNote ? (
             <div className="mt-3 rounded-lg border border-[var(--danger)]/20 bg-[var(--card)]/70 px-3 py-2">
@@ -203,9 +219,9 @@ export default function AssignmentConfirmation({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold">Pending confirmation</p>
+          <p className="text-xs font-semibold">{positionLabel} · Pending confirmation</p>
           <p className="mt-0.5 text-[11px]">
-            Please confirm your assignment.
+            Your response has not been saved yet. Confirm or decline this position.
           </p>
         </div>
       </div>
