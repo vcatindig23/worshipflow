@@ -124,9 +124,11 @@ export function Sidebar({
   className = "",
   children,
   style,
+  onMouseEnter,
+  onMouseLeave,
   ...props
 }: SidebarProps) {
-  const { open } = useSidebar()
+  const { open, setOpen } = useSidebar()
   const collapsed = !open && collapsible === "icon"
   const offcanvas = !open && collapsible === "offcanvas"
 
@@ -155,6 +157,14 @@ export function Sidebar({
             : "translateX(100%)"
           : undefined,
         ...style,
+      }}
+      onMouseEnter={(event) => {
+        onMouseEnter?.(event)
+        if (!event.defaultPrevented && collapsible === "icon") setOpen(true)
+      }}
+      onMouseLeave={(event) => {
+        onMouseLeave?.(event)
+        if (!event.defaultPrevented && collapsible === "icon") setOpen(false)
       }}
       {...props}
     >
