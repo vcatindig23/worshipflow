@@ -56,12 +56,12 @@ export function formatServiceTime(value: string | null) {
     return null
   }
 
-  const [hour, minute] = value.split(":").map(Number)
-  const date = new Date()
-  date.setHours(hour, minute, 0, 0)
+  const match = /^([01]\\d|2[0-3]):([0-5]\\d)/.exec(value)
+  if (!match) return null
 
-  return new Intl.DateTimeFormat("en-PH", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date)
+  const hour = Number(match[1])
+  const minute = Number(match[2])
+  const suffix = hour >= 12 ? "PM" : "AM"
+
+  return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${suffix}`
 }
