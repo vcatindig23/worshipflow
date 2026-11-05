@@ -590,6 +590,9 @@ export default async function SetlistPage({
   const unavailableAssignmentCount = teamAssignmentsWithAvailability.filter(
     (assignment) => assignment.availability?.status === "unavailable"
   ).length
+  const outsideHoursAssignmentCount = teamAssignmentsWithAvailability.filter(
+    (assignment) => assignment.availability?.status === "outside_weekly_hours"
+  ).length
   const publishReadinessWarnings = [
     !readiness.hasSchedule ? "The service date or start time is missing" : null,
     !readiness.hasSongs ? "No songs have been added" : null,
@@ -602,6 +605,9 @@ export default async function SetlistPage({
       : null,
     availabilityChecksAvailable && unavailableAssignmentCount > 0
       ? `${unavailableAssignmentCount} assigned member(s) have marked time off`
+      : null,
+    availabilityChecksAvailable && outsideHoursAssignmentCount > 0
+      ? `${outsideHoursAssignmentCount} assigned member(s) are outside their usual available hours`
       : null,
   ].filter((item): item is string => Boolean(item))
   const publishRecommendations = [
