@@ -30,6 +30,7 @@ type ScheduleEntry = {
     status: "unavailable" | "outside_weekly_hours" | "within_weekly_hours" | "not_recorded" | "needs_schedule"
     label: string
   } | null
+  scheduleConflictCount: number | null
 }
 
 type Period = "upcoming" | "past" | "all"
@@ -276,6 +277,9 @@ export default function ScheduleViewToggle({
                   const hasUnavailableAssignment = dayServices.some(
                     (entry) => entry.availabilityAssessment?.status === "unavailable"
                   )
+                  const hasScheduleConflict = dayServices.some(
+                    (entry) => (entry.scheduleConflictCount ?? 0) > 0
+                  )
                   const hasAvailabilityWarning = dayServices.some((entry) =>
                     entry.availabilityAssessment &&
                     ["unavailable", "outside_weekly_hours", "needs_schedule"].includes(entry.availabilityAssessment.status)
@@ -311,6 +315,9 @@ export default function ScheduleViewToggle({
                               className={`size-2 rounded-full ${hasUnavailableAssignment ? "bg-[var(--danger)]" : "bg-[var(--warning)]"}`}
                             />
                           ) : null}
+                          {hasScheduleConflict ? (
+                            <span title="Overlapping service or rehearsal" aria-label="Overlapping service or rehearsal" className="size-2 rounded-full bg-[var(--warning)]" />
+                          ) : null}
                         </div>
                       </div>
 
@@ -324,11 +331,13 @@ export default function ScheduleViewToggle({
                             className={`block truncate rounded-md border px-1.5 py-1 text-[9px] font-semibold leading-3.5 transition hover:border-[var(--brand)] sm:text-[11px] sm:leading-4 ${
                               entry.availabilityAssessment?.status === "unavailable"
                                 ? "border-[var(--danger)]/40 bg-[var(--danger-soft)] text-[var(--danger)]"
-                                : entry.availabilityAssessment && ["outside_weekly_hours", "needs_schedule"].includes(entry.availabilityAssessment.status)
+                                : entry.scheduleConflictCount && entry.scheduleConflictCount > 0
                                   ? "border-[var(--warning)]/40 bg-[var(--warning-soft)] text-[var(--warning)]"
-                                  : entry.service_date && entry.service_date < today
-                                    ? "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
-                                    : "border-[var(--brand)]/20 bg-[var(--brand-soft)] text-[var(--foreground)]"
+                                  : entry.availabilityAssessment && ["outside_weekly_hours", "needs_schedule"].includes(entry.availabilityAssessment.status)
+                                    ? "border-[var(--warning)]/40 bg-[var(--warning-soft)] text-[var(--warning)]"
+                                    : entry.service_date && entry.service_date < today
+                                      ? "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
+                                      : "border-[var(--brand)]/20 bg-[var(--brand-soft)] text-[var(--foreground)]"
                             }`}
                           >
                             {entry.service_time ? <span className="hidden sm:inline">{displayTime(entry.service_time)} </span> : null}
