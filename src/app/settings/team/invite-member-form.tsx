@@ -117,7 +117,7 @@ export default function InviteMemberForm() {
       </div>
 
       {state.error ? (
-        <Feedback tone="error" title="Invitation could not be created">
+        <Feedback tone="error" title="Invitation not sent">
           {state.error}
         </Feedback>
       ) : null}
