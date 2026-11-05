@@ -58,13 +58,21 @@ test("desktop sidebar expands on hover and returns to the logo rail on pointer l
   await expect(sidebar).toHaveAttribute("data-state", "collapsed")
   await expect(sidebar).toHaveAttribute("data-collapsible", "icon")
   await expect(sidebar).toHaveCSS("width", "76px")
-  await expect(sidebar.getByRole("navigation", { name: "Workspace navigation" })).toBeHidden()
+
+  const workspaceNav = sidebar.getByRole("navigation", { name: "Workspace navigation" })
+  await expect(workspaceNav).toBeVisible()
+
+  for (const [label] of primaryDestinations) {
+    const link = workspaceNav.getByRole("link", { name: label })
+    await expect(link).toBeVisible()
+    await expect(link).toHaveAttribute("aria-label", label)
+    await expect(link.locator("svg")).toBeVisible()
+  }
 
   await sidebar.hover()
   await expect(sidebar).toHaveAttribute("data-state", "expanded")
-  await expect(sidebar.getByRole("link", { name: "Songs" })).toBeVisible()
   await expect(sidebar).toHaveCSS("width", "264px")
-  await expect(sidebar.getByRole("link", { name: "Songs" })).toBeVisible()
+  await expect(workspaceNav.getByRole("link", { name: "Songs" })).toBeVisible()
 
   await page.locator("header").hover()
   await expect(sidebar).toHaveAttribute("data-state", "collapsed")
