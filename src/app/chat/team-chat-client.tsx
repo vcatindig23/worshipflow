@@ -364,6 +364,7 @@ export default function TeamChatClient({
   const [activeDirectConversation, setActiveDirectConversation] = useState<TeamChatDirectConversation | null>(null)
   const [isOpeningDirect, startOpeningDirect] = useTransition()
   const [messageReactions, setMessageReactions] = useState<Record<string, TeamChatReactionSummary[]>>({})
+  const [reactionPickerMessageId, setReactionPickerMessageId] = useState<string | null>(null)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [isPinningMessage, startPinningMessage] = useTransition()
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
@@ -401,6 +402,7 @@ export default function TeamChatClient({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const forceScrollToBottomRef = useRef(false)
   const knownMessageIdsRef = useRef(new Set(initialMessages.map((message) => message.id)))
+  const messagesRef = useRef(messages)
   const previousScrollPositionRef = useRef<{
     scrollHeight: number
     scrollTop: number
@@ -423,6 +425,10 @@ export default function TeamChatClient({
   )
 
   useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
+
+  useEffect(() => {
     if (!messageIdsKey) {
       setMessageReactions({})
       return
@@ -436,8 +442,10 @@ export default function TeamChatClient({
   }, [messageIdsKey])
 
   useEffect(() => {
-    void markTeamChatNotificationsRead()
-  }, [organizationId])
+    if (!activeDirectConversation) {
+      void markTeamChatNotificationsRead()
+    }
+  }, [activeDirectConversation, organizationId])
 
   useEffect(() => {
     const paths = Array.from(new Set(
@@ -676,6 +684,7 @@ export default function TeamChatClient({
             return
           }
 
+          knownMessageIdsRef.current.delete(messageId)
           setMessages((current) =>
             current.filter((message) => message.id !== messageId)
           )
@@ -693,7 +702,7 @@ export default function TeamChatClient({
           filter: `organization_id=eq.${organizationId}`,
         },
         () => {
-          const ids = messages.map((message) => message.id)
+          const ids = messagesRef.current.map((message) => message.id)
           void loadTeamChatMessageReactions(ids).then((result) => {
             if (result.success) setMessageReactions(result.reactions)
           })
@@ -885,6 +894,7 @@ export default function TeamChatClient({
   }
 
   function handleAddReaction(messageId: string, emoji: string) {
+    setReactionPickerMessageId(null)
     void toggleTeamChatMessageReaction(messageId, emoji).then((result) => {
       if (!result.success) {
         setError(result.error)
@@ -1803,10 +1813,10 @@ export default function TeamChatClient({
                             </button>
                           ))}
                           <div className="group/reaction relative">
-                            <button type="button" aria-label="Add reaction" title="Add reaction" className="inline-flex size-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:border-[var(--brand)]/30 hover:text-[var(--brand)]">
+                            <button type="button" onClick={() => setReactionPickerMessageId((current) => current === message.id ? null : message.id)} aria-label="Add reaction" title="Add reaction" className="inline-flex size-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:border-[var(--brand)]/30 hover:text-[var(--brand)]">
                               <Smile className="size-3.5" />
                             </button>
-                            <div className="absolute bottom-full left-0 z-20 mb-1 hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-1.5 shadow-xl group-hover/reaction:flex group-focus-within/reaction:flex">
+                            <div className={`absolute bottom-full left-0 z-20 mb-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-1.5 shadow-xl ${reactionPickerMessageId === message.id ? "flex" : "hidden"}`}>
                               <div className="flex gap-1">
                                 {CHAT_REACTION_EMOJIS.map((emoji) => (
                                   <button key={emoji} type="button" onClick={() => handleAddReaction(message.id, emoji)} aria-label={`React with ${emoji}`} className="flex size-8 items-center justify-center rounded-lg text-base hover:bg-[var(--surface)]">{emoji}</button>
