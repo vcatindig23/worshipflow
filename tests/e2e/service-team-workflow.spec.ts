@@ -407,7 +407,7 @@ test.describe("isolated multi-member service workflow", () => {
       await requester.goto("/my-schedule")
       await expect(requester.getByText(serviceName, { exact: true })).toBeVisible()
       await expectResponsiveLayout(requester, "My Schedule compact phone", "top")
-      await expect(requester.getByText("Asia/Manila", { exact: true })).toBeVisible()
+      await expect(requester.getByText(/Service times and weekly availability use/)).toBeVisible()
       await expect(requester.getByText("Scheduling conflicts · 1", { exact: true })).toBeVisible()
       await expect(requester.getByText("Service overlaps rehearsal", { exact: true })).toBeVisible()
       await expect(requester.getByRole("link", { name: "Review rehearsal", exact: true })).toBeVisible()
