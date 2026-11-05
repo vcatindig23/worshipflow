@@ -33,6 +33,7 @@ import {
   Wifi,
   X,
   WifiOff,
+  Smile,
 } from "lucide-react"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import {
@@ -43,7 +44,11 @@ import {
   searchTeamChatMessages,
   sendTeamChatMessageWithAttachments,
   setTeamChatMessagePinned,
+  createTeamChatDirectConversation,
+  loadTeamChatMessageReactions,
+  toggleTeamChatMessageReaction,
 } from "./actions"
+import DirectMessageClient from "./direct-message-client"
 
 function currentTimeMs() {
   return Date.now()
@@ -78,6 +83,30 @@ export type TeamChatMember = {
   role: string
 }
 
+export type TeamChatDirectConversation = {
+  id: string
+  otherUserId: string
+  otherUserName: string
+  lastMessageAt: string | null
+  lastMessagePreview: string
+}
+
+type TeamChatReactionSummary = {
+  emoji: string
+  count: number
+  userReacted: boolean
+}
+
+const CHAT_REACTION_EMOJIS = ["👍", "❤️", "😂", "🙏", "👏", "🔥", "🎉", "😮"]
+const CHAT_COMPOSER_EMOJIS = [
+  "😀", "😃", "😄", "😁", "😊", "🥰", "😍", "😘",
+  "😂", "🤣", "🥲", "😉", "😎", "🤔", "😮", "😢",
+  "🙏", "👏", "🙌", "👍", "👎", "❤️", "💛", "💚",
+  "💙", "💜", "🔥", "🎉", "✨", "💯", "☀️", "🌿",
+]
+const CHAT_IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/gif"
+const CHAT_FILE_ACCEPT = ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.mp3,.m4a,.wav,.mp4,.webm"
+
 type TeamChatClientProps = {
   organizationId: string
   organizationTimezone: string
@@ -85,6 +114,7 @@ type TeamChatClientProps = {
   canPinMessages: boolean
   initialMessages: TeamChatMessage[]
   initialPinnedMessages: TeamChatMessage[]
+  initialDirectConversations: TeamChatDirectConversation[]
   members: TeamChatMember[]
 }
 
@@ -321,6 +351,7 @@ export default function TeamChatClient({
   canPinMessages,
   initialMessages,
   initialPinnedMessages,
+  initialDirectConversations,
   members,
 }: TeamChatClientProps) {
   const chatTimeZone = useMemo(
@@ -329,6 +360,12 @@ export default function TeamChatClient({
   )
   const [messages, setMessages] = useState(initialMessages)
   const [pinnedMessages, setPinnedMessages] = useState(initialPinnedMessages)
+  const [directConversations, setDirectConversations] = useState(initialDirectConversations)
+  const [activeDirectConversation, setActiveDirectConversation] = useState<TeamChatDirectConversation | null>(null)
+  const [isOpeningDirect, startOpeningDirect] = useTransition()
+  const [messageReactions, setMessageReactions] = useState<Record<string, TeamChatReactionSummary[]>>({})
+  const [reactionPickerMessageId, setReactionPickerMessageId] = useState<string | null>(null)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [isPinningMessage, startPinningMessage] = useTransition()
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const [newMessageCount, setNewMessageCount] = useState(0)
@@ -347,6 +384,7 @@ export default function TeamChatClient({
   const [draft, setDraft] = useState("")
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [attachmentUrls, setAttachmentUrls] = useState<Record<string, string>>({})
+  const imageInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [mentionedUserIds, setMentionedUserIds] = useState<string[]>([])
   const [mentionQuery, setMentionQuery] = useState<string | null>(null)
@@ -364,6 +402,7 @@ export default function TeamChatClient({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const forceScrollToBottomRef = useRef(false)
   const knownMessageIdsRef = useRef(new Set(initialMessages.map((message) => message.id)))
+  const messagesRef = useRef(messages)
   const previousScrollPositionRef = useRef<{
     scrollHeight: number
     scrollTop: number
@@ -380,10 +419,30 @@ export default function TeamChatClient({
     () => new Map(members.map((member) => [member.id, member.displayName])),
     [members]
   )
+  const messageIdsKey = useMemo(
+    () => messages.map((message) => message.id).join(","),
+    [messages]
+  )
 
   useEffect(() => {
-    void markTeamChatNotificationsRead()
-  }, [organizationId])
+    messagesRef.current = messages
+  }, [messages])
+
+  useEffect(() => {
+    if (!messageIdsKey) return
+    let cancelled = false
+    const ids = messageIdsKey.split(",").filter(Boolean)
+    void loadTeamChatMessageReactions(ids).then((result) => {
+      if (!cancelled && result.success) setMessageReactions(result.reactions)
+    })
+    return () => { cancelled = true }
+  }, [messageIdsKey])
+
+  useEffect(() => {
+    if (!activeDirectConversation) {
+      void markTeamChatNotificationsRead()
+    }
+  }, [activeDirectConversation, organizationId])
 
   useEffect(() => {
     const paths = Array.from(new Set(
@@ -502,13 +561,17 @@ export default function TeamChatClient({
           if (row.user_id === currentUserId) {
             forceScrollToBottomRef.current = true
             setNewMessageCount(0)
-          } else if (isNearBottom) {
-            forceScrollToBottomRef.current = true
-            setNewMessageCount(0)
+          } else if (!activeDirectConversation) {
+            if (isNearBottom) {
+              forceScrollToBottomRef.current = true
+              setNewMessageCount(0)
+            } else {
+              setNewMessageCount((count) => count + 1)
+            }
             void markTeamChatNotificationsRead()
           } else {
+            // Do not mark group messages as read while a private conversation is open.
             setNewMessageCount((count) => count + 1)
-            void markTeamChatNotificationsRead()
           }
 
           setMessages((current) => {
@@ -622,12 +685,28 @@ export default function TeamChatClient({
             return
           }
 
+          knownMessageIdsRef.current.delete(messageId)
           setMessages((current) =>
             current.filter((message) => message.id !== messageId)
           )
           setSearchResults((current) =>
             current ? current.filter((message) => message.id !== messageId) : null
           )
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "team_chat_message_reactions",
+          filter: `organization_id=eq.${organizationId}`,
+        },
+        () => {
+          const ids = messagesRef.current.map((message) => message.id)
+          void loadTeamChatMessageReactions(ids).then((result) => {
+            if (result.success) setMessageReactions(result.reactions)
+          })
         }
       )
       .subscribe((
@@ -672,7 +751,7 @@ export default function TeamChatClient({
 
       void supabase.removeChannel(channel)
     }
-  }, [activeSearch, currentUserId, memberNames, organizationId, supabase])
+  }, [activeDirectConversation, activeSearch, currentUserId, memberNames, organizationId, supabase])
 
   useEffect(() => {
     if (activeSearch) {
@@ -775,6 +854,55 @@ export default function TeamChatClient({
     stopTypingTimeoutRef.current = setTimeout(() => {
       stopTypingIndicator()
     }, 1800)
+  }
+
+  function handleOpenDirectMessage(member: TeamChatMember) {
+    if (member.id === currentUserId || isOpeningDirect) return
+    setError("")
+    startOpeningDirect(async () => {
+      const result = await createTeamChatDirectConversation(member.id)
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
+      const conversation: TeamChatDirectConversation = {
+        id: result.conversation.id,
+        otherUserId: member.id,
+        otherUserName: member.displayName,
+        lastMessageAt: result.conversation.last_message_at ?? null,
+        lastMessagePreview: result.conversation.last_message_preview || "Start a conversation",
+      }
+      setDirectConversations((current) => [
+        conversation,
+        ...current.filter((item) => item.id !== conversation.id),
+      ])
+      setActiveDirectConversation(conversation)
+    })
+  }
+
+  function handleAppendEmoji(emoji: string) {
+    const input = messageInputRef.current
+    const start = input?.selectionStart ?? draft.length
+    const end = input?.selectionEnd ?? draft.length
+    const nextDraft = draft.slice(0, start) + emoji + draft.slice(end)
+    if (nextDraft.length > 2000) return
+    handleDraftChange(nextDraft, start + emoji.length)
+    setShowEmojiPicker(false)
+    requestAnimationFrame(() => {
+      input?.focus()
+      input?.setSelectionRange(start + emoji.length, start + emoji.length)
+    })
+  }
+
+  function handleAddReaction(messageId: string, emoji: string) {
+    setReactionPickerMessageId(null)
+    void toggleTeamChatMessageReaction(messageId, emoji).then((result) => {
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
+      setMessageReactions((current) => ({ ...current, [messageId]: result.reactions }))
+    })
   }
 
   function handleSelectMention(member: TeamChatMember) {
@@ -1091,6 +1219,23 @@ export default function TeamChatClient({
     forceScrollToBottomRef.current = false
   }
 
+  function handleSelectChatFiles(incoming: File[], input: HTMLInputElement) {
+    if (selectedFiles.length + incoming.length > 5) {
+      setError("You can attach up to 5 files to one message.")
+      input.value = ""
+      return
+    }
+    const oversized = incoming.find((file) => file.size > 25 * 1024 * 1024)
+    if (oversized) {
+      setError(`“${oversized.name}” is larger than 25 MB.`)
+      input.value = ""
+      return
+    }
+    setError("")
+    setSelectedFiles((current) => [...current, ...incoming])
+    input.value = ""
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const body = draft.trim()
@@ -1136,7 +1281,9 @@ export default function TeamChatClient({
       stopTypingIndicator()
       setDraft("")
       setSelectedFiles([])
+      if (imageInputRef.current) imageInputRef.current.value = ""
       if (fileInputRef.current) fileInputRef.current.value = ""
+      setShowEmojiPicker(false)
       setMentionedUserIds([])
       setMentionQuery(null)
       setMentionStartIndex(null)
@@ -1181,7 +1328,7 @@ export default function TeamChatClient({
   return (
     <section className="wf-card overflow-hidden !rounded-[28px] p-0 shadow-[0_24px_64px_-44px_rgba(21,35,27,0.45)]">
       <div className="flex min-h-0 flex-col md:h-[min(78vh,860px)] md:min-h-[620px] md:flex-row">
-        <aside className="flex max-h-[190px] shrink-0 flex-col overflow-hidden border-b border-[var(--border)] bg-[#fbfcfd] md:max-h-none md:w-[286px] md:border-b-0 md:border-r">
+        <aside className={`flex max-h-[260px] shrink-0 flex-col overflow-y-auto border-b border-[var(--border)] bg-[#fbfcfd] md:max-h-none md:w-[286px] md:border-b-0 md:border-r ${activeDirectConversation ? "hidden md:flex" : ""}`}>
           <div className="px-4 pb-4 pt-5 sm:px-5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -1196,7 +1343,7 @@ export default function TeamChatClient({
           </div>
 
           <div className="px-2.5 sm:px-3">
-            <div aria-current="page" className="flex items-center gap-3 rounded-2xl border border-[var(--brand)]/10 bg-[var(--brand-soft)] p-3 shadow-sm">
+            <button type="button" onClick={() => setActiveDirectConversation(null)} aria-current={activeDirectConversation ? undefined : "page"} className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left shadow-sm transition ${!activeDirectConversation ? "border-[var(--brand)]/20 bg-[var(--brand-soft)]" : "border-[var(--border)] bg-[var(--card)] hover:bg-[var(--surface)]"}`}>
               <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--brand)] text-white">
                 <MessagesSquare className="size-5" />
                 <span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border-2 border-[var(--brand-soft)] bg-[var(--card)] text-[8px] font-bold text-[var(--brand)]">
@@ -1211,36 +1358,94 @@ export default function TeamChatClient({
                 <span className="mt-1 block truncate text-xs leading-5 text-[var(--muted)]">{latestMessagePreview}</span>
                 <span className="mt-0.5 block text-[10px] text-[var(--muted)]">{members.length} members · Shared chat</span>
               </span>
-            </div>
+            </button>
           </div>
 
-          <div className="mt-5 hidden min-h-0 flex-1 overflow-y-auto px-4 pb-4 md:block">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">People</h3>
+          <div className="mt-4 min-h-0 flex-1 overflow-y-auto px-3 pb-4">
+            <div className="flex items-center justify-between gap-2 px-1">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Direct messages</h3>
+              <span className="rounded-full bg-[#eef0f3] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">{directConversations.length}</span>
+            </div>
+            {directConversations.length > 0 ? (
+              <ul className="mt-2 space-y-1">
+                {directConversations.map((conversation) => (
+                  <li key={conversation.id}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveDirectConversation(conversation)}
+                      aria-current={activeDirectConversation?.id === conversation.id ? "page" : undefined}
+                      className={`flex w-full min-w-0 items-center gap-3 rounded-xl px-2.5 py-2 text-left transition ${activeDirectConversation?.id === conversation.id ? "bg-[var(--brand-soft)]" : "hover:bg-[var(--card)]"}`}
+                    >
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[10px] font-bold text-[var(--brand)]">
+                        {initials(conversation.otherUserName)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-xs font-semibold text-[var(--foreground)]">{conversation.otherUserName}</span>
+                        <span className="mt-0.5 block truncate text-[10px] text-[var(--muted)]">{conversation.lastMessagePreview}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-1 py-2 text-[11px] leading-5 text-[var(--muted)]">Your private conversations will appear here.</p>
+            )}
+
+            <div className="mt-5 flex items-center justify-between gap-2 px-1">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Start a conversation</h3>
               <span className="rounded-full bg-[#eef0f3] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">{members.length}</span>
             </div>
             <ul className="mt-3 space-y-1">
               {members.map((member) => (
-                <li key={member.id} className="flex min-w-0 items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-[var(--card)]">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[10px] font-bold text-[var(--brand)] shadow-sm">
-                    {initials(member.displayName)}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-xs font-semibold text-[var(--foreground)]">
-                      {member.id === currentUserId ? `${member.displayName} (You)` : member.displayName}
+                <li key={member.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenDirectMessage(member)}
+                    disabled={member.id === currentUserId || isOpeningDirect}
+                    className="flex w-full min-w-0 items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-[var(--card)] disabled:cursor-default disabled:opacity-55"
+                    aria-label={member.id === currentUserId ? `${member.displayName}, you` : `Message ${member.displayName}`}
+                  >
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[10px] font-bold text-[var(--brand)] shadow-sm">
+                      {initials(member.displayName)}
                     </span>
-                    <span className="mt-0.5 block truncate text-[10px] text-[var(--muted)]">{member.role.replaceAll("_", " ")}</span>
-                  </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-xs font-semibold text-[var(--foreground)]">
+                        {member.id === currentUserId ? `${member.displayName} (You)` : member.displayName}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[10px] text-[var(--muted)]">{member.role.replaceAll("_", " ")}</span>
+                    </span>
+                    {member.id !== currentUserId ? <MessageCircle className="size-3.5 shrink-0 text-[var(--muted)]" /> : null}
+                  </button>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="mt-auto hidden border-t border-[var(--border)] px-5 py-3 md:block">
+          <div className="hidden border-t border-[var(--border)] px-5 py-3 md:block">
             <p className="text-[10px] leading-5 text-[var(--muted)]">Messages are visible to members of your current church workspace.</p>
           </div>
         </aside>
 
+        {activeDirectConversation ? (
+          <DirectMessageClient
+            key={activeDirectConversation.id}
+            currentUserId={currentUserId}
+            conversation={activeDirectConversation}
+            onBackToGroup={() => setActiveDirectConversation(null)}
+            onConversationActivity={(preview, createdAt) => {
+              setDirectConversations((current) =>
+                current
+                  .map((item) => item.id === activeDirectConversation.id
+                    ? { ...item, lastMessagePreview: preview, lastMessageAt: createdAt }
+                    : item
+                  )
+                  .sort((first, second) =>
+                    (second.lastMessageAt ?? "").localeCompare(first.lastMessageAt ?? "")
+                  )
+              )
+            }}
+          />
+        ) : (
         <main className="flex min-h-[560px] min-w-0 flex-1 flex-col bg-[var(--card)] md:min-h-0">
       <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-[var(--card)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex min-w-0 items-center gap-3.5">
@@ -1249,7 +1454,7 @@ export default function TeamChatClient({
           </div>
           <div className="min-w-0">
             <h2 className="truncate text-base font-semibold tracking-tight text-[var(--foreground)]">
-              Team conversation
+              Church group chat
             </h2>
             <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
               Share updates, coordinate rehearsals, and keep everyone in sync.
@@ -1609,6 +1814,31 @@ export default function TeamChatClient({
                             })}
                           </div>
                         ) : null}
+                        <div className={`mt-1.5 flex flex-wrap items-center gap-1.5 ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+                          {(messageReactions[message.id] ?? []).map((reaction) => (
+                            <button
+                              key={reaction.emoji}
+                              type="button"
+                              onClick={() => handleAddReaction(message.id, reaction.emoji)}
+                              aria-label={`${reaction.emoji} reaction, ${reaction.count} total${reaction.userReacted ? ", remove your reaction" : ", add your reaction"}`}
+                              className={`inline-flex h-7 items-center gap-1 rounded-full border px-2 text-xs transition ${reaction.userReacted ? "border-[var(--brand)]/35 bg-[var(--brand-soft)] text-[var(--foreground)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--surface)]"}`}
+                            >
+                              <span>{reaction.emoji}</span><span className="tabular-nums">{reaction.count}</span>
+                            </button>
+                          ))}
+                          <div className="group/reaction relative">
+                            <button type="button" onClick={() => setReactionPickerMessageId((current) => current === message.id ? null : message.id)} aria-label="Add reaction" title="Add reaction" className="inline-flex size-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:border-[var(--brand)]/30 hover:text-[var(--brand)]">
+                              <Smile className="size-3.5" />
+                            </button>
+                            <div className={`absolute bottom-full left-0 z-20 mb-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-1.5 shadow-xl ${reactionPickerMessageId === message.id ? "flex" : "hidden"}`}>
+                              <div className="flex gap-1">
+                                {CHAT_REACTION_EMOJIS.map((emoji) => (
+                                  <button key={emoji} type="button" onClick={() => handleAddReaction(message.id, emoji)} aria-label={`React with ${emoji}`} className="flex size-8 items-center justify-center rounded-lg text-base hover:bg-[var(--surface)]">{emoji}</button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                         {editingMessageId !== message.id ? (
                           <div className={`mt-1.5 flex flex-wrap gap-2 text-[10px] ${isOwnMessage ? "justify-end" : "justify-start"}`}>
                             {canPinMessages ? (
@@ -1772,33 +2002,37 @@ export default function TeamChatClient({
 
         <form onSubmit={handleSubmit} className="flex items-end gap-2 sm:gap-3">
           <input
+            ref={imageInputRef}
+            type="file"
+            multiple
+            accept={CHAT_IMAGE_ACCEPT}
+            className="hidden"
+            onChange={(event) => handleSelectChatFiles(Array.from(event.target.files ?? []), event.currentTarget)}
+          />
+          <input
             ref={fileInputRef}
             type="file"
             multiple
-            accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv,audio/mpeg,audio/mp4,audio/wav,audio/x-wav,video/mp4,video/webm"
+            accept={CHAT_FILE_ACCEPT}
             className="hidden"
-            onChange={(event) => {
-              const incoming = Array.from(event.target.files ?? [])
-              if (selectedFiles.length + incoming.length > 5) {
-                setError("You can attach up to 5 files to one message.")
-                event.target.value = ""
-                return
-              }
-              const oversized = incoming.find((file) => file.size > 25 * 1024 * 1024)
-              if (oversized) {
-                setError(`“${oversized.name}” is larger than 25 MB.`)
-                event.target.value = ""
-                return
-              }
-              setError("")
-              setSelectedFiles((current) => [...current, ...incoming])
-              event.target.value = ""
-            }}
+            onChange={(event) => handleSelectChatFiles(Array.from(event.target.files ?? []), event.currentTarget)}
           />
-          <button type="button" onClick={() => fileInputRef.current?.click()} aria-label="Attach files or images" title="Attach files or images" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[#eef0f3] text-[var(--foreground)] transition hover:bg-[#e2e5e9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25">
-            <Paperclip className="size-5" />
-          </button>
+          <div className="flex shrink-0 items-center gap-1">
+            <button type="button" onClick={() => imageInputRef.current?.click()} aria-label="Attach images" title="Attach images" className="inline-flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:border-[var(--brand)]/30 hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]">
+              <ImageIcon className="size-[18px]" />
+            </button>
+            <button type="button" onClick={() => fileInputRef.current?.click()} aria-label="Attach files" title="Attach files" className="inline-flex size-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:border-[var(--brand)]/30 hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]">
+              <Paperclip className="size-[18px]" />
+            </button>
+          </div>
           <div className="relative min-w-0 flex-1">
+            {showEmojiPicker ? (
+              <div className="absolute bottom-full right-0 z-30 mb-2 grid w-[min(296px,calc(100vw-48px))] grid-cols-8 gap-1 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-xl">
+                {CHAT_COMPOSER_EMOJIS.map((emoji) => (
+                  <button key={emoji} type="button" onClick={() => handleAppendEmoji(emoji)} className="flex size-8 items-center justify-center rounded-lg text-lg transition hover:bg-[var(--surface)]" aria-label={`Insert ${emoji}`}>{emoji}</button>
+                ))}
+              </div>
+            ) : null}
             {mentionQuery !== null ? (
               <div
                 id="team-chat-mention-options"
@@ -1895,6 +2129,9 @@ export default function TeamChatClient({
               className="max-h-40 min-h-[48px] w-full resize-y rounded-[24px] border border-transparent bg-[#f0f2f5] px-4 py-3 text-sm leading-5 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand)]/25 focus:bg-[var(--card)] focus:ring-2 focus:ring-[var(--brand)]/10 disabled:opacity-60"
             />
           </div>
+          <button type="button" onClick={() => setShowEmojiPicker((current) => !current)} aria-label={showEmojiPicker ? "Close emoji picker" : "Choose emoji"} title="Emoji" className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--brand)]">
+            <Smile className="size-[18px]" />
+          </button>
           <button
             type="submit"
             disabled={isPending || (!draft.trim() && selectedFiles.length === 0)}
@@ -1907,11 +2144,12 @@ export default function TeamChatClient({
           </button>
         </form>
         <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-[var(--muted)]">
-          <span className="min-w-0 leading-4">Attach up to 5 files · Enter to send, Shift+Enter for a new line</span>
+          <span className="min-w-0 leading-4">Images and files upload separately · Enter to send, Shift+Enter for a new line</span>
           <span className="shrink-0 tabular-nums">{draft.length}/2000</span>
         </div>
       </div>
         </main>
+        )}
       </div>
     </section>
   )
