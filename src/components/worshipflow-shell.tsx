@@ -2,8 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut, PanelLeft, Plus } from "lucide-react"
-import { useEffect, useState } from "react"
+import { LogOut, Plus } from "lucide-react"
 import AccountOptionsMenu from "@/components/account-options-menu"
 import DashboardDesktopNavigation from "@/components/dashboard-desktop-navigation"
 import DashboardMobileNavigation from "@/components/dashboard-mobile-navigation"
@@ -18,17 +17,12 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarProvider,
-  SidebarRail,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { isActiveNavigationPath } from "@/lib/navigation"
 import { editorRoles } from "@/lib/permissions"
 import {
-  isWorkspaceSidebarCollapsedPreference,
-  isWorkspaceSidebarHiddenPreference,
-  WORKSPACE_SIDEBAR_COLLAPSED_STORAGE_KEY,
-  WORKSPACE_SIDEBAR_HIDDEN_STORAGE_KEY,
 } from "@/lib/workspace-sidebar-preference"
 import { workspaceNavigationItems } from "@/lib/workspace-navigation"
 import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
@@ -181,12 +175,7 @@ function WorkspaceSidebarBrand() {
 function WorshipFlowShellLayout({
   children,
   workspace,
-  sidebarHidden,
-  onToggleSidebarVisibility,
-}: WorshipFlowShellProps & {
-  sidebarHidden: boolean
-  onToggleSidebarVisibility: () => void
-}) {
+}: WorshipFlowShellProps) {
   const pathname = usePathname() ?? "/"
   const pageTitle = getWorkspacePageTitle(pathname)
   const { open } = useSidebar()
@@ -197,25 +186,17 @@ function WorshipFlowShellLayout({
         id="workspace-sidebar"
         collapsible="icon"
         aria-label="Workspace navigation"
-        aria-hidden={sidebarHidden}
-        className={sidebarHidden ? "lg:hidden" : "lg:flex"}
+        className="lg:flex"
       >
         <WorkspaceSidebarBrand />
         <SidebarContent>
           <DashboardDesktopNavigation />
         </SidebarContent>
         <WorkspaceSidebarFooter workspace={workspace} />
-        <SidebarRail />
       </Sidebar>
 
       <SidebarInset
-        className={`wf-workspace-content min-h-screen min-w-0 transition-[padding] duration-200 motion-reduce:transition-none ${
-          sidebarHidden
-            ? "lg:pl-0"
-            : open
-              ? "lg:pl-[264px]"
-              : "lg:pl-[76px]"
-        }`}
+        className="wf-workspace-content min-h-screen min-w-0 transition-[padding] duration-200 motion-reduce:transition-none lg:pl-[76px]"
       >
         <header className="app-header sticky top-0 z-30 flex h-[78px] items-center border-b border-[var(--border)] bg-[var(--background)]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
           <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -225,25 +206,6 @@ function WorshipFlowShellLayout({
               userAvatarUrl={workspace.userAvatarUrl}
             />
             <SidebarTrigger className="group hidden size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition duration-200 hover:border-[var(--brand)]/40 hover:bg-[var(--brand-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 lg:inline-flex" />
-            <button
-              type="button"
-              onClick={onToggleSidebarVisibility}
-              aria-label={
-                sidebarHidden
-                  ? "Show sidebar navigation"
-                  : "Hide sidebar navigation"
-              }
-              aria-controls="workspace-sidebar"
-              aria-expanded={!sidebarHidden}
-              title={
-                sidebarHidden
-                  ? "Show sidebar navigation"
-                  : "Hide sidebar navigation"
-              }
-              className="group hidden size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition duration-200 hover:border-[var(--brand)]/40 hover:bg-[var(--brand-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 lg:inline-flex"
-            >
-              <PanelLeft aria-hidden="true" className="wf-icon-motion size-[18px]" />
-            </button>
             <div className="min-w-0">
               <p className="truncate text-xs font-medium text-[var(--muted)]">
                 {workspace.organizationName}
@@ -283,85 +245,14 @@ export default function WorshipFlowShell({
   workspace,
 }: WorshipFlowShellProps) {
   const pathname = usePathname() ?? "/"
-  const [sidebarHidden, setSidebarHidden] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-
-  useEffect(() => {
-    try {
-      // Hydrate saved preferences after mount to keep server markup deterministic.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSidebarHidden(
-        isWorkspaceSidebarHiddenPreference(
-          window.localStorage.getItem(WORKSPACE_SIDEBAR_HIDDEN_STORAGE_KEY)
-        )
-      )
-      setSidebarCollapsed(
-        isWorkspaceSidebarCollapsedPreference(
-          window.localStorage.getItem(WORKSPACE_SIDEBAR_COLLAPSED_STORAGE_KEY)
-        )
-      )
-    } catch {
-      // The sidebar remains visible and expanded when storage is unavailable.
-    }
-
-    function handleStorage(event: StorageEvent) {
-      if (event.key === WORKSPACE_SIDEBAR_HIDDEN_STORAGE_KEY) {
-        setSidebarHidden(isWorkspaceSidebarHiddenPreference(event.newValue))
-      }
-      if (event.key === WORKSPACE_SIDEBAR_COLLAPSED_STORAGE_KEY) {
-        setSidebarCollapsed(
-          isWorkspaceSidebarCollapsedPreference(event.newValue)
-        )
-      }
-    }
-
-    window.addEventListener("storage", handleStorage)
-    return () => window.removeEventListener("storage", handleStorage)
-  }, [])
-
-  function toggleSidebarVisibility() {
-    const nextHidden = !sidebarHidden
-    setSidebarHidden(nextHidden)
-
-    try {
-      window.localStorage.setItem(
-        WORKSPACE_SIDEBAR_HIDDEN_STORAGE_KEY,
-        String(nextHidden)
-      )
-    } catch {
-      // Keep the selected visibility for the current page when storage is unavailable.
-    }
-  }
-
-  function handleSidebarOpenChange(open: boolean) {
-    const nextCollapsed = !open
-    setSidebarCollapsed(nextCollapsed)
-
-    try {
-      window.localStorage.setItem(
-        WORKSPACE_SIDEBAR_COLLAPSED_STORAGE_KEY,
-        String(nextCollapsed)
-      )
-    } catch {
-      // Keep the selected collapse state for the current page when storage is unavailable.
-    }
-  }
 
   if (isImmersiveWorkspaceRoute(pathname)) {
     return <>{children}</>
   }
 
   return (
-    <SidebarProvider
-      open={!sidebarCollapsed}
-      onOpenChange={handleSidebarOpenChange}
-      className="min-h-screen"
-    >
-      <WorshipFlowShellLayout
-        workspace={workspace}
-        sidebarHidden={sidebarHidden}
-        onToggleSidebarVisibility={toggleSidebarVisibility}
-      >
+    <SidebarProvider defaultOpen={false} className="min-h-screen">
+      <WorshipFlowShellLayout workspace={workspace}>
         {children}
       </WorshipFlowShellLayout>
     </SidebarProvider>
