@@ -406,6 +406,12 @@ describe("semantic theme foundations", () => {
     expect(assignmentConfirmation).not.toMatch(/bg-emerald-50|bg-rose-50|bg-amber-50|text-rose-700|text-amber-800/)
 
     expect(scheduleViewToggle).toMatch(/<Feedback tone="warning"/)
+    expect(mySchedulePage).toContain("assessMemberAvailability")
+    expect(mySchedulePage).toContain("assignmentsForService.map")
+    expect(mySchedulePage).toContain("Service times and weekly availability use")
+    expect(assignmentConfirmation).toContain("Saved. The worship leader can now see your response.")
+    expect(assignmentConfirmation).toContain("Saved. The worship leader has been notified")
+    expect(scheduleViewToggle).toContain("Assignment warning")
     expect(scheduleViewToggle).toMatch(/<Input/)
     expect(scheduleViewToggle).toMatch(/<Textarea/)
     expect(scheduleViewToggle).toMatch(/bg-\[var\(--success\)\]/)
