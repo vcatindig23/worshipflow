@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
+import type { FormEvent } from "react"
 import {
   Download,
   FileText,
@@ -17,6 +18,7 @@ import { Feedback } from "@/components/ui/feedback"
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import {
   loadTeamChatDirectMessageReactions,
+  markTeamChatDirectNotificationsRead,
   loadTeamChatDirectMessages,
   sendTeamChatDirectMessage,
   toggleTeamChatDirectMessageReaction,
@@ -58,7 +60,6 @@ type ReactionSummary = {
 }
 
 type Props = {
-  organizationId: string
   currentUserId: string
   conversation: DirectConversation
   onBackToGroup: () => void
@@ -82,7 +83,6 @@ function formatTime(value: string) {
 }
 
 export default function DirectMessageClient({
-  organizationId,
   currentUserId,
   conversation,
   onBackToGroup,
@@ -109,6 +109,7 @@ export default function DirectMessageClient({
   }, [messages])
 
   useEffect(() => {
+    void markTeamChatDirectNotificationsRead(conversation.id)
     let cancelled = false
     setLoading(true)
     setError("")
@@ -246,7 +247,7 @@ export default function DirectMessageClient({
     input.value = ""
   }
 
-  function sendMessage(event?: React.FormEvent<HTMLFormElement>) {
+  function sendMessage(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault()
     if ((!draft.trim() && selectedFiles.length === 0) || isPending) return
     setError("")
