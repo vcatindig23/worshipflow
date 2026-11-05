@@ -377,6 +377,7 @@ test.describe("isolated multi-member service workflow", () => {
       await leader.goto("/setlists/new")
       await leader.getByLabel("Setlist name").fill(serviceName)
       await leader.getByLabel("Service date").fill(futureServiceDate())
+      await leader.locator("#serviceTime").fill("09:00")
       await leader.getByRole("button", { name: "Create Setlist", exact: true }).click()
       await expect(leader).toHaveURL(/\/setlists\/[0-9a-f-]+$/)
 
@@ -392,12 +393,24 @@ test.describe("isolated multi-member service workflow", () => {
       await leader.getByRole("button", { name: "Assign to Service", exact: true }).click()
       await expect(leader.getByText(requesterName, { exact: true })).toBeVisible()
 
+      // An overlapping rehearsal for the same assigned member should be visible
+      // on My Schedule before the member confirms the service.
+      await leader.goto(`/setlists/${createdSetlistId}/preparation`)
+      await leader.locator("#rehearsalDate").fill(futureServiceDate())
+      await leader.locator("#rehearsalTime").fill("09:30")
+      await leader.locator("#rehearsalEndTime").fill("10:00")
+      await leader.getByRole("button", { name: "Save rehearsal plan", exact: true }).click()
+      await expect(leader).toHaveURL(/saved=rehearsal/)
+
       await signIn(requester, requesterEmail, requesterPassword)
       await requester.setViewportSize({ width: 320, height: 740 })
       await requester.goto("/my-schedule")
       await expect(requester.getByText(serviceName, { exact: true })).toBeVisible()
       await expectResponsiveLayout(requester, "My Schedule compact phone", "top")
       await expect(requester.getByText("Asia/Manila", { exact: true })).toBeVisible()
+      await expect(requester.getByText("Scheduling conflicts · 1", { exact: true })).toBeVisible()
+      await expect(requester.getByText("Service overlaps rehearsal", { exact: true })).toBeVisible()
+      await expect(requester.getByRole("link", { name: "Review rehearsal", exact: true })).toBeVisible()
 
       await requester.getByRole("button", { name: "Confirm", exact: true }).click()
       await expect(requester.getByText("Drummer · Confirmed", { exact: true })).toBeVisible()
