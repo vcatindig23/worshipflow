@@ -944,6 +944,49 @@ export default async function MySchedulePage({
 
                     </div>
 
+                    {setlist.scheduleConflicts === null ? (
+                      <div role="status" className="flex items-start gap-2 rounded-xl border border-[var(--warning)]/30 bg-[var(--warning-soft)] px-3 py-2.5 text-[var(--warning)]">
+                        <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                        <div>
+                          <p className="text-xs font-semibold">Overlap check unavailable</p>
+                          <p className="mt-0.5 text-[11px] leading-5">Your service and rehearsal schedule could not be checked for overlapping assignments. Review the service plans with your team.</p>
+                        </div>
+                      </div>
+                    ) : setlist.scheduleConflicts.length > 0 ? (
+                      <section className="rounded-xl border border-[var(--warning)]/30 bg-[var(--warning-soft)]/50 p-3">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--warning)]" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-[var(--foreground)]">Scheduling conflicts · {setlist.scheduleConflicts.length}</p>
+                            <p className="mt-0.5 text-[11px] leading-5 text-[var(--muted)]">You are assigned to overlapping services or rehearsals. Review the other commitment before confirming your schedule.</p>
+                          </div>
+                        </div>
+                        <ul className="mt-3 space-y-2">
+                          {setlist.scheduleConflicts.map((conflict) => (
+                            <li key={`${conflict.current.key}|${conflict.other.key}`} className="flex flex-col gap-2 rounded-lg border border-[var(--warning)]/20 bg-[var(--card)] p-3 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold text-[var(--foreground)]">
+                                  {conflict.current.kind} overlaps {conflict.other.kind.toLowerCase()}
+                                </p>
+                                <p className="mt-1 text-[11px] leading-5 text-[var(--muted)]">
+                                  {conflict.other.serviceName} · {formatDate(conflict.other.date)} · {formatServiceTime(conflict.other.startTime)}–{conflict.other.endTime} · {workspace.organizationTimezone}
+                                </p>
+                              </div>
+                              <Link
+                                href={`/setlists/${conflict.other.setlistId}/preparation`}
+                                className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-lg border border-[var(--warning)]/30 px-3 py-2 text-xs font-semibold text-[var(--warning)] transition hover:bg-[var(--warning-soft)]"
+                              >
+                                Review {conflict.other.kind.toLowerCase()}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="mt-2 text-[10px] leading-5 text-[var(--muted)]">
+                          If no end time is set, services use a 60-minute estimate and rehearsals use a 90-minute estimate.
+                        </p>
+                      </section>
+                    ) : null}
+
                     {setlist.availabilityAssessment &&
                     setlist.availabilityAssessment.status !== "within_weekly_hours" ? (
                       <div
