@@ -312,6 +312,14 @@ using (
 -- Give direct-message notifications their own type so opening one-to-one
 -- conversations never clears the unread state of the church group chat.
 alter table public.notifications
+  add column direct_conversation_id uuid
+  references public.team_chat_direct_conversations(id) on delete cascade;
+
+create index notifications_direct_conversation_unread_idx
+  on public.notifications (user_id, direct_conversation_id, read_at)
+  where type = 'team_chat_direct_message' and read_at is null;
+
+alter table public.notifications
   drop constraint if exists notifications_type_check;
 
 alter table public.notifications
@@ -365,12 +373,13 @@ begin
 
   if v_recipient is not null then
     insert into public.notifications (
-      user_id, organization_id, setlist_id, type, title, body
+      user_id, organization_id, setlist_id, direct_conversation_id, type, title, body
     )
     values (
       v_recipient,
       new.organization_id,
       null,
+      new.conversation_id,
       'team_chat_direct_message',
       'New direct message',
       v_sender_name || ': ' || v_excerpt
