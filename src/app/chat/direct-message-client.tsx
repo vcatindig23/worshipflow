@@ -178,6 +178,7 @@ export default function DirectMessageClient({
           event: "*",
           schema: "public",
           table: "team_chat_direct_message_reactions",
+          filter: `conversation_id=eq.${conversation.id}`,
         },
         () => {
           const ids = messagesRef.current.map((message) => message.id)
