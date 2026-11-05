@@ -1,7 +1,10 @@
 import Image from "next/image"
 import {
+  AlertTriangle,
+  CheckCircle2,
   Clock3,
   Users,
+  XCircle,
 } from "lucide-react"
 import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
@@ -12,6 +15,7 @@ export type TeamInvitationProps = {
   roleLabel: string
   createdAt: string
   expiresAt: string
+  status: "pending" | "accepted" | "expired" | "revoked"
   avatarSrc?: string | null
   actions?: ReactNode
   className?: string
@@ -40,10 +44,35 @@ export function TeamInvitation({
   roleLabel,
   createdAt,
   expiresAt,
+  status,
   avatarSrc,
   actions,
   className,
 }: TeamInvitationProps) {
+  const isExpired = status === "pending" && new Date(expiresAt).getTime() <= Date.now()
+  const displayStatus = isExpired ? "expired" : status
+  const statusLabel = displayStatus === "accepted"
+    ? "Accepted"
+    : displayStatus === "expired"
+      ? "Expired"
+      : displayStatus === "revoked"
+        ? "Revoked"
+        : "Pending"
+  const statusClass = displayStatus === "accepted"
+    ? "wf-status-success"
+    : displayStatus === "expired"
+      ? "wf-status-danger"
+      : displayStatus === "revoked"
+        ? "wf-status-neutral"
+        : "wf-status-warning"
+  const statusDescription = displayStatus === "accepted"
+    ? "This invitation was accepted."
+    : displayStatus === "expired"
+      ? "This invitation has expired. Create a new invitation if they still need access."
+      : displayStatus === "revoked"
+        ? "This invitation was revoked and can no longer be used."
+        : "Invitation sent; waiting for the member to accept."
+
   return (
     <article
       aria-label={`Invitation for ${email}`}
@@ -75,7 +104,7 @@ export function TeamInvitation({
                 Team Invitation
               </p>
               <p className="mt-0.5 break-words text-[13px] leading-5 text-[var(--muted)]">
-                Invitation created for{" "}
+                Invitation for{" "}
                 <span className="font-medium text-[var(--foreground)]">
                   {email}
                 </span>{" "}
@@ -85,12 +114,21 @@ export function TeamInvitation({
                 </span>
                 .
               </p>
+              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{statusDescription}</p>
             </div>
 
             <div className="flex shrink-0 items-center gap-2 self-start">
-              <span className="wf-status wf-status-neutral h-8 rounded-lg px-2.5">
-                <Clock3 aria-hidden="true" className="size-3.5" />
-                Pending
+              <span className={`wf-status ${statusClass} h-8 rounded-lg px-2.5`}>
+                {displayStatus === "accepted" ? (
+                  <CheckCircle2 aria-hidden="true" className="size-3.5" />
+                ) : displayStatus === "expired" ? (
+                  <AlertTriangle aria-hidden="true" className="size-3.5" />
+                ) : displayStatus === "revoked" ? (
+                  <XCircle aria-hidden="true" className="size-3.5" />
+                ) : (
+                  <Clock3 aria-hidden="true" className="size-3.5" />
+                )}
+                {statusLabel}
               </span>
               {actions}
             </div>
