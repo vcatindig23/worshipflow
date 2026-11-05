@@ -648,7 +648,7 @@ export default async function MySchedulePage({
                   <legend className="text-sm font-medium text-[var(--foreground)]">Days of the week</legend>
                   <div className="flex flex-wrap gap-2">
                     {weekdayLabels.map((day, index) => (
-                      <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-2 text-xs text-[var(--foreground)]">
+                      <label key={day} className="flex min-h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-xs text-[var(--foreground)]">
                         <input type="checkbox" name="weekdays" value={index} />
                         {day}
                       </label>
@@ -704,7 +704,7 @@ export default async function MySchedulePage({
                       </div>
                       <form action={deleteAvailabilityEntry} className="shrink-0">
                         <input type="hidden" name="id" value={entry.id} />
-                        <button type="submit" aria-label={`Delete ${entry.title || "availability entry"}`} className="rounded-lg p-2 text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]">
+                        <button type="submit" aria-label={`Delete ${entry.title || "availability entry"}`} className="flex size-10 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]">
                           <Trash2 className="size-4" />
                         </button>
                       </form>
@@ -869,7 +869,9 @@ export default async function MySchedulePage({
                               {formatServiceTime(setlist.service_time) ?? "Time not set"}
                               <span className="font-normal text-[var(--muted)]">{workspace.organizationTimezone}</span>
                             </span>
-                            {setlist.service_date && setlist.service_date < today ? (
+                            {!setlist.service_date ? (
+                              <span className="wf-status wf-status-neutral">Date not set</span>
+                            ) : setlist.service_date < today ? (
                               <span className="wf-status wf-status-neutral">Past assignment</span>
                             ) : (
                               <span className="wf-status wf-status-success">Upcoming</span>
