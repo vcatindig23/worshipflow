@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/sidebar"
 import { isActiveNavigationPath } from "@/lib/navigation"
 import { editorRoles } from "@/lib/permissions"
-import {
-} from "@/lib/workspace-sidebar-preference"
 import { workspaceNavigationItems } from "@/lib/workspace-navigation"
 import { isImmersiveWorkspaceRoute } from "@/lib/workspace-layout"
 
@@ -178,8 +176,6 @@ function WorshipFlowShellLayout({
 }: WorshipFlowShellProps) {
   const pathname = usePathname() ?? "/"
   const pageTitle = getWorkspacePageTitle(pathname)
-  const { open } = useSidebar()
-
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <Sidebar
