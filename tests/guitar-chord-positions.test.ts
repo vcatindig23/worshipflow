@@ -48,7 +48,7 @@ describe("guitar chord positions", () => {
     expect(rootPosition).toBeDefined()
     expect(rootPosition).toMatchObject({
       frets: [2, 4, 4, 3, 2, 2],
-      fingers: [1, 3, 3, 2, 1, 1],
+      fingers: [1, 3, 4, 2, 1, 1],
       barres: [2],
       bassPitchClass: 6,
       reference: false,
