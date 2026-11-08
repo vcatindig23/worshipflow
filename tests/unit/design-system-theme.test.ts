@@ -538,18 +538,18 @@ describe("semantic theme foundations", () => {
     expect(loginPage).toMatch(/wf-input h-12 pl-10 pr-12/)
     expect(loginPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
 
-    expect(signupPage).toMatch(/<Feedback tone="error"/)
+    expect(signupPage).toMatch(/<FormErrorSummary/)
     expect(signupPage).toMatch(/<Input/)
     expect(signupPage).toMatch(/wf-input h-12 pl-3\.5 pr-12/)
     expect(signupPage).not.toMatch(/bg-red-50|border-red-200|text-red-700/)
 
     expect(forgotPasswordPage).toMatch(/<Feedback tone="success"/)
-    expect(forgotPasswordPage).toMatch(/<Feedback tone="error"/)
+    expect(forgotPasswordPage).toMatch(/<FormErrorSummary/)
     expect(forgotPasswordPage).toMatch(/<Input/)
     expect(forgotPasswordPage).toMatch(/wf-card rounded-3xl/)
     expect(forgotPasswordPage).not.toMatch(/bg-red-50|bg-emerald-50|border-red-200|text-red-700|text-emerald-800/)
 
-    expect(resetPasswordPage).toMatch(/<Feedback tone="error"/)
+    expect(resetPasswordPage).toMatch(/<FormErrorSummary/)
     expect(resetPasswordPage).toMatch(/<Feedback tone="warning"/)
     expect(resetPasswordPage).toMatch(/wf-card/)
     expect(resetPasswordPage).toMatch(/wf-input h-12 px-4 pr-12/)
