@@ -226,30 +226,43 @@ function transposeStoredPosition(
     return null
   }
 
-  const distinctFrets = Array.from(new Set(playedFrets)).sort((a, b) => a - b)
-  // A standard four-finger shape cannot usefully represent more than four
-  // separate fretted positions without a different fingering arrangement.
-  if (distinctFrets.length > 4) return null
+  const baseFret = Math.min(...playedFrets)
+  const hasOpenStrings = position.frets.some((fret) => fret === 0)
+  const fingers = position.frets.map((sourceFret, stringIndex) => {
+    if (sourceFret < 0) return 0
+    if (sourceFret === 0) return 1
 
-  const baseFret = distinctFrets[0]
-  const fingers = transposedFrets.map((fret) => {
-    if (fret === null || fret === 0) return 0
-    return distinctFrets.indexOf(fret) + 1
+    const sourceFinger = position.fingers[stringIndex] ?? 0
+    return hasOpenStrings ? sourceFinger + 1 : sourceFinger
   })
-  const barres = distinctFrets.flatMap((fret) => {
-    const indexes = transposedFrets.flatMap((value, index) =>
-      value === fret ? [index] : []
-    )
-    if (indexes.length < 2) return []
 
-    const first = indexes[0]
-    const last = indexes[indexes.length - 1]
-    const canBarreAcrossSpan = transposedFrets
+  // Keep the source fingering when no open strings need a new index-finger
+  // position. When opens become fret 1, move the existing fingers up one
+  // assignment so the new notes can use finger 1.
+  const hasInvalidFingering = position.frets.some((sourceFret, stringIndex) => {
+    if (sourceFret < 0) return false
+    const finger = fingers[stringIndex]
+    return !Number.isInteger(finger) || finger < 1 || finger > 4
+  })
+  if (hasInvalidFingering) return null
+
+  const barres = position.barres.map((fret) => {
+    const absoluteFret = sourceBaseFret + fret - 1 + semitones
+    return absoluteFret - baseFret + 1
+  })
+  const openStringIndexes = position.frets.flatMap((fret, index) =>
+    fret === 0 ? [index] : []
+  )
+  if (openStringIndexes.length > 1) {
+    const first = openStringIndexes[0]
+    const last = openStringIndexes[openStringIndexes.length - 1]
+    const canBarreConvertedOpenStrings = transposedFrets
       .slice(first, last + 1)
-      .every((value) => value !== null && value >= fret)
-
-    return canBarreAcrossSpan ? [fret - baseFret + 1] : []
-  })
+      .every((fret) => fret !== null && fret >= semitones)
+    if (canBarreConvertedOpenStrings) {
+      barres.push(semitones - baseFret + 1)
+    }
+  }
 
   return {
     frets: transposedFrets.map((fret) => {
