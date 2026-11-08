@@ -219,6 +219,20 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
   const showGettingStarted =
     workspace.role === "admin" &&
     completedGettingStartedSteps < gettingStartedSteps.length
+  const featuredService = workspace.upcomingSetlists[0] ?? null
+  const featuredServiceStatus = featuredService?.readiness.status ?? "incomplete"
+  const featuredServiceStatusLabel =
+    featuredServiceStatus === "ready"
+      ? "Ready"
+      : featuredServiceStatus === "incomplete"
+        ? "Incomplete"
+        : "Needs attention"
+  const featuredServiceStatusClass =
+    featuredServiceStatus === "ready"
+      ? "wf-status-success"
+      : featuredServiceStatus === "incomplete"
+        ? "wf-status-danger"
+        : "wf-status-warning"
 
   return (
     <WorshipFlowShell
@@ -264,98 +278,173 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
           <section
             data-tour="dashboard-next-action"
             aria-labelledby="dashboard-next-action-title"
-            className="wf-card grid min-w-0 gap-5 border-[var(--brand)]/20 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+            className={
+              "wf-card grid min-w-0 overflow-hidden " +
+              (featuredService ? "lg:grid-cols-[minmax(0,1fr)_19rem]" : "grid-cols-1")
+            }
           >
-            <div className="flex min-w-0 items-start gap-4">
-              <span className="wf-icon-tile flex size-11 shrink-0 items-center justify-center">
-                {isTeamLeader ? (
-                  <CircleAlert className="size-5" />
-                ) : pendingMyConfirmations > 0 ? (
-                  <Clock3 className="size-5" />
-                ) : (
-                  <CalendarDays className="size-5" />
-                )}
-              </span>
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--brand)]">
-                  Your next step
-                </p>
-                <h2
-                  id="dashboard-next-action-title"
-                  className="mt-1 break-words text-lg font-semibold tracking-[-0.02em] sm:text-xl [overflow-wrap:anywhere]"
-                >
-                  {nextAction.title}
-                </h2>
-                <p className="mt-1 max-w-2xl break-words text-sm leading-6 text-[var(--muted)]">
-                  {nextAction.description}
-                </p>
-                {nextAction.context ? (
-                  <p className="mt-2 break-words text-xs font-semibold text-[var(--foreground)]">
-                    {nextAction.context}
+            <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-7 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 items-start gap-4">
+                <span className="wf-icon-tile flex size-12 shrink-0 items-center justify-center rounded-2xl">
+                  {isTeamLeader ? (
+                    <CircleAlert className="size-5" />
+                  ) : pendingMyConfirmations > 0 ? (
+                    <Clock3 className="size-5" />
+                  ) : (
+                    <CalendarDays className="size-5" />
+                  )}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[var(--brand-ink)]">
+                    Your next step
                   </p>
-                ) : null}
+                  <h2
+                    id="dashboard-next-action-title"
+                    className="mt-2 break-words text-xl font-semibold leading-tight tracking-[-0.035em] [overflow-wrap:anywhere] sm:text-2xl"
+                  >
+                    {nextAction.title}
+                  </h2>
+                  <p className="mt-2 max-w-2xl break-words text-sm leading-6 text-[var(--muted)] sm:text-base">
+                    {nextAction.description}
+                  </p>
+                  {nextAction.context ? (
+                    <p className="mt-3 break-words text-sm font-semibold text-[var(--foreground)]">
+                      {nextAction.context}
+                    </p>
+                  ) : null}
+                </div>
               </div>
+
+              <Link
+                href={nextAction.href}
+                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-dark)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 lg:self-center"
+              >
+                {nextAction.actionLabel}
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </Link>
             </div>
 
-            <Link
-              href={nextAction.href}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
-            >
-              {nextAction.actionLabel}
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
+            {featuredService ? (
+              <aside
+                aria-label="Next service readiness"
+                className="min-w-0 border-t border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 lg:border-l lg:border-t-0"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-[var(--muted)]">
+                    Next service
+                  </p>
+                  <span className={"wf-status " + featuredServiceStatusClass}>
+                    {featuredServiceStatusLabel}
+                  </span>
+                </div>
+                <h3 className="mt-3 break-words text-base font-semibold leading-6 tracking-tight [overflow-wrap:anywhere]">
+                  {featuredService.name}
+                </h3>
+                <p className="mt-1 text-sm leading-5 text-[var(--muted)]">
+                  {formatServiceDate(featuredService.service_date)}
+                  {" · "}
+                  {formatServiceTime(featuredService.service_time) ?? "Time not set"}
+                </p>
+
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+                    <span className="font-medium text-[var(--foreground)]">Preparation</span>
+                    <span className="font-semibold tabular-nums text-[var(--foreground)]">
+                      {featuredService.readiness.percentage}%
+                    </span>
+                  </div>
+                  <div
+                    role="progressbar"
+                    aria-label={featuredService.name + " preparation progress"}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={featuredService.readiness.percentage}
+                    className="h-2 overflow-hidden rounded-full bg-[var(--border)]"
+                  >
+                    <div
+                      className="h-full origin-left rounded-full bg-[var(--brand)] transition-transform duration-200 motion-reduce:transition-none"
+                      style={{
+                        transform: `scaleX(${featuredService.readiness.percentage / 100})`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[var(--border)] pt-4">
+                  <div>
+                    <p className="text-2xl font-semibold tabular-nums tracking-tight">
+                      {featuredService.readiness.songCount}
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">Songs</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold tabular-nums tracking-tight">
+                      {featuredService.readiness.totalAssignments}
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">Assigned</p>
+                  </div>
+                </div>
+              </aside>
+            ) : null}
           </section>
 
-          <nav
-            aria-label="Dashboard shortcuts"
-            className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold"
+          <section
+            aria-label="Workspace totals"
+            className="mt-4 grid min-w-0 gap-3 sm:grid-cols-3"
           >
             <Link
-              href={canEditServices ? "/songs/new" : "/songs"}
+              href="/songs"
               data-tour="create-song"
-              className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
+              aria-label={"View " + workspace.songCount + " active songs"}
+              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
             >
-              <Music2 className="size-3.5" />
-              {canEditServices ? "Add a song" : "Browse songs"}
+              <span className="wf-icon-tile flex size-11 shrink-0 items-center justify-center rounded-xl">
+                <Music2 aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-2xl font-semibold tabular-nums tracking-tight text-[var(--foreground)]">
+                  {workspace.songCount}
+                </span>
+                <span className="mt-1 block text-sm font-medium text-[var(--muted)]">Active songs</span>
+              </span>
+              <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-[var(--muted)] transition-transform group-hover:translate-x-0.5" />
             </Link>
-            {canEditServices ? (
-              <Link
-                href="/setlists/new"
-                data-tour="build-setlist"
-                className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
-              >
-                <ListMusic className="size-3.5" />
-                Plan a service
-              </Link>
-            ) : (
-              <>
-                <Link
-                  href="/setlists"
-                  data-tour="build-setlist"
-                  className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
-                >
-                  <ListMusic className="size-3.5" />
-                  Browse setlists
-                </Link>
-                <Link
-                  href="/my-schedule"
-                  className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
-                >
-                  <CalendarDays className="size-3.5" />
-                  My Schedule
-                </Link>
-              </>
-            )}
-            {workspace.role === "admin" ? (
-              <Link
-                href="/settings/team"
-                className="inline-flex min-h-9 items-center gap-1.5 text-[var(--brand)] transition hover:underline"
-              >
-                <UsersRound className="size-3.5" />
-                Invite people
-              </Link>
-            ) : null}
-          </nav>
+
+            <Link
+              href="/services"
+              data-tour="build-setlist"
+              aria-label={"View " + workspace.setlistCount + " service plans"}
+              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
+            >
+              <span className="wf-icon-tile flex size-11 shrink-0 items-center justify-center rounded-xl">
+                <ListMusic aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-2xl font-semibold tabular-nums tracking-tight text-[var(--foreground)]">
+                  {workspace.setlistCount}
+                </span>
+                <span className="mt-1 block text-sm font-medium text-[var(--muted)]">Service plans</span>
+              </span>
+              <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-[var(--muted)] transition-transform group-hover:translate-x-0.5" />
+            </Link>
+
+            <Link
+              href="/settings/team"
+              aria-label={"View " + workspace.memberCount + " team members"}
+              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
+            >
+              <span className="wf-icon-tile flex size-11 shrink-0 items-center justify-center rounded-xl">
+                <UsersRound aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-2xl font-semibold tabular-nums tracking-tight text-[var(--foreground)]">
+                  {workspace.memberCount}
+                </span>
+                <span className="mt-1 block text-sm font-medium text-[var(--muted)]">Team members</span>
+              </span>
+              <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-[var(--muted)] transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </section>
 
           {showGettingStarted ? (
             <section
@@ -446,149 +535,41 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
           {isTeamLeader ? (
             <section
               data-tour="team-priorities"
-              aria-labelledby="dashboard-priorities-title"
-              className="mt-6 wf-card overflow-hidden"
-            >
-              <div className="flex flex-col gap-3 border-b border-[var(--border)] px-5 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-6">
-                <div className="min-w-0">
-                  <h2
-                    id="dashboard-priorities-title"
-                    className="text-base font-semibold"
-                  >
-                    Team priorities
-                  </h2>
-                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                    Open a service issue directly instead of searching through the schedule.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-[var(--muted)]">
-                  <span>
-                    <strong className="text-[var(--foreground)] tabular-nums">
-                      {pendingTeamConfirmations}
-                    </strong>{" "}
-                    awaiting
-                  </span>
-                  <span>
-                    <strong className="text-[var(--foreground)] tabular-nums">
-                      {declinedTeamConfirmations}
-                    </strong>{" "}
-                    declined
-                  </span>
-                </div>
-              </div>
-
-              {workspace.upcomingSetlists.length === 0 ? (
-                <div className="flex flex-col gap-3 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold">
-                      No upcoming services to coordinate
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                      Create a dated setlist to start preparing your next service.
-                    </p>
-                  </div>
-                  {canEditServices ? (
-                    <Link
-                      href="/setlists/new"
-                      className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-3.5 text-xs font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-                    >
-                      <Plus className="size-3.5" />
-                      Plan a service
-                    </Link>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="divide-y divide-[var(--border)]">
-                  {workspace.upcomingSetlists.map((setlist) => {
-                    const priority = getDashboardSetlistPriority(
-                      setlist,
-                      canEditServices,
-                    )
-
-                    return (
-                      <Link
-                        key={setlist.id}
-                        href={priority.href}
-                        className="group flex min-w-0 flex-col gap-3 px-5 py-4 transition hover:bg-[var(--surface)] sm:flex-row sm:items-center sm:justify-between sm:px-6"
-                      >
-                        <span className="min-w-0 flex-1">
-                          <span className="flex min-w-0 flex-wrap items-center gap-2">
-                            <span className="min-w-0 break-words text-sm font-semibold [overflow-wrap:anywhere]">
-                              {setlist.name}
-                            </span>
-                            <span
-                              className={
-                                "wf-status " +
-                                (priority.complete
-                                  ? "wf-status-success"
-                                  : setlist.readiness.status === "incomplete"
-                                    ? "wf-status-danger"
-                                    : "wf-status-warning")
-                              }
-                            >
-                              {priority.complete
-                                ? "Ready"
-                                : "Action needed"}
-                            </span>
-                          </span>
-                          <span className="mt-1 block text-xs text-[var(--muted)]">
-                            {formatServiceDate(setlist.service_date)}
-                            {formatServiceTime(setlist.service_time)
-                              ? ` · ${formatServiceTime(setlist.service_time)}`
-                              : ""}
-                          </span>
-                          <span className="mt-2 block break-words text-xs font-semibold text-[var(--foreground)]">
-                            {priority.title}
-                          </span>
-                          <span className="mt-0.5 block break-words text-xs leading-5 text-[var(--muted)]">
-                            {priority.description}
-                          </span>
-                        </span>
-                        <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-[var(--brand)]">
-                          {priority.actionLabel}
-                          <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" />
-                        </span>
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-              <div className="border-t border-[var(--border)] px-5 py-3 sm:px-6">
-                <Link
-                  href="/services"
-                  className="inline-flex min-h-8 items-center gap-1 text-xs font-semibold text-[var(--brand)] hover:underline"
-                >
-                  Review all services
-                  <ChevronRight className="size-3.5" />
-                </Link>
-              </div>
-            </section>
-          ) : null}
-
-          {isTeamLeader ? (
-            <section
               aria-labelledby="dashboard-upcoming-services-title"
               className="mt-6"
             >
-              <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                <div>
+              <div className="mb-4 flex flex-col gap-3 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[var(--brand-ink)]">Service coordination</p>
                   <h2
                     id="dashboard-upcoming-services-title"
-                    className="text-base font-semibold"
+                    className="mt-1 text-lg font-semibold tracking-tight"
                   >
                     Upcoming services
                   </h2>
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    Your next dated worship plans and assigned team members.
+                  <p className="mt-1 text-sm leading-5 text-[var(--muted)]">
+                    Review readiness and open the work that still needs attention.
                   </p>
                 </div>
-                <Link
-                  href="/services"
-                  className="inline-flex min-h-8 items-center gap-1 text-xs font-semibold text-[var(--brand)] hover:underline"
-                >
-                  View schedule
-                  <ChevronRight className="size-3.5" />
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                  {pendingTeamConfirmations > 0 ? (
+                    <span className="wf-status wf-status-warning">
+                      {pendingTeamConfirmations} awaiting
+                    </span>
+                  ) : null}
+                  {declinedTeamConfirmations > 0 ? (
+                    <span className="wf-status wf-status-danger">
+                      {declinedTeamConfirmations} declined
+                    </span>
+                  ) : null}
+                  <Link
+                    href="/services"
+                    className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+                  >
+                    View services
+                    <ChevronRight className="size-4" />
+                  </Link>
+                </div>
               </div>
 
               {workspace.upcomingSetlists.length === 0 ? (
@@ -624,17 +605,17 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                       <Link
                         key={setlist.id}
                         href={priority.href}
-                        className="wf-card wf-card-interactive group flex min-w-0 flex-col p-4"
+                        className="wf-card wf-card-interactive group flex min-w-0 flex-col p-5 hover:-translate-y-0.5"
                       >
                         <div className="flex min-w-0 items-start gap-3">
                           <span className="wf-icon-tile flex size-10 shrink-0 items-center justify-center">
                             <CalendarDays className="size-[18px]" />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block line-clamp-2 break-words text-sm font-semibold leading-5 [overflow-wrap:anywhere]">
+                            <span className="block line-clamp-2 break-words text-base font-semibold leading-6 [overflow-wrap:anywhere]">
                               {setlist.name}
                             </span>
-                            <span className="mt-1 block text-xs text-[var(--muted)]">
+                            <span className="mt-1 block text-sm text-[var(--muted)]">
                               {formatServiceDate(setlist.service_date)}
                               {formatServiceTime(setlist.service_time)
                                 ? ` · ${formatServiceTime(setlist.service_time)}`
@@ -658,18 +639,18 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                               ? "Ready"
                               : "Needs attention"}
                           </span>
-                          <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-[10px] font-medium text-[var(--muted)]">
+                          <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs font-medium text-[var(--muted)]">
                             {setlist.readiness.songCount} songs
                           </span>
-                          <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-[10px] font-medium text-[var(--muted)]">
+                          <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs font-medium text-[var(--muted)]">
                             {setlist.readiness.totalAssignments} assigned
                           </span>
                         </div>
 
-                        <p className="mt-3 break-words text-xs font-semibold text-[var(--foreground)]">
+                        <p className="mt-4 break-words text-sm font-semibold text-[var(--foreground)]">
                           {priority.title}
                         </p>
-                        <p className="mt-1 line-clamp-2 break-words text-xs leading-5 text-[var(--muted)]">
+                        <p className="mt-1 line-clamp-2 break-words text-sm leading-5 text-[var(--muted)]">
                           {priority.description}
                         </p>
 
@@ -692,7 +673,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                                   ", " +
                                   assignment.confirmationStatus
                                 }
-                                className="inline-flex min-w-0 max-w-full items-center gap-1 rounded-full bg-[var(--surface)] py-1 pl-1 pr-2 text-[10px] text-[var(--foreground)]"
+                                className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-full bg-[var(--surface)] py-1 pl-1.5 pr-2.5 text-xs text-[var(--foreground)]"
                               >
                                 <span
                                   aria-hidden="true"
@@ -708,14 +689,14 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                                 <ProfileAvatar
                                   name={assignment.displayName}
                                   imageUrl={assignment.avatarUrl}
-                                  sizeClassName="size-4"
-                                  className="text-[7px]"
+                                  sizeClassName="size-5"
+                                  className="text-[8px]"
                                 />
-                                <span className="min-w-0 max-w-[100px] truncate">
+                                <span className="min-w-0 max-w-[110px] truncate">
                                   {assignment.displayName}
                                 </span>
                                 <span aria-hidden="true">·</span>
-                                <span className="max-w-[90px] truncate">
+                                <span className="max-w-[110px] truncate">
                                   {getTeamPositionLabel(assignment.position)}
                                 </span>
                               </span>
@@ -732,7 +713,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                           ) : null}
                         </div>
 
-                        <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--brand)]">
+                        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--brand)]">
                           {priority.actionLabel}
                           <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" />
                         </span>
@@ -746,7 +727,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
 
           <section
             id="your-upcoming-assignments"
-            data-tour="team-priorities"
+            data-tour={!isTeamLeader ? "team-priorities" : undefined}
             aria-labelledby="dashboard-my-assignments-title"
             className="mt-6 wf-card overflow-hidden"
           >

@@ -119,4 +119,25 @@ describe("role-aware dashboard presentation", () => {
     expect(dashboardView).toContain('href: "/settings/team"')
     expect(dashboardView).toContain("Make your first assignment")
   })
+
+  it("surfaces the next service readiness from the real workspace data", () => {
+    expect(dashboardView).toContain("const featuredService = workspace.upcomingSetlists[0] ?? null")
+    expect(dashboardView).toContain('aria-label="Next service readiness"')
+    expect(dashboardView).toContain("featuredService.readiness.percentage")
+    expect(dashboardView).toContain("featuredService.readiness.songCount")
+    expect(dashboardView).toContain("featuredService.readiness.totalAssignments")
+  })
+
+  it("shows real workspace totals as direct navigation links", () => {
+    expect(dashboardView).toContain('aria-label="Workspace totals"')
+    expect(dashboardView).toContain('aria-label={"View " + workspace.songCount + " active songs"}')
+    expect(dashboardView).toContain('aria-label={"View " + workspace.setlistCount + " service plans"}')
+    expect(dashboardView).toContain('aria-label={"View " + workspace.memberCount + " team members"}')
+  })
+
+  it("uses one service-priority tour target for leaders and members", () => {
+    expect(dashboardView).toContain('data-tour="team-priorities"')
+    expect(dashboardView).toContain('data-tour={!isTeamLeader ? "team-priorities" : undefined}')
+    expect(dashboardView).not.toContain('id="dashboard-priorities-title"')
+  })
 })

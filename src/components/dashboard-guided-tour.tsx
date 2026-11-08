@@ -18,7 +18,7 @@ type TourStep = {
   mobileSelector?: string
 }
 
-const TOUR_VERSION = "v1"
+const TOUR_VERSION = "v2"
 
 const tourSteps: TourStep[] = [
   {
@@ -53,9 +53,9 @@ const tourSteps: TourStep[] = [
     selector: '[data-tour="build-setlist"]',
   },
   {
-    title: "Stay ahead of service priorities",
+    title: "Review service priorities",
     description:
-      "Leaders can open a service issue directly. Team members can review their upcoming assignments and respond to confirmations here.",
+      "Review the next service's readiness, then respond to each position on your own upcoming assignments.",
     selector: '[data-tour="team-priorities"]',
   },
 ]
