@@ -14,6 +14,55 @@ describe("guitar chord positions", () => {
       0, 4, 7, 0, 4,
     ])
     expect(openCShape?.fingers).toEqual([0, 3, 2, 0, 1, 0])
+    expect(openCShape?.reference).toBe(true)
+    expect(openCShape?.transposed).toBe(false)
+  })
+
+  it("transposes C reference shapes into C-sharp with recalculated fingering", () => {
+    const shapes = generateGuitarShapes(1, [0, 4, 7], "major")
+    const rootPosition = shapes.find(
+      (shape) => shape.frets.join(",") === ",4,3,1,2,1"
+    )
+
+    expect(rootPosition).toBeDefined()
+    expect(rootPosition).toMatchObject({
+      frets: [null, 4, 3, 1, 2, 1],
+      fingers: [0, 4, 3, 1, 2, 1],
+      barres: [1],
+      bassPitchClass: 1,
+      reference: false,
+      transposed: true,
+    })
+    expect(rootPosition?.notes.map((note) => note.pitchClass)).toEqual([
+      1, 5, 8, 1, 5,
+    ])
+  })
+
+  it("transposes F reference shapes into F-sharp with a valid barre", () => {
+    const shapes = generateGuitarShapes(6, [0, 4, 7], "major")
+    const rootPosition = shapes.find(
+      (shape) => shape.frets.join(",") === "2,4,4,3,2,2"
+    )
+    const expectedTones = new Set([6, 10, 1])
+
+    expect(rootPosition).toBeDefined()
+    expect(rootPosition).toMatchObject({
+      frets: [2, 4, 4, 3, 2, 2],
+      fingers: [1, 3, 4, 2, 1, 1],
+      barres: [2],
+      bassPitchClass: 6,
+      reference: false,
+      transposed: true,
+    })
+    expect(
+      rootPosition?.notes.every((note) => expectedTones.has(note.pitchClass))
+    ).toBe(true)
+    expect(rootPosition?.notes.map((note) => note.pitchClass)).toEqual([
+      6, 1, 6, 10, 1, 6,
+    ])
+    expect(
+      rootPosition?.frets.every((fret) => fret === null || fret <= 15)
+    ).toBe(true)
   })
 
   it("orders available shapes by chord inversion rather than fret position", () => {

@@ -20,6 +20,7 @@ export type GuitarShape = {
   span: number
   barres: number[]
   reference: boolean
+  transposed: boolean
 }
 
 type StoredGuitarPosition = {
@@ -79,6 +80,17 @@ const DATABASE_SUFFIX_BY_TYPE: Record<string, string> = {
 
 const STRING_COUNT = GUITAR_STRING_OPEN_MIDI.length
 
+// The reference-position subset has no entries for C# or F#. Transpose the
+// neighboring C and F reference shapes rather than returning un-fingered
+// algorithmic guesses for those two keys.
+const TRANSPOSITION_SOURCE_BY_ROOT: Record<
+  number,
+  { sourceRoot: number; semitones: number }
+> = {
+  1: { sourceRoot: 0, semitones: 1 },
+  6: { sourceRoot: 5, semitones: 1 },
+}
+
 function chordPitchClasses(root: number, intervals: number[]) {
   return new Set(intervals.map((interval) => (root + interval) % 12))
 }
@@ -104,7 +116,8 @@ function makeShape(
   root: number,
   intervals: number[],
   barres: number[],
-  reference: boolean
+  reference: boolean,
+  transposed = false
 ): GuitarShape | null {
   const chordTones = chordPitchClasses(root, intervals)
   const notes: GuitarNote[] = []
@@ -158,13 +171,15 @@ function makeShape(
     span,
     barres,
     reference,
+    transposed,
   }
 }
 
 function shapeFromStoredPosition(
   position: StoredGuitarPosition,
   root: number,
-  intervals: number[]
+  intervals: number[],
+  transposed = false
 ): GuitarShape | null {
   const baseFret = position.baseFret || 1
   const frets = position.frets.map((fret) => {
@@ -180,8 +195,85 @@ function shapeFromStoredPosition(
     root,
     intervals,
     barres,
-    true
+    !transposed,
+    transposed
   )
+}
+
+/**
+ * Moves a stored reference shape up by a semitone and rebuilds its relative
+ * fret numbers. Because open strings become fretted notes after transposition,
+ * finger numbers and any useful barre are recalculated instead of copied.
+ */
+function transposeStoredPosition(
+  position: StoredGuitarPosition,
+  semitones: number
+): StoredGuitarPosition | null {
+  const sourceBaseFret = position.baseFret || 1
+  const absoluteFrets = position.frets.map((fret) => {
+    if (fret < 0) return null
+    if (fret === 0) return 0
+    return sourceBaseFret + fret - 1
+  })
+  const transposedFrets = absoluteFrets.map((fret) =>
+    fret === null ? null : fret + semitones
+  )
+  const playedFrets = transposedFrets.filter(
+    (fret): fret is number => fret !== null && fret > 0
+  )
+
+  if (!playedFrets.length || playedFrets.some((fret) => fret > 15)) {
+    return null
+  }
+
+  const baseFret = Math.min(...playedFrets)
+  const hasOpenStrings = position.frets.some((fret) => fret === 0)
+  const fingers = position.frets.map((sourceFret, stringIndex) => {
+    if (sourceFret < 0) return 0
+    if (sourceFret === 0) return 1
+
+    const sourceFinger = position.fingers[stringIndex] ?? 0
+    return hasOpenStrings ? sourceFinger + 1 : sourceFinger
+  })
+
+  // Keep the source fingering when no open strings need a new index-finger
+  // position. When opens become fret 1, move the existing fingers up one
+  // assignment so the new notes can use finger 1.
+  const hasInvalidFingering = position.frets.some((sourceFret, stringIndex) => {
+    if (sourceFret < 0) return false
+    const finger = fingers[stringIndex]
+    return !Number.isInteger(finger) || finger < 1 || finger > 4
+  })
+  if (hasInvalidFingering) return null
+
+  const barres = position.barres.map((fret) => {
+    const absoluteFret = sourceBaseFret + fret - 1 + semitones
+    return absoluteFret - baseFret + 1
+  })
+  const openStringIndexes = position.frets.flatMap((fret, index) =>
+    fret === 0 ? [index] : []
+  )
+  if (openStringIndexes.length > 1) {
+    const first = openStringIndexes[0]
+    const last = openStringIndexes[openStringIndexes.length - 1]
+    const canBarreConvertedOpenStrings = transposedFrets
+      .slice(first, last + 1)
+      .every((fret) => fret !== null && fret >= semitones)
+    if (canBarreConvertedOpenStrings) {
+      barres.push(semitones - baseFret + 1)
+    }
+  }
+
+  return {
+    frets: transposedFrets.map((fret) => {
+      if (fret === null) return -1
+      if (fret === 0) return 0
+      return fret - baseFret + 1
+    }),
+    fingers,
+    baseFret,
+    barres,
+  }
 }
 
 function selectUsefulShapes(
@@ -312,6 +404,27 @@ export function generateGuitarShapes(
 
   if (referenceShapes.length > 0) {
     return selectUsefulShapes(referenceShapes, root, intervals)
+  }
+
+  const transpositionSource = TRANSPOSITION_SOURCE_BY_ROOT[root]
+  const transpositionPositions =
+    suffix && transpositionSource
+      ? storedPositions.positions[String(transpositionSource.sourceRoot)]?.[suffix] ?? []
+      : []
+  const transposedShapes = transpositionPositions
+    .map((position) =>
+      transposeStoredPosition(position, transpositionSource!.semitones)
+    )
+    .filter(
+      (position): position is StoredGuitarPosition => position !== null
+    )
+    .map((position) =>
+      shapeFromStoredPosition(position, root, intervals, true)
+    )
+    .filter((shape): shape is GuitarShape => shape !== null)
+
+  if (transposedShapes.length > 0) {
+    return selectUsefulShapes(transposedShapes, root, intervals)
   }
 
   return generateFallbackShapes(root, intervals)
