@@ -255,6 +255,22 @@ export default function LandingHero() {
         </section>
       </DrapeBackground>
 
+      <section className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-4 pt-2 sm:px-8">
+        <div className="grid gap-4 rounded-[28px] border border-[var(--border)] bg-[var(--card)]/80 p-4 shadow-[0_20px_60px_-40px_rgba(23,32,27,0.35)] backdrop-blur-xl sm:grid-cols-2 lg:grid-cols-4 lg:p-5">
+          {[
+            ["Song library", "Chord charts, keys, lyrics, and references in one reliable place."],
+            ["Service flow", "Map the order, timing, and responsibilities before rehearsal."],
+            ["Team clarity", "Keep worship, tech, and leadership aligned in one workspace."],
+            ["After the set", "Review what happened and prepare better for next time."],
+          ].map(([title, copy]) => (
+            <div key={title} className="rounded-2xl border border-[var(--border)] bg-[var(--background)]/80 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--brand)]">{title}</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{copy}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section
         id="features"
         aria-labelledby="landing-features-title"

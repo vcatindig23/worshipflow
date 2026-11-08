@@ -56,13 +56,22 @@ export default function LandingHowItWorks() {
         </p>
       </div>
 
+      <div className="mx-auto mt-8 flex max-w-4xl flex-wrap items-center justify-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+        {['Song library', 'Setlists', 'Roster', 'Live stage', 'Reviews'].map((label) => (
+          <span key={label} className="rounded-full border border-[var(--border)] bg-[var(--card)]/80 px-3 py-1.5">
+            {label}
+          </span>
+        ))}
+      </div>
+
       <ol className="mx-auto mt-8 grid max-w-6xl gap-4 md:mt-10 md:grid-cols-3">
         {workflowSteps.map(({ number, icon: Icon, title, description, details }) => (
           <li
             key={number}
-            className="group relative flex h-full flex-col rounded-3xl border border-[var(--border)] bg-[var(--card)]/85 p-5 shadow-[0_16px_48px_-32px_rgba(23,32,27,0.28)] backdrop-blur-xl transition duration-200 hover:-translate-y-1 hover:border-[var(--brand)]/35 hover:shadow-lg sm:p-6"
+            className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-[var(--border)] bg-[var(--card)]/85 p-5 shadow-[0_16px_48px_-32px_rgba(23,32,27,0.28)] backdrop-blur-xl transition duration-200 hover:-translate-y-1 hover:border-[var(--brand)]/35 hover:shadow-lg sm:p-6"
           >
-            <div className="flex items-center justify-between">
+            <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,_rgba(54,92,69,0.14),_transparent_72%)]" aria-hidden="true" />
+            <div className="relative flex items-center justify-between">
               <span className="text-xs font-bold tabular-nums tracking-[0.16em] text-[var(--muted)]">
                 STEP {number}
               </span>
@@ -71,14 +80,14 @@ export default function LandingHowItWorks() {
               </span>
             </div>
 
-            <h3 className="mt-5 text-base font-semibold tracking-tight text-[var(--foreground)] sm:text-lg">
+            <h3 className="relative mt-5 text-base font-semibold tracking-tight text-[var(--foreground)] sm:text-lg">
               {title}
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            <p className="relative mt-2 text-sm leading-6 text-[var(--muted)]">
               {description}
             </p>
 
-            <ul className="mt-5 space-y-2.5 border-t border-[var(--border)] pt-4">
+            <ul className="relative mt-5 space-y-2.5 border-t border-[var(--border)] pt-4">
               {details.map((detail) => (
                 <li
                   key={detail}
