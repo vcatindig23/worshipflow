@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import type { InvitationStatus } from "@/lib/team-invitations"
 
 export type TeamInvitationProps = {
   email: string
@@ -15,7 +16,7 @@ export type TeamInvitationProps = {
   roleLabel: string
   createdAt: string
   expiresAt: string
-  status: "pending" | "accepted" | "expired" | "revoked"
+  status: InvitationStatus
   avatarSrc?: string | null
   actions?: ReactNode
   className?: string
@@ -49,8 +50,7 @@ export function TeamInvitation({
   actions,
   className,
 }: TeamInvitationProps) {
-  const isExpired = status === "pending" && new Date(expiresAt).getTime() <= Date.now()
-  const displayStatus = isExpired ? "expired" : status
+  const displayStatus = status
   const statusLabel = displayStatus === "accepted"
     ? "Accepted"
     : displayStatus === "expired"
