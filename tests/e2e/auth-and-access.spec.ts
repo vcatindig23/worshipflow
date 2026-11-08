@@ -157,7 +157,7 @@ test.describe("WorshipFlow authentication", () => {
     expect(desktopResponse?.status()).toBe(200)
 
     await expect(
-      page.getByRole("heading", { name: /Bring your worship team into harmony/i, level: 1 })
+      page.getByRole("heading", { name: /Plan every song and every service/i, level: 1 })
     ).toBeVisible()
     await expect(page.getByRole("link", { name: "Create your workspace" })).toBeVisible()
     await expect(page.getByRole("link", { name: "I already have an account" })).toBeVisible()
@@ -175,7 +175,7 @@ test.describe("WorshipFlow authentication", () => {
 
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto("/")
-    await expect(page.getByRole("heading", { name: /Bring your worship team into harmony/i, level: 1 })).toBeVisible()
+    await expect(page.getByRole("heading", { name: /Plan every song and every service/i, level: 1 })).toBeVisible()
     await expect(page.getByRole("link", { name: "Create your workspace" })).toBeVisible()
 
     const dimensions = await page.evaluate(() => ({
