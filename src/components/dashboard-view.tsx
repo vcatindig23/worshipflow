@@ -396,7 +396,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
               href="/songs"
               data-tour="create-song"
               aria-label={"View " + workspace.songCount + " active songs"}
-              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
+              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
             >
               <span className="wf-icon-tile flex size-11 shrink-0 items-center justify-center rounded-xl">
                 <Music2 aria-hidden="true" className="size-5" />
@@ -414,7 +414,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
               href="/services"
               data-tour="build-setlist"
               aria-label={"View " + workspace.setlistCount + " service plans"}
-              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
+              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
             >
               <span className="wf-icon-tile flex size-11 shrink-0 items-center justify-center rounded-xl">
                 <ListMusic aria-hidden="true" className="size-5" />
@@ -534,8 +534,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
 
           {isTeamLeader ? (
             <section
-              data-tour="team-priorities"          {isTeamLeader ? (
-            <section
+              data-tour="team-priorities"
               aria-labelledby="dashboard-upcoming-services-title"
               className="mt-6"
             >
