@@ -389,7 +389,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
           </section>
 
           <section
-            aria-label="Workspace at a glance"
+            aria-label="Workspace totals"
             className="mt-4 grid min-w-0 gap-3 sm:grid-cols-3"
           >
             <Link
@@ -540,7 +540,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
             >
               <div className="mb-4 flex flex-col gap-3 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-end sm:justify-between">
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-[var(--brand-ink)]">On deck</p>
+                  <p className="text-xs font-semibold text-[var(--brand-ink)]">Service coordination</p>
                   <h2
                     id="dashboard-upcoming-services-title"
                     className="mt-1 text-lg font-semibold tracking-tight"
