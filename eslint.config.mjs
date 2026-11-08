@@ -13,6 +13,17 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    // These design-skill assets are plain WebGL helpers, not React modules.
+    // Their useFallback() utility is unrelated to React's Hook API.
+    files: [
+      ".agents/skills/design-taste-frontend/assets/effects/fx.js",
+      ".agents/skills/design-taste-frontend/assets/objects/photo-kit/photo.js",
+    ],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
