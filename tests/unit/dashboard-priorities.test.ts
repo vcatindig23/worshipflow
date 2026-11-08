@@ -97,6 +97,7 @@ describe("role-aware dashboard presentation", () => {
   it("renders members' real assignment confirmation controls on the dashboard", () => {
     expect(dashboardView).toContain('id="your-upcoming-assignments"')
     expect(dashboardView).toContain("<AssignmentConfirmation")
+    expect(dashboardView).toContain("positionLabel={getTeamPositionLabel(confirmation.position)}")
     expect(dashboardView).toContain('href: "#your-upcoming-assignments"')
     expect(workspaceLoader).toContain("confirmation_status, responded_at, response_note")
   })
