@@ -30,11 +30,11 @@ describe("team invitation status", () => {
     expect(markup).toContain("This invitation was accepted.")
   })
 
-  it("derives expiry for a pending invitation whose code has passed its expiry date", () => {
+  it("shows an expired invitation distinctly", () => {
     const markup = renderToStaticMarkup(
       <TeamInvitation
         {...baseProps}
-        status="pending"
+        status="expired"
         expiresAt="2020-01-01T00:00:00.000Z"
       />
     )
