@@ -269,7 +269,8 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
             const y = gridTop + (note.fret - startFret + 0.5) * fretGap
             if (y < gridTop || y > gridBottom) return null
             const isRoot = note.pitchClass === root
-            const fingerLabel = shape.reference && note.finger > 0
+            const hasSuggestedFingering = shape.reference || shape.transposed
+            const fingerLabel = hasSuggestedFingering && note.finger > 0
               ? String(note.finger)
               : NOTE_NAMES[note.pitchClass]
             return (
@@ -320,7 +321,9 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
       <p className="text-xs leading-5 text-[var(--muted)]">
         {shape.reference
           ? "Reference fingering shown. Numbers inside the dots are fingers: 1 index, 2 middle, 3 ring, 4 pinky."
-          : "Calculated voicing shown with the note names inside each dot. Fret positions match the selected chord tones; this shape has no database-suggested finger assignment."}
+          : shape.transposed
+            ? "Transposed reference shape. Finger numbers are suggested from the new fret positions; check the fingering and barre for comfort."
+            : "Calculated voicing shown with the note names inside each dot. Fret positions match the selected chord tones; this shape has no database-suggested finger assignment."}
         {" "}Notes in this shape: {playedNotes}.
       </p>
     </div>
@@ -391,7 +394,17 @@ function GuitarShapeSelector({ root, intervals, chordTypeId }: { root: number; i
           )
         })}
       </div>
-      {!shape.reference ? (
+      {shape.transposed ? (
+        <div
+          role="status"
+          className="rounded-xl border border-[var(--warning)]/35 bg-[var(--warning-soft)] px-3.5 py-3 text-xs leading-5 text-[var(--foreground)]"
+        >
+          <span className="font-semibold">Transposed reference voicing.</span>{" "}
+          Its fret positions come from a reference shape in the neighboring key.
+          Finger numbers and barre marks are recalculated suggestions, so check
+          the shape for comfortable fingering and clean string contact.
+        </div>
+      ) : !shape.reference ? (
         <div
           role="status"
           className="rounded-xl border border-[var(--warning)]/35 bg-[var(--warning-soft)] px-3.5 py-3 text-xs leading-5 text-[var(--foreground)]"
