@@ -431,7 +431,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
             <Link
               href="/settings/team"
               aria-label={"View " + workspace.memberCount + " team members"}
-              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
+              className="wf-card wf-card-interactive group flex min-w-0 items-center gap-4 p-4 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 sm:p-5"
             >
               <span className="wf-icon-tile flex size-11 shrink-0 items-center justify-center rounded-xl">
                 <UsersRound aria-hidden="true" className="size-5" />
@@ -605,7 +605,7 @@ export default function DashboardView({ workspace }: DashboardViewProps) {
                       <Link
                         key={setlist.id}
                         href={priority.href}
-                        className="wf-card wf-card-interactive group flex min-w-0 flex-col p-5 transition-transform hover:-translate-y-0.5"
+                        className="wf-card wf-card-interactive group flex min-w-0 flex-col p-5 hover:-translate-y-0.5"
                       >
                         <div className="flex min-w-0 items-start gap-3">
                           <span className="wf-icon-tile flex size-10 shrink-0 items-center justify-center">
