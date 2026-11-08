@@ -21,6 +21,7 @@ import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { createClient } from "@/lib/supabase/server"
 import { teamPositionLabels } from "@/lib/team-positions"
+import { getInvitationStatus, type InvitationStatus } from "@/lib/team-invitations"
 import InviteMemberForm from "./invite-member-form"
 import {
   removeMember,
@@ -444,9 +445,9 @@ export default async function TeamSettingsPage({
                 }
                 createdAt={invitation.created_at}
                 expiresAt={invitation.expires_at}
-                status={invitation.status as "pending" | "accepted" | "expired" | "revoked"}
+                status={getInvitationStatus(invitation.status as InvitationStatus, invitation.expires_at)}
                 actions={
-                  invitation.status === "pending" && new Date(invitation.expires_at).getTime() > Date.now() ? (
+                  getInvitationStatus(invitation.status as InvitationStatus, invitation.expires_at) === "pending" ? (
                     <form action={revokeInvitation} className="shrink-0">
                       <input
                         type="hidden"
