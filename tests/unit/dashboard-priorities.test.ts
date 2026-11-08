@@ -129,7 +129,7 @@ describe("role-aware dashboard presentation", () => {
   })
 
   it("shows real workspace totals as direct navigation links", () => {
-    expect(dashboardView).toContain('aria-label="Workspace at a glance"')
+    expect(dashboardView).toContain('aria-label="Workspace totals"')
     expect(dashboardView).toContain('aria-label={"View " + workspace.songCount + " active songs"}')
     expect(dashboardView).toContain('aria-label={"View " + workspace.setlistCount + " service plans"}')
     expect(dashboardView).toContain('aria-label={"View " + workspace.memberCount + " team members"}')
