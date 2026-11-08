@@ -578,6 +578,36 @@ button.wf-action-loading::after {
   transform: translateZ(0);
 }
 
+.wf-landing-demo-shell::before {
+  position: absolute;
+  inset: 12% auto auto -18%;
+  width: 55%;
+  height: 55%;
+  content: "";
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgb(120 167 128 / 26%), transparent 68%);
+  filter: blur(22px);
+  pointer-events: none;
+}
+
+.wf-landing-demo-shell::after {
+  position: absolute;
+  inset: auto -8% -10% auto;
+  width: 46%;
+  height: 46%;
+  content: "";
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgb(225 196 158 / 18%), transparent 70%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.wf-landing-scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 html[data-theme="dark"] .wf-landing-mesh {
   background:
     radial-gradient(ellipse at 12% 13%, rgb(58 95 65 / 32%), transparent 36%),

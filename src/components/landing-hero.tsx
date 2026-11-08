@@ -7,7 +7,9 @@ import {
   ArrowRight,
   CalendarDays,
   CheckCircle2,
+  Clock3,
   Music2,
+  Sparkles,
   UsersRound,
 } from "lucide-react"
 
@@ -15,18 +17,30 @@ const highlights = [
   {
     icon: Music2,
     title: "Songs that stay ready",
-    description: "Keep lyrics, chords, keys, and arrangements together.",
+    description: "Lyrics, chords, keys, and arrangements stay organized in one living library.",
   },
   {
     icon: CalendarDays,
-    title: "Services without the scramble",
-    description: "Build setlists, plan rehearsals, and keep schedules clear.",
+    title: "Services that feel easy",
+    description: "Build the setlist, assign roles, and keep rehearsals moving without the chaos.",
   },
   {
     icon: UsersRound,
-    title: "One team, in sync",
-    description: "Coordinate roles, confirmations, files, and conversations.",
+    title: "A team that stays aligned",
+    description: "Shared planning, clear updates, and context for every worship leader and volunteer.",
   },
+]
+
+const songRows = [
+  { title: "Open the Gates", key: "D", time: "74 BPM", active: true },
+  { title: "Grace Unmeasured", key: "G", time: "82 BPM", active: false },
+  { title: "Goodness of God", key: "F", time: "70 BPM", active: false },
+]
+
+const teamRows = [
+  { name: "Leads", note: "3 confirmed" },
+  { name: "Worship", note: "2 pending" },
+  { name: "Tech", note: "All set" },
 ]
 
 export default function LandingHero() {
@@ -55,7 +69,7 @@ export default function LandingHero() {
               className="wf-landing-wordmark h-auto w-40 sm:w-48"
             />
           </Link>
-  
+
           <nav aria-label="Main navigation" className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/login"
@@ -72,62 +86,166 @@ export default function LandingHero() {
             </Link>
           </nav>
         </header>
-  
+
         <section
           aria-labelledby="landing-hero-title"
-          className="relative z-10 mx-auto flex min-h-[min(760px,calc(100svh-84px))] w-full max-w-6xl flex-col items-center justify-center px-5 pb-20 pt-14 text-center sm:px-8 sm:pb-24 sm:pt-16 lg:pt-20"
+          className="relative z-10 mx-auto w-full max-w-6xl px-5 pb-16 pt-10 sm:px-8 sm:pb-24 sm:pt-16 lg:pb-28"
         >
-          <div className="wf-landing-eyebrow inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)]/75 px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--brand)] shadow-sm backdrop-blur-md sm:text-xs">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--brand)]/35 motion-reduce:animate-none" />
-              <span className="relative inline-flex size-2 rounded-full bg-[var(--brand)]" />
-            </span>
-            Made for worship teams
+          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="text-center lg:text-left">
+              <div className="wf-landing-eyebrow inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)]/75 px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--brand)] shadow-sm backdrop-blur-md sm:text-xs">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--brand)]/35 motion-reduce:animate-none" />
+                  <span className="relative inline-flex size-2 rounded-full bg-[var(--brand)]" />
+                </span>
+                Made for worship teams
+              </div>
+
+              <h1
+                id="landing-hero-title"
+                className="mt-7 max-w-xl text-balance text-[clamp(2.8rem,7vw,5.2rem)] font-semibold leading-[0.98] tracking-[-0.065em] text-[var(--foreground)] lg:max-w-none"
+              >
+                Plan every song and every service
+                <span className="wf-landing-title-accent mt-1 block">without the scramble.</span>
+              </h1>
+
+              <p className="mt-6 max-w-xl text-pretty text-base leading-7 text-[var(--muted)] sm:text-lg lg:max-w-none">
+                WorshipFlow brings your team together with one calm, connected place for song prep, rehearsal planning, service flow, and follow-through.
+              </p>
+
+              <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-start">
+                <Link
+                  href="/signup"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--brand)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_-12px_rgba(41,71,53,0.65)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-[0_18px_36px_-14px_rgba(41,71,53,0.6)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
+                >
+                  Create your workspace
+                  <ArrowRight aria-hidden="true" className="size-4" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--card)]/80 px-6 py-3 text-sm font-semibold text-[var(--foreground)] shadow-sm backdrop-blur-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)]/45 hover:bg-[var(--card)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
+                >
+                  I already have an account
+                </Link>
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium text-[var(--muted)] sm:text-sm lg:justify-start">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)]/60 px-2.5 py-1.5">
+                  <CheckCircle2 aria-hidden="true" className="size-3.5 text-[var(--brand)]" />
+                  Built for real worship teams
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)]/60 px-2.5 py-1.5">
+                  <Clock3 aria-hidden="true" className="size-3.5 text-[var(--brand)]" />
+                  From rehearsal to Sunday
+                </span>
+              </div>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-[560px]">
+              <div className="absolute inset-x-12 -top-6 h-20 rounded-full bg-[var(--brand)]/10 blur-3xl" aria-hidden="true" />
+              <div className="wf-landing-demo-shell relative overflow-hidden rounded-[30px] border border-[var(--border)] bg-[var(--card)]/80 p-3 shadow-[0_30px_80px_-35px_rgba(23,32,27,0.5)] backdrop-blur-xl sm:p-4">
+                <div className="rounded-[24px] border border-[var(--border)] bg-[var(--background)]/85 p-3 sm:p-4">
+                  <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                        <Music2 aria-hidden="true" className="size-4" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">WorshipFlow</p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">Sunday set</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[var(--success)]" aria-hidden="true" />
+                      <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[var(--warning)]" aria-hidden="true" />
+                      <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[var(--danger)]" aria-hidden="true" />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
+                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Setlist</p>
+                          <h2 className="mt-1 text-base font-semibold text-[var(--foreground)]">Morning worship</h2>
+                        </div>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--brand-soft)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand)]">
+                          <Sparkles aria-hidden="true" className="size-3" />
+                          Ready
+                        </span>
+                      </div>
+
+                      <div className="mt-4 space-y-2.5">
+                        {songRows.map(({ title, key, time, active }) => (
+                          <div
+                            key={title}
+                            className={`flex items-center justify-between rounded-xl border px-2.5 py-2 transition ${
+                              active
+                                ? "border-[var(--brand)]/35 bg-[var(--brand-soft)]"
+                                : "border-[var(--border)] bg-[var(--surface)]"
+                            }`}
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-[var(--foreground)]">{title}</p>
+                              <p className="text-[11px] text-[var(--muted)]">{time}</p>
+                            </div>
+                            <span className="ml-3 rounded-full border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+                              {key}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Live stage</p>
+                        <div className="mt-3 space-y-2.5">
+                          <div className="rounded-xl bg-[var(--brand-soft)] p-2 text-[11px] text-[var(--brand)]">
+                            <span className="block font-bold uppercase tracking-[0.14em]">Now</span>
+                            <span className="mt-1 block text-sm font-semibold text-[var(--foreground)]">Open the Gates</span>
+                          </div>
+                          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 text-[11px] text-[var(--muted)]">
+                            <span className="block font-semibold text-[var(--foreground)]">Countdown</span>
+                            02:14 till next song
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Team</p>
+                        <div className="mt-3 space-y-2.5">
+                          {teamRows.map(({ name, note }) => (
+                            <div key={name} className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2.5 py-2 text-[11px] text-[var(--muted)]">
+                              <span className="font-medium text-[var(--foreground)]">{name}</span>
+                              <span>{note}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                {[
+                  { value: "One library", label: "for every song" },
+                  { value: "Shared flow", label: "before service" },
+                  { value: "Team clarity", label: "during rehearsals" },
+                ].map((item) => (
+                  <div key={item.value} className="rounded-2xl border border-[var(--border)] bg-[var(--card)]/70 px-3 py-2.5 text-center shadow-sm backdrop-blur-sm">
+                    <p className="text-lg font-semibold tracking-[-0.04em] text-[var(--foreground)]">{item.value}</p>
+                    <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-  
-          <h1
-            id="landing-hero-title"
-            className="mt-7 max-w-5xl text-balance text-[clamp(2.65rem,7.2vw,5.75rem)] font-semibold leading-[1.03] tracking-[-0.065em] text-[var(--foreground)]"
-          >
-            Bring your worship team
-            <span className="wf-landing-title-accent mt-1 block">
-              into harmony.
-            </span>
-          </h1>
-  
-          <p className="mt-6 max-w-2xl text-pretty text-base leading-7 text-[var(--muted)] sm:mt-7 sm:text-lg sm:leading-8">
-            Songs, chord charts, service plans, schedules, and team
-            communication—together in one calm, organized workspace.
-          </p>
-  
-          <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-9 sm:w-auto sm:flex-row sm:items-center">
-            <Link
-              href="/signup"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--brand)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_-12px_rgba(41,71,53,0.65)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-[0_18px_36px_-14px_rgba(41,71,53,0.6)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
-            >
-              Create your workspace
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--card)]/80 px-6 py-3 text-sm font-semibold text-[var(--foreground)] shadow-sm backdrop-blur-sm transition hover:-translate-y-0.5 hover:border-[var(--brand)]/45 hover:bg-[var(--card)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
-            >
-              I already have an account
-            </Link>
-          </div>
-  
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-[var(--muted)] sm:mt-10 sm:text-sm">
-            <span className="inline-flex items-center gap-2">
-              <CheckCircle2 aria-hidden="true" className="size-4 text-[var(--brand)]" />
-              Built for real team workflows
-            </span>
-            <span className="hidden size-1 rounded-full bg-[var(--border)] sm:inline-block" aria-hidden="true" />
-            <span>From rehearsal to Sunday</span>
-          </div>
-  
+
           <a
             href="#features"
-            className="wf-landing-scroll-cue mt-12 inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] sm:mt-14"
+            className="wf-landing-scroll-cue mt-10 inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] sm:mt-14"
           >
             Explore the workspace
             <span aria-hidden="true" className="wf-landing-scroll-arrow">
