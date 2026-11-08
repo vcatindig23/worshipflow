@@ -53,7 +53,7 @@ const tourSteps: TourStep[] = [
     selector: '[data-tour="build-setlist"]',
   },
   {
-    title: "Stay ahead of service priorities",
+    title: "Review service priorities",
     description:
       "Review the next service's readiness, then respond to each position on your own upcoming assignments.",
     selector: '[data-tour="team-priorities"]',
