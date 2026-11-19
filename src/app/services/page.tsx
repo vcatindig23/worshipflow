@@ -504,17 +504,7 @@ export default async function ServicesPage({
                                 {setlist.name}
                               </h2>
 
-                              <span
-                                className={`wf-status ${
-                                  setlist.status === "published"
-                                    ? "wf-status-success"
-                                    : setlist.status === "archived"
-                                      ? "wf-status-warning"
-                                      : "wf-status-neutral"
-                                }`}
-                              >
-                                <SetlistStatusBadge status={setlist.status} />
-                              </span>
+                              <SetlistStatusBadge status={setlist.status} />
 
                               {setlist.completed_at ? (
                                 <span className="wf-status wf-status-success">
