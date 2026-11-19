@@ -94,6 +94,18 @@ describe("song library and Chord Chart UX", () => {
     expect(audioPlayer).toContain("MEDIA_ERR_DECODE")
   })
 
+  it("renders up to five compact guitar diagrams with string and fingering markers", () => {
+    const chart = source("src/components/chord-chart/chord-chart-explorer.tsx")
+
+    expect(chart).toContain('aria-label="Available guitar chord diagrams"')
+    expect(chart).toContain('grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5')
+    expect(chart).toContain('<GuitarShapeDiagram shape={diagramShape} root={root} />')
+    expect(chart).toContain('fill="#c62828"')
+    expect(chart).toContain('fill="#ffc928"')
+    expect(chart).toContain('{name.toUpperCase()}')
+    expect(chart).toContain('aria-label={"Select guitar inversion " + (index + 1)')
+  })
+
   it("supports keyboard navigation and identifies calculated guitar fallbacks", () => {
     const chart = source("src/components/chord-chart/chord-chart-explorer.tsx")
 
