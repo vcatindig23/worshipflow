@@ -109,6 +109,57 @@ export async function saveRehearsalPlan(formData: FormData) {
   redirect(`/setlists/${setlistId}/preparation?saved=rehearsal`)
 }
 
+export async function saveSchedulingBuffers(formData: FormData) {
+  const setlistId = String(formData.get("setlistId") ?? "").trim()
+  if (!uuidSchema.safeParse(setlistId).success) redirect("/setlists")
+
+  const readBuffer = (field: string) => {
+    const value = String(formData.get(field) ?? "").trim()
+    const parsed = value === "" ? 0 : Number(value)
+    return Number.isInteger(parsed) && parsed >= 0 && parsed <= 240
+      ? parsed
+      : null
+  }
+
+  const servicePrepBuffer = readBuffer("servicePrepBufferMinutes")
+  const serviceTravelBuffer = readBuffer("serviceTravelBufferMinutes")
+  const rehearsalPrepBuffer = readBuffer("rehearsalPrepBufferMinutes")
+  const rehearsalTravelBuffer = readBuffer("rehearsalTravelBufferMinutes")
+
+  if (
+    servicePrepBuffer === null ||
+    serviceTravelBuffer === null ||
+    rehearsalPrepBuffer === null ||
+    rehearsalTravelBuffer === null
+  ) {
+    redirectPreparationError(setlistId, "invalid_schedule_buffers")
+  }
+
+  const { workspace, supabase } = await getPreparationContext(setlistId)
+  const { data, error } = await supabase
+    .from("setlists")
+    .update({
+      service_prep_buffer_minutes: servicePrepBuffer,
+      service_travel_buffer_minutes: serviceTravelBuffer,
+      rehearsal_prep_buffer_minutes: rehearsalPrepBuffer,
+      rehearsal_travel_buffer_minutes: rehearsalTravelBuffer,
+      updated_by: workspace.userId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", setlistId)
+    .eq("organization_id", workspace.organizationId)
+    .select("id")
+    .maybeSingle()
+
+  if (error || !data) {
+    console.error("save_scheduling_buffers failed:", { code: error?.code ?? "NO_MATCHING_SETLIST" })
+    redirectPreparationError(setlistId, "schedule_buffers_save_failed")
+  }
+
+  revalidatePreparation(setlistId)
+  redirect(`/setlists/${setlistId}/preparation?saved=buffers`)
+}
+
 export async function createPreparationTask(formData: FormData) {
   const setlistId = String(formData.get("setlistId") ?? "").trim()
   const title = String(formData.get("title") ?? "").trim()
