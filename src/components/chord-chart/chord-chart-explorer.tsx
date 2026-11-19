@@ -618,11 +618,11 @@ export default function ChordChartExplorer() {
   async function handlePlayChord() {
     try {
       setAudioError(false)
+      setPlaying(true)
       const notes = instrument === "guitar"
         ? (guitarShapes[Math.min(guitarShapeIndex, Math.max(0, guitarShapes.length - 1))]?.notes.map((note) => note.midi) ?? quality.intervals.map((interval) => 48 + root + interval))
         : pianoVoicing.map((note) => note.midi)
       await playChordSample(notes, instrument)
-      setPlaying(true)
       window.setTimeout(() => setPlaying(false), instrument === "guitar" ? 2300 : 3000)
     } catch {
       setPlaying(false)
@@ -651,7 +651,7 @@ export default function ChordChartExplorer() {
               <Piano className="size-4" aria-hidden="true" />Piano
             </button>
           </div>
-          <button type="button" onClick={handlePlayChord} aria-label={playing ? "Playing " + instrument + " chord" : "Play " + instrument + " chord"} aria-busy={playing} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2">
+          <button type="button" onClick={handlePlayChord} disabled={playing} aria-label={playing ? "Playing " + instrument + " chord" : "Play " + instrument + " chord"} aria-busy={playing} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2">
             <Volume2 className="size-4" aria-hidden="true" />{playing ? "Playing chord…" : "Play chord"}
           </button>
         </div>
