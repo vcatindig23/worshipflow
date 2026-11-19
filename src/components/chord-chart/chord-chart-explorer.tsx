@@ -1,8 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { AudioLines, Guitar, Piano, Volume2 } from "lucide-react"
+import { Guitar, Piano, Volume2 } from "lucide-react"
 import { generateGuitarShapes, GUITAR_STRING_NAMES, type GuitarShape } from "@/lib/chord-chart/guitar-shapes"
+import { PageHeader } from "@/components/ui/page"
 
 type Instrument = "guitar" | "piano"
 type ChordType = { id: string; label: string; suffix: string; group: string; intervals: number[] }
@@ -386,7 +387,7 @@ function GuitarShapeSelector({ root, intervals, chordTypeId }: { root: number; i
                 "rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " +
                 (safeIndex === index
                   ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
-                  : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")
+                  : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--foreground)]")
               }
             >
               {label}
@@ -539,44 +540,137 @@ export default function ChordChartExplorer() {
 
   return (
     <div className="space-y-6 pb-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]"><AudioLines className="size-3.5" />Chord reference</span>
-          <h1 className="wf-page-title mt-3">Guitar &amp; Piano Chord Chart</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">Choose a chord to see one clear playable shape at a time. Switch voicings to compare inversions without the extra fretboard noise.</p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Chord reference"
+        title="Guitar & Piano Chord Chart"
+        description="Build a chord, choose an instrument, and compare one clear voicing at a time."
+      />
 
-      <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div className="grid flex-1 gap-4 sm:grid-cols-2">
-            <label className="block text-sm font-medium text-[var(--foreground)]">Root note
-              <select value={root} onChange={(event) => { setRoot(Number(event.target.value)); setInversionIndex(0) }} className="mt-1.5 h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-soft)]">
-                {ROOT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
-            </label>
-            <label className="block text-sm font-medium text-[var(--foreground)]">Chord type
-              <select value={qualityId} onChange={(event) => { setQualityId(event.target.value); setInversionIndex(0) }} className="mt-1.5 h-11 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-soft)]">
-                {CHORD_GROUPS.map((group) => <optgroup key={group} label={group}>{CHORD_TYPES.filter((type) => type.group === group).map((type) => <option key={type.id} value={type.id}>{type.label}{type.suffix ? " · " + type.suffix : ""}</option>)}</optgroup>)}
-              </select>
-            </label>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div role="group" className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1" aria-label="Instrument">
-              <button type="button" onClick={() => changeInstrument("guitar")} aria-pressed={instrument === "guitar"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (instrument === "guitar" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Guitar className="size-4" />Guitar</button>
-              <button type="button" onClick={() => changeInstrument("piano")} aria-pressed={instrument === "piano"} className={"inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (instrument === "piano" ? "bg-white text-[var(--foreground)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]")}><Piano className="size-4" />Piano</button>
+      <section aria-label="Chord controls" className="wf-card p-4 sm:p-6">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(15rem,18rem)] xl:items-end">
+          <div>
+            <div className="mb-3">
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">Build a chord</h2>
+              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Choose the root note and chord quality to update the chart.</p>
             </div>
-            <button type="button" onClick={handlePlaySample} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2"><Volume2 className="size-4" />{playing ? "Playing sample…" : "Play " + instrument + " sample"}</button>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-[var(--foreground)]">
+                Root note
+                <select
+                  value={root}
+                  onChange={(event) => {
+                    setRoot(Number(event.target.value))
+                    setInversionIndex(0)
+                  }}
+                  className="mt-1.5 h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--focus-ring)]"
+                >
+                  {ROOT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-medium text-[var(--foreground)]">
+                Chord type
+                <select
+                  value={qualityId}
+                  onChange={(event) => {
+                    setQualityId(event.target.value)
+                    setInversionIndex(0)
+                  }}
+                  className="mt-1.5 h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--focus-ring)]"
+                >
+                  {CHORD_GROUPS.map((group) => (
+                    <optgroup key={group} label={group}>
+                      {CHORD_TYPES.filter((type) => type.group === group).map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.label}{type.suffix ? " · " + type.suffix : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end xl:flex-col xl:items-stretch">
+            <div className="min-w-0 flex-1">
+              <p id="instrument-label" className="mb-1.5 text-sm font-medium text-[var(--foreground)]">Instrument</p>
+              <div
+                role="group"
+                aria-labelledby="instrument-label"
+                className="grid grid-cols-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1"
+              >
+                <button
+                  type="button"
+                  onClick={() => changeInstrument("guitar")}
+                  aria-pressed={instrument === "guitar"}
+                  className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (instrument === "guitar" ? "bg-[var(--card)] text-[var(--foreground)] shadow-sm ring-1 ring-[var(--border)]" : "text-[var(--muted)] hover:text-[var(--foreground)]")}
+                >
+                  <Guitar className="size-4" aria-hidden="true" />
+                  Guitar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changeInstrument("piano")}
+                  aria-pressed={instrument === "piano"}
+                  className={"inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (instrument === "piano" ? "bg-[var(--card)] text-[var(--foreground)] shadow-sm ring-1 ring-[var(--border)]" : "text-[var(--muted)] hover:text-[var(--foreground)]")}
+                >
+                  <Piano className="size-4" aria-hidden="true" />
+                  Piano
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handlePlaySample}
+              aria-label={playing ? "Playing " + instrument + " chord sample" : "Play " + instrument + " chord sample"}
+              aria-busy={playing}
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2"
+            >
+              <Volume2 className="size-4" aria-hidden="true" />
+              {playing ? "Playing sample…" : "Play " + instrument + " sample"}
+            </button>
           </div>
         </div>
-        <div className="mt-5 flex flex-col gap-4 border-t border-[var(--border)] pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <div><p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Selected chord</p><div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1"><h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">{chordSymbol}</h2><span className="text-sm text-[var(--muted)]">{quality.label}</span></div></div>
-          <div className="sm:text-right"><p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Chord notes</p><div className="mt-2 flex flex-wrap gap-2 sm:justify-end">{chordNotes.map((note) => <span key={note} className={"rounded-lg px-2.5 py-1 text-sm font-semibold " + (note === rootName ? "bg-[var(--brand)] text-white" : "border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]")}>{note}</span>)}</div></div>
+
+        <div className="mt-5 grid gap-4 border-t border-[var(--border)] pt-5 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:items-center">
+          <div className="rounded-xl bg-[var(--brand-soft)] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Selected chord</p>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">{chordSymbol}</h2>
+              <span className="text-sm text-[var(--muted)]">{quality.label}</span>
+            </div>
+          </div>
+
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Chord notes</p>
+              <span className="text-xs tabular-nums text-[var(--muted)]">{chordNotes.length} notes</span>
+            </div>
+            <div role="group" aria-label={"Chord notes: " + chordNotes.join(", ")} className="mt-2 flex flex-wrap gap-2">
+              {chordNotes.map((note) => (
+                <span
+                  key={note}
+                  className={"inline-flex min-h-9 items-center rounded-lg px-3 text-sm font-semibold " + (note === rootName ? "bg-[var(--brand)] text-white" : "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)]")}
+                >
+                  {note}
+                  {note === rootName ? <span className="sr-only">, root note</span> : null}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-        {audioError ? <p role="status" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">Audio could not start. Check that your browser allows sound, then try again.</p> : null}
+
+        {audioError ? (
+          <p role="status" className="mt-4 rounded-lg border border-[var(--warning)]/35 bg-[var(--warning-soft)] px-3 py-2 text-sm text-[var(--foreground)]">
+            Audio could not start. Check that your browser allows sound, then try again.
+          </p>
+        ) : null}
       </section>
 
-      <section className="rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm sm:p-6">
+      <section aria-label="Chord voicing" className="wf-card p-4 sm:p-6">
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div><h2 className="text-lg font-semibold text-[var(--foreground)]">{instrument === "guitar" ? "Guitar shape" : "Piano inversion"}</h2><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{instrument === "guitar" ? "One playable fingering at a time, on the fretboard through fret 15." : "One inversion at a time, on a compact C3–C5 keyboard."}</p></div>
           <ChordToneLegend />
@@ -626,7 +720,7 @@ export default function ChordChartExplorer() {
                     "rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " +
                     (inversionIndex === index
                       ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
-                      : "border-[var(--border)] bg-white text-[var(--muted)] hover:text-[var(--foreground)]")
+                      : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--foreground)]")
                   }
                 >
                   {index === 0
