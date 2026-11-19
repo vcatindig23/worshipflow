@@ -613,9 +613,11 @@ export default async function MySchedulePage({
             <Feedback tone="error" title="Availability could not be updated">
               {getParam(params.availabilityError) === "invalid_entry"
                 ? "Check the dates, days, and times and try again."
-                : getParam(params.availabilityError) === "delete_failed"
-                  ? "This availability entry could not be removed. Please try again."
-                  : "Your availability could not be saved. Please try again."}
+                : getParam(params.availabilityError) === "update_failed"
+                  ? "This availability entry could not be updated. Please refresh and try again."
+                  : getParam(params.availabilityError) === "delete_failed"
+                    ? "This availability entry could not be removed. Please try again."
+                    : "Your availability could not be saved. Please try again."}
             </Feedback>
           </div>
         ) : null}
