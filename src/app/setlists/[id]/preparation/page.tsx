@@ -31,6 +31,7 @@ import {
   createPreparationTask,
   deletePreparationTask,
   saveRehearsalPlan,
+  saveSchedulingBuffers,
   togglePreparationTask,
 } from "../preparation-actions"
 
@@ -169,6 +170,8 @@ export default async function ServicePreparationPage({
     rehearsal_location_too_long: "The rehearsal location must be 200 characters or fewer.",
     rehearsal_notes_too_long: "Rehearsal notes must be 3,000 characters or fewer.",
     rehearsal_save_failed: "The rehearsal plan could not be saved.",
+    invalid_schedule_buffers: "Each buffer must be a whole number from 0 to 240 minutes.",
+    schedule_buffers_save_failed: "The scheduling buffers could not be saved. Refresh and try again.",
     task_invalid: "Checklist tasks need a title of 1–160 characters.",
     task_details_too_long: "Task details must be 1,000 characters or fewer.",
     task_save_failed: "The checklist task could not be added.",
@@ -228,6 +231,10 @@ export default async function ServicePreparationPage({
       {saved === "rehearsal" ? (
         <Feedback tone="success" title="Rehearsal plan saved">
           Your rehearsal details are up to date.
+        </Feedback>
+      ) : saved === "buffers" ? (
+        <Feedback tone="success" title="Scheduling buffers saved">
+          These reserved time windows are now included in service and rehearsal conflict checks.
         </Feedback>
       ) : saved === "task" ? (
         <Feedback tone="success" title="Preparation task added">
@@ -308,6 +315,113 @@ export default async function ServicePreparationPage({
             {setlist.rehearsal_location ? <span>· {setlist.rehearsal_location}</span> : null}
           </div>
         ) : null}
+      </section>
+
+      <section className="wf-card p-5 sm:p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+            <Clock3 className="size-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">Travel &amp; preparation buffers</h2>
+            <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+              Reserve time before each event for setup and preparation, and after it for pack-down and travel. Conflict checks use these reserved windows so members are not booked too closely together.
+            </p>
+          </div>
+        </div>
+
+        {canEdit ? (
+          <form action={saveSchedulingBuffers} className="mt-5 space-y-4">
+            <input type="hidden" name="setlistId" value={id} />
+            <div className="grid gap-4 md:grid-cols-2">
+              <fieldset className="wf-card space-y-3 p-4">
+                <legend className="px-1 text-sm font-semibold text-[var(--foreground)]">Service</legend>
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  Preparation / setup before (minutes)
+                  <Input
+                    name="servicePrepBufferMinutes"
+                    type="number"
+                    min={0}
+                    max={240}
+                    step={5}
+                    defaultValue={setlist.service_prep_buffer_minutes ?? 0}
+                    className="mt-1.5 h-11 px-3"
+                  />
+                </label>
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  Travel / pack-down after (minutes)
+                  <Input
+                    name="serviceTravelBufferMinutes"
+                    type="number"
+                    min={0}
+                    max={240}
+                    step={5}
+                    defaultValue={setlist.service_travel_buffer_minutes ?? 0}
+                    className="mt-1.5 h-11 px-3"
+                  />
+                </label>
+              </fieldset>
+
+              <fieldset className="wf-card space-y-3 p-4">
+                <legend className="px-1 text-sm font-semibold text-[var(--foreground)]">Rehearsal</legend>
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  Preparation / setup before (minutes)
+                  <Input
+                    name="rehearsalPrepBufferMinutes"
+                    type="number"
+                    min={0}
+                    max={240}
+                    step={5}
+                    defaultValue={setlist.rehearsal_prep_buffer_minutes ?? 0}
+                    className="mt-1.5 h-11 px-3"
+                  />
+                </label>
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  Travel / pack-down after (minutes)
+                  <Input
+                    name="rehearsalTravelBufferMinutes"
+                    type="number"
+                    min={0}
+                    max={240}
+                    step={5}
+                    defaultValue={setlist.rehearsal_travel_buffer_minutes ?? 0}
+                    className="mt-1.5 h-11 px-3"
+                  />
+                </label>
+              </fieldset>
+            </div>
+
+            <p className="text-xs leading-5 text-[var(--muted)]">
+              Use 0 when no extra time is needed. Each buffer accepts 0–240 minutes and applies to every member assigned to that service or rehearsal.
+            </p>
+            <div className="flex justify-end">
+              <FormSubmitButton pendingText="Saving buffers…" className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:opacity-60">
+                Save scheduling buffers
+              </FormSubmitButton>
+            </div>
+          </form>
+        ) : (
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl bg-[var(--surface)] p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Service</p>
+              <p className="mt-2 text-sm text-[var(--foreground)]">
+                {setlist.service_prep_buffer_minutes ?? 0} min preparation before
+              </p>
+              <p className="mt-1 text-sm text-[var(--foreground)]">
+                {setlist.service_travel_buffer_minutes ?? 0} min travel after
+              </p>
+            </div>
+            <div className="rounded-2xl bg-[var(--surface)] p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Rehearsal</p>
+              <p className="mt-2 text-sm text-[var(--foreground)]">
+                {setlist.rehearsal_prep_buffer_minutes ?? 0} min preparation before
+              </p>
+              <p className="mt-1 text-sm text-[var(--foreground)]">
+                {setlist.rehearsal_travel_buffer_minutes ?? 0} min travel after
+              </p>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="wf-card p-5 sm:p-6">
@@ -430,6 +544,16 @@ export default async function ServicePreparationPage({
                     <p className="text-sm leading-6 text-[var(--muted)]">
                       {conflict.other.serviceName} · {formatDate(conflict.other.date)} · {formatTime(conflict.other.startTime)}–{conflict.other.endTime}
                     </p>
+                    {(conflict.current.prepBufferMinutes > 0 || conflict.current.travelBufferMinutes > 0) ? (
+                      <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                        This {conflict.current.kind.toLowerCase()}: {conflict.current.prepBufferMinutes} min preparation before · {conflict.current.travelBufferMinutes} min travel after
+                      </p>
+                    ) : null}
+                    {(conflict.other.prepBufferMinutes > 0 || conflict.other.travelBufferMinutes > 0) ? (
+                      <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                        Other event: {conflict.other.prepBufferMinutes} min preparation before · {conflict.other.travelBufferMinutes} min travel after
+                      </p>
+                    ) : null}
                     <p className="mt-2 text-xs leading-5 text-[var(--warning)]">
                       Shared assigned team: {conflict.memberNames.join(", ")}
                     </p>
@@ -443,7 +567,7 @@ export default async function ServicePreparationPage({
           </ul>
         ) : (
           <div className="mt-4 rounded-2xl bg-[var(--surface)] px-4 py-4 text-sm leading-6 text-[var(--muted)]">
-            No overlapping commitments were found for shared team members. Services without an end time are estimated at 60 minutes; rehearsals without an end time are estimated at 90 minutes.
+            No overlapping reserved windows were found for shared team members. Services without an end time are estimated at 60 minutes; rehearsals without an end time are estimated at 90 minutes.
           </div>
         )}
         <p className="mt-3 text-xs leading-5 text-[var(--muted)]">
