@@ -46,6 +46,7 @@ import AnnouncementAcknowledgment from "./announcement-acknowledgment"
 import SetlistSwapRequestsPanel from "./swap-requests-panel"
 import AssignmentForm from "./assignment-form"
 import {
+  buildActiveScheduleAssignmentsMap,
   buildScheduleEvents,
   findProposedMemberScheduleConflicts,
   getScheduleConflictSignature,
@@ -483,17 +484,9 @@ export default async function SetlistPage({
   const currentScheduledEventCount = scheduleEvents.filter(
     (event) => event.setlistId === id
   ).length
-  const scheduleAssignmentsBySetlist = new Map<string, Set<string>>()
-
-  if (scheduleConflictChecksAvailable) {
-    for (const assignment of allScheduleAssignmentsResult.data ?? []) {
-      if (assignment.confirmation_status === "declined") continue
-
-      const members = scheduleAssignmentsBySetlist.get(assignment.setlist_id) ?? new Set<string>()
-      members.add(assignment.user_id)
-      scheduleAssignmentsBySetlist.set(assignment.setlist_id, members)
-    }
-  }
+  const scheduleAssignmentsBySetlist = scheduleConflictChecksAvailable
+    ? buildActiveScheduleAssignmentsMap(allScheduleAssignmentsResult.data ?? [])
+    : new Map<string, Set<string>>()
   const timelineRows = timelineItemsResult.data ?? []
   const timelineSummary = timelineItemsResult.error
     ? null
