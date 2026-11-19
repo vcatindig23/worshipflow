@@ -619,7 +619,7 @@ function GuitarShapeSelector({
             </button>
           ))}
         </div>
-        <p className="text-xs text-[var(--muted)]">{view === "fretboard" ? "Full neck · frets 1–15" : shapes.length + " chord voicings · low E to high E"}</p>
+        <p className="text-xs text-[var(--muted)]">{view === "fretboard" ? "Full neck · frets 1–15" : shapes.length + " chord voicings · low E to high E" + (shape.reference ? " · Reference fingering" : shape.transposed ? " · Transposed reference voicing" : " · Calculated fallback voicing.")}</p>
       </div>
 
       {view === "fretboard" ? (
