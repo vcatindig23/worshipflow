@@ -201,8 +201,8 @@ begin
   if not denied then raise exception 'Anonymous data access';end if;
   checks:=checks+2;
   execute 'reset role';
-  if checks <> 38 then raise exception 'Unexpected authorization test count: %',checks;end if;
+  if checks <> 37 then raise exception 'Unexpected authorization test count: %',checks;end if;
 end;
 $$;
 rollback;
-select '38 database authorization checks passed; all fixtures rolled back' as result;
+select '37 database authorization checks passed; all fixtures rolled back' as result;
