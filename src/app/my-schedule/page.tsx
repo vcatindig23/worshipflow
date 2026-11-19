@@ -321,7 +321,7 @@ export default async function MySchedulePage({
     setlistIds.length > 0
       ? supabase
           .from("setlists")
-          .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time")
+          .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time, service_prep_buffer_minutes, service_travel_buffer_minutes, rehearsal_prep_buffer_minutes, rehearsal_travel_buffer_minutes")
           .eq("organization_id", workspace.organizationId)
       : Promise.resolve({ data: [], error: null }),
   ])
