@@ -45,6 +45,10 @@ const errorMessages: Record<string, string> = {
   swap_resolution_failed: "The request could not be resolved. Please try again.",
   substitute_acceptance_required: "The proposed substitute must accept before a leader can approve the swap.",
   substitute_already_assigned: "That substitute is already assigned to the same position in this service.",
+  substitute_unavailable: "The proposed substitute has marked this service or rehearsal date as unavailable. Ask them to update their availability or choose another substitute.",
+  substitute_schedule_conflict: "The proposed substitute has another service or rehearsal that overlaps this commitment, including its preparation and travel buffers.",
+  schedule_verification_unavailable: "WorshipFlow could not verify the proposed substitute's schedule. Refresh and try again.",
+  availability_verification_unavailable: "WorshipFlow could not verify the proposed substitute's availability. Refresh and try again.",
 }
 
 export default async function SetlistSwapRequestsPanel({
