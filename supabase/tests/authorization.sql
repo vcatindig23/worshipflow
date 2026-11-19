@@ -6,7 +6,7 @@ declare
   admin_a uuid := gen_random_uuid(); editor_a uuid := gen_random_uuid(); member_a uuid := gen_random_uuid(); viewer_a uuid := gen_random_uuid();
   admin_b uuid := gen_random_uuid(); outsider uuid := gen_random_uuid();
   org_a uuid := gen_random_uuid(); org_b uuid := gen_random_uuid();
-  song_a uuid := gen_random_uuid(); song_b uuid := gen_random_uuid(); service_a uuid := gen_random_uuid(); service_b uuid := gen_random_uuid();
+  song_a uuid := gen_random_uuid(); song_b uuid := gen_random_uuid(); service_a uuid := gen_random_uuid(); service_b uuid := gen_random_uuid(); service_copy uuid;
   uid uuid; n integer; denied boolean; checks integer := 0;
 begin
   foreach uid in array array[admin_a,editor_a,member_a,viewer_a,admin_b,outsider] loop
@@ -76,7 +76,13 @@ begin
     get diagnostics n=row_count;denied:=n=0;
   exception when insufficient_privilege then denied:=true;end;
   if not denied then raise exception 'Viewer changed a service';end if;
-  checks:=checks+1;
+  denied:=false;
+  begin
+    insert into public.setlist_position_requirements(organization_id,setlist_id,team_position,required_count)
+    values(org_a,service_a,'singer',2);
+  exception when insufficient_privilege then denied:=true;end;
+  if not denied then raise exception 'Viewer created position requirements';end if;
+  checks:=checks+2;
 
   -- The editor can edit planning, cannot complete services or cross the tenant boundary.
   perform set_config('request.jwt.claims',jsonb_build_object('sub',editor_a,'session_id',editor_a,'aal','aal1','role','authenticated')::text,true);
@@ -87,6 +93,23 @@ begin
   update public.setlists set name='Unauthorized cross-tenant update' where id=service_b;
   get diagnostics n=row_count;
   if n<>0 then raise exception 'Cross-tenant update'; end if;
+  perform public.save_setlist_position_requirements(
+    service_a,
+    '{"worship_leader":1,"singer":2,"guitarist":2,"drummer":1}'::jsonb
+  );
+  select count(*) into n
+  from public.setlist_position_requirements
+  where setlist_id=service_a and organization_id=org_a;
+  if n<>4 then raise exception 'Editor could not save all service position requirements';end if;
+  denied:=false;
+  begin
+    perform public.save_setlist_position_requirements(
+      service_a,
+      '{"guitarist":2,"lead_guitarist":1}'::jsonb
+    );
+  exception when sqlstate '22023' then denied:=true;end;
+  if not denied then raise exception 'Overlapping guitarist coverage requirements were accepted';end if;
+  checks:=checks+2;
   denied:=false;
   begin update public.setlists set completed_at=now() where id=service_a;
   exception when insufficient_privilege then denied:=true;end;
@@ -146,6 +169,12 @@ begin
   begin perform public.update_organization_member_role(org_a,admin_a,'viewer');
   exception when others then if sqlerrm like '%LAST_ADMIN_CANNOT_BE_DEMOTED%' then denied:=true;else raise;end if;end;
   if not denied then raise exception 'Last administrator was demoted';end if;
+  service_copy := public.duplicate_setlist(service_a);
+  select count(*) into n
+  from public.setlist_position_requirements
+  where setlist_id=service_copy and organization_id=org_a;
+  if n<>4 then raise exception 'Duplicate service lost position requirements';end if;
+  checks:=checks+1;
   update public.setlists set status='published',completed_at=now(),attendance_count=10 where id=service_a;
   get diagnostics n=row_count;if n<>1 then raise exception 'Leader completion regression';end if;
   checks:=checks+6;
@@ -172,8 +201,8 @@ begin
   if not denied then raise exception 'Anonymous data access';end if;
   checks:=checks+2;
   execute 'reset role';
-  if checks <> 33 then raise exception 'Unexpected authorization test count: %',checks;end if;
+  if checks <> 37 then raise exception 'Unexpected authorization test count: %',checks;end if;
 end;
 $$;
 rollback;
-select '33 database authorization checks passed; all fixtures rolled back' as result;
+select '37 database authorization checks passed; all fixtures rolled back' as result;

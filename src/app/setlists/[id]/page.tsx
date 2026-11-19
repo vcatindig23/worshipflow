@@ -37,6 +37,8 @@ import {
 import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { getServiceReadiness } from "@/lib/service-readiness"
+import ServicePositionCoverage from "@/components/service-position-coverage"
+import type { ServicePositionRequirement } from "@/lib/service-position-coverage"
 import ServiceResources from "./service-resources"
 import ServiceTimeline from "./service-timeline"
 import ServicePreparationChecklist from "./service-preparation-checklist"
@@ -183,6 +185,12 @@ const errorMessages: Record<
     "The setlist assignment database migration is missing or not yet visible to Supabase. Apply the setlist-team-assignment migration and refresh the API schema cache.",
   team_assignment_failed:
     "The team assignment could not be changed.",
+  position_coverage_migration_missing:
+    "The service position coverage migration is missing or not yet visible to Supabase. Apply the service-position-coverage migrations and refresh the API schema cache.",
+  invalid_position_requirements:
+    "Enter a whole number from 0 to 20 for each required team position.",
+  position_coverage_save_failed:
+    "The position requirements could not be saved. Please try again.",
   invalid_resource:
     "Select a valid workspace file and display name.",
   resource_permission_denied:
@@ -398,6 +406,7 @@ export default async function SetlistPage({
     teamAssignmentsResult,
     timelineItemsResult,
     resourcesCountResult,
+    positionRequirementsResult,
   ] = await Promise.all([
     supabase
       .from("organization_members")
@@ -421,6 +430,12 @@ export default async function SetlistPage({
       .select("id", { count: "exact", head: true })
       .eq("setlist_id", id)
       .eq("organization_id", workspace.organizationId),
+    supabase
+      .from("setlist_position_requirements")
+      .select("team_position, required_count")
+      .eq("setlist_id", id)
+      .eq("organization_id", workspace.organizationId)
+      .order("team_position", { ascending: true }),
   ])
 
   const teamDataAvailable =
@@ -432,6 +447,10 @@ export default async function SetlistPage({
   const teamAssignments = (
     teamAssignmentsResult.data ?? []
   ) as TeamAssignment[]
+  const positionRequirementsAvailable = !positionRequirementsResult.error
+  const positionRequirements = (
+    positionRequirementsResult.data ?? []
+  ) as ServicePositionRequirement[]
   const timelineRows = timelineItemsResult.data ?? []
   const timelineSummary = timelineItemsResult.error
     ? null
@@ -567,7 +586,14 @@ export default async function SetlistPage({
     (assignment) => assignment.confirmation_status === "declined"
   ).length
 
-  const readiness = getServiceReadiness(setlist, setlistSongs.length, teamAssignments)
+  const readiness = getServiceReadiness(
+    setlist,
+    setlistSongs.length,
+    teamAssignments,
+    positionRequirements
+  )
+  const canEditPositionRequirements =
+    canEdit && !setlist.completed_at && setlist.status !== "archived"
   const checklistAssignments = teamAssignmentsWithAvailability.map((assignment) => ({
     memberName: teamProfileNames.get(assignment.user_id) ?? "Name not set",
     teamPosition: teamPositionLabels[assignment.team_position] ?? assignment.team_position,
@@ -584,6 +610,9 @@ export default async function SetlistPage({
     !readiness.hasSchedule ? "The service date or start time is missing" : null,
     !readiness.hasSongs ? "No songs have been added" : null,
     !readiness.hasTeam ? "No worship-team members are assigned" : null,
+    readiness.positionCoverage && readiness.positionCoverage.vacantSlots > 0
+      ? `Position coverage has ${readiness.positionCoverage.vacantSlots} unfilled spot(s)`
+      : null,
     declinedAssignments > 0
       ? `${declinedAssignments} team assignment(s) were declined`
       : null,
@@ -621,7 +650,7 @@ export default async function SetlistPage({
     "Publishing marks this plan as Published in your church workspace. It does not complete the service or prevent later edits.",
     publishReadinessWarnings.length > 0
       ? `Core readiness gaps to review: ${publishReadinessWarnings.join("; ")}.`
-      : "All four core readiness checks are complete.",
+      : `All ${readiness.totalChecks} core readiness checks are complete.`,
     publishRecommendations.length > 0
       ? `Recommended but optional: ${publishRecommendations.join("; ")}.`
       : null,
@@ -1413,6 +1442,13 @@ export default async function SetlistPage({
         </section>
 
         <aside className="setlist-print-sidebar space-y-5">
+          <ServicePositionCoverage
+            setlistId={id}
+            requirements={positionRequirements}
+            assignments={teamAssignments}
+            canEdit={canEditPositionRequirements}
+            requirementsAvailable={positionRequirementsAvailable}
+          />
           <ServiceResources setlistId={id} canEdit={canEdit} />
 
           <section id="worship-team" className="scroll-mt-6 wf-card p-5">

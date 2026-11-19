@@ -74,4 +74,65 @@ describe("shared service readiness", () => {
       hasUnconfirmedTeam: true,
     })
   })
+  it("adds position coverage as a fifth readiness check only when requirements are configured", () => {
+    const withoutRequirements = getServiceReadiness(scheduled, 1, [
+      { confirmation_status: "confirmed" },
+    ])
+
+    expect(withoutRequirements).toMatchObject({
+      totalChecks: 4,
+      completedChecks: 4,
+      percentage: 100,
+      positionCoverage: null,
+    })
+
+    const withRequirements = getServiceReadiness(
+      scheduled,
+      1,
+      [{ confirmation_status: "confirmed", team_position: "singer", user_id: "singer-1" }],
+      [
+        { team_position: "singer", required_count: 2 },
+        { team_position: "drummer", required_count: 1 },
+      ]
+    )
+
+    expect(withRequirements).toMatchObject({
+      totalChecks: 5,
+      completedChecks: 4,
+      percentage: 80,
+      positionCoverage: {
+        requiredSlots: 3,
+        assignedSlots: 1,
+        vacantSlots: 2,
+        isComplete: false,
+      },
+    })
+  })
+
+  it("keeps configured position coverage separate from member confirmations", () => {
+    const readiness = getServiceReadiness(
+      scheduled,
+      1,
+      [
+        { confirmation_status: "confirmed", team_position: "singer", user_id: "singer-1" },
+        { confirmation_status: "pending", team_position: "singer", user_id: "singer-2" },
+      ],
+      [{ team_position: "singer", required_count: 2 }]
+    )
+
+    expect(readiness).toMatchObject({
+      totalChecks: 5,
+      completedChecks: 4,
+      positionCoverage: {
+        requiredSlots: 2,
+        assignedSlots: 2,
+        confirmedSlots: 1,
+        pendingAssignments: 1,
+        vacantSlots: 0,
+        isComplete: true,
+      },
+    })
+  })
+
+
 })

@@ -1,3 +1,10 @@
+import {
+  getServicePositionCoverage,
+  type ServicePositionCoverage,
+  type ServicePositionRequirement,
+  type ServicePositionAssignment,
+} from "@/lib/service-position-coverage"
+
 export type ReadinessStatus = "ready" | "attention" | "incomplete"
 
 export type ServiceReadiness = {
@@ -13,10 +20,13 @@ export type ServiceReadiness = {
   hasSongs: boolean
   hasTeam: boolean
   hasUnconfirmedTeam: boolean
+  positionCoverage: ServicePositionCoverage | null
 }
 
 export type ServiceReadinessAssignment = {
   confirmation_status: "pending" | "confirmed" | "declined"
+  team_position?: string
+  user_id?: string
 }
 
 export type ServiceReadinessSchedule = {
@@ -27,7 +37,8 @@ export type ServiceReadinessSchedule = {
 export function getServiceReadiness(
   setlist: ServiceReadinessSchedule,
   songCount: number,
-  assignments: ServiceReadinessAssignment[]
+  assignments: ServiceReadinessAssignment[],
+  requirements: ServicePositionRequirement[] = []
 ): ServiceReadiness {
   const hasSchedule = Boolean(setlist.service_date) && Boolean(setlist.service_time)
   const hasSongs = songCount > 0
@@ -45,12 +56,21 @@ export function getServiceReadiness(
   const totalAssignments = assignments.length
   const hasUnconfirmedTeam = pendingAssignments > 0 || declinedAssignments > 0
 
-  // Preserve the service dashboard's existing four equally weighted checks.
+  const positionCoverage = getServicePositionCoverage(
+    requirements,
+    assignments.map((assignment) => ({
+      ...assignment,
+      team_position: assignment.team_position ?? "",
+    })) as ServicePositionAssignment[]
+  )
+
+  // Keep the original four checks for services without configured position requirements.
   const checks = [
     hasSchedule,
     hasSongs,
     hasTeam,
     hasTeam && totalAssignments > 0 && confirmedAssignments === totalAssignments,
+    ...(positionCoverage ? [positionCoverage.isComplete] : []),
   ]
   const completedChecks = checks.filter(Boolean).length
   const totalChecks = checks.length
@@ -72,6 +92,7 @@ export function getServiceReadiness(
     hasSongs,
     hasTeam,
     hasUnconfirmedTeam,
+    positionCoverage,
   }
 }
 
