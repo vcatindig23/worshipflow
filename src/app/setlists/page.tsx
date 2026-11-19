@@ -238,7 +238,7 @@ export default async function SetlistsPage({
             type="submit"
             className={buttonVariants({ variant: "secondary" })}
           >
-            Apply
+            Apply filters
           </button>
         </form>
       </section>
