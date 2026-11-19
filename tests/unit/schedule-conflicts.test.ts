@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildScheduleEvents,
   findScheduleConflicts,
+  findProposedMemberScheduleConflicts,
   timeToMinutes,
   type SetlistSchedule,
 } from "@/lib/schedule-conflicts"
@@ -154,4 +155,75 @@ describe("shared service and rehearsal conflict checks", () => {
     expect(timeToMinutes("invalid")).toBeNull()
     expect(timeToMinutes(null)).toBeNull()
   })
+  it("detects an existing overlap before a proposed member is assigned", () => {
+    const events = buildScheduleEvents(schedules)
+    const assignments = new Map<string, Set<string>>([
+      ["service-b", new Set(["candidate-member"])],
+    ])
+
+    const conflicts = findProposedMemberScheduleConflicts(
+      "service-a",
+      "candidate-member",
+      events,
+      assignments,
+      new Map([["candidate-member", "Candidate Member"]])
+    )
+
+    expect(conflicts).toHaveLength(1)
+    expect(conflicts[0].other.setlistId).toBe("service-b")
+    expect(conflicts[0].memberNames).toEqual(["Candidate Member"])
+    expect(assignments.has("service-a")).toBe(false)
+  })
+
+  it("checks both the target service and its rehearsal against the proposed member's schedule", () => {
+    const events = buildScheduleEvents([
+      {
+        ...schedules[0],
+        service_time: "09:00:00",
+        end_time: "10:00:00",
+        rehearsal_date: "2026-11-08",
+        rehearsal_time: "16:00:00",
+        rehearsal_end_time: "17:00:00",
+      },
+      {
+        ...schedules[1],
+        service_time: "16:15:00",
+        end_time: "17:15:00",
+        rehearsal_date: null,
+        rehearsal_time: null,
+        rehearsal_end_time: null,
+      },
+    ])
+    const assignments = new Map<string, Set<string>>([
+      ["service-b", new Set(["candidate-member"])],
+    ])
+
+    const conflicts = findProposedMemberScheduleConflicts(
+      "service-a",
+      "candidate-member",
+      events,
+      assignments
+    )
+
+    expect(conflicts).toHaveLength(1)
+    expect(conflicts[0].current.kind).toBe("Rehearsal")
+    expect(conflicts[0].other.kind).toBe("Service")
+  })
+
+  it("does not report a conflict for a proposed member with no overlapping commitments", () => {
+    const events = buildScheduleEvents(schedules)
+    const assignments = new Map<string, Set<string>>([
+      ["service-b", new Set(["another-member"])],
+    ])
+
+    expect(
+      findProposedMemberScheduleConflicts(
+        "service-a",
+        "candidate-member",
+        events,
+        assignments
+      )
+    ).toHaveLength(0)
+  })
+
 })
