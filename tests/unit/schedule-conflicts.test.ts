@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  buildActiveScheduleAssignmentsMap,
   buildScheduleEvents,
   findScheduleConflicts,
   findProposedMemberScheduleConflicts,
@@ -245,6 +246,18 @@ describe("shared service and rehearsal conflict checks", () => {
     expect(signature).toContain("service-b:service")
     expect(signature).toContain("service-c:service")
     expect(getScheduleConflictSignature([...conflicts].reverse())).toBe(signature)
+  })
+
+  it("treats pending and confirmed assignments as active but ignores declined assignments", () => {
+    const assignments = buildActiveScheduleAssignmentsMap([
+      { setlist_id: "service-a", user_id: "pending-member", confirmation_status: "pending" },
+      { setlist_id: "service-a", user_id: "confirmed-member", confirmation_status: "confirmed" },
+      { setlist_id: "service-a", user_id: "declined-member", confirmation_status: "declined" },
+    ])
+
+    expect(assignments.get("service-a")).toEqual(
+      new Set(["pending-member", "confirmed-member"])
+    )
   })
 
 
