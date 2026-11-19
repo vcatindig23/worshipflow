@@ -695,7 +695,7 @@ export default async function SongsPage({
                     : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand-ink)]"
                 }`}
               >
-                All songs
+                All
               </Link>
 
               <Link
