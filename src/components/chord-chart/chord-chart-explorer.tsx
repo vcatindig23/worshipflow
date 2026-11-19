@@ -285,7 +285,7 @@ function GuitarShapeDiagram({ shape, root }: { shape: GuitarShape; root: number 
               fontWeight="600"
               textAnchor="middle"
             >
-              {name}
+              {name.toUpperCase()}
             </text>
           </g>
         )
