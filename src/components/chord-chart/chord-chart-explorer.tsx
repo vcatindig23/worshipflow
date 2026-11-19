@@ -424,7 +424,7 @@ function GuitarFretboard({ shape, root }: { shape: GuitarShape; root: number }) 
         })}
         {GUITAR_STRING_NAMES.map((name, index) => (
           <g key={name}>
-            <text x="83" y={stringY[index] + 5} textAnchor="middle" fill="var(--foreground)" fontSize="15" fontWeight="700">{name}</text>
+            <text x="35" y={stringY[index] + 5} textAnchor="middle" fill="var(--foreground)" fontSize="15" fontWeight="700">{name}</text>
             <line x1={boardX - 2} y1={stringY[index]} x2={boardX + boardWidth + 3} y2={stringY[index]} stroke="url(#wf-string-metal)" strokeWidth={[4.1, 3.4, 2.8, 2.2, 1.7, 1.35][index]} />
           </g>
         ))}
