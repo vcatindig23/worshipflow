@@ -25,6 +25,7 @@ import { getProfileAvatarUrlMap } from "@/lib/profile-avatars"
 import { getTeamPositionLabel } from "@/lib/team-positions"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import { getServiceReadiness, getReadinessLabel } from "@/lib/service-readiness"
+import type { ServicePositionRequirement } from "@/lib/service-position-coverage"
 
 type ServicesPageProps = {
   searchParams: Promise<
@@ -54,6 +55,10 @@ type TeamAssignment = {
     | "pending"
     | "confirmed"
     | "declined"
+}
+
+type SetlistPositionRequirement = ServicePositionRequirement & {
+  setlist_id: string
 }
 
 type MemberProfile = {
@@ -189,6 +194,8 @@ export default async function ServicesPage({
       string,
       TeamAssignment[]
     >()
+  const positionRequirementsBySetlist =
+    new Map<string, ServicePositionRequirement[]>()
 
   if (setlists.length > 0) {
     const setlistIds =
@@ -199,6 +206,7 @@ export default async function ServicesPage({
     const [
       songsResult,
       assignmentsResult,
+      positionRequirementsResult,
     ] = await Promise.all([
       supabase
         .from("setlist_songs")
@@ -225,6 +233,11 @@ export default async function ServicesPage({
             ascending: true,
           }
         ),
+      supabase
+        .from("setlist_position_requirements")
+        .select("setlist_id, team_position, required_count")
+        .eq("organization_id", workspace.organizationId)
+        .in("setlist_id", setlistIds),
     ])
 
     if (
@@ -245,6 +258,20 @@ export default async function ServicesPage({
           row.setlist_id
         ) ?? 0) + 1
       )
+    }
+
+    for (const requirement of (
+      positionRequirementsResult.data ?? []
+    ) as SetlistPositionRequirement[]) {
+      const requirements =
+        positionRequirementsBySetlist.get(requirement.setlist_id) ?? []
+
+      requirements.push({
+        team_position: requirement.team_position,
+        required_count: requirement.required_count,
+      })
+
+      positionRequirementsBySetlist.set(requirement.setlist_id, requirements)
     }
 
     for (const assignment of (
@@ -478,11 +505,15 @@ export default async function ServicesPage({
                     setlist.id
                   ) ?? 0
 
+                const positionRequirements =
+                  positionRequirementsBySetlist.get(setlist.id) ?? []
+
                 const readiness =
                   getServiceReadiness(
                     setlist,
                     songCount,
-                    assignments
+                    assignments,
+                    positionRequirements
                   )
 
                 return (
@@ -727,6 +758,26 @@ export default async function ServicesPage({
                               </span>
                             ) : null}
                           </div>
+
+                          {readiness.positionCoverage ? (
+                            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                              <span className="wf-readiness-supporting">
+                                {readiness.positionCoverage.filledSlots}/
+                                {readiness.positionCoverage.requiredSlots} positions staffed
+                              </span>
+                              <span
+                                className={
+                                  readiness.positionCoverage.vacantSlots > 0
+                                    ? "wf-readiness-missing"
+                                    : "wf-readiness-supporting"
+                                }
+                              >
+                                {readiness.positionCoverage.vacantSlots > 0
+                                  ? `${readiness.positionCoverage.vacantSlots} open ${readiness.positionCoverage.vacantSlots === 1 ? "position" : "positions"}`
+                                  : "All positions covered"}
+                              </span>
+                            </div>
+                          ) : null}
 
                           {readiness.declinedAssignments >
                           0 ? (
