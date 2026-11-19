@@ -493,7 +493,6 @@ export default async function SongsPage({
     view: view === "grid" ? "grid" : undefined,
   })
   const activeFilterCount = [
-    query,
     favoriteOnly ? "favorite" : "",
     selectedTag,
     selectedKey,
