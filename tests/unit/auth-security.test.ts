@@ -24,6 +24,14 @@ describe("CSRF checks", () => {
   it("accepts a same-origin request", () => {
     expect(isSameOriginRequest(new Headers({ origin: "https://worshipflow.example" }), "https://worshipflow.example/auth/signout")).toBe(true)
   })
+  it("accepts a same-origin loopback request when the internal URL host is normalized", () => {
+    const headers = new Headers({
+      origin: "http://127.0.0.1:3000",
+      host: "127.0.0.1:3000",
+      "sec-fetch-site": "same-origin",
+    })
+    expect(isSameOriginRequest(headers, "http://localhost:3000/login")).toBe(true)
+  })
   it("rejects a different scheme on the same host", () => {
     expect(isSameOriginRequest(new Headers({ origin: "http://worshipflow.example" }), "https://worshipflow.example/auth/signout")).toBe(false)
   })
