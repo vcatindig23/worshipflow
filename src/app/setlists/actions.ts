@@ -15,6 +15,11 @@ import {
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { serviceCoveragePositionLabels } from "@/lib/service-position-coverage"
 import {
+  buildScheduleEvents,
+  findProposedMemberScheduleConflicts,
+  type SetlistSchedule,
+} from "@/lib/schedule-conflicts"
+import {
   isValidServiceDate,
   isValidServiceTime,
 } from "@/lib/service-scheduling"
@@ -775,8 +780,56 @@ export async function addSetlistTeamAssignment(
     redirect(`/setlists/${setlistId}?error=invalid_team_assignment`)
   }
 
-  const { supabase, role } = await getMembership()
+  const { supabase, organizationId, role } = await getMembership()
   requireRole(role, editorRoles)
+
+  // Re-check the latest organization schedule on the server. The client warning
+  // is for visibility; this fresh check prevents stale browser data from silently
+  // creating a new overlapping assignment.
+  const { data: schedulesData, error: schedulesError } = await supabase
+    .from("setlists")
+    .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time")
+    .eq("organization_id", organizationId)
+
+  if (schedulesError || !schedulesData?.some((schedule) => schedule.id === setlistId)) {
+    redirect(`/setlists/${setlistId}?error=assignment_conflict_check_unavailable#worship-team`)
+  }
+
+  const schedules = schedulesData as SetlistSchedule[]
+  const scheduleIds = schedules.map((schedule) => schedule.id)
+  const { data: assignmentRows, error: assignmentsError } = scheduleIds.length > 0
+    ? await supabase
+        .from("setlist_team_assignments")
+        .select("setlist_id, user_id, confirmation_status")
+        .in("setlist_id", scheduleIds)
+    : { data: [], error: null }
+
+  if (assignmentsError) {
+    redirect(`/setlists/${setlistId}?error=assignment_conflict_check_unavailable#worship-team`)
+  }
+
+  const assignmentsBySetlist = new Map<string, Set<string>>()
+  for (const assignment of assignmentRows ?? []) {
+    if (assignment.confirmation_status === "declined") continue
+
+    const members = assignmentsBySetlist.get(assignment.setlist_id) ?? new Set<string>()
+    members.add(assignment.user_id)
+    assignmentsBySetlist.set(assignment.setlist_id, members)
+  }
+
+  const proposedConflicts = findProposedMemberScheduleConflicts(
+    setlistId,
+    userId,
+    buildScheduleEvents(schedules),
+    assignmentsBySetlist
+  )
+
+  const conflictAcknowledged =
+    String(formData.get("acknowledgeScheduleConflict") ?? "") === "true"
+
+  if (proposedConflicts.length > 0 && !conflictAcknowledged) {
+    redirect(`/setlists/${setlistId}?error=assignment_schedule_conflict#worship-team`)
+  }
 
   const { error } = await supabase.rpc(
     "add_setlist_team_assignment",
