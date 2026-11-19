@@ -3,6 +3,7 @@ import {
   buildScheduleEvents,
   findScheduleConflicts,
   findProposedMemberScheduleConflicts,
+  getScheduleConflictSignature,
   timeToMinutes,
   type SetlistSchedule,
 } from "@/lib/schedule-conflicts"
@@ -225,5 +226,26 @@ describe("shared service and rehearsal conflict checks", () => {
       )
     ).toHaveLength(0)
   })
+  it("creates a stable signature for the exact conflicts a leader reviewed", () => {
+    const events = buildScheduleEvents(schedules)
+    const assignments = new Map<string, Set<string>>([
+      ["service-b", new Set(["candidate-member"])],
+      ["service-c", new Set(["candidate-member"])],
+    ])
+    const conflicts = findProposedMemberScheduleConflicts(
+      "service-a",
+      "candidate-member",
+      events,
+      assignments
+    )
+
+    expect(conflicts).toHaveLength(2)
+    const signature = getScheduleConflictSignature(conflicts)
+    expect(signature).toContain("service-a:service")
+    expect(signature).toContain("service-b:service")
+    expect(signature).toContain("service-c:service")
+    expect(getScheduleConflictSignature([...conflicts].reverse())).toBe(signature)
+  })
+
 
 })
