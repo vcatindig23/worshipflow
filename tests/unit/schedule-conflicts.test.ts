@@ -246,6 +246,15 @@ describe("shared service and rehearsal conflict checks", () => {
     expect(signature).toContain("service-b:service")
     expect(signature).toContain("service-c:service")
     expect(getScheduleConflictSignature([...conflicts].reverse())).toBe(signature)
+
+    const changedTimeConflicts = conflicts.map((conflict) => ({
+      ...conflict,
+      other: {
+        ...conflict.other,
+        endMinutes: conflict.other.endMinutes + 15,
+      },
+    }))
+    expect(getScheduleConflictSignature(changedTimeConflicts)).not.toBe(signature)
   })
 
   it("treats pending and confirmed assignments as active but ignores declined assignments", () => {
