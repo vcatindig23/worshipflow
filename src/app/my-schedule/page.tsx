@@ -575,8 +575,6 @@ export default async function MySchedulePage({
         }
       />
 
-      {getParam(params.swapRequested)      </section>
-
       {getParam(params.swapRequested) === "1" ? (
         <Feedback tone="success" title="Swap request sent">
           Your proposed substitute and worship leaders have been notified.
@@ -767,7 +765,6 @@ export default async function MySchedulePage({
               : `/my-schedule?period=${item.value}`,
         }))}
       />
-      </nav>
 
       <ScheduleViewToggle
         entries={setlists.map((setlist) => ({
