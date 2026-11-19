@@ -146,3 +146,33 @@ export function findScheduleConflicts(
     a.current.startMinutes - b.current.startMinutes
   )
 }
+
+
+/**
+ * Evaluates a proposed member assignment without mutating the existing
+ * schedule. Declined assignments are excluded by the caller; pending and
+ * confirmed assignments remain active commitments.
+ */
+export function findProposedMemberScheduleConflicts(
+  currentSetlistId: string,
+  proposedMemberId: string,
+  events: ScheduleEvent[],
+  assignmentsBySetlist: Map<string, Set<string>>,
+  memberNamesById: Map<string, string> = new Map()
+): ScheduleConflict[] {
+  const proposedAssignments = new Map(assignmentsBySetlist)
+  const currentMembers = new Set(
+    proposedAssignments.get(currentSetlistId) ?? []
+  )
+
+  currentMembers.add(proposedMemberId)
+  proposedAssignments.set(currentSetlistId, currentMembers)
+
+  return findScheduleConflicts(
+    currentSetlistId,
+    events,
+    proposedAssignments,
+    memberNamesById,
+    proposedMemberId
+  )
+}
