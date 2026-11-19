@@ -22,7 +22,7 @@ export function isSameOriginRequest(headers: Headers, requestUrl?: string) {
     const parsed = new URL(origin)
     const request = requestUrl ? new URL(requestUrl) : null
     const forwardedHost = headers.get("x-forwarded-host")?.split(",")[0]?.trim()
-    const expectedHost = forwardedHost ?? host
+    const expectedHost = forwardedHost ?? host ?? request?.host
     const forwardedProtocol = headers.get("x-forwarded-proto")?.split(",")[0]?.trim()
     const expectedProtocol = forwardedProtocol
       ? `${forwardedProtocol.replace(/:$/, "")}:`
