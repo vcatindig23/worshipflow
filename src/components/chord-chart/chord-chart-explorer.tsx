@@ -555,7 +555,7 @@ function PianoKeyboard({ root, intervals, inversionIndex }: { root: number; inte
         <span className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 font-mono text-xs text-[var(--foreground)]">{voicing.map((note) => NOTE_NAMES[note.pitchClass]).join(" · ")}</span>
       </div>
       <div className="rounded-xl border border-[var(--border)] bg-[#f8fafc] p-2 sm:p-3">
-        <svg role="img" aria-label={"Piano chord voicing in " + getInversionName(root, bass.pitchClass, chordOrder) + ", selected notes only."} viewBox={"0 0 " + PIANO_WIDTH + " 180"} className="block h-auto w-full">
+        <svg role="img" aria-label={"Piano chord voicing in " + getInversionName(root, bass.pitchClass, chordOrder) + ", selected notes only."} viewBox={"0 0 " + PIANO_WIDTH + " 180"} preserveAspectRatio="none" className="block h-[140px] w-full sm:h-[164px]">
           {whiteKeys.map((key) => {
             const selected = selectedMidis.has(key.midi)
             const isRoot = selected && key.pitchClass === root
