@@ -3,6 +3,7 @@ import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import { Feedback } from "@/components/ui/feedback"
 import { Input, Select, Textarea } from "@/components/ui/form-controls"
 import Link from "next/link"
+import SetlistStatusBadge from "@/components/setlist-status-badge"
 import {
   Archive,
   ArrowDown,
@@ -236,20 +237,6 @@ function formatDate(value: string | null) {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "full",
   }).format(new Date(`${value}T00:00:00`))
-}
-
-function statusLabel(
-  status: Setlist["status"]
-) {
-  if (status === "published") {
-    return "Published"
-  }
-
-  if (status === "archived") {
-    return "Archived"
-  }
-
-  return "Draft"
 }
 
 function availabilityBadgeClass(status: MemberAvailabilityStatus) {
@@ -683,19 +670,7 @@ export default async function SetlistPage({
                 Setlist
               </span>
 
-              <span
-                className={`wf-status ${
-                  setlist.status === "published"
-                    ? "wf-status-success"
-                    : setlist.status === "archived"
-                      ? "wf-status-warning"
-                      : "wf-status-neutral"
-                }`}
-              >
-                {statusLabel(
-                  setlist.status
-                )}
-              </span>
+              <SetlistStatusBadge status={setlist.status} />
 
               {setlist.completed_at ? (
                 <span className="wf-status wf-status-success">
