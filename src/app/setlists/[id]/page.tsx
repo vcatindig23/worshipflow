@@ -48,6 +48,7 @@ import AssignmentForm from "./assignment-form"
 import {
   buildScheduleEvents,
   findProposedMemberScheduleConflicts,
+  getScheduleConflictSignature,
   type SetlistSchedule,
 } from "@/lib/schedule-conflicts"
 import { saveServiceAsTemplate } from "@/app/services/template-actions"
@@ -593,21 +594,22 @@ export default async function SetlistPage({
             ? ` · ${availability.label}`
             : ""
 
-        const conflicts = scheduleConflictChecksAvailable
+        const proposedConflicts = scheduleConflictChecksAvailable
           ? findProposedMemberScheduleConflicts(
               id,
               member.user_id,
               scheduleEvents,
               scheduleAssignmentsBySetlist
-            ).map(({ other }) => ({
-              serviceName: other.serviceName,
-              kind: other.kind,
-              date: other.date,
-              startTime: other.startTime,
-              endTime: other.endTime,
-              isCurrentService: other.setlistId === id,
-            }))
+            )
           : []
+        const conflicts = proposedConflicts.map(({ other }) => ({
+          serviceName: other.serviceName,
+          kind: other.kind,
+          date: other.date,
+          startTime: other.startTime,
+          endTime: other.endTime,
+          isCurrentService: other.setlistId === id,
+        }))
 
         return {
           key: `${member.user_id}|${position}`,
@@ -616,6 +618,7 @@ export default async function SetlistPage({
           }${availabilitySuffix}`,
           availabilityStatus: availability?.status ?? null,
           conflicts,
+          conflictSignature: getScheduleConflictSignature(proposedConflicts),
         }
       })
   )
