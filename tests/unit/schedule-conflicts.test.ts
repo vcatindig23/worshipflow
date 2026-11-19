@@ -284,8 +284,8 @@ describe("shared service and rehearsal conflict checks", () => {
     expect(events.find((event) => event.key === "service-a:service")).toMatchObject({
       prepBufferMinutes: 15,
       travelBufferMinutes: 30,
-      conflictStartAtMinute: 540 + 7 * 1440 - 15,
-      conflictEndAtMinute: 630 + 7 * 1440 + 30,
+      conflictStartAtMinute: Math.floor(Date.UTC(2026, 10, 8) / 86_400_000) * 1440 + 540 - 15,
+      conflictEndAtMinute: Math.floor(Date.UTC(2026, 10, 8) / 86_400_000) * 1440 + 630 + 30,
     })
     expect(events.find((event) => event.key === "service-a:rehearsal")).toMatchObject({
       prepBufferMinutes: 10,
