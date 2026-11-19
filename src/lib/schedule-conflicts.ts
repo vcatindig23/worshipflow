@@ -176,3 +176,15 @@ export function findProposedMemberScheduleConflicts(
     proposedMemberId
   )
 }
+
+
+/**
+ * Stable snapshot identifier for the exact overlap set a leader reviewed.
+ * The server compares it with a fresh calculation when the form is submitted.
+ */
+export function getScheduleConflictSignature(conflicts: ScheduleConflict[]) {
+  return conflicts
+    .map((conflict) => [conflict.current.key, conflict.other.key].sort().join("::"))
+    .sort((a, b) => a.localeCompare(b))
+    .join("|")
+}
