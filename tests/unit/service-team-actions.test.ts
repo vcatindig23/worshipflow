@@ -40,30 +40,45 @@ const requesterId = "8c5a1f30-ebc6-4d75-a084-5d4f9c1a7e62"
 const substituteId = "9d6b2a41-fcd7-4e86-b195-6e5a0d2b8f73"
 const otherUserId = "ae7c3b52-0de8-4f97-82a6-7f6b1e3c9a84"
 
-function createQuery(data: unknown) {
-  const query = {
+function createQuery(data: unknown, error: { message: string } | null = null) {
+  const query: any = {
     select: vi.fn(() => query),
     eq: vi.fn(() => query),
-    maybeSingle: vi.fn(async () => ({ data, error: null })),
+    in: vi.fn(() => query),
+    maybeSingle: vi.fn(async () => ({ data, error })),
   }
+  query.then = (resolve: (value: { data: unknown; error: { message: string } | null }) => unknown, reject?: (reason: unknown) => unknown) =>
+    Promise.resolve({ data, error }).then(resolve, reject)
   return query
 }
 
 function createSupabase(options?: {
   rpcError?: { message: string } | null
   queryData?: unknown
+  schedulesData?: unknown
+  availabilityData?: unknown
+  assignmentsData?: unknown
+  schedulesError?: { message: string } | null
+  availabilityError?: { message: string } | null
+  assignmentsError?: { message: string } | null
 }) {
-  const query = createQuery(options?.queryData ?? null)
+  const requestQuery = createQuery(options?.queryData ?? null)
+  const tableQueries = new Map<string, ReturnType<typeof createQuery>>([
+    ["setlist_assignment_swap_requests", requestQuery],
+    ["setlists", createQuery(options?.schedulesData ?? [], options?.schedulesError ?? null)],
+    ["member_availability", createQuery(options?.availabilityData ?? [], options?.availabilityError ?? null)],
+    ["setlist_team_assignments", createQuery(options?.assignmentsData ?? [], options?.assignmentsError ?? null)],
+  ])
   const supabase = {
     auth: {
       getClaims: vi.fn(async () => ({
         data: { claims: { sub: substituteId } },
       })),
     },
-    from: vi.fn(() => query),
+    from: vi.fn((table: string) => tableQueries.get(table) ?? createQuery(null)),
     rpc: vi.fn(async () => ({ error: options?.rpcError ?? null })),
   }
-  return { supabase, query }
+  return { supabase, query: requestQuery }
 }
 
 function form(values: Record<string, string>) {
@@ -84,6 +99,7 @@ beforeEach(() => {
   mocks.getWorkspace.mockResolvedValue({
     userId: substituteId,
     organizationId,
+    organizationTimezone: "Asia/Manila",
     role: "team_member",
   })
 })
@@ -271,10 +287,134 @@ describe("service-team server actions", () => {
     expect(mocks.createClient).not.toHaveBeenCalled()
   })
 
+  it("blocks approval when the accepted substitute has a current date-specific blockout", async () => {
+    mocks.getWorkspace.mockResolvedValue({
+      userId: requesterId,
+      organizationId,
+      organizationTimezone: "Asia/Manila",
+      role: "worship_leader",
+    })
+    const { supabase } = createSupabase({
+      queryData: {
+        id: requestId,
+        setlist_id: setlistId,
+        organization_id: organizationId,
+        substitute_user_id: substituteId,
+      },
+      schedulesData: [{
+        id: setlistId,
+        name: "Sunday Worship",
+        service_date: "2026-11-22",
+        service_time: "09:00:00",
+        end_time: "10:00:00",
+        status: "published",
+        completed_at: null,
+        rehearsal_date: null,
+        rehearsal_time: null,
+        rehearsal_end_time: null,
+        service_prep_buffer_minutes: 0,
+        service_travel_buffer_minutes: 0,
+        rehearsal_prep_buffer_minutes: 0,
+        rehearsal_travel_buffer_minutes: 0,
+      }],
+      availabilityData: [{
+        user_id: substituteId,
+        entry_type: "blockout",
+        starts_on: "2026-11-22",
+        ends_on: "2026-11-22",
+        weekdays: null,
+        start_time: null,
+        end_time: null,
+        timezone: "Asia/Manila",
+      }],
+    })
+    mocks.createClient.mockResolvedValue(supabase)
+
+    await expectRedirect(
+      resolveAssignmentSwapRequest(form({
+        requestId,
+        decision: "approve",
+        resolutionNote: "",
+      })),
+      `/setlists/${setlistId}?coordinationError=substitute_unavailable#assignment-swaps`
+    )
+
+    expect(supabase.rpc).not.toHaveBeenCalled()
+  })
+
+  it("blocks approval when the substitute has an overlapping active service after buffers are applied", async () => {
+    mocks.getWorkspace.mockResolvedValue({
+      userId: requesterId,
+      organizationId,
+      organizationTimezone: "Asia/Manila",
+      role: "worship_leader",
+    })
+    const { supabase } = createSupabase({
+      queryData: {
+        id: requestId,
+        setlist_id: setlistId,
+        organization_id: organizationId,
+        substitute_user_id: substituteId,
+      },
+      schedulesData: [
+        {
+          id: setlistId,
+          name: "Sunday Worship",
+          service_date: "2026-11-22",
+          service_time: "09:00:00",
+          end_time: "10:00:00",
+          status: "published",
+          completed_at: null,
+          rehearsal_date: null,
+          rehearsal_time: null,
+          rehearsal_end_time: null,
+          service_prep_buffer_minutes: 0,
+          service_travel_buffer_minutes: 20,
+          rehearsal_prep_buffer_minutes: 0,
+          rehearsal_travel_buffer_minutes: 0,
+        },
+        {
+          id: "0b6e25d6-4d7c-4cbe-8f23-8bc4b3edbb66",
+          name: "Youth Fellowship",
+          service_date: "2026-11-22",
+          service_time: "10:10:00",
+          end_time: "11:00:00",
+          status: "published",
+          completed_at: null,
+          rehearsal_date: null,
+          rehearsal_time: null,
+          rehearsal_end_time: null,
+          service_prep_buffer_minutes: 0,
+          service_travel_buffer_minutes: 0,
+          rehearsal_prep_buffer_minutes: 0,
+          rehearsal_travel_buffer_minutes: 0,
+        },
+      ],
+      assignmentsData: [{
+        setlist_id: "0b6e25d6-4d7c-4cbe-8f23-8bc4b3edbb66",
+        user_id: substituteId,
+        confirmation_status: "confirmed",
+      }],
+    })
+    mocks.createClient.mockResolvedValue(supabase)
+
+    await expectRedirect(
+      resolveAssignmentSwapRequest(form({
+        requestId,
+        decision: "approve",
+        resolutionNote: "",
+      })),
+      `/setlists/${setlistId}?coordinationError=substitute_schedule_conflict#assignment-swaps`
+    )
+
+    expect(supabase.rpc).not.toHaveBeenCalled()
+  })
+
   it("scopes leader resolution to the leader's workspace and records the decision", async () => {
     mocks.getWorkspace.mockResolvedValue({
       userId: requesterId,
       organizationId,
+      organizationTimezone: "Asia/Manila",
       role: "worship_leader",
     })
     const { supabase, query } = createSupabase({
@@ -282,7 +422,24 @@ describe("service-team server actions", () => {
         id: requestId,
         setlist_id: setlistId,
         organization_id: organizationId,
+        substitute_user_id: substituteId,
       },
+      schedulesData: [{
+        id: setlistId,
+        name: "Sunday Worship",
+        service_date: "2026-11-22",
+        service_time: "09:00:00",
+        end_time: "10:00:00",
+        status: "published",
+        completed_at: null,
+        rehearsal_date: null,
+        rehearsal_time: null,
+        rehearsal_end_time: null,
+        service_prep_buffer_minutes: 0,
+        service_travel_buffer_minutes: 0,
+        rehearsal_prep_buffer_minutes: 0,
+        rehearsal_travel_buffer_minutes: 0,
+      }],
     })
     mocks.createClient.mockResolvedValue(supabase)
 
