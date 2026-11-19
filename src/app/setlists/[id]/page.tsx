@@ -1790,9 +1790,7 @@ export default async function SetlistPage({
                 </dt>
 
                 <dd className="font-semibold text-[var(--foreground)]">
-                  {statusLabel(
-                    setlist.status
-                  )}
+                  <SetlistStatusBadge status={setlist.status} />
                 </dd>
               </div>
 
