@@ -15,6 +15,7 @@ import {
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
 import { serviceCoveragePositionLabels } from "@/lib/service-position-coverage"
 import {
+  buildActiveScheduleAssignmentsMap,
   buildScheduleEvents,
   findProposedMemberScheduleConflicts,
   getScheduleConflictSignature,
@@ -809,14 +810,7 @@ export async function addSetlistTeamAssignment(
     redirect(`/setlists/${setlistId}?error=assignment_conflict_check_unavailable#worship-team`)
   }
 
-  const assignmentsBySetlist = new Map<string, Set<string>>()
-  for (const assignment of assignmentRows ?? []) {
-    if (assignment.confirmation_status === "declined") continue
-
-    const members = assignmentsBySetlist.get(assignment.setlist_id) ?? new Set<string>()
-    members.add(assignment.user_id)
-    assignmentsBySetlist.set(assignment.setlist_id, members)
-  }
+  const assignmentsBySetlist = buildActiveScheduleAssignmentsMap(assignmentRows ?? [])
 
   const proposedConflicts = findProposedMemberScheduleConflicts(
     setlistId,
