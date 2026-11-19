@@ -75,6 +75,7 @@ type WorkspaceHeaderActionsProps = {
   onCloseSearch?: () => void
   unreadChatCount?: number
   disablePrefetch?: boolean
+  disableRemoteData?: boolean
 }
 
 type SearchSong = {
@@ -241,6 +242,7 @@ export default function WorkspaceHeaderActions({
   onCloseSearch: onCloseSearchProp,
   unreadChatCount = 0,
   disablePrefetch = false,
+  disableRemoteData = false,
 }: WorkspaceHeaderActionsProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
@@ -346,6 +348,8 @@ export default function WorkspaceHeaderActions({
   }, [activeSearchResultDomId, searchOpen])
 
   const refreshNotifications = useCallback(async () => {
+    if (disableRemoteData) return
+
     setIsLoadingNotifications(true)
     setNotificationError("")
 
@@ -368,7 +372,7 @@ export default function WorkspaceHeaderActions({
     } finally {
       setIsLoadingNotifications(false)
     }
-  }, [])
+  }, [disableRemoteData])
 
   const feedItems = useMemo<CombinedFeedItem[]>(() => [
     ...notifications.map((notification) => ({
