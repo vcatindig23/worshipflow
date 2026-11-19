@@ -687,7 +687,32 @@ export default function ChordChartExplorer() {
               </div>
               <div role="group" aria-label="Select piano inversion" className="flex flex-wrap gap-1.5">
                 {Array.from({ length: pianoVoicingCount }, (_, index) => (
-                  <button key={index} type="button" onClick={() => setInversionIndex(index)} aria-pressed={inversionIndex === index} className={"min-h-9 rounded-lg border px-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (inversionIndex === index ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--foreground)]")}>
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setInversionIndex(index)}
+                    onKeyDown={(event) => {
+                      let nextIndex: number
+                      if (event.key === "ArrowRight") {
+                        nextIndex = (index + 1) % pianoVoicingCount
+                      } else if (event.key === "ArrowLeft") {
+                        nextIndex = (index - 1 + pianoVoicingCount) % pianoVoicingCount
+                      } else if (event.key === "Home") {
+                        nextIndex = 0
+                      } else if (event.key === "End") {
+                        nextIndex = pianoVoicingCount - 1
+                      } else {
+                        return
+                      }
+                      event.preventDefault()
+                      setInversionIndex(nextIndex)
+                      event.currentTarget.parentElement
+                        ?.querySelectorAll<HTMLButtonElement>("button")[nextIndex]
+                        ?.focus()
+                    }}
+                    tabIndex={inversionIndex === index ? 0 : -1}
+                    aria-pressed={inversionIndex === index}
+                    className={"min-h-9 rounded-lg border px-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] " + (inversionIndex === index ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--foreground)]")}>
                     {index === 0 ? "Root" : String(index)}
                   </button>
                 ))}
