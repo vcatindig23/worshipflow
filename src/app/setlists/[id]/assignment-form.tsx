@@ -17,11 +17,13 @@ type AssignmentOption = {
   key: string
   label: string
   conflicts: ProposedConflict[]
+  conflictSignature: string
 }
 
 type AssignmentFormProps = {
   setlistId: string
   options: AssignmentOption[]
+  scheduledEventCount: number
 }
 
 function formatDate(value: string) {
@@ -47,6 +49,7 @@ function formatTime(value: string) {
 export default function AssignmentForm({
   setlistId,
   options,
+  scheduledEventCount,
 }: AssignmentFormProps) {
   const [selectedKey, setSelectedKey] = useState("")
   const [acknowledged, setAcknowledged] = useState(false)
@@ -60,6 +63,13 @@ export default function AssignmentForm({
       className="mt-4 space-y-3 border-t border-[var(--border)] pt-4"
     >
       <input type="hidden" name="setlistId" value={setlistId} />
+      {hasConflicts ? (
+        <input
+          type="hidden"
+          name="acknowledgedConflictSignature"
+          value={acknowledged ? selectedOption?.conflictSignature ?? "" : ""}
+        />
+      ) : null}
       <label
         htmlFor="assignmentKey"
         className="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
@@ -146,10 +156,14 @@ export default function AssignmentForm({
             </span>
           </label>
         </div>
-      ) : selectedOption ? (
+      ) : selectedOption && scheduledEventCount > 0 ? (
         <p className="inline-flex items-center gap-1.5 text-xs text-[var(--success)]">
           <CheckCircle2 className="size-3.5" />
-          No overlapping service or rehearsal was found for this member.
+          No overlapping commitments were found for the service and rehearsal times currently scheduled.
+        </p>
+      ) : selectedOption ? (
+        <p className="text-xs leading-5 text-[var(--muted)]">
+          This service has no complete date and start time yet. Add its schedule to check for overlapping commitments.
         </p>
       ) : (
         <p className="text-xs leading-5 text-[var(--muted)]">
