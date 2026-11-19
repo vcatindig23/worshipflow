@@ -724,7 +724,7 @@ export default function ChordChartExplorer() {
         )}
 
         {audioError ? <p role="alert" className="rounded-lg border border-[var(--warning)]/35 bg-[var(--warning-soft)] px-3 py-2 text-xs text-[var(--foreground)]">Audio samples could not load. Check your connection and allow sound in your browser, then try again.</p> : null}
-        <p className="text-[10px] leading-4 text-[var(--muted)]">Instrument audio uses FluidR3_GM SoundFont samples (CC BY 3.0).</p>
+        <p className="text-[10px] leading-4 text-[var(--muted)]">Audio samples: <a href="https://github.com/gleitz/midi-js-soundfonts" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-[var(--foreground)]">FluidR3_GM by Frank Wen & contributors</a> · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-[var(--foreground)]">CC BY 3.0</a>.</p>
 
         <div className="space-y-2 border-t border-[var(--border)] pt-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
