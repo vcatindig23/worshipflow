@@ -2,7 +2,6 @@ import { Pagination } from "@/components/ui/pagination"
 import { EmptyState } from "@/components/ui/empty-state"
 import { buttonVariants } from "@/components/ui/button"
 import { Input, Select } from "@/components/ui/form-controls"
-import { Card } from "@/components/ui/card"
 import { Feedback } from "@/components/ui/feedback"
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button"
 import { PageContainer, PageHeader } from "@/components/ui/page"
@@ -575,207 +574,163 @@ export default async function SongsPage({
         </Feedback>
       ) : null}
 
-      <section aria-label="Song usage analytics" className="grid gap-4 lg:grid-cols-2">
-        <Card className="p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="size-4 text-[var(--brand)]" aria-hidden="true" />
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">Frequently used</h2>
-          </div>
-          <p className="mt-1 text-xs text-[var(--muted)]">Songs you open most often on this account.</p>
-          {frequentlyOpened.length ? (
-            <ol className="mt-4 space-y-3">
-              {frequentlyOpened.map((song, index) => (
-                <li key={song.id} className="flex items-center gap-3">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] text-xs font-semibold text-[var(--muted)]" aria-label={`Rank ${index + 1}`}>{index + 1}</span>
-                  <Link href={`/songs/${song.id}`} className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--foreground)] hover:text-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/40">
-                    {song.title}
-                  </Link>
-                  <span className="shrink-0 text-xs tabular-nums text-[var(--muted)]">{preferencesBySong.get(song.id)?.open_count ?? 0} opens</span>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="mt-4 text-sm text-[var(--muted)]">Usage data will appear here as you open charts.</p>
-          )}
-        </Card>
-        <Card className="p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <Clock3 className="size-4 text-[var(--brand)]" aria-hidden="true" />
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">Recently opened</h2>
-          </div>
-          <p className="mt-1 text-xs text-[var(--muted)]">Pick up where you left off.</p>
-          {recentlyOpened.length ? (
-            <ul className="mt-4 space-y-3">
-              {recentlyOpened.map((song) => (
-                <li key={song.id} className="flex items-center gap-3">
-                  <Music2 className="size-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
-                  <Link href={`/songs/${song.id}`} className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--foreground)] hover:text-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/40">
-                    {song.title}
-                  </Link>
-                  <time className="shrink-0 text-xs text-[var(--muted)]" dateTime={preferencesBySong.get(song.id)?.last_opened_at ?? undefined}>{formatDate(preferencesBySong.get(song.id)!.last_opened_at!)}</time>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-[var(--muted)]">Your recent songs will appear here after you view a chart.</p>
-          )}
-        </Card>
-      </section>
-
-      <section className="wf-card p-3 shadow-sm sm:p-4">
-        <details className="group">
-          <summary className="flex cursor-pointer list-none items-center gap-3 rounded-2xl px-2 py-2 outline-none transition hover:bg-[var(--surface)] focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25 [&::-webkit-details-marker]:hidden">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
-              <SlidersHorizontal className="size-[18px]" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-[var(--foreground)]">Search & filters</span>
-              <span className="mt-0.5 block truncate text-xs text-[var(--muted)]">
-                {hasActiveFilters
-                  ? filterDescriptions.length
-                    ? filterDescriptions.join(" · ")
-                    : "Custom sorting applied"
-                  : "Search songs, sort your library, or filter by key, tempo, and tags."}
-              </span>
-            </span>
-            {activeFilterCount > 0 ? (
-              <span className="hidden shrink-0 rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-[10px] font-semibold text-[var(--brand)] sm:inline-flex">
-                {activeFilterCount} active
-              </span>
-            ) : null}
-            <ChevronDown className="size-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-180" />
-          </summary>
-          <div className="mt-3 border-t border-[var(--border)] px-1 pb-1 pt-4">
+      <section className="wf-card p-3 sm:p-4" aria-label="Find songs">
         <form
           action="/songs"
           method="get"
-          className="flex flex-col gap-3 2xl:flex-row"
+          className="flex flex-col gap-3 sm:flex-row sm:items-center"
         >
           <input type="hidden" name="view" value={view} />
+          <input type="hidden" name="sort" value={sort} />
+          <input type="hidden" name="status" value={status} />
+          <input type="hidden" name="key" value={selectedKey} />
+          <input type="hidden" name="tempo" value={tempoBucket} />
           {favoriteOnly ? <input type="hidden" name="favorite" value="true" /> : null}
           {selectedTag ? <input type="hidden" name="tag" value={selectedTag} /> : null}
           <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" />
-
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[var(--muted)]" aria-hidden="true" />
             <Input
               name="q"
               defaultValue={query}
-              placeholder="Search songs, artists, albums, or tags..."
+              placeholder="Search song titles, artists, albums, or tags"
               className="w-full pl-10 pr-4"
-            aria-label="Search" />
+              aria-label="Search songs"
+            />
           </div>
-
-          <Select
-            name="sort"
-            defaultValue={sort}
-            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
-           aria-label="Sort">
-            <option value="title">Title A–Z</option>
-            <option value="artist">Artist A–Z</option>
-            <option value="album">Album A–Z</option>
-            <option value="recent">Recently Used</option>
-            <option value="newest">Recently Added</option>
-            <option value="updated">Recently Updated</option>
-            <option value="tempo-asc">Slowest Tempo</option>
-            <option value="tempo-desc">Fastest Tempo</option>
-          </Select>
-
-          <Select
-            name="status"
-            defaultValue={status}
-            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
-           aria-label="Status">
-            <option value="active">
-              Active
-            </option>
-            <option value="archived">
-              Archived
-            </option>
-            <option value="all">
-              All Songs
-            </option>
-          </Select>
-
-          <Select
-            name="key"
-            defaultValue={selectedKey}
-            aria-label="Filter by musical key"
-            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
-          >
-            <option value="">All keys</option>
-            {availableKeys.map((key) => (
-              <option key={key} value={key}>{key}</option>
-            ))}
-          </Select>
-
-          <Select
-            name="tempo"
-            defaultValue={tempoBucket}
-            aria-label="Filter by tempo"
-            className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
-          >
-            {Object.entries(tempoBucketLabels).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </Select>
-
-          <button
-            type="submit"
-            className={buttonVariants({ variant: "secondary" })}
-          >
-            <ArrowDownUp className="size-4" />
-            Apply
+          <button type="submit" className={buttonVariants({ variant: "secondary" })}>
+            Search songs
           </button>
         </form>
+      </section>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Link
-            href={buildHref(params, {
-              favorite: undefined,
-              tag: undefined,
-            })}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-              !favoriteOnly && !selectedTag
-                ? "bg-[var(--brand)] text-white"
-                : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]"
-            }`}
-          >
-            All
-          </Link>
+      <section className="wf-card p-3 shadow-sm sm:p-4" aria-label="Song filters">
+        <details className="group" open={activeFilterCount > 0}>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-xl px-2 py-2 outline-none transition hover:bg-[var(--surface)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] [&::-webkit-details-marker]:hidden">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand-ink)]">
+              <SlidersHorizontal className="size-[18px]" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-[var(--foreground)]">More filters</span>
+              <span className="mt-0.5 block text-xs text-[var(--muted)]">
+                Sort the library or narrow it by status, key, tempo, and tags.
+              </span>
+            </span>
+            {activeFilterCount > 0 ? (
+              <span className="shrink-0 rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-[10px] font-semibold text-[var(--brand-ink)]">
+                {activeFilterCount} active
+              </span>
+            ) : null}
+            <ChevronDown className="size-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="mt-3 border-t border-[var(--border)] px-1 pb-1 pt-4">
+            <form action="/songs" method="get" className="flex flex-col gap-3 2xl:flex-row">
+              <input type="hidden" name="q" value={query} />
+              <input type="hidden" name="view" value={view} />
+              {favoriteOnly ? <input type="hidden" name="favorite" value="true" /> : null}
+              {selectedTag ? <input type="hidden" name="tag" value={selectedTag} /> : null}
 
-          <Link
-            href={favoriteHref}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-              favoriteOnly
-                ? "bg-[var(--brand)] text-white"
-                : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]"
-            }`}
-          >
-            <Star className="size-3.5" />
-            Favorites
-          </Link>
+              <Select
+                name="sort"
+                defaultValue={sort}
+                aria-label="Sort songs"
+                className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
+              >
+                <option value="title">Title A–Z</option>
+                <option value="artist">Artist A–Z</option>
+                <option value="album">Album A–Z</option>
+                <option value="recent">Recently used</option>
+                <option value="newest">Recently added</option>
+                <option value="updated">Recently updated</option>
+                <option value="tempo-asc">Slowest tempo</option>
+                <option value="tempo-desc">Fastest tempo</option>
+              </Select>
 
-          {tags.slice(0, 12).map((tag) => (
-            <Link
-              key={tag.id}
-              href={buildHref(params, {
-                tag:
-                  selectedTag.toLowerCase() ===
-                  tag.name.toLowerCase()
-                    ? undefined
-                    : tag.name,
-              })}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                selectedTag.toLowerCase() ===
-                tag.name.toLowerCase()
-                  ? "bg-[var(--brand)] text-white"
-                  : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]"
-              }`}
-            >
-              {tag.name}
-            </Link>
-          ))}
-        </div>
+              <Select
+                name="status"
+                defaultValue={status}
+                aria-label="Song status"
+                className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
+              >
+                <option value="active">Active</option>
+                <option value="archived">Archived</option>
+                <option value="all">All songs</option>
+              </Select>
+
+              <Select
+                name="key"
+                defaultValue={selectedKey}
+                aria-label="Filter by musical key"
+                className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
+              >
+                <option value="">All keys</option>
+                {availableKeys.map((key) => (
+                  <option key={key} value={key}>{key}</option>
+                ))}
+              </Select>
+
+              <Select
+                name="tempo"
+                defaultValue={tempoBucket}
+                aria-label="Filter by tempo"
+                className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
+              >
+                {Object.entries(tempoBucketLabels).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </Select>
+
+              <button type="submit" className={buttonVariants({ variant: "secondary" })}>
+                <SlidersHorizontal className="size-4" aria-hidden="true" />
+                Apply filters
+              </button>
+            </form>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <Link
+                href={buildHref(params, { favorite: undefined, tag: undefined })}
+                aria-current={!favoriteOnly && !selectedTag ? "page" : undefined}
+                className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+                  !favoriteOnly && !selectedTag
+                    ? "bg-[var(--brand)] text-white"
+                    : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand-ink)]"
+                }`}
+              >
+                All songs
+              </Link>
+
+              <Link
+                href={favoriteHref}
+                aria-current={favoriteOnly ? "page" : undefined}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition ${
+                  favoriteOnly
+                    ? "bg-[var(--brand)] text-white"
+                    : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand-ink)]"
+                }`}
+              >
+                <Star className="size-3.5" aria-hidden="true" />
+                Favorites
+              </Link>
+
+              {tags.slice(0, 12).map((tag) => (
+                <Link
+                  key={tag.id}
+                  href={buildHref(params, {
+                    tag:
+                      selectedTag.toLowerCase() === tag.name.toLowerCase()
+                        ? undefined
+                        : tag.name,
+                  })}
+                  aria-current={selectedTag.toLowerCase() === tag.name.toLowerCase() ? "page" : undefined}
+                  className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+                    selectedTag.toLowerCase() === tag.name.toLowerCase()
+                      ? "bg-[var(--brand)] text-white"
+                      : "bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand-ink)]"
+                  }`}
+                >
+                  {tag.name}
+                </Link>
+              ))}
+            </div>
           </div>
         </details>
       </section>
@@ -804,6 +759,68 @@ export default async function SongsPage({
           </Link>
         </section>
       ) : null}
+
+      <details className="wf-card group overflow-hidden">
+        <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4 py-3 outline-none transition hover:bg-[var(--surface)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--focus-ring)] [&::-webkit-details-marker]:hidden">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand-ink)]">
+            <Clock3 className="size-[18px]" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-[var(--foreground)]">Your song activity</span>
+            <span className="mt-0.5 block text-xs text-[var(--muted)]">Jump back to songs you open often or viewed recently.</span>
+          </span>
+          <ChevronDown className="size-4 shrink-0 text-[var(--muted)] transition-transform group-open:rotate-180" aria-hidden="true" />
+        </summary>
+        <div className="grid gap-5 border-t border-[var(--border)] p-4 sm:grid-cols-2 sm:p-5">
+          <section aria-labelledby="frequently-used-heading">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="size-4 text-[var(--brand-ink)]" aria-hidden="true" />
+              <h2 id="frequently-used-heading" className="text-sm font-semibold text-[var(--foreground)]">Frequently used</h2>
+            </div>
+            <p className="mt-1 text-xs text-[var(--muted)]">Songs you open most often on this account.</p>
+            {frequentlyOpened.length ? (
+              <ol className="mt-3 space-y-2.5">
+                {frequentlyOpened.map((song, index) => (
+                  <li key={song.id} className="flex items-center gap-3">
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] text-xs font-semibold tabular-nums text-[var(--muted)]" aria-label={`Rank ${index + 1}`}>{index + 1}</span>
+                    <Link href={`/songs/${song.id}`} className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--foreground)] transition-colors hover:text-[var(--brand-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+                      {song.title}
+                    </Link>
+                    <span className="shrink-0 text-xs tabular-nums text-[var(--muted)]">{preferencesBySong.get(song.id)?.open_count ?? 0} opens</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-3 text-sm text-[var(--muted)]">Your most-used songs will appear here after you open charts.</p>
+            )}
+          </section>
+
+          <section aria-labelledby="recently-opened-heading">
+            <div className="flex items-center gap-2">
+              <Clock3 className="size-4 text-[var(--brand-ink)]" aria-hidden="true" />
+              <h2 id="recently-opened-heading" className="text-sm font-semibold text-[var(--foreground)]">Recently opened</h2>
+            </div>
+            <p className="mt-1 text-xs text-[var(--muted)]">Pick up where you left off.</p>
+            {recentlyOpened.length ? (
+              <ul className="mt-3 space-y-2.5">
+                {recentlyOpened.map((song) => (
+                  <li key={song.id} className="flex items-center gap-3">
+                    <Music2 className="size-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
+                    <Link href={`/songs/${song.id}`} className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--foreground)] transition-colors hover:text-[var(--brand-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+                      {song.title}
+                    </Link>
+                    <time className="shrink-0 text-xs tabular-nums text-[var(--muted)]" dateTime={preferencesBySong.get(song.id)?.last_opened_at ?? undefined}>
+                      {formatDate(preferencesBySong.get(song.id)!.last_opened_at!)}
+                    </time>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-sm text-[var(--muted)]">Recently opened songs will appear here after you view a chart.</p>
+            )}
+          </section>
+        </div>
+      </details>
 
       <section>
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
