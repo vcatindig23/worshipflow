@@ -53,7 +53,6 @@ import {
 import { saveServiceAsTemplate } from "@/app/services/template-actions"
 import {
   addSongToSetlist,
-  addSetlistTeamAssignment,
   deleteSetlist,
   duplicateSetlist,
   moveSetlistSong,
