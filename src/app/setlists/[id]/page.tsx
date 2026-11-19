@@ -598,13 +598,18 @@ export default async function SetlistPage({
               scheduleAssignmentsBySetlist
             )
           : []
-        const conflicts = proposedConflicts.map(({ other }) => ({
+        const conflicts = proposedConflicts.map(({ current, other }) => ({
           serviceName: other.serviceName,
           kind: other.kind,
           date: other.date,
           startTime: other.startTime,
           endTime: other.endTime,
           isCurrentService: other.setlistId === id,
+          currentKind: current.kind,
+          currentPrepBufferMinutes: current.prepBufferMinutes,
+          currentTravelBufferMinutes: current.travelBufferMinutes,
+          prepBufferMinutes: other.prepBufferMinutes,
+          travelBufferMinutes: other.travelBufferMinutes,
         }))
 
         return {
