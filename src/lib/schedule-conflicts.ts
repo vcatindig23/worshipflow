@@ -146,3 +146,79 @@ export function findScheduleConflicts(
     a.current.startMinutes - b.current.startMinutes
   )
 }
+
+
+/**
+ * Evaluates a proposed member assignment without mutating the existing
+ * schedule. Declined assignments are excluded by the caller; pending and
+ * confirmed assignments remain active commitments.
+ */
+export function findProposedMemberScheduleConflicts(
+  currentSetlistId: string,
+  proposedMemberId: string,
+  events: ScheduleEvent[],
+  assignmentsBySetlist: Map<string, Set<string>>,
+  memberNamesById: Map<string, string> = new Map()
+): ScheduleConflict[] {
+  const proposedAssignments = new Map(assignmentsBySetlist)
+  const currentMembers = new Set(
+    proposedAssignments.get(currentSetlistId) ?? []
+  )
+
+  currentMembers.add(proposedMemberId)
+  proposedAssignments.set(currentSetlistId, currentMembers)
+
+  return findScheduleConflicts(
+    currentSetlistId,
+    events,
+    proposedAssignments,
+    memberNamesById,
+    proposedMemberId
+  )
+}
+
+
+/**
+ * Stable snapshot identifier for the exact overlap set a leader reviewed.
+ * The server compares it with a fresh calculation when the form is submitted.
+ */
+export function getScheduleConflictSignature(conflicts: ScheduleConflict[]) {
+  const eventSignature = (event: ScheduleEvent) =>
+    `${event.key}@${event.date}:${event.startMinutes}-${event.endMinutes}:${event.serviceName}`
+
+  return conflicts
+    .map((conflict) =>
+      [eventSignature(conflict.current), eventSignature(conflict.other)]
+        .sort()
+        .join("::")
+    )
+    .sort((a, b) => a.localeCompare(b))
+    .join("|")
+}
+
+
+export type ScheduleAssignmentRecord = {
+  setlist_id: string
+  user_id: string
+  confirmation_status?: string | null
+}
+
+/**
+ * Builds active member commitments for conflict checks. A declined assignment
+ * is no longer a scheduled commitment; pending and confirmed assignments are.
+ */
+export function buildActiveScheduleAssignmentsMap(
+  assignments: ScheduleAssignmentRecord[]
+) {
+  const assignmentsBySetlist = new Map<string, Set<string>>()
+
+  for (const assignment of assignments) {
+    if (assignment.confirmation_status === "declined") continue
+
+    const members = assignmentsBySetlist.get(assignment.setlist_id) ?? new Set<string>()
+    members.add(assignment.user_id)
+    assignmentsBySetlist.set(assignment.setlist_id, members)
+  }
+
+  return assignmentsBySetlist
+}

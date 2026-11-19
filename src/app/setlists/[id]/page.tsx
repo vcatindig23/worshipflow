@@ -44,10 +44,17 @@ import ServiceTimeline from "./service-timeline"
 import ServicePreparationChecklist from "./service-preparation-checklist"
 import AnnouncementAcknowledgment from "./announcement-acknowledgment"
 import SetlistSwapRequestsPanel from "./swap-requests-panel"
+import AssignmentForm from "./assignment-form"
+import {
+  buildActiveScheduleAssignmentsMap,
+  buildScheduleEvents,
+  findProposedMemberScheduleConflicts,
+  getScheduleConflictSignature,
+  type SetlistSchedule,
+} from "@/lib/schedule-conflicts"
 import { saveServiceAsTemplate } from "@/app/services/template-actions"
 import {
   addSongToSetlist,
-  addSetlistTeamAssignment,
   deleteSetlist,
   duplicateSetlist,
   moveSetlistSong,
@@ -185,6 +192,10 @@ const errorMessages: Record<
     "The setlist assignment database migration is missing or not yet visible to Supabase. Apply the setlist-team-assignment migration and refresh the API schema cache.",
   team_assignment_failed:
     "The team assignment could not be changed.",
+  assignment_schedule_conflict:
+    "This member has an overlapping service or rehearsal. Review the schedule warning and acknowledge the overlap before assigning.",
+  assignment_conflict_check_unavailable:
+    "The latest team schedule could not be checked. Refresh the page and try assigning again once conflict checking is available.",
   position_coverage_migration_missing:
     "The service position coverage migration is missing or not yet visible to Supabase. Apply the service-position-coverage migrations and refresh the API schema cache.",
   invalid_position_requirements:
@@ -407,6 +418,7 @@ export default async function SetlistPage({
     timelineItemsResult,
     resourcesCountResult,
     positionRequirementsResult,
+    allSchedulesResult,
   ] = await Promise.all([
     supabase
       .from("organization_members")
@@ -436,6 +448,10 @@ export default async function SetlistPage({
       .eq("setlist_id", id)
       .eq("organization_id", workspace.organizationId)
       .order("team_position", { ascending: true }),
+    supabase
+      .from("setlists")
+      .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time")
+      .eq("organization_id", workspace.organizationId),
   ])
 
   const teamDataAvailable =
@@ -451,6 +467,26 @@ export default async function SetlistPage({
   const positionRequirements = (
     positionRequirementsResult.data ?? []
   ) as ServicePositionRequirement[]
+
+  const allSchedules = (allSchedulesResult.data ?? []) as SetlistSchedule[]
+  const allScheduleIds = allSchedules.map((schedule) => schedule.id)
+  const allScheduleAssignmentsResult = allScheduleIds.length > 0
+    ? await supabase
+        .from("setlist_team_assignments")
+        .select("setlist_id, user_id, confirmation_status")
+        .in("setlist_id", allScheduleIds)
+    : { data: [], error: null }
+  const scheduleConflictChecksAvailable =
+    !allSchedulesResult.error && !allScheduleAssignmentsResult.error
+  const scheduleEvents = scheduleConflictChecksAvailable
+    ? buildScheduleEvents(allSchedules)
+    : []
+  const currentScheduledEventCount = scheduleEvents.filter(
+    (event) => event.setlistId === id
+  ).length
+  const scheduleAssignmentsBySetlist = scheduleConflictChecksAvailable
+    ? buildActiveScheduleAssignmentsMap(allScheduleAssignmentsResult.data ?? [])
+    : new Map<string, Set<string>>()
   const timelineRows = timelineItemsResult.data ?? []
   const timelineSummary = timelineItemsResult.error
     ? null
@@ -554,12 +590,31 @@ export default async function SetlistPage({
             ? ` · ${availability.label}`
             : ""
 
+        const proposedConflicts = scheduleConflictChecksAvailable
+          ? findProposedMemberScheduleConflicts(
+              id,
+              member.user_id,
+              scheduleEvents,
+              scheduleAssignmentsBySetlist
+            )
+          : []
+        const conflicts = proposedConflicts.map(({ other }) => ({
+          serviceName: other.serviceName,
+          kind: other.kind,
+          date: other.date,
+          startTime: other.startTime,
+          endTime: other.endTime,
+          isCurrentService: other.setlistId === id,
+        }))
+
         return {
           key: `${member.user_id}|${position}`,
           label: `${teamProfileNames.get(member.user_id) ?? "Name not set"} — ${
             teamPositionLabels[position] ?? position
           }${availabilitySuffix}`,
           availabilityStatus: availability?.status ?? null,
+          conflicts,
+          conflictSignature: getScheduleConflictSignature(proposedConflicts),
         }
       })
   )
@@ -1584,45 +1639,18 @@ export default async function SetlistPage({
               </p>
             )}
             {canEdit && teamDataAvailable ? (
-              assignableOptions.length > 0 ? (
-                <form
-                  action={addSetlistTeamAssignment}
-                  className="mt-4 space-y-3 border-t border-[var(--border)] pt-4"
-                >
-                  <input
-                    type="hidden"
-                    name="setlistId"
-                    value={id}
-                  />
-                  <label
-                    htmlFor="assignmentKey"
-                    className="block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
-                  >
-                    Member and position
-                  </label>
-                  <Select
-                    id="assignmentKey"
-                    name="assignmentKey"
-                    required
-                    defaultValue=""
-                    className="h-11 px-3"
-                  >
-                    <option value="" disabled>
-                      Select a team member
-                    </option>
-                    {assignableOptions.map((option) => (
-                      <option key={option.key} value={option.key}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </Select>
-                  <button
-                    type="submit"
-                    className="h-10 w-full rounded-xl bg-[var(--brand)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-                  >
-                    Assign to Service
-                  </button>
-                </form>
+              !scheduleConflictChecksAvailable ? (
+                <div className="mt-4">
+                  <Feedback tone="warning" title="Schedule conflict checks unavailable">
+                    The team schedule could not be checked, so new assignments are temporarily unavailable. Refresh the page and try again.
+                  </Feedback>
+                </div>
+              ) : assignableOptions.length > 0 ? (
+                <AssignmentForm
+                  setlistId={id}
+                  options={assignableOptions}
+                  scheduledEventCount={currentScheduledEventCount}
+                />
               ) : !hasConfiguredTeamPosition ? (
                 <p className="mt-4 border-t border-[var(--border)] pt-4 text-xs leading-5 text-[var(--muted)]">
                   Assign worship-team positions to members on the Team page before scheduling them here.
