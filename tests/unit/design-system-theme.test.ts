@@ -14,6 +14,14 @@ const setlistStatusBadge = readFileSync(
   join(process.cwd(), "src/components/setlist-status-badge.tsx"),
   "utf8"
 )
+const servicePositionCoverageComponent = readFileSync(
+  join(process.cwd(), "src/components/service-position-coverage.tsx"),
+  "utf8"
+)
+const servicePositionCoverageLib = readFileSync(
+  join(process.cwd(), "src/lib/service-position-coverage.ts"),
+  "utf8"
+)
 const globals = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8")
 const buttonSource = readFileSync(
   join(process.cwd(), "src/components/ui/button.tsx"),
@@ -675,6 +683,26 @@ describe("semantic theme foundations", () => {
     expect(setlistsPage).toContain("<SetlistStatusBadge")
     expect(searchPage).toContain("<SetlistStatusBadge")
     expect(setlistDetailPage).toContain("<SetlistStatusBadge")
+  })
+
+
+  it("uses accessible position coverage and a protected service staffing editor", () => {
+    expect(servicePositionCoverageComponent).toContain('id="position-coverage"')
+    expect(servicePositionCoverageComponent).toContain('role="progressbar"')
+    expect(servicePositionCoverageComponent).toContain("Required team positions")
+    expect(servicePositionCoverageComponent).toContain("Save requirements")
+    expect(servicePositionCoverageComponent).toMatch(/<ProtectedForm action=\{saveSetlistPositionRequirements\}/)
+    expect(servicePositionCoverageComponent).toContain("aria-label={`Required number of ${label}`}")
+    expect(servicePositionCoverageComponent).not.toMatch(/bg-white|text-slate-|bg-emerald-|bg-red-/)
+
+    expect(servicePositionCoverageLib).toContain('guitarist: "Guitarists"')
+    expect(servicePositionCoverageLib).toContain("vacant:")
+    expect(servicePositionCoverageLib).toContain("confirmed:")
+    expect(servicePositionCoverageLib).toContain("declined:")
+    expect(servicesPage).toContain("positionRequirementsBySetlist")
+    expect(servicesPage).toContain("readiness.positionCoverage")
+    expect(setlistDetailPage).toContain("<ServicePositionCoverage")
+    expect(setlistDetailPage).toContain("positionRequirementsAvailable")
   })
 
 
