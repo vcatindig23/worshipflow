@@ -477,7 +477,7 @@ function GuitarShapeSelector({
             </button>
           ))}
         </div>
-        <p className="text-xs text-[var(--muted)]">{view === "fretboard" ? "Full neck · frets 1–15" : "Standard five-fret chord box"} · {shape.notes.length} strings played</p>
+        <p className="text-xs text-[var(--muted)]">{view === "fretboard" ? "Full neck · frets 1–15" : "Standard five-fret chord box"} · {shape.notes.length} strings played · {shape.reference ? "Reference fingering" : shape.transposed ? "Transposed reference voicing" : "Calculated fallback voicing."}</p>
       </div>
 
       {view === "fretboard" ? <GuitarFretboard shape={shape} root={root} /> : <GuitarShapeDiagram shape={shape} root={root} chordOrder={chordOrder} index={safeIndex} total={shapes.length} />}
