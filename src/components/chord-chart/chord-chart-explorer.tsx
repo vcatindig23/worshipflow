@@ -554,7 +554,7 @@ function PianoKeyboard({ root, intervals, inversionIndex }: { root: number; inte
         <div><p className="text-sm font-semibold text-[var(--foreground)]">{getInversionName(root, bass.pitchClass, chordOrder)}</p><p className="mt-1 text-xs text-[var(--muted)]">Selected voicing · lowest note {NOTE_NAMES[bass.pitchClass]}</p></div>
         <span className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 font-mono text-xs text-[var(--foreground)]">{voicing.map((note) => NOTE_NAMES[note.pitchClass]).join(" · ")}</span>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[#f8fafc] p-3">
+      <div className="rounded-xl border border-[var(--border)] bg-[#f8fafc] p-2 sm:p-3">
         <svg role="img" aria-label={"Piano chord voicing in " + getInversionName(root, bass.pitchClass, chordOrder) + ", selected notes only."} viewBox={"0 0 " + PIANO_WIDTH + " 180"} className="block h-auto w-full">
           {whiteKeys.map((key) => {
             const selected = selectedMidis.has(key.midi)
@@ -569,9 +569,6 @@ function PianoKeyboard({ root, intervals, inversionIndex }: { root: number; inte
         </svg>
       </div>
       <p className="text-xs leading-5 text-[var(--muted)]">Only the notes in this inversion are highlighted; unselected keys remain neutral.</p>
-      <p className="text-xs text-[var(--muted)] sm:hidden">
-        Swipe horizontally to view the full keyboard from C3 to C5.
-      </p>
     </div>
   )
 }
