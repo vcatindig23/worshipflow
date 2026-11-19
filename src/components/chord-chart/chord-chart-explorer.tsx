@@ -210,12 +210,12 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
           {fingering}
         </span>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[#fbfaf7] p-3">
+      <div className="rounded-xl border border-[var(--border)] bg-[#fbfaf7] p-2 sm:p-3">
         <svg
           role="img"
           aria-label={"Guitar chord diagram, low E string on the left and high E on the right. " + inversion + ". String frets low to high: " + fingering}
           viewBox={"0 0 " + width + " " + height}
-          className="mx-auto block w-full min-w-[300px] max-w-[390px]"
+          className="mx-auto block h-auto w-full max-w-[390px]"
         >
           <rect x={left - 11} y={gridTop - 1} width={right - left + 22} height={gridBottom - gridTop + 2} rx="2" fill="#efe3cb" />
           {Array.from({ length: fretRows + 1 }, (_, row) => {
