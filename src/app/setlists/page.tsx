@@ -291,17 +291,7 @@ export default async function SetlistsPage({
                               {setlist.name}
                             </h2>
 
-                            <span
-                              className={`wf-status ${
-                                setlist.status === "published"
-                                  ? "wf-status-success"
-                                  : setlist.status === "archived"
-                                    ? "wf-status-warning"
-                                    : "wf-status-neutral"
-                              }`}
-                            >
-                              <SetlistStatusBadge status={setlist.status} />
-                            </span>
+                            <SetlistStatusBadge status={setlist.status} />
                           </div>
 
                           {setlist.description ? (
