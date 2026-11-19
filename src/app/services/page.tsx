@@ -1,5 +1,7 @@
 import { buttonVariants } from "@/components/ui/button"
 import { PageContainer, PageHeader } from "@/components/ui/page"
+import { PageFilterTabs } from "@/components/ui/page-filter-tabs"
+import SetlistStatusBadge from "@/components/setlist-status-badge"
 import Link from "next/link"
 import {
   AlertCircle,
@@ -91,19 +93,6 @@ function formatDate(value: string | null) {
     dateStyle: "full",
   }).format(new Date(`${value}T00:00:00`))
 }
-
-function statusLabel(status: Setlist["status"]) {
-  if (status === "published") {
-    return "Published"
-  }
-
-  if (status === "archived") {
-    return "Archived"
-  }
-
-  return "Draft"
-}
-
 
 const periods: {
   value: Period
@@ -404,36 +393,21 @@ export default async function ServicesPage({
         </>}
       />
 
-      <nav
-        aria-label="Service schedule"
-        className="flex flex-wrap gap-2"
-      >
-        {periods.map((item) => (
-          <Link
-            key={item.value}
-            href={
-              item.value === "upcoming"
-                ? "/services"
-                : `/services?period=${item.value}`
-            }
-            aria-current={
-              period === item.value
-                ? "page"
-                : undefined
-            }
-            className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-              period === item.value
-                ? "bg-[var(--brand)] text-white"
-                : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+      <PageFilterTabs
+        ariaLabel="Service schedule"
+        activeValue={period}
+        items={periods.map((item) => ({
+          value: item.value,
+          label: item.label,
+          href:
+            item.value === "upcoming"
+              ? "/services"
+              : `/services?period=${item.value}`,
+        }))}
+      />
 
       <section>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-[var(--foreground)]">
               {setlists.length}{" "}
@@ -530,19 +504,7 @@ export default async function ServicesPage({
                                 {setlist.name}
                               </h2>
 
-                              <span
-                                className={`wf-status ${
-                                  setlist.status === "published"
-                                    ? "wf-status-success"
-                                    : setlist.status === "archived"
-                                      ? "wf-status-warning"
-                                      : "wf-status-neutral"
-                                }`}
-                              >
-                                {statusLabel(
-                                  setlist.status
-                                )}
-                              </span>
+                              <SetlistStatusBadge status={setlist.status} />
 
                               {setlist.completed_at ? (
                                 <span className="wf-status wf-status-success">
@@ -688,7 +650,14 @@ export default async function ServicesPage({
                             </span>
                           </div>
 
-                          <div className="wf-readiness-progress-track mt-3 h-1.5 overflow-hidden rounded-full">
+                          <div
+                            className="wf-readiness-progress-track mt-3 h-1.5 overflow-hidden rounded-full"
+                            role="progressbar"
+                            aria-label="Service readiness"
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={readiness.percentage}
+                          >
                             <div
                               className="wf-readiness-progress-fill origin-left h-full rounded-full transition-transform"
                               style={{
@@ -697,7 +666,7 @@ export default async function ServicesPage({
                             />
                           </div>
 
-                          <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[10px]">
+                          <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
                             <span
                               className={
                                 readiness.hasSchedule
@@ -761,7 +730,7 @@ export default async function ServicesPage({
 
                           {readiness.declinedAssignments >
                           0 ? (
-                            <p className="wf-readiness-missing mt-2 text-[10px] font-medium">
+                            <p className="wf-readiness-missing mt-2 text-[11px] font-medium">
                               {readiness.declinedAssignments}{" "}
                               {readiness.declinedAssignments ===
                               1
@@ -771,7 +740,7 @@ export default async function ServicesPage({
                             </p>
                           ) : readiness.pendingAssignments >
                             0 ? (
-                            <p className="wf-readiness-pending mt-2 text-[10px] font-medium">
+                            <p className="wf-readiness-pending mt-2 text-[11px] font-medium">
                               {readiness.pendingAssignments}{" "}
                               {readiness.pendingAssignments ===
                               1

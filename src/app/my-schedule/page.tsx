@@ -1,6 +1,7 @@
 import { Feedback } from "@/components/ui/feedback"
 import { Input, Textarea } from "@/components/ui/form-controls"
-import { PageContainer } from "@/components/ui/page"
+import { PageContainer, PageHeader } from "@/components/ui/page"
+import { PageFilterTabs } from "@/components/ui/page-filter-tabs"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -548,34 +549,31 @@ export default async function MySchedulePage({
 
   return (
     <PageContainer>
-      <section>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--brand)]">
-              <CalendarDays className="size-3.5" />
-              Your Worship Team Schedule
-            </span>
-
-            <h1 className="wf-page-title mt-3">
-              My Schedule
-            </h1>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              Review services where you have been assigned, confirm your availability, and keep track of your worship team commitments.
-            </p>
-            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted)]">
+      <PageHeader
+        eyebrow={
+          <>
+            <CalendarDays className="size-3.5" />
+            Your Worship Team Schedule
+          </>
+        }
+        title="My Schedule"
+        description={
+          <>
+            Review services where you have been assigned, confirm your availability, and keep track of your worship team commitments.
+            <span className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[var(--muted)]">
               <Clock3 className="size-3.5" />
               Service times and weekly availability use {workspace.organizationTimezone}.
-            </p>
-          </div>
-
-          {pendingCount > 0 ? (
+            </span>
+          </>
+        }
+        actions={
+          pendingCount > 0 ? (
             <span className="wf-status wf-status-warning shrink-0">
               {pendingCount} pending {pendingCount === 1 ? "response" : "responses"}
             </span>
-          ) : null}
-        </div>
-      </section>
+          ) : null
+        }
+      />
 
       {getParam(params.swapRequested) === "1" ? (
         <Feedback tone="success" title="Swap request sent">
@@ -755,38 +753,18 @@ export default async function MySchedulePage({
         )}
       </section>
 
-      <nav
-        aria-label="My service schedule"
-        className="flex flex-wrap gap-2"
-      >
-        {periods.map(
-          (item) => (
-            <Link
-              key={item.value}
-              href={
-                item.value ===
-                "upcoming"
-                  ? "/my-schedule"
-                  : `/my-schedule?period=${item.value}`
-              }
-              aria-current={
-                period ===
-                item.value
-                  ? "page"
-                  : undefined
-              }
-              className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                period ===
-                item.value
-                  ? "bg-[var(--brand)] text-white"
-                  : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-              }`}
-            >
-              {item.label}
-            </Link>
-          )
-        )}
-      </nav>
+      <PageFilterTabs
+        ariaLabel="My service schedule"
+        activeValue={period}
+        items={periods.map((item) => ({
+          value: item.value,
+          label: item.label,
+          href:
+            item.value === "upcoming"
+              ? "/my-schedule"
+              : `/my-schedule?period=${item.value}`,
+        }))}
+      />
 
       <ScheduleViewToggle
         entries={setlists.map((setlist) => ({

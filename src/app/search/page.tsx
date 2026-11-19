@@ -2,6 +2,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/form-controls"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import Link from "next/link"
+import SetlistStatusBadge from "@/components/setlist-status-badge"
 import {
   CalendarDays,
   ListMusic,
@@ -49,10 +50,6 @@ function formatDate(value: string | null) {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "medium",
   }).format(new Date(`${value}T00:00:00`))
-}
-
-function statusLabel(status: SearchSetlist["status"]) {
-  return status.charAt(0).toUpperCase() + status.slice(1)
 }
 
 export default async function SearchPage({
@@ -273,8 +270,8 @@ export default async function SearchPage({
                         <span className="mt-1 block text-xs text-[var(--muted)]">
                           {formatDate(setlist.service_date)}
                         </span>
-                        <span className="mt-2 inline-flex rounded-full bg-[var(--surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
-                          {statusLabel(setlist.status)}
+                        <span className="mt-2 inline-flex">
+                          <SetlistStatusBadge status={setlist.status} />
                         </span>
                       </span>
                     </Link>

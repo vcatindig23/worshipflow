@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { buttonVariants } from "@/components/ui/button"
 import { Input, Select } from "@/components/ui/form-controls"
 import { PageContainer, PageHeader } from "@/components/ui/page"
+import SetlistStatusBadge from "@/components/setlist-status-badge"
 import Link from "next/link"
 import {
   Archive,
@@ -57,20 +58,6 @@ function formatDate(value: string | null) {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "medium",
   }).format(new Date(`${value}T00:00:00`))
-}
-
-function statusLabel(
-  status: Setlist["status"]
-) {
-  if (status === "published") {
-    return "Published"
-  }
-
-  if (status === "archived") {
-    return "Archived"
-  }
-
-  return "Draft"
 }
 
 export default async function SetlistsPage({
@@ -211,7 +198,7 @@ export default async function SetlistsPage({
         </>}
       />
 
-      <section className="wf-card p-5 sm:p-6">
+      <section className="wf-card p-4 sm:p-5" aria-label="Find setlists">
         <form
           action="/setlists"
           method="get"
@@ -223,16 +210,16 @@ export default async function SetlistsPage({
             <Input
               name="q"
               defaultValue={query}
-              placeholder="Search setlists..."
+              placeholder="Search setlists…"
               className="w-full pl-10 pr-4"
-            aria-label="Search" />
+            aria-label="Search setlists" />
           </div>
 
           <Select
             name="status"
             defaultValue={status}
             className="px-3.5 font-medium text-[var(--foreground)] sm:w-auto"
-           aria-label="Status">
+           aria-label="Filter by status">
             <option value="all">
               All statuses
             </option>
@@ -251,13 +238,13 @@ export default async function SetlistsPage({
             type="submit"
             className={buttonVariants({ variant: "secondary" })}
           >
-            Apply
+            Apply filters
           </button>
         </form>
       </section>
 
       <section>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-[var(--foreground)]">
               {totalSetlists}{" "}
@@ -304,19 +291,7 @@ export default async function SetlistsPage({
                               {setlist.name}
                             </h2>
 
-                            <span
-                              className={`wf-status ${
-                                setlist.status === "published"
-                                  ? "wf-status-success"
-                                  : setlist.status === "archived"
-                                    ? "wf-status-warning"
-                                    : "wf-status-neutral"
-                              }`}
-                            >
-                              {statusLabel(
-                                setlist.status
-                              )}
-                            </span>
+                            <SetlistStatusBadge status={setlist.status} />
                           </div>
 
                           {setlist.description ? (

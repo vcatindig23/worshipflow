@@ -6,6 +6,14 @@ const designSystem = readFileSync(
   join(process.cwd(), "src/app/design-system.css"),
   "utf8"
 )
+const pageFilterTabs = readFileSync(
+  join(process.cwd(), "src/components/ui/page-filter-tabs.tsx"),
+  "utf8"
+)
+const setlistStatusBadge = readFileSync(
+  join(process.cwd(), "src/components/setlist-status-badge.tsx"),
+  "utf8"
+)
 const globals = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8")
 const buttonSource = readFileSync(
   join(process.cwd(), "src/components/ui/button.tsx"),
@@ -299,17 +307,14 @@ describe("semantic theme foundations", () => {
   it("uses semantic cards and status colors in the main workspace views", () => {
     expect(servicesPage).toMatch(/wf-readiness-panel/)
     expect(servicesPage).toMatch(/data-state={readiness.status}/)
-    expect(servicesPage).toMatch(/wf-status-success/)
-    expect(servicesPage).toMatch(/wf-status-warning/)
+    expect(servicesPage).toMatch(/<SetlistStatusBadge status={setlist.status}/)
     expect(servicesPage).toMatch(/wf-card-interactive/)
     expect(servicesPage).not.toMatch(/getReadinessClasses|readinessClasses/)
     expect(servicesPage).not.toMatch(/bg-white/)
     expect(servicesPage).not.toMatch(/bg-emerald-100|bg-amber-100|bg-rose-50|text-rose-700/)
 
     expect(setlistsPage).toMatch(/wf-card-interactive/)
-    expect(setlistsPage).toMatch(/wf-status-success/)
-    expect(setlistsPage).toMatch(/wf-status-warning/)
-    expect(setlistsPage).toMatch(/wf-status-neutral/)
+    expect(setlistsPage).toMatch(/<SetlistStatusBadge status={setlist.status}/)
     expect(setlistsPage).not.toMatch(/bg-white|bg-emerald-100|bg-amber-100/)
 
     expect(songsPage).toMatch(/wf-card wf-card-interactive/)
@@ -651,5 +656,26 @@ describe("semantic theme foundations", () => {
     expect(accountSecurityPage).toMatch(/variant="destructive"/)
     expect(accountSecurityPage).toContain('title="Permanently delete your account?"')
   })
+
+  it("shares accessible period navigation and setlist status badges across planning surfaces", () => {
+    expect(pageFilterTabs).toContain('aria-current={active ? "page" : undefined}')
+    expect(pageFilterTabs).toContain("min-h-11")
+    expect(pageFilterTabs).toContain("focus-visible:ring-[var(--focus-ring)]")
+    expect(servicesPage).toContain("<PageFilterTabs")
+    expect(mySchedulePage).toContain("<PageFilterTabs")
+    expect(mySchedulePage).toContain("<PageHeader")
+
+    expect(setlistStatusBadge).toContain('"Published"')
+    expect(setlistStatusBadge).toContain('"Draft"')
+    expect(setlistStatusBadge).toContain('"Archived"')
+    expect(setlistStatusBadge).toContain("wf-status-success")
+    expect(setlistStatusBadge).toContain("wf-status-neutral")
+    expect(setlistStatusBadge).toContain("wf-status-warning")
+    expect(servicesPage).toContain("<SetlistStatusBadge")
+    expect(setlistsPage).toContain("<SetlistStatusBadge")
+    expect(searchPage).toContain("<SetlistStatusBadge")
+    expect(setlistDetailPage).toContain("<SetlistStatusBadge")
+  })
+
 
 })
