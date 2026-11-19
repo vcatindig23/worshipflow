@@ -27,8 +27,10 @@ function Shortcut({ children }: { children: React.ReactNode }) {
 
 export default function AccountOptionsMenu({
   canManageTeam,
+  disablePrefetch = false,
 }: {
   canManageTeam: boolean
+  disablePrefetch?: boolean
 }) {
   const router = useRouter()
   const menuRef = useRef<HTMLDivElement>(null)
@@ -137,6 +139,7 @@ export default function AccountOptionsMenu({
           <nav aria-label="Account options">
             <Link
               href="/profile"
+              prefetch={!disablePrefetch}
               onClick={closeMenu}
               className="flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
             >
@@ -147,6 +150,7 @@ export default function AccountOptionsMenu({
 
             <Link
               href="/my-schedule"
+              prefetch={!disablePrefetch}
               onClick={closeMenu}
               className="flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
             >
@@ -157,6 +161,7 @@ export default function AccountOptionsMenu({
 
             <Link
               href="/settings"
+              prefetch={!disablePrefetch}
               onClick={closeMenu}
               className="flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
             >
@@ -193,6 +198,7 @@ export default function AccountOptionsMenu({
                 >
                   <Link
                     href={inviteHref}
+                    prefetch={!disablePrefetch}
                     onClick={closeMenu}
                     className="flex min-h-9 items-center gap-3 rounded-lg px-3 py-2 text-sm transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
                   >
@@ -201,6 +207,7 @@ export default function AccountOptionsMenu({
                   </Link>
                   <Link
                     href={inviteHref}
+                    prefetch={!disablePrefetch}
                     onClick={closeMenu}
                     className="flex min-h-9 items-center gap-3 rounded-lg px-3 py-2 text-sm transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
                   >
