@@ -270,4 +270,116 @@ describe("shared service and rehearsal conflict checks", () => {
   })
 
 
+  it("expands service and rehearsal commitments by their configured preparation and travel buffers", () => {
+    const events = buildScheduleEvents([
+      {
+        ...schedules[0],
+        service_prep_buffer_minutes: 15,
+        service_travel_buffer_minutes: 30,
+        rehearsal_prep_buffer_minutes: 10,
+        rehearsal_travel_buffer_minutes: 20,
+      },
+    ])
+
+    expect(events.find((event) => event.key === "service-a:service")).toMatchObject({
+      prepBufferMinutes: 15,
+      travelBufferMinutes: 30,
+      conflictStartAtMinute: Math.floor(Date.UTC(2026, 10, 8) / 86_400_000) * 1440 + 540 - 15,
+      conflictEndAtMinute: Math.floor(Date.UTC(2026, 10, 8) / 86_400_000) * 1440 + 630 + 30,
+    })
+    expect(events.find((event) => event.key === "service-a:rehearsal")).toMatchObject({
+      prepBufferMinutes: 10,
+      travelBufferMinutes: 20,
+    })
+  })
+
+  it("detects short gaps that are consumed by the previous travel and next preparation buffers", () => {
+    const events = buildScheduleEvents([
+      {
+        ...schedules[0],
+        rehearsal_date: null,
+        rehearsal_time: null,
+        service_time: "09:00:00",
+        end_time: "10:30:00",
+        service_travel_buffer_minutes: 25,
+      },
+      {
+        ...schedules[1],
+        service_time: "10:45:00",
+        end_time: "11:45:00",
+        service_prep_buffer_minutes: 10,
+        rehearsal_date: null,
+        rehearsal_time: null,
+        rehearsal_end_time: null,
+      },
+    ])
+    const assignments = new Map<string, Set<string>>([
+      ["service-a", new Set(["shared-member"])],
+      ["service-b", new Set(["shared-member"])],
+    ])
+
+    const conflicts = findScheduleConflicts(
+      "service-a",
+      events,
+      assignments,
+      new Map([["shared-member", "Shared Member"]])
+    )
+
+    expect(conflicts).toHaveLength(1)
+    expect(conflicts[0].other.setlistId).toBe("service-b")
+    expect(conflicts[0].other.prepBufferMinutes).toBe(10)
+    expect(conflicts[0].current.travelBufferMinutes).toBe(25)
+  })
+
+  it("detects a travel buffer that crosses midnight into the next calendar day", () => {
+    const events = buildScheduleEvents([
+      {
+        ...schedules[0],
+        service_date: "2026-11-07",
+        service_time: "23:00:00",
+        end_time: "23:30:00",
+        rehearsal_date: null,
+        rehearsal_time: null,
+        service_travel_buffer_minutes: 45,
+      },
+      {
+        ...schedules[1],
+        service_date: "2026-11-08",
+        service_time: "00:05:00",
+        end_time: "01:00:00",
+        rehearsal_date: null,
+        rehearsal_time: null,
+      },
+    ])
+    const assignments = new Map<string, Set<string>>([
+      ["service-a", new Set(["shared-member"])],
+      ["service-b", new Set(["shared-member"])],
+    ])
+
+    const conflicts = findScheduleConflicts(
+      "service-a",
+      events,
+      assignments,
+      new Map()
+    )
+
+    expect(conflicts).toHaveLength(1)
+    expect(conflicts[0].other.date).toBe("2026-11-08")
+  })
+
+  it("keeps schedules with zero buffers unchanged and ignores invalid buffer values safely", () => {
+    const noBuffers = buildScheduleEvents([schedules[0]])
+    const invalidBuffers = buildScheduleEvents([{
+      ...schedules[0],
+      service_prep_buffer_minutes: -10,
+      service_travel_buffer_minutes: 241,
+    }])
+
+    expect(invalidBuffers[0].prepBufferMinutes).toBe(0)
+    expect(invalidBuffers[0].travelBufferMinutes).toBe(0)
+    expect(invalidBuffers[0].conflictStartAtMinute).toBe(noBuffers[0].conflictStartAtMinute)
+    expect(invalidBuffers[0].conflictEndAtMinute).toBe(noBuffers[0].conflictEndAtMinute)
+  })
+
+
 })
