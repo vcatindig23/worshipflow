@@ -366,86 +366,227 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
 }
 
 function GuitarFretboard({ shape, root }: { shape: GuitarShape; root: number }) {
-  const boardX = 112
-  const boardY = 44
-  const fretWidth = 60
-  const boardWidth = fretWidth * 15
-  const stringY = [70, 98, 126, 154, 182, 210]
+  const boardX = 72
+  const boardY = 34
+  const boardWidth = 1050
+  const boardHeight = 132
+  const fretboardEndFret = 15
+  const scaleLength = boardWidth / (1 - Math.pow(2, -fretboardEndFret / 12))
+  const fretPositions = Array.from(
+    { length: fretboardEndFret + 1 },
+    (_, fret) => boardX + scaleLength * (1 - Math.pow(2, -fret / 12))
+  )
+  const stringYByIndex = [156, 134, 112, 90, 68, 46]
+  const displayStringNames = ["E", "B", "G", "D", "A", "E"]
+  const displayStringWidths = [1.2, 1.5, 1.9, 2.5, 3.1, 3.8]
   const markerFrets = [3, 5, 7, 9, 12, 15]
 
+  function fretCenter(fret: number) {
+    if (fret <= 0) return boardX - 15
+    return (fretPositions[fret - 1] + fretPositions[fret]) / 2
+  }
+
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 sm:p-3">
+    <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 sm:p-3">
       <svg
         role="img"
-        aria-label="Electric guitar fretboard with all 15 frets visible. Six strings run from low E to high E, with the selected chord fingering highlighted."
-        viewBox="0 0 1030 244"
+        aria-label="Electric guitar fretboard showing frets zero through fifteen. The high E string is at the top and the low E string is at the bottom. Chord finger positions are highlighted."
+        viewBox="0 0 1160 214"
         preserveAspectRatio="none"
-        className="block h-[164px] w-full sm:h-[190px]"
+        className="block h-[154px] w-full sm:h-[184px]"
       >
         <defs>
           <linearGradient id="wf-fretboard-wood" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#71452d" />
-            <stop offset="0.48" stopColor="#3d241d" />
-            <stop offset="1" stopColor="#70442b" />
+            <stop offset="0" stopColor="#3b3a38" />
+            <stop offset="0.46" stopColor="#292a2a" />
+            <stop offset="1" stopColor="#3a3937" />
           </linearGradient>
           <linearGradient id="wf-fret-wire" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#68717a" />
-            <stop offset="0.45" stopColor="#f2f4f5" />
-            <stop offset="1" stopColor="#7e8991" />
+            <stop offset="0" stopColor="#776e5e" />
+            <stop offset="0.22" stopColor="#d9c9a9" />
+            <stop offset="0.48" stopColor="#f1e6d1" />
+            <stop offset="0.74" stopColor="#a99a7e" />
+            <stop offset="1" stopColor="#615a4f" />
           </linearGradient>
           <linearGradient id="wf-string-metal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#f8fafc" />
-            <stop offset="0.45" stopColor="#8b949e" />
-            <stop offset="1" stopColor="#e2e8f0" />
+            <stop offset="0" stopColor="#fbfbf8" />
+            <stop offset="0.42" stopColor="#aeb1ad" />
+            <stop offset="0.7" stopColor="#e5e4dc" />
+            <stop offset="1" stopColor="#777c7a" />
           </linearGradient>
-          <pattern id="wf-wood-grain" width="180" height="22" patternUnits="userSpaceOnUse">
-            <path d="M0 5 C35 0 70 12 110 5 S155 3 180 8 M0 17 C45 12 82 22 130 15 S160 16 180 18" fill="none" stroke="#d6a47b" strokeOpacity=".12" strokeWidth="1" />
+          <pattern id="wf-wood-grain" width="220" height="30" patternUnits="userSpaceOnUse">
+            <path d="M0 7 C48 2 76 13 124 7 S182 5 220 10 M0 23 C52 18 91 29 142 21 S185 21 220 25" fill="none" stroke="#d4c5ae" strokeOpacity=".065" strokeWidth="1" />
           </pattern>
+          <filter id="wf-fret-shadow" x="-20%" y="-10%" width="140%" height="120%">
+            <feGaussianBlur stdDeviation="1.1" />
+          </filter>
+          <filter id="wf-note-shadow" x="-40%" y="-40%" width="180%" height="180%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.2" floodColor="#111827" floodOpacity=".45" />
+          </filter>
         </defs>
-        <rect x={boardX} y={boardY} width={boardWidth} height="172" rx="8" fill="url(#wf-fretboard-wood)" stroke="#251b18" strokeWidth="5" />
-        <rect x={boardX} y={boardY} width={boardWidth} height="172" rx="8" fill="url(#wf-wood-grain)" />
+
+        <rect
+          x={boardX - 3}
+          y={boardY - 2}
+          width={boardWidth + 6}
+          height={boardHeight + 4}
+          rx="3"
+          fill="#151718"
+          stroke="#858078"
+          strokeWidth="1"
+        />
+        <rect
+          x={boardX}
+          y={boardY}
+          width={boardWidth}
+          height={boardHeight}
+          fill="url(#wf-fretboard-wood)"
+        />
+        <rect
+          x={boardX}
+          y={boardY}
+          width={boardWidth}
+          height={boardHeight}
+          fill="url(#wf-wood-grain)"
+        />
+
         {markerFrets.map((fret) => {
-          const x = boardX + (fret - 0.5) * fretWidth
+          const x = fretCenter(fret)
           return fret === 12 ? (
-            <g key={fret} fill="#d9c7a3" opacity=".55">
-              <circle cx={x} cy="112" r="7" />
-              <circle cx={x} cy="168" r="7" />
+            <g key={fret} fill="#c6b99f" opacity=".28">
+              <circle cx={x} cy="78" r="5.5" />
+              <circle cx={x} cy="122" r="5.5" />
             </g>
           ) : (
-            <circle key={fret} cx={x} cy="140" r="7" fill="#d9c7a3" opacity=".5" />
+            <circle key={fret} cx={x} cy="100" r="5.5" fill="#c6b99f" opacity=".28" />
           )
         })}
-        {Array.from({ length: 16 }, (_, index) => {
-          const x = boardX + index * fretWidth
-          return <g key={index}>
-            <line x1={x} y1={boardY} x2={x} y2={boardY + 172} stroke="url(#wf-fret-wire)" strokeWidth={index === 0 ? 7 : 3.2} />
-            {index > 0 ? <text x={x - fretWidth / 2} y="30" textAnchor="middle" fill="var(--muted)" fontSize="14" fontWeight="600">{index}</text> : null}
-          </g>
-        })}
-        {GUITAR_STRING_NAMES.map((name, index) => (
-          <g key={name}>
-            <text x="35" y={stringY[index] + 5} textAnchor="middle" fill="var(--foreground)" fontSize="15" fontWeight="700">{name}</text>
-            <line x1={boardX - 2} y1={stringY[index]} x2={boardX + boardWidth + 3} y2={stringY[index]} stroke="url(#wf-string-metal)" strokeWidth={[4.1, 3.4, 2.8, 2.2, 1.7, 1.35][index]} />
+
+        {fretPositions.slice(1).map((x, index) => (
+          <g key={index + 1}>
+            <line
+              x1={x + 1.3}
+              y1={boardY + 1}
+              x2={x + 1.3}
+              y2={boardY + boardHeight - 1}
+              stroke="#0e1011"
+              strokeOpacity=".58"
+              strokeWidth="5.5"
+              filter="url(#wf-fret-shadow)"
+            />
+            <line
+              x1={x}
+              y1={boardY}
+              x2={x}
+              y2={boardY + boardHeight}
+              stroke="url(#wf-fret-wire)"
+              strokeWidth={index === 11 ? 4.2 : 3.1}
+            />
+            <line
+              x1={x - 1.2}
+              y1={boardY + 2}
+              x2={x - 1.2}
+              y2={boardY + boardHeight - 2}
+              stroke="#fff4df"
+              strokeOpacity=".22"
+              strokeWidth=".8"
+            />
           </g>
         ))}
-        {shape.frets.map((fret, index) => {
-          const note = shape.notes.find((item) => item.stringIndex === index)
-          if (fret === null || !note) return null
-          const x = fret === 0 ? boardX - 22 : boardX + (fret - 0.5) * fretWidth
-          const y = stringY[index]
-          const isRoot = note.pitchClass === root
-          return <g key={index}>
-            <circle cx={x} cy={y} r="13" fill={isRoot ? "var(--brand)" : "#dce9dd"} stroke={isRoot ? "#ffffff" : "#526b58"} strokeWidth="2" />
-            <text x={x} y={y + 4.5} textAnchor="middle" fontSize="12" fontWeight="800" fill={isRoot ? "#ffffff" : "#1d3023"}>{shape.fingers[index] > 0 ? shape.fingers[index] : NOTE_NAMES[note.pitchClass]}</text>
-          </g>
+
+        <rect
+          x={boardX - 5}
+          y={boardY - 1}
+          width="8"
+          height={boardHeight + 2}
+          fill="#101213"
+          stroke="#b8b6ac"
+          strokeOpacity=".42"
+          strokeWidth=".8"
+        />
+
+        {displayStringNames.map((name, row) => {
+          const y = stringYByIndex[5 - row]
+          return (
+            <g key={row}>
+              <text
+                x="27"
+                y={y + 4}
+                textAnchor="middle"
+                fill="var(--foreground)"
+                fontSize="13"
+                fontWeight="700"
+              >
+                {name}
+              </text>
+              <line
+                x1={boardX - 1}
+                y1={y}
+                x2={boardX + boardWidth + 1}
+                y2={y}
+                stroke="#16191a"
+                strokeOpacity=".65"
+                strokeWidth={displayStringWidths[row] + 1.7}
+              />
+              <line
+                x1={boardX - 1}
+                y1={y}
+                x2={boardX + boardWidth + 1}
+                y2={y}
+                stroke="url(#wf-string-metal)"
+                strokeWidth={displayStringWidths[row]}
+              />
+            </g>
+          )
         })}
-        <text x={boardX} y="238" fill="var(--muted)" fontSize="12">Nut</text>
-        <text x={boardX + boardWidth} y="238" textAnchor="end" fill="var(--muted)" fontSize="12">15th fret</text>
+
+        {shape.frets.map((fret, stringIndex) => {
+          const note = shape.notes.find((item) => item.stringIndex === stringIndex)
+          if (fret === null || !note) return null
+          const x = fret === 0 ? boardX - 15 : fretCenter(fret)
+          const y = stringYByIndex[stringIndex]
+          const isRoot = note.pitchClass === root
+          return (
+            <g key={stringIndex} filter="url(#wf-note-shadow)">
+              <circle
+                cx={x}
+                cy={y}
+                r="10.5"
+                fill="#f8faf7"
+                stroke={isRoot ? "var(--brand)" : "#59675d"}
+                strokeWidth={isRoot ? "2.4" : "1.4"}
+              />
+              <text
+                x={x}
+                y={y + 3.8}
+                textAnchor="middle"
+                fontSize="10"
+                fontWeight="800"
+                fill="#243229"
+              >
+                {shape.fingers[stringIndex] > 0 ? shape.fingers[stringIndex] : NOTE_NAMES[note.pitchClass]}
+              </text>
+            </g>
+          )
+        })}
+
+        {Array.from({ length: fretboardEndFret + 1 }, (_, fret) => (
+          <text
+            key={fret}
+            x={fret === 0 ? boardX - 15 : fretCenter(fret)}
+            y="190"
+            textAnchor="middle"
+            fill="var(--foreground)"
+            fontSize="12"
+            fontWeight="500"
+          >
+            {fret}
+          </text>
+        ))}
       </svg>
     </div>
   )
 }
-
 function GuitarShapeSelector({
   shapes,
   root,
