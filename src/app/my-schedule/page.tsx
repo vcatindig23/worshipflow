@@ -10,7 +10,6 @@ import {
   Clock3,
   ListMusic,
   Plus,
-  Trash2,
   AlertTriangle,
 } from "lucide-react"
 import { redirect } from "next/navigation"
@@ -37,7 +36,8 @@ import { getWorkspace } from "@/lib/workspace/get-workspace"
 import AssignmentConfirmation from "./assignment-confirmation"
 import ScheduleViewToggle from "./schedule-view-toggle"
 import { requestAssignmentSwap } from "./swap-actions"
-import { createAvailabilityEntry, deleteAvailabilityEntry } from "./availability-actions"
+import { createAvailabilityEntry } from "./availability-actions"
+import AvailabilityEntryCard from "./availability-entry-card"
 
 type MySchedulePageProps = {
   searchParams: Promise<
@@ -93,13 +93,6 @@ type AvailabilityEntry = MemberAvailabilityEntry & {
 }
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-
-function formatAvailabilityTime(value: string | null) {
-  if (!value) return ""
-  const [hour, minute] = value.split(":").map(Number)
-  const displayHour = hour % 12 || 12
-  return `${displayHour}:${String(minute).padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`
-}
 
 function getParam(
   value: string | string[] | undefined
@@ -620,9 +613,11 @@ export default async function MySchedulePage({
             <Feedback tone="error" title="Availability could not be updated">
               {getParam(params.availabilityError) === "invalid_entry"
                 ? "Check the dates, days, and times and try again."
-                : getParam(params.availabilityError) === "delete_failed"
-                  ? "This availability entry could not be removed. Please try again."
-                  : "Your availability could not be saved. Please try again."}
+                : getParam(params.availabilityError) === "update_failed"
+                  ? "This availability entry could not be updated. Please refresh and try again."
+                  : getParam(params.availabilityError) === "delete_failed"
+                    ? "This availability entry could not be removed. Please try again."
+                    : "Your availability could not be saved. Please try again."}
             </Feedback>
           </div>
         ) : null}
@@ -720,31 +715,14 @@ export default async function MySchedulePage({
               ) : (
                 <div className="mt-3 grid gap-2 md:grid-cols-2">
                   {availabilityEntries.map((entry) => (
-                    <article key={entry.id} className="wf-card flex items-start justify-between gap-3 p-3.5">
-                      <div className="min-w-0">
-                        <span className={`wf-status ${entry.entry_type === "blockout" ? "wf-status-warning" : "wf-status-success"}`}>
-                          {entry.entry_type === "blockout" ? "Unavailable" : "Weekly availability"}
-                        </span>
-                        <h4 className="mt-1 text-sm font-semibold text-[var(--foreground)]">
-                          {entry.title || (entry.entry_type === "blockout" ? "Unavailable dates" : "Recurring availability")}
-                        </h4>
-                        <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                          {entry.entry_type === "blockout"
-                            ? `${formatDate(entry.starts_on)} – ${formatDate(entry.ends_on)}`
-                            : `${(entry.weekdays ?? []).slice().sort((a, b) => a - b).map((day) => weekdayLabels[day]).join(", ")} · ${formatAvailabilityTime(entry.start_time)}–${formatAvailabilityTime(entry.end_time)}`}
-                        </p>
-                        <p className="mt-1 text-[10px] font-medium text-[var(--muted)]">
-                          Time zone: {entry.timezone}
-                        </p>
-                        {entry.reason ? <p className="mt-1.5 text-xs leading-5 text-[var(--muted)]">{entry.reason}</p> : null}
-                      </div>
-                      <form action={deleteAvailabilityEntry} className="shrink-0">
-                        <input type="hidden" name="id" value={entry.id} />
-                        <button type="submit" aria-label={`Delete ${entry.title || "availability entry"}`} className="flex size-10 shrink-0 items-center justify-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]">
-                          <Trash2 className="size-4" />
-                        </button>
-                      </form>
-                    </article>
+                    <AvailabilityEntryCard
+                      key={entry.id}
+                      entry={entry}
+                      organizationTimezone={workspace.organizationTimezone}
+                      selectedDate={initialSelectedDate}
+                      calendarView={initialView === "calendar"}
+                      period={period}
+                    />
                   ))}
                 </div>
               )}
