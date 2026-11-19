@@ -480,6 +480,9 @@ export default async function SetlistPage({
   const scheduleEvents = scheduleConflictChecksAvailable
     ? buildScheduleEvents(allSchedules)
     : []
+  const currentScheduledEventCount = scheduleEvents.filter(
+    (event) => event.setlistId === id
+  ).length
   const scheduleAssignmentsBySetlist = new Map<string, Set<string>>()
 
   if (scheduleConflictChecksAvailable) {
@@ -1653,6 +1656,7 @@ export default async function SetlistPage({
                 <AssignmentForm
                   setlistId={id}
                   options={assignableOptions}
+                  scheduledEventCount={currentScheduledEventCount}
                 />
               ) : !hasConfiguredTeamPosition ? (
                 <p className="mt-4 border-t border-[var(--border)] pt-4 text-xs leading-5 text-[var(--muted)]">
