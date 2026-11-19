@@ -188,3 +188,30 @@ export function getScheduleConflictSignature(conflicts: ScheduleConflict[]) {
     .sort((a, b) => a.localeCompare(b))
     .join("|")
 }
+
+
+export type ScheduleAssignmentRecord = {
+  setlist_id: string
+  user_id: string
+  confirmation_status?: string | null
+}
+
+/**
+ * Builds active member commitments for conflict checks. A declined assignment
+ * is no longer a scheduled commitment; pending and confirmed assignments are.
+ */
+export function buildActiveScheduleAssignmentsMap(
+  assignments: ScheduleAssignmentRecord[]
+) {
+  const assignmentsBySetlist = new Map<string, Set<string>>()
+
+  for (const assignment of assignments) {
+    if (assignment.confirmation_status === "declined") continue
+
+    const members = assignmentsBySetlist.get(assignment.setlist_id) ?? new Set<string>()
+    members.add(assignment.user_id)
+    assignmentsBySetlist.set(assignment.setlist_id, members)
+  }
+
+  return assignmentsBySetlist
+}
