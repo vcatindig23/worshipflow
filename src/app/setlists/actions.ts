@@ -17,6 +17,7 @@ import { serviceCoveragePositionLabels } from "@/lib/service-position-coverage"
 import {
   buildScheduleEvents,
   findProposedMemberScheduleConflicts,
+  getScheduleConflictSignature,
   type SetlistSchedule,
 } from "@/lib/schedule-conflicts"
 import {
@@ -826,8 +827,14 @@ export async function addSetlistTeamAssignment(
 
   const conflictAcknowledged =
     String(formData.get("acknowledgeScheduleConflict") ?? "") === "true"
+  const reviewedConflictSignature =
+    String(formData.get("acknowledgedConflictSignature") ?? "")
+  const currentConflictSignature = getScheduleConflictSignature(proposedConflicts)
 
-  if (proposedConflicts.length > 0 && !conflictAcknowledged) {
+  if (
+    proposedConflicts.length > 0 &&
+    (!conflictAcknowledged || reviewedConflictSignature !== currentConflictSignature)
+  ) {
     redirect(`/setlists/${setlistId}?error=assignment_schedule_conflict#worship-team`)
   }
 
