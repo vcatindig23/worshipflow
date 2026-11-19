@@ -185,6 +185,7 @@ export default function DashboardMobileNavigation({
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={normalizedPathname !== "/e2e/workspace-navigation"}
                     onClick={() => closeNavigation(false)}
                     aria-current={active ? (exact ? "page" : "location") : undefined}
                     className={`group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
@@ -231,6 +232,7 @@ export default function DashboardMobileNavigation({
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={normalizedPathname !== "/e2e/workspace-navigation"}
                     onClick={() => closeNavigation(false)}
                     aria-current={active ? (exact ? "page" : "location") : undefined}
                     className={`group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
@@ -264,6 +266,7 @@ export default function DashboardMobileNavigation({
               <div className="flex items-center gap-3 rounded-2xl bg-white/[0.06] p-3">
                 <Link
                   href="/profile"
+                  prefetch={normalizedPathname !== "/e2e/workspace-navigation"}
                   onClick={() => closeNavigation(false)}
                   className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                   aria-label={`View profile for ${userName}`}

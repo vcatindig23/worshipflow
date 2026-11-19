@@ -74,6 +74,8 @@ type WorkspaceHeaderActionsProps = {
   onOpenSearch?: () => void
   onCloseSearch?: () => void
   unreadChatCount?: number
+  disablePrefetch?: boolean
+  disableRemoteData?: boolean
 }
 
 type SearchSong = {
@@ -239,6 +241,8 @@ export default function WorkspaceHeaderActions({
   onOpenSearch: onOpenSearchProp,
   onCloseSearch: onCloseSearchProp,
   unreadChatCount = 0,
+  disablePrefetch = false,
+  disableRemoteData = false,
 }: WorkspaceHeaderActionsProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
@@ -344,6 +348,8 @@ export default function WorkspaceHeaderActions({
   }, [activeSearchResultDomId, searchOpen])
 
   const refreshNotifications = useCallback(async () => {
+    if (disableRemoteData) return
+
     setIsLoadingNotifications(true)
     setNotificationError("")
 
@@ -366,7 +372,7 @@ export default function WorkspaceHeaderActions({
     } finally {
       setIsLoadingNotifications(false)
     }
-  }, [])
+  }, [disableRemoteData])
 
   const feedItems = useMemo<CombinedFeedItem[]>(() => [
     ...notifications.map((notification) => ({
@@ -855,6 +861,7 @@ export default function WorkspaceHeaderActions({
 
       <Link
         href="/chat"
+        prefetch={!disablePrefetch}
         title="Team Chat"
         aria-label={liveUnreadChatCount > 0 ? `Team Chat, ${liveUnreadChatCount} unread updates` : "Team Chat"}
         className="group relative flex size-11 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[var(--brand)]/35 hover:bg-[var(--surface)] active:translate-y-0 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25"
@@ -1057,6 +1064,7 @@ export default function WorkspaceHeaderActions({
             <div className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3">
               <Link
                 href="/activity"
+                prefetch={!disablePrefetch}
                 onClick={() => setNotificationsOpen(false)}
                 className="text-xs font-semibold text-[var(--brand)] hover:underline"
               >
@@ -1182,6 +1190,7 @@ export default function WorkspaceHeaderActions({
                                         <Link
                                           id={`workspace-search-result-song-${song.id}`}
                                           href={`/songs/${song.id}`}
+                                          prefetch={!disablePrefetch}
                                           onClick={onCloseSearch}
                                           onMouseEnter={() => setActiveSearchResultIndex(index)}
                                           className={`flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20 ${activeSearchResultIndex === index ? "bg-[var(--brand-soft)]" : ""}`}
@@ -1214,6 +1223,7 @@ export default function WorkspaceHeaderActions({
                                         <Link
                                           id={`workspace-search-result-setlist-${setlist.id}`}
                                           href={`/setlists/${setlist.id}`}
+                                          prefetch={!disablePrefetch}
                                           onClick={onCloseSearch}
                                           onMouseEnter={() => setActiveSearchResultIndex(searchResults.songs.length + index)}
                                           className={`flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20 ${activeSearchResultIndex === searchResults.songs.length + index ? "bg-[var(--brand-soft)]" : ""}`}

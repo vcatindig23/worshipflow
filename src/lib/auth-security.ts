@@ -20,14 +20,31 @@ export function isSameOriginRequest(headers: Headers, requestUrl?: string) {
   if (!origin || origin === "null") return false
   try {
     const parsed = new URL(origin)
-    const expected = requestUrl ? new URL(requestUrl).host : host
+    const request = requestUrl ? new URL(requestUrl) : null
+    const forwardedHost = headers.get("x-forwarded-host")?.split(",")[0]?.trim()
+    const expectedHost = forwardedHost ?? host ?? request?.host
+    const forwardedProtocol = headers.get("x-forwarded-proto")?.split(",")[0]?.trim()
+    const expectedProtocol = forwardedProtocol
+      ? `${forwardedProtocol.replace(/:$/, "")}:`
+      : request?.protocol
+
     if (!["https:", "http:"].includes(parsed.protocol) || headers.get("sec-fetch-site") === "cross-site") return false
-    if (parsed.host === expected && (!requestUrl || parsed.origin === new URL(requestUrl).origin)) return true
+
+    // Compare the browser Origin with the externally received host, not only
+    // request.url: local Node/Next adapters may normalize 127.0.0.1 to localhost.
+    // The scheme still must match the forwarded public protocol or request URL.
+    if (
+      expectedHost &&
+      expectedProtocol &&
+      parsed.host === expectedHost &&
+      parsed.protocol === expectedProtocol
+    ) return true
+
     // Local reverse proxies (including Codespaces) can report an internal URL.
     // Trust only the explicitly configured development origin, never a wildcard.
     return process.env.NODE_ENV === "development" && !!process.env.NEXT_PUBLIC_SITE_URL &&
       parsed.origin === new URL(process.env.NEXT_PUBLIC_SITE_URL).origin &&
-      headers.get("x-forwarded-host") === parsed.host
+      forwardedHost === parsed.host
   } catch { return false }
 }
 

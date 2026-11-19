@@ -84,7 +84,13 @@ function roleLabel(role: string) {
     .join(" ")
 }
 
-function WorkspaceSidebarFooter({ workspace }: { workspace: WorkspaceShellData }) {
+function WorkspaceSidebarFooter({
+  workspace,
+  disablePrefetch,
+}: {
+  workspace: WorkspaceShellData
+  disablePrefetch: boolean
+}) {
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
 
@@ -107,6 +113,7 @@ function WorkspaceSidebarFooter({ workspace }: { workspace: WorkspaceShellData }
         >
           <Link
             href="/profile"
+            prefetch={!disablePrefetch}
             aria-label={`View profile for ${workspace.userName}`}
             title="View profile"
             className={`group flex min-w-0 items-center gap-3 rounded-lg p-1 transition hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
@@ -176,6 +183,7 @@ function WorshipFlowShellLayout({
 }: WorshipFlowShellProps) {
   const pathname = usePathname() ?? "/"
   const pageTitle = getWorkspacePageTitle(pathname)
+  const disableNavigationPrefetch = pathname === "/e2e/workspace-navigation"
   const { state } = useSidebar()
   const expanded = state === "expanded"
 
@@ -191,7 +199,12 @@ function WorshipFlowShellLayout({
         <SidebarContent>
           <DashboardDesktopNavigation />
         </SidebarContent>
-        {expanded ? <WorkspaceSidebarFooter workspace={workspace} /> : null}
+        {expanded ? (
+          <WorkspaceSidebarFooter
+            workspace={workspace}
+            disablePrefetch={disableNavigationPrefetch}
+          />
+        ) : null}
       </Sidebar>
 
       <SidebarInset
@@ -215,14 +228,20 @@ function WorshipFlowShellLayout({
 
           <div className="flex shrink-0 items-center gap-2">
             <div className="hidden sm:block">
-              <AccountOptionsMenu canManageTeam={workspace.role === "admin"} />
+              <AccountOptionsMenu
+                canManageTeam={workspace.role === "admin"}
+                disablePrefetch={disableNavigationPrefetch}
+              />
             </div>
             <WorkspaceHeaderActions
               unreadChatCount={workspace.unreadChatNotificationCount}
+              disablePrefetch={disableNavigationPrefetch}
+              disableRemoteData={disableNavigationPrefetch}
             />
             {editorRoles.includes(workspace.role) ? (
               <Link
                 href="/songs/new"
+                prefetch={!disableNavigationPrefetch}
                 className="group ml-1 hidden items-center gap-2 rounded-xl bg-[var(--brand)] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[var(--brand-dark)] hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)] sm:inline-flex"
               >
                 <Plus aria-hidden="true" className="wf-icon-motion size-4" />

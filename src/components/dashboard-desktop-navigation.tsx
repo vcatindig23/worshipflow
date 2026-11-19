@@ -35,7 +35,7 @@ function NavigationLink({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        render={<Link href={item.href} />}
+        render={<Link href={item.href} prefetch={pathname !== "/e2e/workspace-navigation"} />}
         isActive={active}
         ariaCurrent={exact ? "page" : "location"}
         tooltip={item.label}
