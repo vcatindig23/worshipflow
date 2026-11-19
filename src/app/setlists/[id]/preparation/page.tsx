@@ -21,6 +21,7 @@ import FormSubmitButton from "@/components/ui/form-submit-button"
 import { createClient } from "@/lib/supabase/server"
 import { getWorkspace } from "@/lib/workspace/get-workspace"
 import {
+  buildActiveScheduleAssignmentsMap,
   buildScheduleEvents,
   findScheduleConflicts,
   timeToMinutes,
@@ -87,7 +88,7 @@ export default async function ServicePreparationPage({
   const [setlistResult, taskResult, schedulesResult] = await Promise.all([
     supabase
       .from("setlists")
-      .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time, rehearsal_location, rehearsal_notes")
+      .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time, rehearsal_location, rehearsal_notes, service_prep_buffer_minutes, service_travel_buffer_minutes, rehearsal_prep_buffer_minutes, rehearsal_travel_buffer_minutes")
       .eq("id", id)
       .eq("organization_id", workspace.organizationId)
       .maybeSingle(),
@@ -100,7 +101,7 @@ export default async function ServicePreparationPage({
       .order("created_at", { ascending: true }),
     supabase
       .from("setlists")
-      .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time")
+      .select("id, name, service_date, service_time, end_time, status, completed_at, rehearsal_date, rehearsal_time, rehearsal_end_time, service_prep_buffer_minutes, service_travel_buffer_minutes, rehearsal_prep_buffer_minutes, rehearsal_travel_buffer_minutes")
       .eq("organization_id", workspace.organizationId),
   ])
 
@@ -117,16 +118,11 @@ export default async function ServicePreparationPage({
   const { data: assignmentRows, error: assignmentsError } = scheduleIds.length
     ? await supabase
         .from("setlist_team_assignments")
-        .select("setlist_id, user_id")
+        .select("setlist_id, user_id, confirmation_status")
         .in("setlist_id", scheduleIds)
     : { data: [], error: null }
 
-  const assignmentsBySetlist = new Map<string, Set<string>>()
-  for (const assignment of assignmentRows ?? []) {
-    const members = assignmentsBySetlist.get(assignment.setlist_id) ?? new Set<string>()
-    members.add(assignment.user_id)
-    assignmentsBySetlist.set(assignment.setlist_id, members)
-  }
+  const assignmentsBySetlist = buildActiveScheduleAssignmentsMap(assignmentRows ?? [])
 
   const events = buildScheduleEvents(schedules)
   const conflictsAvailable = !assignmentsError
