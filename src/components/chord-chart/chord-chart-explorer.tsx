@@ -67,7 +67,6 @@ const CHORD_TYPES: ChordType[] = [
   { id: "minor-seven-add-eleven", label: "Minor 7 add 11", suffix: "m7add11", group: "Extended chords", intervals: [0, 3, 7, 10, 17] },
 ]
 
-const CHORD_GROUPS = ["Triads & basics", "Sixths & sevenths", "Suspended & added tones", "Extended chords", "Altered chords"]
 const WHITE_PITCH_CLASSES = [0, 2, 4, 5, 7, 9, 11]
 const WHITE_NOTE_NAMES = ["C", "D", "E", "F", "G", "A", "B"]
 const WHITE_KEY_WIDTH = 60
@@ -79,7 +78,7 @@ function getChordPitchClasses(root: number, intervals: number[]) {
   return new Set(intervals.map((interval) => (root + interval) % 12))
 }
 
-const SOUND_FONT_BASE_URL = "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM"
+const SOUND_FONT_BASE_URL = "https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/gh-pages/FluidR3_GM"
 const soundFontCache = new Map<string, Promise<Map<number, string>>>()
 
 function sampleNameToMidi(name: string) {
@@ -591,10 +590,6 @@ function PianoKeyboard({ root, intervals, inversionIndex }: { root: number; inte
       </p>
     </div>
   )
-}
-
-function ChordToneLegend() {
-  return <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--muted)]"><span className="inline-flex items-center gap-2"><span className="size-3 rounded-full bg-[var(--brand)]" />Root note</span><span className="inline-flex items-center gap-2"><span className="size-3 rounded-full border border-[#cad7ca] bg-[var(--brand-soft)]" />Selected chord tone</span></div>
 }
 
 export default function ChordChartExplorer() {
