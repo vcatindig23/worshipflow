@@ -13,6 +13,7 @@ import {
   uuidSchema,
 } from "@/lib/team-access-validation"
 import { hasServiceTimeColumn } from "@/lib/service-time-schema"
+import { serviceCoveragePositionLabels } from "@/lib/service-position-coverage"
 import {
   isValidServiceDate,
   isValidServiceTime,
@@ -689,6 +690,69 @@ export async function deleteSetlist(
 
   revalidatePath("/setlists")
   redirect("/setlists")
+}
+
+export async function saveSetlistPositionRequirements(
+  formData: FormData
+) {
+  const setlistId = String(formData.get("setlistId") ?? "").trim()
+
+  if (!uuidSchema.safeParse(setlistId).success) {
+    redirect("/setlists")
+  }
+
+  const requirements: Record<string, number> = {}
+  for (const position of Object.keys(serviceCoveragePositionLabels)) {
+    const rawValue = String(formData.get(`required_${position}`) ?? "0").trim()
+    const count = rawValue === "" ? 0 : Number(rawValue)
+
+    if (!Number.isInteger(count) || count < 0 || count > 20) {
+      redirect(`/setlists/${setlistId}?error=invalid_position_requirements#position-coverage`)
+    }
+
+    requirements[position] = count
+  }
+
+  const { supabase, role } = await getMembership()
+  requireRole(role, editorRoles)
+
+  const { error } = await supabase.rpc("save_setlist_position_requirements", {
+    p_setlist_id: setlistId,
+    p_requirements: requirements,
+  })
+
+  if (error) {
+    console.error("save_setlist_position_requirements failed:", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    })
+
+    if (
+      error.code === "PGRST202" ||
+      error.code === "42883" ||
+      error.code === "42P01"
+    ) {
+      redirect(`/setlists/${setlistId}?error=position_coverage_migration_missing#position-coverage`)
+    }
+
+    if (error.message.includes("SETLIST_NOT_FOUND")) {
+      redirect(`/setlists/${setlistId}?error=setlist_load_failed`)
+    }
+
+    if (
+      error.message.includes("INVALID_POSITION_REQUIREMENTS") ||
+      error.message.includes("POSITION_REQUIREMENT_TOO_LARGE")
+    ) {
+      redirect(`/setlists/${setlistId}?error=invalid_position_requirements#position-coverage`)
+    }
+
+    redirect(`/setlists/${setlistId}?error=position_coverage_save_failed#position-coverage`)
+  }
+
+  revalidatePath(`/setlists/${setlistId}`)
+  revalidatePath("/services")
+  redirect(`/setlists/${setlistId}#position-coverage`)
 }
 
 export async function addSetlistTeamAssignment(
