@@ -183,8 +183,15 @@ export function findProposedMemberScheduleConflicts(
  * The server compares it with a fresh calculation when the form is submitted.
  */
 export function getScheduleConflictSignature(conflicts: ScheduleConflict[]) {
+  const eventSignature = (event: ScheduleEvent) =>
+    `${event.key}@${event.date}:${event.startMinutes}-${event.endMinutes}:${event.serviceName}`
+
   return conflicts
-    .map((conflict) => [conflict.current.key, conflict.other.key].sort().join("::"))
+    .map((conflict) =>
+      [eventSignature(conflict.current), eventSignature(conflict.other)]
+        .sort()
+        .join("::")
+    )
     .sort((a, b) => a.localeCompare(b))
     .join("|")
 }
