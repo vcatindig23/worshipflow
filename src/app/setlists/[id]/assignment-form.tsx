@@ -11,6 +11,11 @@ type ProposedConflict = {
   startTime: string
   endTime: string
   isCurrentService: boolean
+  currentKind: "Service" | "Rehearsal"
+  currentPrepBufferMinutes: number
+  currentTravelBufferMinutes: number
+  prepBufferMinutes: number
+  travelBufferMinutes: number
 }
 
 type AssignmentOption = {
@@ -138,6 +143,19 @@ export default function AssignmentForm({
                     {formatTime(conflict.startTime)}–{formatTime(conflict.endTime)}
                   </span>
                 </p>
+                {(conflict.currentPrepBufferMinutes > 0 ||
+                  conflict.currentTravelBufferMinutes > 0 ||
+                  conflict.prepBufferMinutes > 0 ||
+                  conflict.travelBufferMinutes > 0) ? (
+                  <div className="mt-2 space-y-1 text-[11px] leading-5 text-[var(--muted)]">
+                    <p>
+                      This {conflict.currentKind.toLowerCase()}: {conflict.currentPrepBufferMinutes} min preparation before · {conflict.currentTravelBufferMinutes} min travel after
+                    </p>
+                    <p>
+                      {conflict.isCurrentService ? "This service's rehearsal" : conflict.serviceName}: {conflict.prepBufferMinutes} min preparation before · {conflict.travelBufferMinutes} min travel after
+                    </p>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>
