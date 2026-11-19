@@ -721,7 +721,7 @@ export default async function MySchedulePage({
                       calendarView={initialView === "calendar"}
                       period={period}
                     />
-                  ))}}
+                  ))}
                 </div>
               )}
             </div>
