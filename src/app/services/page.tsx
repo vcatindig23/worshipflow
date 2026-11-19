@@ -405,7 +405,6 @@ export default async function ServicesPage({
               : `/services?period=${item.value}`,
         }))}
       />
-      </nav>
 
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
