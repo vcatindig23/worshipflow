@@ -195,7 +195,6 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
     const note = shape.notes.find((item) => item.stringIndex === stringIndex)
     return note ? NOTE_NAMES[note.pitchClass] : "—"
   })
-  const playedNotes = shape.notes.map((note) => NOTE_NAMES[note.pitchClass]).join(" · ")
   const inversion = getInversionName(root, shape.bassPitchClass, chordOrder)
 
   return (
@@ -362,21 +361,6 @@ function GuitarShapeDiagram({ shape, root, chordOrder, index, total }: { shape: 
           ))}
         </svg>
       </div>
-      <p className="text-xs text-[var(--muted)] sm:hidden">
-        Swipe horizontally to view all six strings and the full fretboard.
-      </p>
-      <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
-        <span className="font-medium text-[var(--foreground)]">String notes (low E → high e):</span>
-        <span>{stringNotes.join(" · ")}</span>
-      </div>
-      <p className="text-xs leading-5 text-[var(--muted)]">
-        {shape.reference
-          ? "Reference fingering shown. Numbers inside the dots are fingers: 1 index, 2 middle, 3 ring, 4 pinky."
-          : shape.transposed
-            ? "Transposed reference shape. Finger numbers are suggested from the new fret positions; check the fingering and barre for comfort."
-            : "Calculated voicing shown with the note names inside each dot. Fret positions match the selected chord tones; this shape has no database-suggested finger assignment."}
-        {" "}Notes in this shape: {playedNotes}.
-      </p>
     </div>
   )
 }
