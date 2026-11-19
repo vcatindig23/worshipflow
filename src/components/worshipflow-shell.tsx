@@ -236,6 +236,7 @@ function WorshipFlowShellLayout({
             <WorkspaceHeaderActions
               unreadChatCount={workspace.unreadChatNotificationCount}
               disablePrefetch={disableNavigationPrefetch}
+              disableRemoteData={disableNavigationPrefetch}
             />
             {editorRoles.includes(workspace.role) ? (
               <Link
