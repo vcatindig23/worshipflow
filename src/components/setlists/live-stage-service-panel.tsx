@@ -132,7 +132,7 @@ export default function LiveStageServicePanel({
         className="absolute inset-0 cursor-default"
       />
       <aside
-        className="relative flex h-full w-full max-w-xl flex-col border-l border-white/10 bg-[#111713] text-white shadow-2xl"
+        className="relative flex h-full w-full max-w-xl flex-col border-l border-white/10 bg-[var(--stage-surface-raised)] text-[var(--stage-foreground)] shadow-2xl"
         aria-label="Service information"
       >
         <header className="flex shrink-0 items-start justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-6">
@@ -300,7 +300,7 @@ export default function LiveStageServicePanel({
                               </p>
                             ) : null}
                             {item.item_type === "song" ? (
-                              <p className="mt-1 text-[10px] text-amber-200/70">
+                              <p className="mt-1 text-[10px] text-[var(--stage-warning)]/80">
                                 Link a setlist song to make this item navigable.
                               </p>
                             ) : null}
@@ -343,10 +343,10 @@ export default function LiveStageServicePanel({
 
                   const statusClass =
                     member.confirmation_status === "confirmed"
-                      ? "bg-emerald-300/10 text-emerald-200"
+                      ? "bg-[var(--stage-success-soft)] text-[var(--stage-success)]"
                       : member.confirmation_status === "declined"
-                        ? "bg-rose-300/10 text-rose-200"
-                        : "bg-amber-300/10 text-amber-200"
+                        ? "bg-[var(--stage-danger-soft)] text-[var(--stage-danger)]"
+                        : "bg-[var(--stage-warning-soft)] text-[var(--stage-warning)]"
 
                   return (
                     <li

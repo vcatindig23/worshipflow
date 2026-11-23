@@ -33,7 +33,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         className="relative mx-auto flex min-h-[calc(100svh-2.5rem)] w-full max-w-[1240px] flex-col justify-center sm:min-h-[calc(100svh-4rem)] lg:min-h-[calc(100svh-4rem)]"
       >
         <div className="grid w-full items-stretch lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:overflow-hidden lg:rounded-[32px] lg:border lg:border-[var(--border)] lg:bg-[var(--card)]/80 lg:shadow-[0_32px_100px_-42px_rgba(15,23,42,0.36)] lg:backdrop-blur-xl">
-          <aside className="relative hidden min-h-full flex-col justify-between overflow-hidden bg-gradient-to-br from-[#173d2a] via-[#28523a] to-[#426949] p-10 text-white lg:flex xl:p-12">
+          <aside className="relative hidden min-h-full flex-col justify-between overflow-hidden bg-gradient-to-br from-[var(--sidebar)] via-[var(--brand-dark)] to-[var(--brand)] p-10 text-white lg:flex xl:p-12">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute -right-24 -top-20 size-80 rounded-full border border-white/10"
@@ -51,7 +51,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               <Link
                 href="/"
                 aria-label="WorshipFlow home"
-                className="inline-flex rounded-xl outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#28523a]"
+                className="inline-flex rounded-xl outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--brand-dark)]"
               >
                 <Image
                   src="/worshipflow-wordmark.png"
@@ -67,7 +67,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               </p>
 
               <div className="mt-16 max-w-md xl:mt-20">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-100/75">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--sidebar-accent)]/85">
                   Prepare with purpose
                 </p>
                 <h2 className="mt-4 text-4xl font-semibold leading-[1.12] tracking-tight xl:text-[3.25rem]">
@@ -83,7 +83,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             <div className="relative z-10 mt-12 space-y-5">
               {workspaceFeatures.map(({ icon: Icon, title, description }) => (
                 <div key={title} className="flex items-start gap-3.5">
-                  <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-emerald-100">
+                  <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-[var(--sidebar-accent)]">
                     <Icon aria-hidden="true" className="size-4" />
                   </span>
                   <div>
@@ -95,7 +95,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                 </div>
               ))}
               <div className="flex items-center gap-2 border-t border-white/15 pt-6 text-xs text-white/60">
-                <Check aria-hidden="true" className="size-4 text-emerald-100" />
+                <Check aria-hidden="true" className="size-4 text-[var(--sidebar-accent)]" />
                 A shared home for your worship team
               </div>
             </div>

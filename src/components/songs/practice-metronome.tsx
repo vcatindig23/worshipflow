@@ -171,7 +171,7 @@ export default function PracticeMetronome({
   return (
     <section
       aria-label="Song practice metronome"
-      className={"rounded-2xl border p-4 sm:p-5 " + border + " " + (dark ? "bg-[#17221b]" : "bg-[var(--card)]")}
+      className={"rounded-2xl border p-4 sm:p-5 " + border + " " + (dark ? "bg-[var(--stage-surface)]" : "bg-[var(--card)]")}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 items-start gap-3">
@@ -256,7 +256,7 @@ export default function PracticeMetronome({
           <button
             type="button"
             onClick={toggleMetronome}
-            className={"inline-flex h-11 min-w-32 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition sm:h-10 " + (running ? (dark ? "bg-white text-[#17221b]" : "bg-[var(--surface)] text-[var(--foreground)]") : "bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]")}
+            className={"inline-flex h-11 min-w-32 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition sm:h-10 " + (running ? (dark ? "bg-[var(--stage-foreground)] text-[var(--stage-background)]" : "bg-[var(--surface)] text-[var(--foreground)]") : "bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]")}
           >
             {running ? <Pause className="size-4" /> : <Play className="size-4" />}
             {running ? "Stop metronome" : "Start metronome"}
@@ -288,7 +288,7 @@ export default function PracticeMetronome({
       </div>
 
       {audioError ? (
-        <p role="alert" className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-700">
+        <p role="alert" className={"mt-3 rounded-lg border px-3 py-2 text-xs " + (dark ? "border-[var(--stage-danger-border)] bg-[var(--stage-danger-soft)] text-[var(--stage-danger)]" : "border-[var(--danger)]/30 bg-[var(--danger-soft)] text-[var(--danger)]")}>
           {audioError}
         </p>
       ) : null}

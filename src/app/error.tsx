@@ -27,7 +27,7 @@ export default function GlobalError({
             aria-labelledby="global-error-title"
             className="w-full max-w-lg rounded-3xl border border-[var(--border)] bg-[var(--card)] p-6 text-center shadow-sm sm:p-10"
           >
-            <div className="mx-auto flex size-16 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-600">
+            <div className="wf-icon-tile wf-icon-tile-warning mx-auto flex size-16 items-center justify-center rounded-2xl border border-[var(--warning)]/20">
               <AlertTriangle aria-hidden="true" className="size-7" />
             </div>
 

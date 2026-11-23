@@ -133,7 +133,7 @@ export default function DashboardMobileNavigation({
             type="button"
             aria-label="Close navigation menu"
             onClick={() => closeNavigation()}
-            className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-[var(--foreground)]/50 backdrop-blur-[2px]"
           />
 
           <aside

@@ -224,7 +224,7 @@ export default function AccountOptionsMenu({
           <form action="/auth/signout" method="post">
             <button
               type="submit"
-              className="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-red-600 transition hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
+              className="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-[var(--danger)] transition hover:bg-[var(--danger-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--danger)]/25"
             >
               <LogOut aria-hidden="true" className="size-4" />
               Log out

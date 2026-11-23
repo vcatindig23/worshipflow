@@ -62,7 +62,7 @@ function SongPracticePanel({
         immersive
           ? "h-full min-h-0 overflow-y-auto bg-[var(--surface)] p-3 sm:p-4"
           : "z-10 max-h-[min(42dvh,380px)] shrink-0 overflow-y-auto border-b p-3 sm:p-4 " +
-            (dark ? "border-white/10 bg-[#0d120f]" : "border-[var(--border)] bg-[var(--card)]")
+            (dark ? "border-white/10 bg-[var(--stage-background)]" : "border-[var(--border)] bg-[var(--card)]")
       }
     >
       <div className={immersive ? "space-y-3" : "mx-auto max-w-7xl space-y-3"}>
@@ -305,7 +305,7 @@ export default function SongViewer({
       tabIndex={0}
       className={`min-h-0 min-w-0 overscroll-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand)]/40 ${
         stageMode
-          ? "flex-1 overflow-auto bg-[#0d120f] px-3 py-4 text-white sm:px-4 sm:py-6 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
+          ? "flex-1 overflow-auto bg-[var(--stage-background)] px-3 py-4 text-white sm:px-4 sm:py-6 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
           : practiceOpen
             ? "min-h-0 flex-1 overflow-auto bg-[var(--card)] px-4 py-5 sm:px-8 sm:py-8"
             : "h-[calc(100dvh-170px)] min-h-[360px] overflow-auto px-5 py-7 sm:px-8 sm:py-9"
@@ -417,8 +417,8 @@ export default function SongViewer({
 
   if (stageMode) {
     return (
-      <div className="fixed inset-0 z-[100] flex h-dvh flex-col overflow-hidden bg-[#0d120f] text-white">
-        <header className="z-10 flex shrink-0 flex-col gap-3 border-b border-white/10 bg-[#0d120f] px-3 py-3 sm:px-6 sm:py-4">
+      <div className="fixed inset-0 z-[100] flex h-dvh flex-col overflow-hidden bg-[var(--stage-background)] text-white">
+        <header className="z-10 flex shrink-0 flex-col gap-3 border-b border-white/10 bg-[var(--stage-background)] px-3 py-3 sm:px-6 sm:py-4">
           <div className="flex min-w-0 items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45 sm:text-xs">
@@ -445,7 +445,7 @@ export default function SongViewer({
                 onClick={() => setPracticeOpen((value) => !value)}
                 aria-expanded={practiceOpen}
                 aria-label={practiceOpen ? "Close practice tools" : "Open practice tools"}
-                className={"inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border px-2.5 text-xs font-semibold transition sm:px-3 " + (practiceOpen ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white")}
+                className={"inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border px-2.5 text-xs font-semibold transition sm:px-3 " + (practiceOpen ? "border-[var(--stage-success-border)] bg-[var(--stage-success-soft)] text-[var(--stage-success)]" : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white")}
               >
                 <Gauge className="size-3.5" />
                 <span className="hidden sm:inline">Practice</span>
@@ -473,7 +473,7 @@ export default function SongViewer({
               aria-label={autoScroll ? "Pause auto-scroll" : "Start auto-scroll"}
               className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-2.5 text-xs font-semibold transition sm:px-3 ${
                 autoScroll
-                  ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200"
+                  ? "border-[var(--stage-success-border)] bg-[var(--stage-success-soft)] text-[var(--stage-success)]"
                   : "border-white/15 bg-white/5 text-white/75 hover:bg-white/10 hover:text-white"
               }`}
             >

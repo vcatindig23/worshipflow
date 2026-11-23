@@ -868,7 +868,7 @@ export default function WorkspaceHeaderActions({
       >
         <MessagesSquare className="wf-icon-motion size-[18px] group-hover:scale-110 group-hover:-rotate-3" />
         {liveUnreadChatCount > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-red-600 px-1 text-[9px] font-bold text-white">
+          <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-[var(--danger-action)] px-1 text-[9px] font-bold text-white">
             {liveUnreadChatCount > 99 ? "99+" : liveUnreadChatCount}
           </span>
         ) : null}
@@ -889,7 +889,7 @@ export default function WorkspaceHeaderActions({
           {unreadCount > 0 ? (
             <span
               aria-hidden="true"
-              className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-red-600 px-1 text-[9px] font-bold text-white"
+              className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--background)] bg-[var(--danger-action)] px-1 text-[9px] font-bold text-white"
             >
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
@@ -1082,7 +1082,7 @@ export default function WorkspaceHeaderActions({
 
       {searchOpen && isBrowserMounted
         ? createPortal(
-                    <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/35 px-3 py-8 backdrop-blur-[2px] sm:px-6">
+                    <div className="fixed inset-0 z-[100] overflow-y-auto bg-[var(--foreground)]/35 px-3 py-8 backdrop-blur-[2px] sm:px-6">
                       <button
                         type="button"
                         aria-label="Close global search"
