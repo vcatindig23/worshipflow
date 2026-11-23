@@ -239,6 +239,17 @@ const accountSecurityPage = readFileSync(
   join(process.cwd(), "src/app/settings/security/page.tsx"),
   "utf8"
 )
+const globalErrorPage = readFileSync(join(process.cwd(), "src/app/error.tsx"), "utf8")
+const serviceTimeline = readFileSync(join(process.cwd(), "src/app/setlists/[id]/service-timeline.tsx"), "utf8")
+const authLayout = readFileSync(join(process.cwd(), "src/components/auth/auth-layout.tsx"), "utf8")
+const accountOptionsMenu = readFileSync(join(process.cwd(), "src/components/account-options-menu.tsx"), "utf8")
+const dashboardMobileNavigation = readFileSync(join(process.cwd(), "src/components/dashboard-mobile-navigation.tsx"), "utf8")
+const particleButton = readFileSync(join(process.cwd(), "src/components/kokonutui/particle-button.tsx"), "utf8")
+const practiceMetronome = readFileSync(join(process.cwd(), "src/components/songs/practice-metronome.tsx"), "utf8")
+const referenceAudioPlayer = readFileSync(join(process.cwd(), "src/components/songs/reference-audio-player.tsx"), "utf8")
+const songViewer = readFileSync(join(process.cwd(), "src/components/songs/song-viewer.tsx"), "utf8")
+const liveStageView = readFileSync(join(process.cwd(), "src/components/setlists/live-stage-view.tsx"), "utf8")
+const liveStageServicePanel = readFileSync(join(process.cwd(), "src/components/setlists/live-stage-service-panel.tsx"), "utf8")
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
@@ -260,6 +271,66 @@ describe("semantic theme foundations", () => {
     expect(designSystem).toMatch(/--gold-soft:\s*#f3e9d7/)
     expect(designSystem).toMatch(/--accent:\s*#d18b70/)
     expect(designSystem).toMatch(/--gold:\s*#d0b678/)
+  })
+
+  it("defines fixed projector palette tokens for immersive practice and live stage", () => {
+    expect(designSystem).toMatch(/--stage-background:\\s*#0d120f/)
+    expect(designSystem).toMatch(/--stage-surface:\\s*#17211b/)
+    expect(designSystem).toMatch(/--stage-success:\\s*#bad2b3/)
+    expect(designSystem).toMatch(/--stage-warning:\\s*#e3ca92/)
+    expect(designSystem).toMatch(/--stage-danger:\\s*#e6a9aa/)
+    expect(designSystem).toMatch(/--sidebar-accent:\\s*#e6d3a6/)
+  })
+
+  it("uses semantic brand and status colors on the remaining workspace and auth surfaces", () => {
+    expect(authLayout).toContain("from-[var(--sidebar)]")
+    expect(authLayout).toContain("text-[var(--sidebar-accent)]")
+    expect(authLayout).not.toMatch(/#173d2a|#28523a|#426949|text-emerald-100/)
+
+    expect(globalErrorPage).toContain("wf-icon-tile-warning")
+    expect(globalErrorPage).not.toMatch(/amber-500|amber-600/)
+
+    expect(accountOptionsMenu).toContain("text-[var(--danger)]")
+    expect(accountOptionsMenu).not.toMatch(/text-red-600|hover:bg-red-50|ring-red-500/)
+
+    expect(workspaceHeaderActions).toContain("bg-[var(--danger-action)]")
+    expect(workspaceHeaderActions).not.toContain("bg-red-600")
+    expect(workspaceHeaderActions).not.toContain("bg-slate-950/")
+    expect(dashboardMobileNavigation).not.toContain("bg-slate-950/")
+    expect(particleButton).toContain("bg-[var(--danger-action)]")
+    expect(particleButton).not.toMatch(/bg-red-600|dark:bg-red-500/)
+
+    expect(loginPage).toContain("bg-[var(--card)]/95")
+    expect(signupPage).toContain("bg-[var(--card)]/95")
+    expect(loginPage).not.toContain("bg-white/95")
+    expect(signupPage).not.toContain("bg-white/95")
+
+    expect(serviceTimeline).toContain("bg-[var(--card)]/75")
+    expect(serviceTimeline).toContain("text-[var(--warning)]")
+    expect(serviceTimeline).not.toContain("bg-white/75")
+    expect(serviceTimeline).not.toContain("text-amber-700")
+  })
+
+  it("keeps projector and dark practice accents on stage-specific semantic tokens", () => {
+    expect(practiceMetronome).toContain("var(--stage-surface)")
+    expect(practiceMetronome).toContain("var(--stage-danger)")
+    expect(practiceMetronome).not.toMatch(/#17221b|text-rose-700|bg-rose-500/)
+
+    expect(referenceAudioPlayer).toContain("var(--stage-success)")
+    expect(referenceAudioPlayer).toContain("var(--stage-danger)")
+    expect(referenceAudioPlayer).not.toMatch(/#17221b|emerald-200|rose-200|border-rose-200|bg-rose-50/)
+
+    expect(songViewer).toContain("var(--stage-background)")
+    expect(songViewer).toContain("var(--stage-success)")
+    expect(songViewer).not.toMatch(/#0d120f|emerald-200|bg-emerald-400/)
+
+    expect(liveStageView).toContain("var(--stage-warning)")
+    expect(liveStageView).toContain("var(--stage-success)")
+    expect(liveStageView).not.toMatch(/#0d120f|#17211b|amber-200|emerald-200|bg-amber-200/)
+
+    expect(liveStageServicePanel).toContain("var(--stage-surface-raised)")
+    expect(liveStageServicePanel).toContain("var(--stage-danger)")
+    expect(liveStageServicePanel).not.toMatch(/#111713|amber-200|emerald-200|rose-200/)
   })
 
   it("keeps global styles free of broad dark-mode utility overrides", () => {
