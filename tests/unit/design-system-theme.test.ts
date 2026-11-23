@@ -283,7 +283,7 @@ describe("semantic theme foundations", () => {
   })
   it("provides theme-aware semantic warning and status styles", () => {
     expect(designSystem).toMatch(/--warning:\s*#8e6a2e/)
-    expect(designSystem).toMatch(/--warning:\s*#f0c477/)
+    expect(designSystem).toMatch(/--warning:\s*#d0b678/)
     expect(designSystem).toMatch(/\.wf-status-warning[\s\S]*?background:\s*var\(--warning-soft\)/)
     expect(designSystem).toMatch(/\.wf-status-success[\s\S]*?color:\s*var\(--success\)/)
   })
