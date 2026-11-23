@@ -188,7 +188,7 @@ export default function ReferenceAudioPlayer({
   return (
     <section
       aria-label="Reference audio player"
-      className={"rounded-2xl border p-4 sm:p-5 " + border + " " + (dark ? "bg-[#17221b]" : "bg-[var(--card)]")}
+      className={"rounded-2xl border p-4 sm:p-5 " + border + " " + (dark ? "bg-[var(--stage-surface)]" : "bg-[var(--card)]")}
     >
       <audio
         ref={audioRef}
@@ -247,9 +247,9 @@ export default function ReferenceAudioPlayer({
               aria-live="polite"
               className={"rounded-full px-2 py-1 text-[10px] font-semibold " + subtleSurface + " " + (
                 audioState === "error" || audioState === "blocked"
-                  ? (dark ? "text-rose-200" : "text-[var(--danger)]")
+                  ? (dark ? "text-[var(--stage-danger)]" : "text-[var(--danger)]")
                   : audioState === "ready"
-                    ? (dark ? "text-emerald-200" : "text-[var(--success)]")
+                    ? (dark ? "text-[var(--stage-success)]" : "text-[var(--success)]")
                     : muted
               )}
             >
@@ -348,7 +348,7 @@ export default function ReferenceAudioPlayer({
             type="button"
             onClick={toggleTrackRepeat}
             aria-pressed={repeatTrack}
-            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold sm:h-9 " + (repeatTrack ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
+            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold sm:h-9 " + (repeatTrack ? (dark ? "border-[var(--stage-success-border)] bg-[var(--stage-success-soft)] text-[var(--stage-success)]" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
           >
             <Repeat2 className="size-3.5" />
             Repeat track
@@ -358,7 +358,7 @@ export default function ReferenceAudioPlayer({
             onClick={markLoopStart}
             disabled={repeatTrack || !duration}
             aria-pressed={loopStart !== null}
-            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 " + (loopStart !== null && !repeatTrack ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
+            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 " + (loopStart !== null && !repeatTrack ? (dark ? "border-[var(--stage-success-border)] bg-[var(--stage-success-soft)] text-[var(--stage-success)]" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
           >
             <span className="font-bold">A</span> Set loop start
           </button>
@@ -367,7 +367,7 @@ export default function ReferenceAudioPlayer({
             onClick={markLoopEnd}
             disabled={repeatTrack || loopStart === null || !duration}
             aria-pressed={sectionLoopActive}
-            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 " + (sectionLoopActive ? (dark ? "border-emerald-300/40 bg-emerald-400/15 text-emerald-200" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
+            className={"inline-flex h-11 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 " + (sectionLoopActive ? (dark ? "border-[var(--stage-success-border)] bg-[var(--stage-success-soft)] text-[var(--stage-success)]" : "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand-dark)]") : secondaryButton)}
           >
             <span className="font-bold">B</span> Set loop end
           </button>
@@ -387,7 +387,7 @@ export default function ReferenceAudioPlayer({
       </div>
 
       {error ? (
-        <div role="alert" className={"mt-3 flex flex-col gap-2 rounded-lg border px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between " + (dark ? "border-rose-300/20 bg-rose-300/10 text-rose-100" : "border-rose-200 bg-rose-50 text-rose-700")}>
+        <div role="alert" className={"mt-3 flex flex-col gap-2 rounded-lg border px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between " + (dark ? "border-[var(--stage-danger-border)] bg-[var(--stage-danger-soft)] text-[var(--stage-danger)]" : "border-[var(--danger)]/25 bg-[var(--danger-soft)] text-[var(--danger)]")}>
           <p className="leading-5">{error}</p>
           <button
             type="button"
@@ -398,7 +398,7 @@ export default function ReferenceAudioPlayer({
               setAudioState("loading")
               audio.load()
             }}
-            className={"inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 font-semibold transition " + (dark ? "border-white/15 bg-white/5 text-white hover:bg-white/10" : "border-rose-200 bg-white text-rose-800 hover:bg-rose-100")}
+            className={"inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 font-semibold transition " + (dark ? "border-[var(--stage-danger-border)] bg-[var(--stage-danger-soft)] text-[var(--stage-danger)] hover:bg-[var(--stage-danger-soft)]" : "border-[var(--danger)]/25 bg-[var(--card)] text-[var(--danger)] hover:bg-[var(--danger-soft)]")}
           >
             <RotateCcw className="size-3.5" />
             Retry audio

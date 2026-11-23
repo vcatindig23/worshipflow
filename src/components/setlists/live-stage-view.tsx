@@ -402,7 +402,7 @@ export default function LiveStageView({
   }), [displayLines, fontSize, showChords])
 
   return (
-    <main className="fixed inset-0 z-50 flex min-h-dvh flex-col overflow-hidden bg-[#0d120f] text-white">
+    <main className="fixed inset-0 z-50 flex min-h-dvh flex-col overflow-hidden bg-[var(--stage-background)] text-[var(--stage-foreground)]">
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 px-3 py-2.5 sm:gap-4 sm:px-7 sm:py-3">
         <div className="flex min-w-0 flex-1 basis-full items-center gap-3 sm:basis-auto sm:flex-initial">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white/70">
@@ -424,7 +424,7 @@ export default function LiveStageView({
               <Clock className="size-4" />
               <span aria-label="Countdown remaining">{formatCountdown(countdownRemaining)}</span>
             </summary>
-            <div className="absolute left-0 top-full z-[220] mt-2 w-64 sm:left-auto sm:right-0 rounded-2xl border border-white/15 bg-[#17211b] p-4 shadow-2xl">
+            <div className="absolute left-0 top-full z-[220] mt-2 w-64 sm:left-auto sm:right-0 rounded-2xl border border-white/15 bg-[var(--stage-surface)] p-4 shadow-2xl">
               <p className="text-sm font-semibold">Transition countdown</p>
               <p className="mt-1 text-xs leading-5 text-white/55">A local timer for rehearsal and transitions. It does not automatically advance the song.</p>
               <label htmlFor="stage-countdown-duration" className="mt-3 block text-xs font-medium text-white/70">Duration</label>
@@ -446,9 +446,9 @@ export default function LiveStageView({
                 <option value={300}>5 minutes</option>
               </select>
               <p className="mt-3 text-center font-mono text-3xl font-semibold tabular-nums" aria-live="off">{formatCountdown(countdownRemaining)}</p>
-              {countdownRemaining === 0 ? <p role="status" className="mt-1 text-center text-xs font-semibold text-amber-200">Countdown complete</p> : null}
+              {countdownRemaining === 0 ? <p role="status" className="mt-1 text-center text-xs font-semibold text-[var(--stage-warning)]">Countdown complete</p> : null}
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => setCountdownRunning((running) => !running)} disabled={countdownRemaining === 0} className="h-9 rounded-lg bg-white px-3 text-xs font-semibold text-[#17211b] disabled:opacity-40">{countdownRunning ? "Pause" : "Start"}</button>
+                <button type="button" onClick={() => setCountdownRunning((running) => !running)} disabled={countdownRemaining === 0} className="h-9 rounded-lg bg-[var(--stage-foreground)] px-3 text-xs font-semibold text-[var(--stage-background)] disabled:opacity-40">{countdownRunning ? "Pause" : "Start"}</button>
                 <button type="button" onClick={() => { setCountdownRunning(false); setCountdownRemaining(countdownDuration) }} className="h-9 rounded-lg border border-white/15 px-3 text-xs font-semibold text-white/80 hover:bg-white/10">Reset</button>
               </div>
             </div>
@@ -467,8 +467,8 @@ export default function LiveStageView({
             aria-live="polite"
             className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-[10px] font-semibold sm:text-xs ${
               isOnline
-                ? "border-emerald-300/20 bg-emerald-300/10 text-emerald-200"
-                : "border-amber-300/25 bg-amber-300/10 text-amber-100"
+                ? "border-[var(--stage-success-border)] bg-[var(--stage-success-soft)] text-[var(--stage-success)]"
+                : "border-[var(--stage-warning-border)] bg-[var(--stage-warning-soft)] text-[var(--stage-warning)]"
             }`}
             title={
               offlineSaveError ??
@@ -572,7 +572,7 @@ export default function LiveStageView({
                         aria-pressed={autoScroll}
                         className={`inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition ${
                           autoScroll
-                            ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200"
+                            ? "border-[var(--stage-success-border)] bg-[var(--stage-success-soft)] text-[var(--stage-success)]"
                             : "border-white/15 text-white/75 hover:bg-white/10"
                         }`}
                       >
@@ -647,7 +647,7 @@ export default function LiveStageView({
                   </div>
 
                   {currentSong.notes ? (
-                    <div className="mb-3 shrink-0 rounded-xl border border-amber-200/20 bg-amber-200/10 px-4 py-3 text-sm leading-6 text-amber-100">
+                    <div className="mb-3 shrink-0 rounded-xl border border-[var(--stage-warning-border)] bg-[var(--stage-warning-soft)] px-4 py-3 text-sm leading-6 text-[var(--stage-warning)]">
                       <span className="mr-2 font-semibold">Arrangement note</span>
                       {currentSong.notes}
                     </div>
@@ -696,7 +696,7 @@ export default function LiveStageView({
                   {songs[currentIndex + 1]?.title ?? "End of setlist"}
                 </p>
                 {fullscreenError ? (
-                  <p role="status" className="mt-1 text-xs text-amber-200">
+                  <p role="status" className="mt-1 text-xs text-[var(--stage-warning)]">
                     {fullscreenError}
                   </p>
                 ) : null}

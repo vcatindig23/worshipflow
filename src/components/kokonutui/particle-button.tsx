@@ -460,7 +460,7 @@ export default function ParticleButton({
           "group/status relative overflow-visible",
           "ease transition-[background-color,color,opacity] duration-200",
           status === "error" &&
-            "bg-red-600 text-white hover:bg-red-600/90 dark:bg-red-500 dark:text-white dark:hover:bg-red-500/90",
+            "bg-[var(--danger-action)] text-[var(--danger-foreground)] hover:bg-[var(--danger-action-hover)]",
           className
         )}
         data-status={status}
