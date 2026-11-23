@@ -21,6 +21,7 @@
   --gold-ink: #765d32;
   --sidebar: #263c2f;
   --sidebar-muted: #cbd4c4;
+  --sidebar-accent: #e6d3a6;
   --focus-ring: #947342;
   --scrollbar-thumb: #d7ccb8;
   --scrollbar-thumb-hover: #bfb29b;
@@ -90,6 +91,21 @@
   --wf-radius-control: 0.75rem;
   --wf-radius-card: 1rem;
   --wf-shadow-card: 0 1px 3px rgb(44 54 44 / 6%);
+
+  /* Projector and immersive practice screens stay dark for readability in either theme. */
+  --stage-background: #0d120f;
+  --stage-surface: #17211b;
+  --stage-surface-raised: #111713;
+  --stage-foreground: #f3ecdd;
+  --stage-success: #bad2b3;
+  --stage-success-soft: rgb(186 210 179 / 11%);
+  --stage-success-border: rgb(186 210 179 / 28%);
+  --stage-warning: #e3ca92;
+  --stage-warning-soft: rgb(227 202 146 / 11%);
+  --stage-warning-border: rgb(227 202 146 / 26%);
+  --stage-danger: #e6a9aa;
+  --stage-danger-soft: rgb(230 169 170 / 11%);
+  --stage-danger-border: rgb(230 169 170 / 26%);
 }
 
 @layer components {

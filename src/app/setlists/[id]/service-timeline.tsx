@@ -178,7 +178,7 @@ export default async function ServiceTimeline({
                       >
                         {typeLabels[item.item_type] ?? "Other"}
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white/75 px-2 py-1 text-[11px] font-medium text-[var(--muted)]">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--card)]/75 px-2 py-1 text-[11px] font-medium text-[var(--muted)]">
                         <Clock3 className="size-3" />
                         {item.duration_minutes
                           ? `Planned · ${item.duration_minutes} min`
@@ -191,12 +191,12 @@ export default async function ServiceTimeline({
                         Linked to {linkedSong.title}
                       </p>
                     ) : item.item_type === "song" ? (
-                      <p className="mt-2 text-xs text-amber-700">
+                      <p className="mt-2 text-xs text-[var(--warning)]">
                         This song timeline item is not linked to a setlist chart yet.
                       </p>
                     ) : null}
                     {item.notes ? (
-                      <div className="mt-3 rounded-xl border border-[var(--border)]/70 bg-white/75 p-3">
+                      <div className="mt-3 rounded-xl border border-[var(--border)]/70 bg-[var(--card)]/75 p-3">
                         <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
                           Notes and transition cues
                         </p>
