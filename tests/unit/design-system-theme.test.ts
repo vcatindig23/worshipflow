@@ -274,12 +274,12 @@ describe("semantic theme foundations", () => {
   })
 
   it("defines fixed projector palette tokens for immersive practice and live stage", () => {
-    expect(designSystem).toMatch(/--stage-background:\\s*#0d120f/)
-    expect(designSystem).toMatch(/--stage-surface:\\s*#17211b/)
-    expect(designSystem).toMatch(/--stage-success:\\s*#bad2b3/)
-    expect(designSystem).toMatch(/--stage-warning:\\s*#e3ca92/)
-    expect(designSystem).toMatch(/--stage-danger:\\s*#e6a9aa/)
-    expect(designSystem).toMatch(/--sidebar-accent:\\s*#e6d3a6/)
+    expect(designSystem).toMatch(/--stage-background:\s*#0d120f/)
+    expect(designSystem).toMatch(/--stage-surface:\s*#17211b/)
+    expect(designSystem).toMatch(/--stage-success:\s*#bad2b3/)
+    expect(designSystem).toMatch(/--stage-warning:\s*#e3ca92/)
+    expect(designSystem).toMatch(/--stage-danger:\s*#e6a9aa/)
+    expect(designSystem).toMatch(/--sidebar-accent:\s*#e6d3a6/)
   })
 
   it("uses semantic brand and status colors on the remaining workspace and auth surfaces", () => {
