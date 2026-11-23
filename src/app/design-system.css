@@ -1,64 +1,78 @@
 /* Semantic theme tokens: keep application colors here, not in route-level styles. */
 :root {
   color-scheme: light;
-  --background: #f5f7f5;
-  --surface: #f0f4f0;
-  --card: #ffffff;
-  --foreground: #17201b;
-  --muted: #5f6c63;
-  --border: #e2e7e2;
-  --border-strong: #c3ccc4;
-  --brand: #365c45;
-  --brand-dark: #294735;
-  --brand-soft: #e6efe8;
-  --brand-ink: #294735;
-  --sidebar: #15231b;
-  --sidebar-muted: #9ca9a1;
-  --focus-ring: #365c45;
-  --scrollbar-thumb: #c8d0c9;
-  --scrollbar-thumb-hover: #aeb8b0;
+  --background: #f7f1e5;
+  --surface: #efe6d6;
+  --card: #fffcf5;
+  --foreground: #2c362c;
+  --muted: #6d7064;
+  --border: #e4dac8;
+  --border-strong: #cbbda5;
+  --brand: #355b45;
+  --brand-dark: #284535;
+  --brand-soft: #e6eddf;
+  --brand-ink: #2c503b;
+  --accent: #b86d53;
+  --accent-dark: #96513d;
+  --accent-soft: #f4e3da;
+  --accent-ink: #874a37;
+  --gold: #a98951;
+  --gold-soft: #f3e9d7;
+  --gold-ink: #765d32;
+  --sidebar: #263c2f;
+  --sidebar-muted: #cbd4c4;
+  --focus-ring: #947342;
+  --scrollbar-thumb: #d7ccb8;
+  --scrollbar-thumb-hover: #bfb29b;
   --danger: #b42332;
-  --danger-soft: #fff1f2;
+  --danger-soft: #fcebed;
   --danger-action: #b42332;
   --danger-action-hover: #91202c;
   --danger-foreground: #ffffff;
-  --success: #23613b;
-  --success-soft: #edf7ef;
-  --info: #315b80;
-  --info-soft: #eff5fb;
-  --warning: #8a5200;
-  --warning-soft: #fff4dc;
+  --success: #315b40;
+  --success-soft: #e8f0e6;
+  --info: #526c65;
+  --info-soft: #e8efea;
+  --warning: #8e6a2e;
+  --warning-soft: #f5ebd7;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #101713;
-  --surface: #18221c;
-  --card: #17211b;
-  --foreground: #e8eee9;
-  --muted: #b3c0b7;
-  --border: #34443a;
-  --border-strong: #536459;
-  --brand: #365c45;
-  --brand-dark: #294735;
-  --brand-soft: #20382a;
-  --brand-ink: #b8e1c2;
-  --sidebar: #0a100c;
-  --sidebar-muted: #a1afa5;
-  --focus-ring: #a5d6b3;
-  --scrollbar-thumb: #435349;
-  --scrollbar-thumb-hover: #5a6b60;
-  --danger: #ffb4bb;
-  --danger-soft: #3a2027;
-  --danger-action: #8f303c;
-  --danger-action-hover: #a83c49;
+  --background: #171d18;
+  --surface: #1d261f;
+  --card: #232d25;
+  --foreground: #f3ecdd;
+  --muted: #b7b5a6;
+  --border: #39453a;
+  --border-strong: #596653;
+  --brand: #355b45;
+  --brand-dark: #284535;
+  --brand-soft: #2a3b2d;
+  --brand-ink: #bfd2b8;
+  --accent: #d18b70;
+  --accent-dark: #b96e56;
+  --accent-soft: #402f29;
+  --accent-ink: #e9b6a2;
+  --gold: #d0b678;
+  --gold-soft: #3c3425;
+  --gold-ink: #e9d5a8;
+  --sidebar: #1c2d22;
+  --sidebar-muted: #bfccbf;
+  --focus-ring: #d2b777;
+  --scrollbar-thumb: #465447;
+  --scrollbar-thumb-hover: #61715e;
+  --danger: #f1a6ad;
+  --danger-soft: #3d2528;
+  --danger-action: #9e3f49;
+  --danger-action-hover: #b94c56;
   --danger-foreground: #ffffff;
-  --success: #aadbb8;
-  --success-soft: #1e3327;
-  --info: #b5d6f2;
-  --info-soft: #1e2d3b;
-  --warning: #f0c477;
-  --warning-soft: #3a2d1a;
+  --success: #a7c9a5;
+  --success-soft: #26382a;
+  --info: #b2c8bd;
+  --info-soft: #293831;
+  --warning: #d0b678;
+  --warning-soft: #3c3425;
 }
 
 /* WorshipFlow foundations: 4px rhythm, forest palette, theme-aware surfaces. */
@@ -75,7 +89,7 @@
   --wf-space-8: 2rem;
   --wf-radius-control: 0.75rem;
   --wf-radius-card: 1rem;
-  --wf-shadow-card: 0 1px 3px rgb(23 32 27 / 5%);
+  --wf-shadow-card: 0 1px 3px rgb(44 54 44 / 6%);
 }
 
 @layer components {
@@ -112,7 +126,7 @@
     align-items: center;
     gap: var(--wf-space-2);
     margin-bottom: var(--wf-space-2);
-    color: var(--brand-ink);
+    color: var(--accent-ink);
     font-size: 0.75rem;
     font-weight: 700;
     line-height: 1.5;
@@ -269,6 +283,14 @@
   .wf-icon-tile-warning {
     background: var(--warning-soft);
     color: var(--warning);
+  }
+  .wf-icon-tile-accent {
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+  }
+  .wf-icon-tile-gold {
+    background: var(--gold-soft);
+    color: var(--gold-ink);
   }
   .wf-icon-tile-success {
     background: var(--success-soft);

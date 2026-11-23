@@ -377,8 +377,8 @@ button.wf-action-loading::after {
 }
 
 .wf-skeleton-dark {
-  background-color: #29362d !important;
-  background-image: linear-gradient(100deg, #29362d 25%, #3b4b40 45%, #29362d 65%) !important;
+  background-color: var(--sidebar) !important;
+  background-image: linear-gradient(100deg, var(--sidebar) 25%, color-mix(in srgb, var(--sidebar) 78%, var(--brand-ink)) 45%, var(--sidebar) 65%) !important;
 }
 
 @keyframes wf-skeleton-shimmer {
@@ -434,11 +434,11 @@ button.wf-action-loading::after {
     ),
     repeating-linear-gradient(
       100deg,
-      #476f57 10%,
-      #8ea7d0 15%,
-      #b2d2bb 20%,
-      #c8b4da 25%,
-      #78a788 30%
+      var(--brand) 10%,
+      var(--accent) 15%,
+      var(--gold) 20%,
+      #e7dcc8 25%,
+      #789279 30%
     );
   background-size: 300% 200%, 200% 100%;
   background-position: 50% 50%, 50% 50%;
@@ -461,11 +461,11 @@ button.wf-action-loading::after {
     ),
     repeating-linear-gradient(
       100deg,
-      #476f57 10%,
-      #8ea7d0 15%,
-      #b2d2bb 20%,
-      #c8b4da 25%,
-      #78a788 30%
+      var(--brand) 10%,
+      var(--accent) 15%,
+      var(--gold) 20%,
+      #e7dcc8 25%,
+      #789279 30%
     );
   background-size: 200% 100%, 100% 100%;
   background-position: 50% 50%, 50% 50%;
@@ -529,9 +529,9 @@ button.wf-action-loading::after {
   overflow: hidden;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 12% 13%, rgb(199 226 202 / 72%), transparent 36%),
-    radial-gradient(ellipse at 83% 18%, rgb(215 231 215 / 66%), transparent 33%),
-    radial-gradient(ellipse at 54% 76%, rgb(234 216 191 / 44%), transparent 39%),
+    radial-gradient(ellipse at 12% 13%, rgb(191 210 186 / 64%), transparent 36%),
+    radial-gradient(ellipse at 83% 18%, rgb(232 201 181 / 48%), transparent 33%),
+    radial-gradient(ellipse at 54% 76%, rgb(222 202 160 / 42%), transparent 39%),
     linear-gradient(180deg, var(--background) 0%, var(--background) 100%);
 }
 
@@ -548,21 +548,21 @@ button.wf-action-loading::after {
 
 .wf-landing-mesh::before {
   background:
-    radial-gradient(ellipse at 25% 25%, rgb(100 157 113 / 29%) 0%, transparent 36%),
-    radial-gradient(ellipse at 71% 31%, rgb(176 204 167 / 41%) 0%, transparent 34%),
-    radial-gradient(ellipse at 50% 70%, rgb(225 197 159 / 30%) 0%, transparent 38%);
+    radial-gradient(ellipse at 25% 25%, rgb(53 91 69 / 26%) 0%, transparent 36%),
+    radial-gradient(ellipse at 71% 31%, rgb(184 109 83 / 23%) 0%, transparent 34%),
+    radial-gradient(ellipse at 50% 70%, rgb(169 137 81 / 26%) 0%, transparent 38%);
   animation: wf-landing-mesh-drift 26s ease-in-out infinite alternate;
 }
 
 .wf-landing-mesh::after {
   background:
-    radial-gradient(ellipse at 78% 63%, rgb(134 174 137 / 25%) 0%, transparent 34%),
-    radial-gradient(ellipse at 28% 72%, rgb(210 226 207 / 43%) 0%, transparent 36%);
+    radial-gradient(ellipse at 78% 63%, rgb(53 91 69 / 18%) 0%, transparent 34%),
+    radial-gradient(ellipse at 28% 72%, rgb(230 211 174 / 34%) 0%, transparent 36%);
   animation: wf-landing-mesh-drift 34s ease-in-out infinite alternate-reverse;
 }
 
 .wf-landing-title-accent {
-  background: linear-gradient(108deg, #294735 7%, #477a56 53%, #79946b 100%);
+  background: linear-gradient(108deg, var(--brand-dark) 6%, var(--accent) 56%, var(--gold) 100%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -610,27 +610,27 @@ button.wf-action-loading::after {
 
 html[data-theme="dark"] .wf-landing-mesh {
   background:
-    radial-gradient(ellipse at 12% 13%, rgb(58 95 65 / 32%), transparent 36%),
-    radial-gradient(ellipse at 83% 18%, rgb(48 77 54 / 29%), transparent 33%),
-    radial-gradient(ellipse at 54% 76%, rgb(112 86 57 / 18%), transparent 39%),
+    radial-gradient(ellipse at 12% 13%, rgb(53 91 69 / 34%), transparent 36%),
+    radial-gradient(ellipse at 83% 18%, rgb(184 109 83 / 19%), transparent 33%),
+    radial-gradient(ellipse at 54% 76%, rgb(169 137 81 / 17%), transparent 39%),
     linear-gradient(180deg, var(--background) 0%, var(--background) 100%);
 }
 
 html[data-theme="dark"] .wf-landing-mesh::before {
   background:
-    radial-gradient(ellipse at 25% 25%, rgb(100 157 113 / 20%) 0%, transparent 36%),
-    radial-gradient(ellipse at 71% 31%, rgb(102 143 98 / 23%) 0%, transparent 34%),
-    radial-gradient(ellipse at 50% 70%, rgb(155 120 81 / 13%) 0%, transparent 38%);
+    radial-gradient(ellipse at 25% 25%, rgb(126 167 132 / 22%) 0%, transparent 36%),
+    radial-gradient(ellipse at 71% 31%, rgb(209 139 112 / 18%) 0%, transparent 34%),
+    radial-gradient(ellipse at 50% 70%, rgb(208 182 120 / 15%) 0%, transparent 38%);
 }
 
 html[data-theme="dark"] .wf-landing-mesh::after {
   background:
-    radial-gradient(ellipse at 78% 63%, rgb(87 132 93 / 20%) 0%, transparent 34%),
-    radial-gradient(ellipse at 28% 72%, rgb(70 105 75 / 23%) 0%, transparent 36%);
+    radial-gradient(ellipse at 78% 63%, rgb(126 167 132 / 18%) 0%, transparent 34%),
+    radial-gradient(ellipse at 28% 72%, rgb(208 182 120 / 16%) 0%, transparent 36%);
 }
 
 html[data-theme="dark"] .wf-landing-title-accent {
-  background: linear-gradient(108deg, #b3d4b8 7%, #8fb99a 53%, #c5d4a6 100%);
+  background: linear-gradient(108deg, var(--brand-ink) 6%, var(--accent) 56%, var(--gold) 100%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -674,19 +674,19 @@ html[data-theme="dark"] .wf-landing-wordmark {
 
 /* Theme-aware colors for the landing page's WebGL curtain. */
 .wf-landing-drape-lit {
-  color: #f4f8f1;
+  color: #fbf6eb;
 }
 
 .wf-landing-drape-shade {
-  color: #b7cdb6;
+  color: #d0b678;
 }
 
 html[data-theme="dark"] .wf-landing-drape-lit {
-  color: #9fbaa3;
+  color: #a9c5a8;
 }
 
 html[data-theme="dark"] .wf-landing-drape-shade {
-  color: #24372a;
+  color: #594936;
 }
 
 

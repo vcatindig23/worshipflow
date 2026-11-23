@@ -242,12 +242,24 @@ const accountSecurityPage = readFileSync(
 
 describe("semantic theme foundations", () => {
   it("keeps light and dark theme tokens in the design system", () => {
-    expect(designSystem).toMatch(/--background:\s*#f5f7f5/)
-    expect(designSystem).toMatch(/--surface:\s*#f0f4f0/)
-    expect(designSystem).toMatch(/--card:\s*#ffffff/)
+    expect(designSystem).toMatch(/--background:\s*#f7f1e5/)
+    expect(designSystem).toMatch(/--surface:\s*#efe6d6/)
+    expect(designSystem).toMatch(/--card:\s*#fffcf5/)
     expect(designSystem).toMatch(/:root\[data-theme="dark"\]/)
-    expect(designSystem).toMatch(/--background:\s*#101713/)
-    expect(designSystem).toMatch(/--focus-ring:\s*#a5d6b3/)
+    expect(designSystem).toMatch(/--background:\s*#171d18/)
+    expect(designSystem).toMatch(/--focus-ring:\s*#d2b777/)
+  })
+
+
+  it("uses the butter cream, forest, terracotta, and muted gold brand palette", () => {
+    expect(designSystem).toMatch(/--brand:\s*#355b45/)
+    expect(designSystem).toMatch(/--brand-dark:\s*#284535/)
+    expect(designSystem).toMatch(/--accent:\s*#b86d53/)
+    expect(designSystem).toMatch(/--accent-soft:\s*#f4e3da/)
+    expect(designSystem).toMatch(/--gold:\s*#a98951/)
+    expect(designSystem).toMatch(/--gold-soft:\s*#f3e9d7/)
+    expect(designSystem).toMatch(/--accent:\s*#d18b70/)
+    expect(designSystem).toMatch(/--gold:\s*#d0b678/)
   })
 
   it("keeps global styles free of broad dark-mode utility overrides", () => {
@@ -270,8 +282,8 @@ describe("semantic theme foundations", () => {
     expect(buttonSource).toMatch(/hover:bg-\[var\(--danger-action-hover\)\]/)
   })
   it("provides theme-aware semantic warning and status styles", () => {
-    expect(designSystem).toMatch(/--warning:\s*#8a5200/)
-    expect(designSystem).toMatch(/--warning:\s*#f0c477/)
+    expect(designSystem).toMatch(/--warning:\s*#8e6a2e/)
+    expect(designSystem).toMatch(/--warning:\s*#d0b678/)
     expect(designSystem).toMatch(/\.wf-status-warning[\s\S]*?background:\s*var\(--warning-soft\)/)
     expect(designSystem).toMatch(/\.wf-status-success[\s\S]*?color:\s*var\(--success\)/)
   })
