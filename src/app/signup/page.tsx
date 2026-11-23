@@ -47,7 +47,7 @@ export default async function SignupPage({
           </p>
         </header>
 
-        <section className="rounded-[28px] border border-[var(--border)] bg-white/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.24)] ring-1 ring-black/[0.02] backdrop-blur sm:p-8">
+        <section className="rounded-[28px] border border-[var(--border)] bg-[var(--card)]/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.24)] ring-1 ring-black/[0.02] backdrop-blur sm:p-8">
           <div className="mb-6">
             <h2 className="text-lg font-semibold tracking-tight text-[var(--foreground)]">
               Sign up with email
