@@ -93,10 +93,10 @@ export default function LandingHero() {
         >
           <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="text-center lg:text-left">
-              <div className="wf-landing-eyebrow inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)]/75 px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--brand)] shadow-sm backdrop-blur-md sm:text-xs">
+              <div className="wf-landing-eyebrow inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)]/75 px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--accent-ink)] shadow-sm backdrop-blur-md sm:text-xs">
                 <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--brand)]/35 motion-reduce:animate-none" />
-                  <span className="relative inline-flex size-2 rounded-full bg-[var(--brand)]" />
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--accent)]/35 motion-reduce:animate-none" />
+                  <span className="relative inline-flex size-2 rounded-full bg-[var(--accent)]" />
                 </span>
                 Made for worship teams
               </div>
@@ -116,7 +116,7 @@ export default function LandingHero() {
               <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center lg:justify-start">
                 <Link
                   href="/signup"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--brand)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_-12px_rgba(41,71,53,0.65)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-[0_18px_36px_-14px_rgba(41,71,53,0.6)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--brand)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_-12px_rgba(40,69,53,0.65)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-dark)] hover:shadow-[0_18px_36px_-14px_rgba(40,69,53,0.6)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--brand-soft)]"
                 >
                   Create your workspace
                   <ArrowRight aria-hidden="true" className="size-4" />
@@ -143,7 +143,7 @@ export default function LandingHero() {
 
             <div className="relative mx-auto w-full max-w-[560px]">
               <div className="absolute inset-x-12 -top-6 h-20 rounded-full bg-[var(--brand)]/10 blur-3xl" aria-hidden="true" />
-              <div className="wf-landing-demo-shell relative overflow-hidden rounded-[30px] border border-[var(--border)] bg-[var(--card)]/80 p-3 shadow-[0_30px_80px_-35px_rgba(23,32,27,0.5)] backdrop-blur-xl sm:p-4">
+              <div className="wf-landing-demo-shell relative overflow-hidden rounded-[30px] border border-[var(--border)] bg-[var(--card)]/80 p-3 shadow-[0_30px_80px_-35px_rgba(44,54,44,0.5)] backdrop-blur-xl sm:p-4">
                 <div className="rounded-[24px] border border-[var(--border)] bg-[var(--background)]/85 p-3 sm:p-4">
                   <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
                     <div className="flex items-center gap-3">

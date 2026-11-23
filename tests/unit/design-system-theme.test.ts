@@ -250,6 +250,18 @@ describe("semantic theme foundations", () => {
     expect(designSystem).toMatch(/--focus-ring:\s*#a5d6b3/)
   })
 
+
+  it("uses the butter cream, forest, terracotta, and muted gold brand palette", () => {
+    expect(designSystem).toMatch(/--brand:\\s*#355b45/)
+    expect(designSystem).toMatch(/--brand-dark:\\s*#284535/)
+    expect(designSystem).toMatch(/--accent:\\s*#b86d53/)
+    expect(designSystem).toMatch(/--accent-soft:\\s*#f4e3da/)
+    expect(designSystem).toMatch(/--gold:\\s*#a98951/)
+    expect(designSystem).toMatch(/--gold-soft:\\s*#f3e9d7/)
+    expect(designSystem).toMatch(/--accent:\\s*#d18b70/)
+    expect(designSystem).toMatch(/--gold:\\s*#d0b678/)
+  })
+
   it("keeps global styles free of broad dark-mode utility overrides", () => {
     expect(globals).not.toMatch(/:root\[data-theme="dark"\]\s+\.(?:bg-|text-|border-)/)
     expect(globals).toMatch(/outline:\s*2px solid var\(--focus-ring\)/)
